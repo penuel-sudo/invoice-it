@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
-import { toastConfig } from '../lib/toastConfig'
 
 // Helper function to convert typography presets to inline styles
 const getTypographyStyle = (preset: any) => ({
@@ -14,21 +13,15 @@ const getTypographyStyle = (preset: any) => ({
 })
 
 export default function DashboardPage() {
-  const { user, loading, signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        navigate('/auth')
-      } else {
-        // Handle OAuth callback - clear URL hash if present
-        if (window.location.hash.includes('access_token')) {
-          window.history.replaceState({}, document.title, window.location.pathname)
-        }
-      }
+    // Handle OAuth callback - clear URL hash if present
+    if (window.location.hash.includes('access_token')) {
+      window.history.replaceState({}, document.title, window.location.pathname)
     }
-  }, [user, loading, navigate])
+  }, [])
 
   const handleSignOut = async () => {
     try {
@@ -40,24 +33,6 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: brandColors.neutral[50]
-      }}>
-        <p style={{
-          ...getTypographyStyle(typographyPresets.bodyLarge),
-          color: brandColors.neutral[600]
-        }}>
-          Loading...
-        </p>
-      </div>
-    )
-  }
 
   if (!user) {
     return null
@@ -144,9 +119,6 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
-      
-      {/* Toast Notifications */}
-      <Toaster toastOptions={toastConfig} />
     </div>
   )
 }

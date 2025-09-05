@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { Button, Input, Label, Card } from '../components/ui'
 import { brandColors, colorSchemes, typographyPresets } from '../stylings'
 import { useAuth } from '../lib/useAuth'
-import { toastConfig } from '../lib/toastConfig'
 
 // Helper function to convert typography presets to inline styles
 const getTypographyStyle = (preset: any) => ({
@@ -31,15 +30,8 @@ export default function AuthPage() {
     password: ''
   })
   const [isLoading, setIsLoading] = useState(false)
-  const { signUp, signIn, signInWithGoogle, user, loading } = useAuth()
+  const { signUp, signIn, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
-
-  // Redirect if user is already logged in
-  useEffect(() => {
-    if (user && !loading) {
-      navigate('/dashboard')
-    }
-  }, [user, loading, navigate])
 
   const handleInputChange = (field: keyof AuthFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -112,7 +104,7 @@ export default function AuthPage() {
           maxWidth: '1200px',
           display: 'flex',
           alignItems: 'center',
-          gap: '4rem'
+          gap: '2rem'
         }}
       >
         {/* Left Side - Logo and Branding (Desktop Only) */}
@@ -461,7 +453,7 @@ export default function AuthPage() {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isLoading || loading}
+              disabled={isLoading}
               style={{
                 width: '100%',
                 height: '48px',
@@ -470,22 +462,22 @@ export default function AuthPage() {
                 border: 'none',
                 borderRadius: '8px',
                 ...getTypographyStyle(typographyPresets.buttonLarge),
-                cursor: (isLoading || loading) ? 'not-allowed' : 'pointer',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s ease',
                 marginBottom: '1.5rem'
               }}
               onMouseEnter={(e) => {
-                if (!isLoading && !loading) {
+                if (!isLoading) {
                   e.currentTarget.style.backgroundColor = colorSchemes.primaryButton.hover
                 }
               }}
               onMouseLeave={(e) => {
-                if (!isLoading && !loading) {
+                if (!isLoading) {
                   e.currentTarget.style.backgroundColor = colorSchemes.primaryButton.background
                 }
               }}
             >
-              {(isLoading || loading) ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+              {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
             </Button>
 
             {/* Divider */}
@@ -578,9 +570,6 @@ export default function AuthPage() {
         </Card>
         </motion.div>
       </motion.div>
-      
-      {/* Toast Notifications */}
-      <Toaster toastOptions={toastConfig} />
     </div>
   )
 }

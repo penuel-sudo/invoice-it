@@ -1,19 +1,32 @@
 import { createBrowserRouter } from 'react-router-dom'
 import AuthPage from '../pages/AuthPage'
 import DashboardPage from '../pages/DashboardPage'
+import AuthWrapper from '../components/AuthWrapper'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <DashboardPage />
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <DashboardPage />
+      </AuthWrapper>
+    )
   },
   {
     path: '/auth',
-    element: <AuthPage />
+    element: (
+      <AuthWrapper requireAuth={false}>
+        <AuthPage />
+      </AuthWrapper>
+    )
   },
   {
     path: '/dashboard',
-    element: <DashboardPage />
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <DashboardPage />
+      </AuthWrapper>
+    )
   }
 ])
 

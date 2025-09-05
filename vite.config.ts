@@ -20,17 +20,35 @@ export default defineConfig({
     minify: 'esbuild',
     sourcemap: false,
     
+    // Faster builds
+    emptyOutDir: true,
+    
     // Code splitting and chunk optimization
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-label', '@radix-ui/react-select', '@radix-ui/react-slot'],
-          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'animation-vendor': ['framer-motion'],
-          'utils-vendor': ['clsx', 'tailwind-merge', 'class-variance-authority', 'lucide-react']
+        manualChunks: (id) => {
+          // More granular chunking for better caching
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor'
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase-vendor'
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor'
+            }
+            if (id.includes('framer-motion')) {
+              return 'animation-vendor'
+            }
+            if (id.includes('react-hook-form') || id.includes('zod')) {
+              return 'form-vendor'
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons-vendor'
+            }
+            return 'vendor'
+          }
         },
         // Optimize chunk names
         chunkFileNames: 'assets/[name]-[hash].js',
