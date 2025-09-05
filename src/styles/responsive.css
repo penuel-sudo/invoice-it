@@ -1,0 +1,32 @@
+/* Responsive styles for Auth Page */
+
+@media (max-width: 767px) {
+  .auth-container {
+    flex-direction: column !important;
+    gap: 2rem !important;
+    padding: 1rem !important;
+  }
+  
+  .auth-left-side {
+    display: none !important;
+  }
+  
+  .auth-right-side {
+    flex: 1 !important;
+    max-width: 100% !important;
+  }
+  
+  .mobile-logo {
+    display: block !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .auth-left-side {
+    display: block !important;
+  }
+  
+  .mobile-logo {
+    display: none !important;
+  }
+}

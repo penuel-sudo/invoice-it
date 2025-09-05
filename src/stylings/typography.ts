@@ -4,7 +4,8 @@ export const typography = {
   fontFamily: {
     sans: ['Inter', 'system-ui', 'sans-serif'],
     mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-    display: ['Inter', 'system-ui', 'sans-serif'],
+    display: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+    heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
   },
 
   // Font sizes - Perfect for invoice documents
@@ -74,24 +75,28 @@ export const typographyPresets = {
     fontWeight: typography.fontWeight.bold,
     lineHeight: typography.lineHeight.tight,
     letterSpacing: typography.letterSpacing.tight,
+    fontFamily: typography.fontFamily.heading,
   },
   h2: {
     fontSize: typography.fontSize['display-md'],
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.bold,
     lineHeight: typography.lineHeight.snug,
     letterSpacing: typography.letterSpacing.tight,
+    fontFamily: typography.fontFamily.heading,
   },
   h3: {
     fontSize: typography.fontSize['display-sm'],
     fontWeight: typography.fontWeight.semibold,
     lineHeight: typography.lineHeight.snug,
     letterSpacing: typography.letterSpacing.normal,
+    fontFamily: typography.fontFamily.heading,
   },
   h4: {
     fontSize: typography.fontSize['display-xs'],
-    fontWeight: typography.fontWeight.medium,
+    fontWeight: typography.fontWeight.semibold,
     lineHeight: typography.lineHeight.normal,
     letterSpacing: typography.letterSpacing.normal,
+    fontFamily: typography.fontFamily.heading,
   },
 
   // Body text

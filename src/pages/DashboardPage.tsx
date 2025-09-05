@@ -18,8 +18,15 @@ export default function DashboardPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth')
+    if (!loading) {
+      if (!user) {
+        navigate('/auth')
+      } else {
+        // Handle OAuth callback - clear URL hash if present
+        if (window.location.hash.includes('access_token')) {
+          window.history.replaceState({}, document.title, window.location.pathname)
+        }
+      }
     }
   }, [user, loading, navigate])
 

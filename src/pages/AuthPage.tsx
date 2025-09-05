@@ -106,37 +106,156 @@ export default function AuthPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        style={{ width: '100%', maxWidth: '400px' }}
+        className="auth-container"
+        style={{ 
+          width: '100%', 
+          maxWidth: '1200px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4rem'
+        }}
       >
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img 
-            src="/logo3_assets_bundle/icon-256x256.png" 
-            alt="Invoice-It" 
-            style={{ 
-              width: '64px', 
-              height: '64px', 
-              margin: '0 auto 1rem',
-              borderRadius: '12px'
+        {/* Left Side - Logo and Branding (Desktop Only) */}
+        <div className="auth-left-side" style={{
+          flex: 1,
+          display: 'none'
+        }}>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{
+              textAlign: 'left',
+              maxWidth: '400px'
             }}
-          />
-          <h1 style={{
-            ...getTypographyStyle(typographyPresets.h2),
-            color: brandColors.neutral[900],
-            margin: 0
-          }}>
-            Invoice-It
-          </h1>
-          <p style={{
-            ...getTypographyStyle(typographyPresets.bodySmall),
-            color: brandColors.neutral[500],
-            margin: '0.5rem 0 0'
-          }}>
-            Professional invoice management
-          </p>
+          >
+            <img 
+              src="/logo3_assets_bundle/icon-256x256.png" 
+              alt="Invoice-It" 
+              style={{ 
+                width: '80px', 
+                height: '80px', 
+                marginBottom: '2rem',
+                borderRadius: '16px'
+              }}
+            />
+            <h1 style={{
+              ...getTypographyStyle(typographyPresets.h1),
+              color: brandColors.neutral[900],
+              margin: '0 0 1rem',
+              fontSize: '3rem',
+              fontWeight: '800'
+            }}>
+              Invoice-It
+            </h1>
+            <p style={{
+              ...getTypographyStyle(typographyPresets.bodyLarge),
+              color: brandColors.neutral[600],
+              margin: '0 0 2rem',
+              lineHeight: '1.6'
+            }}>
+              Create, manage, and track professional invoices with ease. 
+              Streamline your business operations with our intuitive invoice management platform.
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: brandColors.neutral[600],
+                fontSize: '14px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: brandColors.success[500],
+                  borderRadius: '50%'
+                }} />
+                Professional Templates
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: brandColors.neutral[600],
+                fontSize: '14px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: brandColors.primary[500],
+                  borderRadius: '50%'
+                }} />
+                PDF Export
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: brandColors.neutral[600],
+                fontSize: '14px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: brandColors.warning[500],
+                  borderRadius: '50%'
+                }} />
+                Secure & Reliable
+              </div>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Auth Card */}
+        {/* Right Side - Auth Form */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="auth-right-side"
+          style={{
+            flex: '0 0 400px',
+            width: '100%',
+            maxWidth: '400px'
+          }}
+        >
+          {/* Mobile Logo (Only on Mobile) */}
+          <div className="mobile-logo" style={{
+            textAlign: 'center',
+            marginBottom: '2rem',
+            display: 'none'
+          }}>
+            <img 
+              src="/logo3_assets_bundle/icon-256x256.png" 
+              alt="Invoice-It" 
+              style={{ 
+                width: '64px', 
+                height: '64px', 
+                margin: '0 auto 1rem',
+                borderRadius: '12px'
+              }}
+            />
+            <h1 style={{
+              ...getTypographyStyle(typographyPresets.h2),
+              color: brandColors.neutral[900],
+              margin: 0
+            }}>
+              Invoice-It
+            </h1>
+            <p style={{
+              ...getTypographyStyle(typographyPresets.bodySmall),
+              color: brandColors.neutral[500],
+              margin: '0.5rem 0 0'
+            }}>
+              Professional invoice management
+            </p>
+          </div>
+
+          {/* Auth Card */}
         <Card style={{
           padding: '2rem',
           backgroundColor: brandColors.white,
@@ -457,6 +576,7 @@ export default function AuthPage() {
             </p>
           </div>
         </Card>
+        </motion.div>
       </motion.div>
       
       {/* Toast Notifications */}
