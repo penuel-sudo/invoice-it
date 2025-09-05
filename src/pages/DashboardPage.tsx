@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { Layout } from '../components/layout'
 import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 
@@ -13,8 +12,7 @@ const getTypographyStyle = (preset: any) => ({
 })
 
 export default function DashboardPage() {
-  const { user, signOut } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth()
 
   useEffect(() => {
     // Handle OAuth callback - clear URL hash if present
@@ -23,103 +21,142 @@ export default function DashboardPage() {
     }
   }, [])
 
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-      toast.success('Signed out successfully')
-      navigate('/auth')
-    } catch (error) {
-      toast.error('Failed to sign out')
-    }
-  }
-
-
   if (!user) {
     return null
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: brandColors.neutral[50],
-      padding: '2rem'
-    }}>
+    <Layout>
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto'
       }}>
-        <header style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-          padding: '1rem',
-          backgroundColor: brandColors.white,
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+        {/* Welcome Section */}
+        <div style={{
+          marginBottom: '2rem'
         }}>
-          <div>
-            <h1 style={{
-              ...getTypographyStyle(typographyPresets.h2),
+          <h1 style={{
+            ...getTypographyStyle(typographyPresets.h1),
+            color: brandColors.neutral[900],
+            margin: '0 0 0.5rem',
+            fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+          }}>
+            Welcome back!
+          </h1>
+          <p style={{
+            ...getTypographyStyle(typographyPresets.bodyLarge),
+            color: brandColors.neutral[600],
+            margin: 0
+          }}>
+            Here's what's happening with your business today.
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            backgroundColor: brandColors.white,
+            padding: '1.5rem',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+            border: `1px solid ${brandColors.neutral[200]}`
+          }}>
+            <h3 style={{
+              ...getTypographyStyle(typographyPresets.h4),
               color: brandColors.neutral[900],
+              margin: '0 0 0.5rem'
+            }}>
+              Net Revenue
+            </h3>
+            <p style={{
+              ...getTypographyStyle(typographyPresets.h2),
+              color: brandColors.success[600],
               margin: 0,
               fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
             }}>
-              Dashboard
-            </h1>
-            <p style={{
-              ...getTypographyStyle(typographyPresets.bodySmall),
-              color: brandColors.neutral[600],
-              margin: '0.25rem 0 0'
-            }}>
-              Welcome back, {user.email}
+              $4,200
             </p>
           </div>
-          <button
-            onClick={handleSignOut}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: brandColors.error[500],
-              color: brandColors.white,
-              border: 'none',
-              borderRadius: '6px',
-              ...getTypographyStyle(typographyPresets.button),
-              cursor: 'pointer',
-              transition: 'background-color 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.error[600]
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.error[500]
-            }}
-          >
-            Sign Out
-          </button>
-        </header>
 
+          <div style={{
+            backgroundColor: brandColors.white,
+            padding: '1.5rem',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+            border: `1px solid ${brandColors.neutral[200]}`
+          }}>
+            <h3 style={{
+              ...getTypographyStyle(typographyPresets.h4),
+              color: brandColors.neutral[900],
+              margin: '0 0 0.5rem'
+            }}>
+              Outstanding
+            </h3>
+            <p style={{
+              ...getTypographyStyle(typographyPresets.h2),
+              color: brandColors.warning[600],
+              margin: 0,
+              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+            }}>
+              $1,800
+            </p>
+          </div>
+
+          <div style={{
+            backgroundColor: brandColors.white,
+            padding: '1.5rem',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+            border: `1px solid ${brandColors.neutral[200]}`
+          }}>
+            <h3 style={{
+              ...getTypographyStyle(typographyPresets.h4),
+              color: brandColors.neutral[900],
+              margin: '0 0 0.5rem'
+            }}>
+              Total Invoices
+            </h3>
+            <p style={{
+              ...getTypographyStyle(typographyPresets.h2),
+              color: brandColors.primary[600],
+              margin: 0,
+              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+            }}>
+              12
+            </p>
+          </div>
+        </div>
+
+        {/* Recent Invoices */}
         <div style={{
           backgroundColor: brandColors.white,
+          padding: '1.5rem',
           borderRadius: '12px',
-          padding: '2rem',
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+          border: `1px solid ${brandColors.neutral[200]}`
         }}>
-          <h2 style={{
+          <h3 style={{
             ...getTypographyStyle(typographyPresets.h3),
             color: brandColors.neutral[900],
-            margin: '0 0 1rem'
+            margin: '0 0 1.5rem',
+            fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
           }}>
-            Invoice Management
-          </h2>
+            Recent Invoices
+          </h3>
           <p style={{
             ...getTypographyStyle(typographyPresets.body),
             color: brandColors.neutral[600],
             margin: 0
           }}>
-            Your invoice dashboard is ready! This is where you'll manage all your invoices.
+            Your recent invoices will appear here. Start by creating your first invoice!
           </p>
         </div>
       </div>
-    </div>
+    </Layout>
   )
 }
