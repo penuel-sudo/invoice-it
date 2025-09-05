@@ -20,7 +20,20 @@ export {
   flex 
 } from './spacing'
 
-// Invoice-specific components removed for flexibility
+// Import for internal use
+import { brandColors, colorSchemes, componentStyles } from './colors'
+import { typography, typographyPresets } from './typography'
+import { 
+  spacing, 
+  semanticSpacing, 
+  borderRadius, 
+  shadows, 
+  zIndex, 
+  breakpoints, 
+  containers, 
+  grid, 
+  flex 
+} from './spacing'
 
 // Utility functions for common styling patterns
 export const styleUtils = {
@@ -155,7 +168,7 @@ export const styleUtils = {
     gap: keyof typeof semanticSpacing.component = 'md'
   ) => ({
     display: 'flex',
-    flexDirection: flex.direction[direction],
+    flexDirection: direction === 'column' ? 'column' : 'row',
     justifyContent: flex.justify[justify],
     alignItems: flex.align[align],
     gap: semanticSpacing.component[gap],

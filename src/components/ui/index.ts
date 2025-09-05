@@ -1,0 +1,11 @@
+// Barrel exports for UI components - improves tree shaking and build performance
+export { Button, buttonVariants } from './button'
+export { Input } from './input'
+export { Label } from './label'
+export { Card } from './card'
+export { Badge, badgeVariants } from './badge'
+export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './dialog'
+export { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useFormField } from './form'
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
+export { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table'
+export { Textarea } from './textarea'
