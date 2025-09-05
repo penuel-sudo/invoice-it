@@ -1,0 +1,183 @@
+export const brandColors = {
+  // Primary Blue - Your main brand color
+  primary: {
+    50: '#f0f9ff',   // Very light blue - subtle backgrounds
+    100: '#e0f2fe',  // Light blue - hover states
+    200: '#bae6fd',  // Light blue - borders/dividers
+    300: '#7dd3fc',  // Medium blue - secondary elements
+    400: '#38bdf8',  // Medium blue - icons/accents
+    500: '#0ea5e9',  // Main brand blue - primary actions
+    600: '#0284c7',  // Darker blue - primary buttons
+    700: '#0369a1',  // Dark blue - hover states
+    800: '#075985',  // Darker blue - headings
+    900: '#0c4a6e',  // Darkest blue - strong emphasis
+  },
+  
+  // Neutral Grays - Minimal supporting colors
+  neutral: {
+    50: '#f8fafc',   // Off-white - main backgrounds
+    100: '#f1f5f9',  // Very light gray - card backgrounds
+    200: '#e2e8f0',  // Light gray - borders
+    300: '#cbd5e1',  // Medium gray - dividers
+    400: '#94a3b8',  // Medium gray - secondary text
+    500: '#64748b',  // Gray - body text
+    600: '#475569',  // Dark gray - headings
+    700: '#334155',  // Darker gray - strong headings
+    800: '#1e293b',  // Very dark gray - primary text
+    900: '#0f172a',  // Almost black - emphasis text
+  },
+  
+  // White variations
+  white: '#ffffff',
+  'white-soft': '#fefefe',
+  'white-warm': '#fcfcfd',
+  
+  // Minimal semantic colors (very subtle)
+  success: {
+    50: '#f0fdf4',
+    500: '#10b981', // Muted green
+    600: '#059669',
+  },
+  
+  warning: {
+    50: '#fffbeb',
+    500: '#f59e0b', // Muted orange
+    600: '#d97706',
+  },
+  
+  error: {
+    50: '#fef2f2',
+    500: '#ef4444', // Muted red
+    600: '#dc2626',
+  },
+}
+
+// Simplified color combinations focusing on blue and white
+export const colorSchemes = {
+  // Primary button - Clean blue
+  primaryButton: {
+    background: brandColors.primary[600],
+    hover: brandColors.primary[700],
+    text: brandColors.white,
+    border: brandColors.primary[600],
+  },
+  
+  // Secondary button - White with blue accent
+  secondaryButton: {
+    background: brandColors.white,
+    hover: brandColors.primary[50],
+    text: brandColors.primary[600],
+    border: brandColors.primary[200],
+  },
+  
+  // Ghost button - Minimal
+  ghostButton: {
+    background: 'transparent',
+    hover: brandColors.primary[50],
+    text: brandColors.primary[600],
+    border: 'transparent',
+  },
+  
+  // Card design - Clean white
+  card: {
+    background: brandColors.white,
+    border: brandColors.neutral[200],
+    shadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+  },
+  
+  // Header - Clean blue
+  header: {
+    background: brandColors.primary[600],
+    text: brandColors.white,
+    accent: brandColors.primary[400],
+  },
+  
+  // Navigation - Minimal
+  navigation: {
+    background: brandColors.white,
+    active: brandColors.primary[600],
+    inactive: brandColors.neutral[500],
+    hover: brandColors.primary[50],
+  },
+  
+  // Dashboard - Clean and minimal
+  dashboard: {
+    background: brandColors.neutral[50],
+    cardBackground: brandColors.white,
+    primary: brandColors.primary[600],
+    secondary: brandColors.neutral[600],
+  },
+  
+  // Status indicators - Very subtle
+  status: {
+    paid: brandColors.success[500],
+    pending: brandColors.warning[500],
+    overdue: brandColors.error[500],
+    // Background variants
+    paidBg: brandColors.success[50],
+    pendingBg: brandColors.warning[50],
+    overdueBg: brandColors.error[50],
+  },
+  
+  // Text colors - Simple hierarchy
+  text: {
+    primary: brandColors.neutral[900],   // Main text
+    secondary: brandColors.neutral[600], // Secondary text
+    tertiary: brandColors.neutral[500],  // Muted text
+    accent: brandColors.primary[600],    // Brand accent text
+    inverse: brandColors.white,          // White text on dark backgrounds
+  },
+  
+  // Border colors - Minimal
+  border: {
+    light: brandColors.neutral[200],     // Light borders
+    medium: brandColors.neutral[300],    // Medium borders
+    dark: brandColors.neutral[400],      // Darker borders
+    accent: brandColors.primary[200],    // Blue accent borders
+  },
+  
+  // Background colors - Clean palette
+  background: {
+    primary: brandColors.white,          // Main background
+    secondary: brandColors.neutral[50],  // Secondary background
+    tertiary: brandColors.neutral[100],  // Tertiary background
+    accent: brandColors.primary[50],     // Blue accent background
+  }
+}
+
+// Usage examples for different components
+export const componentStyles = {
+  // Input fields
+  input: {
+    background: brandColors.white,
+    border: brandColors.neutral[200],
+    focusBorder: brandColors.primary[500],
+    text: brandColors.neutral[900],
+    placeholder: brandColors.neutral[400],
+  },
+  
+  // Tables
+  table: {
+    headerBg: brandColors.neutral[50],
+    headerText: brandColors.neutral[700],
+    rowBorder: brandColors.neutral[200],
+    evenRowBg: brandColors.white,
+    oddRowBg: brandColors.white,
+  },
+  
+  // Sidebar
+  sidebar: {
+    background: brandColors.white,
+    border: brandColors.neutral[200],
+    activeItem: brandColors.primary[50],
+    activeText: brandColors.primary[700],
+    inactiveText: brandColors.neutral[600],
+  },
+  
+  // Modals/Overlays
+  modal: {
+    background: brandColors.white,
+    overlay: 'rgba(15, 23, 42, 0.5)', // Semi-transparent dark
+    shadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
+  }
+}
