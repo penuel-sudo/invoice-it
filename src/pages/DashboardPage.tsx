@@ -62,7 +62,8 @@ export default function DashboardPage() {
             <h1 style={{
               ...getTypographyStyle(typographyPresets.h2),
               color: brandColors.neutral[900],
-              margin: 0
+              margin: 0,
+              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
             }}>
               Dashboard
             </h1>

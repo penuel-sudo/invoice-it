@@ -4,8 +4,9 @@ export const typography = {
   fontFamily: {
     sans: ['Inter', 'system-ui', 'sans-serif'],
     mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-    display: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
-    heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+    display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+    heading: ['Space Grotesk', 'Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+    body: ['Inter', 'system-ui', 'sans-serif'],
   },
 
   // Font sizes - Perfect for invoice documents
@@ -105,18 +106,21 @@ export const typographyPresets = {
     fontWeight: typography.fontWeight.normal,
     lineHeight: typography.lineHeight.normal,
     letterSpacing: typography.letterSpacing.normal,
+    fontFamily: typography.fontFamily.body,
   },
   bodyLarge: {
     fontSize: typography.fontSize['text-lg'],
     fontWeight: typography.fontWeight.normal,
     lineHeight: typography.lineHeight.relaxed,
     letterSpacing: typography.letterSpacing.normal,
+    fontFamily: typography.fontFamily.body,
   },
   bodySmall: {
     fontSize: typography.fontSize['text-sm'],
     fontWeight: typography.fontWeight.normal,
     lineHeight: typography.lineHeight.normal,
     letterSpacing: typography.letterSpacing.normal,
+    fontFamily: typography.fontFamily.body,
   },
 
   // Invoice specific
@@ -171,18 +175,21 @@ export const typographyPresets = {
     fontWeight: typography.fontWeight.medium,
     lineHeight: typography.lineHeight.none,
     letterSpacing: typography.letterSpacing.wide,
+    fontFamily: typography.fontFamily.body,
   },
   buttonLarge: {
     fontSize: typography.fontSize['text-base'],
     fontWeight: typography.fontWeight.medium,
     lineHeight: typography.lineHeight.none,
     letterSpacing: typography.letterSpacing.wide,
+    fontFamily: typography.fontFamily.body,
   },
   buttonSmall: {
     fontSize: typography.fontSize['text-xs'],
     fontWeight: typography.fontWeight.medium,
     lineHeight: typography.lineHeight.none,
     letterSpacing: typography.letterSpacing.wide,
+    fontFamily: typography.fontFamily.body,
   },
 
   // Code and monospace
