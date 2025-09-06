@@ -74,7 +74,13 @@ export default defineConfig({
       'react-hot-toast',
       'zustand'
     ],
-    exclude: ['@radix-ui/react-use-layout-effect'] // Exclude problematic deps
+    exclude: ['@radix-ui/react-use-layout-effect'], // Exclude problematic deps
+    force: true // Force re-optimization
+  },
+  
+  // Skip type checking during build
+  esbuild: {
+    logLevel: 'error'
   },
   
   // Cache optimization

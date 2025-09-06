@@ -1,12 +1,12 @@
 // Typography system for Invoice App
 export const typography = {
-  // Font families
+  // Font families - Clean, modern iOS-style fonts
   fontFamily: {
-    sans: ['Inter', 'system-ui', 'sans-serif'],
-    mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-    display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
-    heading: ['Space Grotesk', 'Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
-    body: ['Inter', 'system-ui', 'sans-serif'],
+    sans: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'system-ui', 'sans-serif'],
+    mono: ['SF Mono', 'Monaco', 'Inconsolata', 'monospace'],
+    display: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'system-ui', 'sans-serif'],
+    heading: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'system-ui', 'sans-serif'],
+    body: ['SF Pro Text', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'system-ui', 'sans-serif'],
   },
 
   // Font sizes - Perfect for invoice documents

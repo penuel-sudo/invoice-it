@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../lib/useAuth'
-import Header from './Header'
-import Sidebar from './Sidebar'
-import BottomNav from './BottomNav'
+import Sidebar from './Sidebar.tsx'
+import BottomNav from './BottomNav.tsx'
 import { brandColors } from '../../stylings'
 
 interface LayoutProps {
@@ -31,15 +30,18 @@ export default function Layout({ children }: LayoutProps) {
       minHeight: '100vh',
       backgroundColor: brandColors.neutral[50],
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      width: '100%',
+      maxWidth: '100vw',
+      overflow: 'hidden'
     }}>
-      {/* Header - Always visible */}
-      <Header />
-      
       <div style={{
         display: 'flex',
         flex: 1,
-        position: 'relative'
+        position: 'relative',
+        width: '100%',
+        maxWidth: '100vw',
+        overflow: 'hidden'
       }}>
         {/* Sidebar - Desktop only */}
         {!isMobile && <Sidebar />}
@@ -47,10 +49,14 @@ export default function Layout({ children }: LayoutProps) {
         {/* Main Content */}
         <main style={{
           flex: 1,
-          padding: isMobile ? '1rem' : '2rem',
+          width: '100%',
+          maxWidth: isMobile ? '100vw' : 'calc(100vw - 280px)',
+          padding: isMobile ? '0' : '2rem',
           paddingBottom: isMobile ? '5rem' : '2rem', // Space for bottom nav on mobile
           marginLeft: isMobile ? 0 : '280px', // Sidebar width
-          transition: 'margin-left 0.3s ease'
+          transition: 'margin-left 0.3s ease',
+          overflowX: 'hidden',
+          boxSizing: 'border-box'
         }}>
           {children}
         </main>

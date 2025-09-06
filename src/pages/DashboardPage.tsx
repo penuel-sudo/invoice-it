@@ -1,162 +1,501 @@
 import { useEffect } from 'react'
-import { Layout } from '../components/layout'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
+import { Layout } from '../components/layout'
+import { FileText, TrendingUp, Users, Plus } from 'lucide-react'
 
-// Helper function to convert typography presets to inline styles
-const getTypographyStyle = (preset: any) => ({
-  fontSize: typeof preset.fontSize === 'string' ? preset.fontSize : (Array.isArray(preset.fontSize) ? preset.fontSize[0] : '1rem'),
-  fontWeight: preset.fontWeight,
-  lineHeight: preset.lineHeight,
-  letterSpacing: preset.letterSpacing,
-})
+const getTypographyStyle = (preset: any) => {
+  return {
+    fontSize: Array.isArray(preset.fontSize) ? preset.fontSize[0] : preset.fontSize,
+    fontWeight: preset.fontWeight,
+    lineHeight: preset.lineHeight,
+    letterSpacing: preset.letterSpacing,
+    fontFamily: preset.fontFamily,
+  }
+}
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    // Handle OAuth callback - clear URL hash if present
     if (window.location.hash.includes('access_token')) {
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
 
-  if (!user) {
-    return null
-  }
+  if (!user) { return null } // AuthWrapper handles redirection
 
   return (
     <Layout>
       <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto'
+        paddingBottom: '6rem', // Space for bottom nav
+        backgroundColor: brandColors.neutral[50],
+        minHeight: '100vh'
       }}>
-        {/* Welcome Section */}
+        {/* Green gradient section - covers header + stats upwards, full width */}
         <div style={{
-          marginBottom: '2rem'
+          background: `linear-gradient(135deg, ${brandColors.primary[100]} 0%, ${brandColors.primary[50]} 100%)`,
+          padding: '1rem',
+          paddingBottom: '2rem'
         }}>
-          <h1 style={{
-            ...getTypographyStyle(typographyPresets.h1),
-            color: brandColors.neutral[900],
-            margin: '0 0 0.5rem',
-            fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+        {/* Header with User Info */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1.5rem',
+          padding: '0.5rem 0'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: brandColors.primary[100],
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: brandColors.primary[700]
+            }}>
+              {user?.email?.charAt(0).toUpperCase() || 'U'}
+            </div>
+            <div>
+              <p style={{
+                ...getTypographyStyle(typographyPresets.bodyLarge),
+                color: brandColors.neutral[900],
+                margin: 0,
+                fontWeight: '600'
+              }}>
+                Rahat Nur
+              </p>
+            </div>
+          </div>
+          <button style={{
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer'
           }}>
-            Welcome back!
-          </h1>
-          <p style={{
-            ...getTypographyStyle(typographyPresets.bodyLarge),
-            color: brandColors.neutral[600],
-            margin: 0
-          }}>
-            Here's what's happening with your business today.
-          </p>
+            🔔
+          </button>
         </div>
 
-        {/* Stats Cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2rem'
-        }}>
+          {/* Stats Overview - Inside the green gradient */}
           <div style={{
-            backgroundColor: brandColors.white,
-            padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '0.75rem',
+            padding: '1rem'
           }}>
-            <h3 style={{
-              ...getTypographyStyle(typographyPresets.h4),
-              color: brandColors.neutral[900],
-              margin: '0 0 0.5rem'
-            }}>
-              Net Revenue
-            </h3>
+          <div style={{ textAlign: 'center' }}>
             <p style={{
-              ...getTypographyStyle(typographyPresets.h2),
-              color: brandColors.success[600],
-              margin: 0,
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
-            }}>
-              $4,200
-            </p>
-          </div>
-
-          <div style={{
-            backgroundColor: brandColors.white,
-            padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
-          }}>
-            <h3 style={{
-              ...getTypographyStyle(typographyPresets.h4),
+              fontSize: '1.5rem',
+              fontWeight: '700',
               color: brandColors.neutral[900],
-              margin: '0 0 0.5rem'
+              margin: '0 0 0.25rem 0'
             }}>
-              Outstanding
-            </h3>
+              35
+            </p>
             <p style={{
-              ...getTypographyStyle(typographyPresets.h2),
-              color: brandColors.warning[600],
-              margin: 0,
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
-            }}>
-              $1,800
-            </p>
-          </div>
-
-          <div style={{
-            backgroundColor: brandColors.white,
-            padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
-          }}>
-            <h3 style={{
-              ...getTypographyStyle(typographyPresets.h4),
-              color: brandColors.neutral[900],
-              margin: '0 0 0.5rem'
+              fontSize: '0.75rem',
+              color: brandColors.neutral[500],
+              margin: 0
             }}>
               Total Invoices
-            </h3>
+            </p>
             <p style={{
-              ...getTypographyStyle(typographyPresets.h2),
-              color: brandColors.primary[600],
-              margin: 0,
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+              fontSize: '0.625rem',
+              color: brandColors.neutral[400],
+              margin: 0
             }}>
-              12
+              Last 24 hours
+            </p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              color: brandColors.neutral[900],
+              margin: '0 0 0.25rem 0'
+            }}>
+              50
+            </p>
+            <p style={{
+              fontSize: '0.75rem',
+              color: brandColors.neutral[500],
+              margin: 0
+            }}>
+              Paid Invoice
+            </p>
+            <p style={{
+              fontSize: '0.625rem',
+              color: brandColors.neutral[400],
+              margin: 0
+            }}>
+              Last 30 days
+            </p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              color: brandColors.neutral[900],
+              margin: '0 0 0.25rem 0'
+            }}>
+              05
+            </p>
+            <p style={{
+              fontSize: '0.75rem',
+              color: brandColors.neutral[500],
+              margin: 0
+            }}>
+              Pending Invoice
+            </p>
+            <p style={{
+              fontSize: '0.625rem',
+              color: brandColors.neutral[400],
+              margin: 0
+            }}>
+              Last 30 days
             </p>
           </div>
         </div>
+        {/* End of green gradient section */}
 
-        {/* Recent Invoices */}
+        {/* Quick Actions - No card backgrounds */}
         <div style={{
-          backgroundColor: brandColors.white,
-          padding: '1.5rem',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-          border: `1px solid ${brandColors.neutral[200]}`
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '0.75rem',
+          marginBottom: '1.5rem',
+          padding: '0 1rem'
         }}>
-          <h3 style={{
-            ...getTypographyStyle(typographyPresets.h3),
-            color: brandColors.neutral[900],
-            margin: '0 0 1.5rem',
-            fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+          <button
+            onClick={() => navigate('/invoice/new')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '1rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              textAlign: 'center'
+            }}
+          >
+            <div style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: brandColors.primary[100],
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <FileText size={20} color={brandColors.primary[600]} />
+            </div>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              color: brandColors.neutral[700]
+            }}>
+              Create Invoice
+            </span>
+          </button>
+
+          <button style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'center'
           }}>
-            Recent Invoices
-          </h3>
-          <p style={{
-            ...getTypographyStyle(typographyPresets.body),
-            color: brandColors.neutral[600],
-            margin: 0
+            <div style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: brandColors.warning[100],
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <TrendingUp size={20} color={brandColors.warning[600]} />
+            </div>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              color: brandColors.neutral[700]
+            }}>
+              Advance Invoice
+            </span>
+          </button>
+
+          <button style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'center'
           }}>
-            Your recent invoices will appear here. Start by creating your first invoice!
-          </p>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: brandColors.primary[100],
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Users size={20} color={brandColors.primary[600]} />
+            </div>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              color: brandColors.neutral[700]
+            }}>
+              Customers
+            </span>
+          </button>
+        </div>
+
+        {/* Secondary Actions - No card backgrounds */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '0.75rem',
+          marginBottom: '1.5rem',
+          padding: '0 1rem'
+        }}>
+          <button style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: brandColors.warning[100],
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              📦
+            </div>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              color: brandColors.neutral[700]
+            }}>
+              Items / Services
+            </span>
+          </button>
+
+          <button style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: brandColors.error[100],
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              📊
+            </div>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              color: brandColors.neutral[700]
+            }}>
+              Expenses
+            </span>
+          </button>
+
+          <button style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: brandColors.success[100],
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              💰
+            </div>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              color: brandColors.neutral[700]
+            }}>
+              Income
+            </span>
+          </button>
+        </div>
+
+        {/* Recent Transactions - No card background */}
+        <div style={{
+          padding: '1rem'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1rem'
+          }}>
+            <h3 style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: brandColors.neutral[900],
+              margin: 0
+            }}>
+              Recent transactions
+            </h3>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            gap: '0.5rem',
+            marginBottom: '1rem'
+          }}>
+            <button style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: brandColors.primary[600],
+              color: brandColors.white,
+              border: 'none',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}>
+              All Invoices
+            </button>
+            <button style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: brandColors.neutral[100],
+              color: brandColors.neutral[600],
+              border: 'none',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}>
+              Expenses
+            </button>
+            <button style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: brandColors.neutral[100],
+              color: brandColors.neutral[600],
+              border: 'none',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}>
+              Income
+            </button>
+          </div>
+
+          {/* Transaction List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {[
+              { name: 'Karim Ahmed', type: 'Sales', invoice: '#INV0078', date: '25 Jun 2024', amount: '$5,000', status: 'success' },
+              { name: 'Nasir Hussain', type: 'Purchase', invoice: '#INV0078', date: '26 Jun 2024', amount: '$5,000', status: 'warning' },
+              { name: 'Kabir Ahmed', type: 'Sales', invoice: '#INV0078', date: '27 Jun 2024', amount: '$5,000', status: 'error' }
+            ].map((transaction, index) => (
+              <div key={index} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.75rem 0'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: transaction.status === 'success' ? brandColors.success[100] : 
+                                   transaction.status === 'warning' ? brandColors.warning[100] : brandColors.error[100],
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem'
+                  }}>
+                    {transaction.status === 'success' ? '✓' : transaction.status === 'warning' ? '⚠' : '✗'}
+                  </div>
+                  <div>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: brandColors.neutral[900],
+                      margin: '0 0 0.125rem 0'
+                    }}>
+                      {transaction.name}
+                    </p>
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: brandColors.neutral[500],
+                      margin: 0
+                    }}>
+                      {transaction.type} • {transaction.invoice} • {transaction.date}
+                    </p>
+                  </div>
+                </div>
+                <p style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0
+                }}>
+                  {transaction.amount}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+    </div>
     </Layout>
   )
 }

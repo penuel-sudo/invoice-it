@@ -1,12 +1,12 @@
-import { Home, FileText, Plus, DollarSign, Settings } from 'lucide-react'
+import { Home, FileText, Plus, BarChart3, Menu } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { brandColors } from '../../stylings'
 
 const navigationItems = [
-  { id: 'dashboard', icon: Home, path: '/dashboard' },
-  { id: 'invoices', icon: FileText, path: '/invoices' },
-  { id: 'expenses', icon: DollarSign, path: '/expenses' },
-  { id: 'settings', icon: Settings, path: '/settings' }
+  { id: 'Home', icon: Home, path: '/dashboard' },
+  { id: 'Invoices', icon: FileText, path: '/invoices' },
+  { id: 'Reports', icon: BarChart3, path: '/reports' },
+  { id: 'Menu', icon: Menu, path: '/menu' }
 ]
 
 export default function BottomNav() {
@@ -61,7 +61,7 @@ export default function BottomNav() {
             <Icon size={20} />
             <span style={{
               fontSize: '10px',
-              textTransform: 'capitalize'
+              fontWeight: '500'
             }}>
               {item.id}
             </span>

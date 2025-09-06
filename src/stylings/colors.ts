@@ -1,16 +1,16 @@
 export const brandColors = {
-  // Primary Blue - Your main brand color
+  // Primary Green - Your main brand color (matching the image)
   primary: {
-    50: '#f0f9ff',   // Very light blue - subtle backgrounds
-    100: '#e0f2fe',  // Light blue - hover states
-    200: '#bae6fd',  // Light blue - borders/dividers
-    300: '#7dd3fc',  // Medium blue - secondary elements
-    400: '#38bdf8',  // Medium blue - icons/accents
-    500: '#0ea5e9',  // Main brand blue - primary actions
-    600: '#0284c7',  // Darker blue - primary buttons
-    700: '#0369a1',  // Dark blue - hover states
-    800: '#075985',  // Darker blue - headings
-    900: '#0c4a6e',  // Darkest blue - strong emphasis
+    50: '#f0fdf4',   // Very light green - subtle backgrounds
+    100: '#dcfce7',  // Light green - hover states
+    200: '#bbf7d0',  // Light green - borders/dividers
+    300: '#86efac',  // Medium green - secondary elements
+    400: '#4ade80',  // Medium green - icons/accents
+    500: '#22c55e',  // Main brand green - primary actions
+    600: '#16a34a',  // Darker green - primary buttons (main brand)
+    700: '#15803d',  // Dark green - hover states
+    800: '#166534',  // Darker green - headings
+    900: '#14532d',  // Darkest green - strong emphasis
   },
   
   // Neutral Grays - Minimal supporting colors
@@ -52,9 +52,9 @@ export const brandColors = {
   },
 }
 
-// Simplified color combinations focusing on blue and white
+// Simplified color combinations focusing on green and white
 export const colorSchemes = {
-  // Primary button - Clean blue
+  // Primary button - Clean green
   primaryButton: {
     background: brandColors.primary[600],
     hover: brandColors.primary[700],
@@ -62,7 +62,7 @@ export const colorSchemes = {
     border: brandColors.primary[600],
   },
   
-  // Secondary button - White with blue accent
+  // Secondary button - White with green accent
   secondaryButton: {
     background: brandColors.white,
     hover: brandColors.primary[50],
@@ -85,7 +85,7 @@ export const colorSchemes = {
     shadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
   },
   
-  // Header - Clean blue
+  // Header - Clean green
   header: {
     background: brandColors.primary[600],
     text: brandColors.white,
