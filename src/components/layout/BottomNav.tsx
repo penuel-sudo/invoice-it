@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { brandColors } from '../../stylings'
 import SettingsPanel from '../SettingsPanel'
+import NotificationDropdown from '../NotificationDropdown'
 
 const navigationItems = [
   { id: 'Home', icon: Home, path: '/dashboard' },
@@ -15,6 +16,7 @@ export default function BottomNav() {
   const location = useLocation()
   const navigate = useNavigate()
   const [isSettingsVisible, setIsSettingsVisible] = useState(false)
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false)
 
   const handleNavigation = (path: string) => {
     if (path === '/menu') {
@@ -27,10 +29,17 @@ export default function BottomNav() {
 
   return (
     <>
+      {/* Notification Dropdown */}
+      <NotificationDropdown 
+        isVisible={isNotificationVisible} 
+        onClose={() => setIsNotificationVisible(false)} 
+      />
+      
       {/* Settings Panel */}
       <SettingsPanel 
         isVisible={isSettingsVisible} 
-        onClose={() => setIsSettingsVisible(false)} 
+        onClose={() => setIsSettingsVisible(false)}
+        onNotificationClick={() => setIsNotificationVisible(true)}
       />
       
       <nav style={{
@@ -40,11 +49,13 @@ export default function BottomNav() {
         right: 0,
         backgroundColor: brandColors.white,
         borderTop: `1px solid ${brandColors.neutral[200]}`,
-        borderTopLeftRadius: '20px',
-        borderTopRightRadius: '20px',
+        borderTopLeftRadius: '25px',
+        borderTopRightRadius: '25px',
+        borderBottomLeftRadius: '25px',
+        borderBottomRightRadius: '25px',
         padding: '0.75rem 1rem 1rem 1rem',
         display: 'flex',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 50,
         boxShadow: '0 -4px 12px 0 rgb(0 0 0 / 0.1)'

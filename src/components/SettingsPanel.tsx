@@ -19,9 +19,10 @@ import toast from 'react-hot-toast'
 interface SettingsPanelProps {
   isVisible: boolean
   onClose: () => void
+  onNotificationClick: () => void
 }
 
-export default function SettingsPanel({ isVisible, onClose }: SettingsPanelProps) {
+export default function SettingsPanel({ isVisible, onClose, onNotificationClick }: SettingsPanelProps) {
   const { user, signOut } = useAuth()
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -80,42 +81,45 @@ export default function SettingsPanel({ isVisible, onClose }: SettingsPanelProps
       icon: Bell,
       title: 'Notifications',
       subtitle: 'Manage your notification preferences',
-      action: () => toast.info('Notifications settings coming soon!')
+      action: () => {
+        onNotificationClick()
+        onClose()
+      }
     },
     {
       id: 'privacy',
       icon: Shield,
       title: 'Privacy & Security',
       subtitle: 'Control your privacy settings',
-      action: () => toast.info('Privacy settings coming soon!')
+      action: () => toast('Privacy settings coming soon!', { icon: '🔒' })
     },
     {
       id: 'help',
       icon: HelpCircle,
       title: 'Help & Support',
       subtitle: 'Get help and contact support',
-      action: () => toast.info('Help center coming soon!')
+      action: () => toast('Help center coming soon!', { icon: '❓' })
     }
   ]
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        bottom: isVisible ? '80px' : '-100vh',
-        left: 0,
-        right: 0,
-        backgroundColor: brandColors.white,
-        borderTopLeftRadius: '20px',
-        borderTopRightRadius: '20px',
-        padding: '1.5rem',
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.15)',
-        zIndex: 40,
-        transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        maxHeight: '70vh',
-        overflowY: 'auto'
-      }}
-    >
+        style={{
+          position: 'fixed',
+          bottom: isVisible ? '80px' : '-100vh',
+          left: 0,
+          right: 0,
+          backgroundColor: brandColors.white,
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+          padding: '1.5rem',
+          boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.15)',
+          zIndex: 45,
+          transition: 'bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          maxHeight: '70vh',
+          overflowY: 'auto'
+        }}
+      >
       {/* Top Border Line */}
       <div style={{
         width: '40px',
@@ -174,7 +178,7 @@ export default function SettingsPanel({ isVisible, onClose }: SettingsPanelProps
             position: 'relative',
             width: '60px',
             height: '60px',
-            borderRadius: '50%',
+            borderRadius: '25px',
             backgroundColor: brandColors.primary[200],
             display: 'flex',
             alignItems: 'center',

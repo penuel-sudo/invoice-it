@@ -4,6 +4,7 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { Layout } from '../components/layout'
 import { getUserDisplayName, getUserInitial } from '../lib/profilePicture'
+import NotificationDropdown from '../components/NotificationDropdown'
 import { 
   FileText, 
   TrendingUp, 
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('all')
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false)
 
   useEffect(() => {
     if (window.location.hash.includes('access_token')) {
@@ -56,6 +58,12 @@ export default function DashboardPage() {
 
   return (
     <Layout>
+      {/* Notification Dropdown */}
+      <NotificationDropdown 
+        isVisible={isNotificationVisible} 
+        onClose={() => setIsNotificationVisible(false)} 
+      />
+      
       <div style={{
         paddingBottom: '6rem', // Space for bottom nav
         backgroundColor: brandColors.white,
@@ -64,10 +72,10 @@ export default function DashboardPage() {
         maxWidth: '100vw',
         overflow: 'hidden'
       }}>
-        {/* 🎨 GRADIENT SECTION (20% height) - Green gradient with orange/blue touches */}
+        {/* 🎨 GRADIENT SECTION (30% height) - Green gradient with orange/blue touches */}
         <div style={{
-          height: '20vh',
-          minHeight: '160px',
+          height: '30vh',
+          minHeight: '240px',
           background: `linear-gradient(135deg, ${brandColors.primary[200]} 0%, ${brandColors.primary[100]} 50%, ${brandColors.warning[100]} 100%)`,
           padding: '1rem',
           paddingTop: '0',
@@ -79,14 +87,14 @@ export default function DashboardPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '1rem 0 0.5rem 0',
+            padding: '1rem 0 1.5rem 0',
             backgroundColor: 'transparent'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{
                 width: '36px',
                 height: '36px',
-                borderRadius: '50%',
+                borderRadius: '25px',
                 backgroundColor: brandColors.primary[200],
                 display: 'flex',
                 alignItems: 'center',
@@ -109,74 +117,108 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <button style={{
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Bell size={20} color={brandColors.neutral[700]} />
+            <button 
+              onClick={() => setIsNotificationVisible(!isNotificationVisible)}
+              style={{
+                padding: '0.75rem',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = brandColors.primary[100]
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}>
+              <Bell size={24} color={brandColors.neutral[700]} />
             </button>
           </div>
 
-          {/* Stats Summary - Transparent div */}
+          {/* Stats Summary - Colored cards */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             padding: '0.5rem 0',
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            gap: '0.75rem'
           }}>
-            <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ 
+              textAlign: 'center', 
+              flex: 1,
+              backgroundColor: brandColors.primary[50],
+              borderRadius: '16px',
+              padding: '1rem 0.5rem',
+              border: `1px solid ${brandColors.primary[200]}`
+            }}>
               <p style={{
-                fontSize: '1.25rem',
+                fontSize: '1.75rem',
                 fontWeight: '700',
-                color: brandColors.neutral[900],
-                margin: '0 0 0.125rem 0'
+                color: brandColors.primary[800],
+                margin: '0 0 0.25rem 0'
               }}>
                 35
               </p>
               <p style={{
-                fontSize: '0.625rem',
-                color: brandColors.neutral[600],
-                margin: 0
+                fontSize: '0.75rem',
+                color: brandColors.primary[600],
+                margin: 0,
+                fontWeight: '500'
               }}>
                 Total
               </p>
             </div>
-            <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ 
+              textAlign: 'center', 
+              flex: 1,
+              backgroundColor: brandColors.success[50],
+              borderRadius: '16px',
+              padding: '1rem 0.5rem',
+              border: `1px solid ${brandColors.success[200]}`
+            }}>
               <p style={{
-                fontSize: '1.25rem',
+                fontSize: '1.75rem',
                 fontWeight: '700',
-                color: brandColors.neutral[900],
-                margin: '0 0 0.125rem 0'
+                color: brandColors.success[800],
+                margin: '0 0 0.25rem 0'
               }}>
                 28
               </p>
               <p style={{
-                fontSize: '0.625rem',
-                color: brandColors.neutral[600],
-                margin: 0
+                fontSize: '0.75rem',
+                color: brandColors.success[600],
+                margin: 0,
+                fontWeight: '500'
               }}>
                 Paid
               </p>
             </div>
-            <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ 
+              textAlign: 'center', 
+              flex: 1,
+              backgroundColor: brandColors.warning[50],
+              borderRadius: '16px',
+              padding: '1rem 0.5rem',
+              border: `1px solid ${brandColors.warning[200]}`
+            }}>
               <p style={{
-                fontSize: '1.25rem',
+                fontSize: '1.75rem',
                 fontWeight: '700',
-                color: brandColors.neutral[900],
-                margin: '0 0 0.125rem 0'
+                color: brandColors.warning[800],
+                margin: '0 0 0.25rem 0'
               }}>
                 7
               </p>
               <p style={{
-                fontSize: '0.625rem',
-                color: brandColors.neutral[600],
-                margin: 0
+                fontSize: '0.75rem',
+                color: brandColors.warning[600],
+                margin: 0,
+                fontWeight: '500'
               }}>
                 Pending
               </p>
@@ -184,16 +226,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 🔘 QUICK ACTIONS SECTION (Transparent) - 6 buttons in 3 rows */}
+        {/* 🔘 QUICK ACTIONS SECTION (2 rows with shadows) - 6 buttons in 2 rows */}
         <div style={{
-          padding: '1rem',
+          padding: '2rem 1rem 1rem 1rem',
           backgroundColor: 'transparent'
         }}>
           {/* Row 1 */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            gap: '0.75rem'
           }}>
             <button
               onClick={() => navigate('/invoice/new')}
@@ -202,33 +245,35 @@ export default function DashboardPage() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '0.5rem',
-                padding: '1rem',
-                backgroundColor: 'transparent',
-                border: 'none',
+                padding: '1.25rem',
+                backgroundColor: brandColors.white,
+                border: `1px solid ${brandColors.neutral[100]}`,
                 cursor: 'pointer',
                 textAlign: 'center',
                 flex: 1,
-                margin: '0 0.25rem',
-                borderRadius: '12px',
+                borderRadius: '16px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                 transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = brandColors.primary[50]
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
               }}
             >
               <div style={{
-                width: '44px',
-                height: '44px',
+                width: '48px',
+                height: '48px',
                 backgroundColor: brandColors.primary[100],
-                borderRadius: '12px',
+                borderRadius: '14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <FileText size={22} color={brandColors.primary[600]} />
+                <FileText size={24} color={brandColors.primary[600]} />
               </div>
               <span style={{
                 fontSize: '0.75rem',
@@ -244,32 +289,34 @@ export default function DashboardPage() {
               flexDirection: 'column',
               alignItems: 'center',
               gap: '0.5rem',
-              padding: '1rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'center',
-              flex: 1,
-              margin: '0 0.25rem',
-              borderRadius: '12px',
+              padding: '1.25rem',
+                backgroundColor: brandColors.white,
+                border: `1px solid ${brandColors.neutral[100]}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+                flex: 1,
+                borderRadius: '16px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.warning[50]
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
             }}>
               <div style={{
-                width: '44px',
-                height: '44px',
+                width: '48px',
+                height: '48px',
                 backgroundColor: brandColors.warning[100],
-                borderRadius: '12px',
+                borderRadius: '14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <TrendingUp size={22} color={brandColors.warning[600]} />
+                <TrendingUp size={24} color={brandColors.warning[600]} />
               </div>
               <span style={{
                 fontSize: '0.75rem',
@@ -279,45 +326,40 @@ export default function DashboardPage() {
                 Advanced
               </span>
             </button>
-          </div>
 
-          {/* Row 2 */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: '1rem'
-          }}>
             <button style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '0.5rem',
-              padding: '1rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'center',
-              flex: 1,
-              margin: '0 0.25rem',
-              borderRadius: '12px',
+              padding: '1.25rem',
+                backgroundColor: brandColors.white,
+                border: `1px solid ${brandColors.neutral[100]}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+                flex: 1,
+                borderRadius: '16px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.primary[50]
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
             }}>
               <div style={{
-                width: '44px',
-                height: '44px',
+                width: '48px',
+                height: '48px',
                 backgroundColor: brandColors.primary[100],
-                borderRadius: '12px',
+                borderRadius: '14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Users size={22} color={brandColors.primary[600]} />
+                <Users size={24} color={brandColors.primary[600]} />
               </div>
               <span style={{
                 fontSize: '0.75rem',
@@ -327,38 +369,47 @@ export default function DashboardPage() {
                 Customers
               </span>
             </button>
+          </div>
 
+          {/* Row 2 */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: '0.75rem'
+          }}>
             <button style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '0.5rem',
-              padding: '1rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'center',
-              flex: 1,
-              margin: '0 0.25rem',
-              borderRadius: '12px',
+              padding: '1.25rem',
+                backgroundColor: brandColors.white,
+                border: `1px solid ${brandColors.neutral[100]}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+                flex: 1,
+                borderRadius: '16px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.warning[50]
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
             }}>
               <div style={{
-                width: '44px',
-                height: '44px',
+                width: '48px',
+                height: '48px',
                 backgroundColor: brandColors.warning[100],
-                borderRadius: '12px',
+                borderRadius: '14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Package size={22} color={brandColors.warning[600]} />
+                <Package size={24} color={brandColors.warning[600]} />
               </div>
               <span style={{
                 fontSize: '0.75rem',
@@ -368,44 +419,40 @@ export default function DashboardPage() {
                 Items
               </span>
             </button>
-          </div>
 
-          {/* Row 3 */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between'
-          }}>
             <button style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '0.5rem',
-              padding: '1rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'center',
-              flex: 1,
-              margin: '0 0.25rem',
-              borderRadius: '12px',
+              padding: '1.25rem',
+                backgroundColor: brandColors.white,
+                border: `1px solid ${brandColors.neutral[100]}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+                flex: 1,
+                borderRadius: '16px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.error[50]
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
             }}>
               <div style={{
-                width: '44px',
-                height: '44px',
+                width: '48px',
+                height: '48px',
                 backgroundColor: brandColors.error[100],
-                borderRadius: '12px',
+                borderRadius: '14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <ArrowDownRight size={22} color={brandColors.error[600]} />
+                <ArrowDownRight size={24} color={brandColors.error[600]} />
               </div>
               <span style={{
                 fontSize: '0.75rem',
@@ -421,32 +468,34 @@ export default function DashboardPage() {
               flexDirection: 'column',
               alignItems: 'center',
               gap: '0.5rem',
-              padding: '1rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              textAlign: 'center',
-              flex: 1,
-              margin: '0 0.25rem',
-              borderRadius: '12px',
+              padding: '1.25rem',
+                backgroundColor: brandColors.white,
+                border: `1px solid ${brandColors.neutral[100]}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+                flex: 1,
+                borderRadius: '16px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.success[50]
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
             }}>
               <div style={{
-                width: '44px',
-                height: '44px',
+                width: '48px',
+                height: '48px',
                 backgroundColor: brandColors.success[100],
-                borderRadius: '12px',
+                borderRadius: '14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <ArrowUpRight size={22} color={brandColors.success[600]} />
+                <ArrowUpRight size={24} color={brandColors.success[600]} />
               </div>
               <span style={{
                 fontSize: '0.75rem',
@@ -461,12 +510,12 @@ export default function DashboardPage() {
 
         {/* 📑 TABS SECTION */}
         <div style={{
-          padding: '0 1rem 1rem 1rem'
+          padding: '1.5rem 1rem 0.5rem 1rem'
         }}>
           {/* Tab Navigation */}
           <div style={{
             display: 'flex',
-            gap: '0.5rem',
+            gap: '0.75rem',
             marginBottom: '1rem'
           }}>
             {[
@@ -478,15 +527,16 @@ export default function DashboardPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '0.75rem 1.5rem',
                   backgroundColor: activeTab === tab.id ? brandColors.primary[600] : brandColors.neutral[100],
                   color: activeTab === tab.id ? brandColors.white : brandColors.neutral[600],
                   border: 'none',
                   borderRadius: '20px',
-                  fontSize: '0.75rem',
+                  fontSize: '0.875rem',
                   fontWeight: '500',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  flex: 1
                 }}
               >
                 {tab.label}
