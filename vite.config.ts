@@ -15,55 +15,41 @@ export default defineConfig({
     },
   },
   build: {
-    // Optimize build performance
+    // Ultra-fast build settings
     target: 'esnext',
-    minify: 'esbuild',
+    minify: 'esbuild', // Fastest minifier
     sourcemap: false,
     
-    // Faster builds
+    // Aggressive optimizations
     emptyOutDir: true,
+    write: true,
     
-    // Code splitting and chunk optimization
+    // Simplified chunking for speed
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // More granular chunking for better caching
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor'
-            }
-            if (id.includes('@supabase')) {
-              return 'supabase-vendor'
-            }
-            if (id.includes('@radix-ui')) {
-              return 'ui-vendor'
-            }
-            if (id.includes('framer-motion')) {
-              return 'animation-vendor'
-            }
-            if (id.includes('react-hook-form') || id.includes('zod')) {
-              return 'form-vendor'
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons-vendor'
-            }
-            return 'vendor'
-          }
+        manualChunks: {
+          // Group all vendor code into fewer chunks for faster builds
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': [
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-avatar', 
+            '@radix-ui/react-collapsible',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-navigation-menu'
+          ],
+          'supabase-vendor': ['@supabase/supabase-js'],
+          'utils-vendor': ['framer-motion', 'lucide-react', 'react-hot-toast', 'zustand']
         },
-        // Optimize chunk names
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        // Simplified file naming
+        chunkFileNames: 'assets/[name].js',
+        entryFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]'
       }
     },
     
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 1000,
-    
-    // Optimize CSS
-    cssCodeSplit: true,
-    
-    // Reduce bundle size
+    // Reduce processing overhead
+    chunkSizeWarningLimit: 2000,
+    cssCodeSplit: false, // Faster builds
     reportCompressedSize: false
   },
   
@@ -71,11 +57,12 @@ export default defineConfig({
   server: {
     hmr: true,
     watch: {
-      usePolling: false
+      usePolling: false,
+      ignored: ['**/node_modules/**', '**/dist/**']
     }
   },
   
-  // Optimize dependencies
+  // Aggressive dependency optimization
   optimizeDeps: {
     include: [
       'react',
@@ -83,7 +70,13 @@ export default defineConfig({
       'react-router-dom',
       '@supabase/supabase-js',
       'framer-motion',
-      'lucide-react'
-    ]
-  }
+      'lucide-react',
+      'react-hot-toast',
+      'zustand'
+    ],
+    exclude: ['@radix-ui/react-use-layout-effect'] // Exclude problematic deps
+  },
+  
+  // Cache optimization
+  cacheDir: 'node_modules/.vite'
 })

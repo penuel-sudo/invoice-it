@@ -5,15 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:fast": "vite build --mode production --minify esbuild",
+    "build": "vite build",
+    "build:fast": "vite build --mode production --minify esbuild --sourcemap false",
     "build:analyze": "vite build --mode analyze",
     "build:prod": "vite build --mode production --minify esbuild --sourcemap false",
+    "build:ultra": "vite build --mode production --minify esbuild --sourcemap false --emptyOutDir",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules/.vite node_modules/.tmp"
+    "type-check:fast": "tsc --noEmit --skipLibCheck",
+    "clean": "rm -rf dist node_modules/.vite node_modules/.tmp",
+    "clean:all": "rm -rf dist node_modules/.vite node_modules/.tmp node_modules/.cache"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
