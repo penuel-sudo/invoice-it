@@ -6,9 +6,11 @@ import { brandColors } from '../../stylings'
 
 interface LayoutProps {
   children: React.ReactNode
+  isNotificationVisible?: boolean
+  onNotificationToggle?: () => void
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, isNotificationVisible, onNotificationToggle }: LayoutProps) {
   const { user } = useAuth()
   const [isMobile, setIsMobile] = useState(false)
 
@@ -28,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: brandColors.neutral[50],
+      backgroundColor: brandColors.white,
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
@@ -63,7 +65,7 @@ export default function Layout({ children }: LayoutProps) {
       </div>
       
       {/* Bottom Navigation - Mobile only */}
-      {isMobile && <BottomNav />}
+      {isMobile && <BottomNav isNotificationVisible={isNotificationVisible} onNotificationToggle={onNotificationToggle} />}
     </div>
   )
 }

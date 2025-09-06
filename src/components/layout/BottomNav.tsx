@@ -12,11 +12,15 @@ const navigationItems = [
   { id: 'Menu', icon: Menu, path: '/menu' }
 ]
 
-export default function BottomNav() {
+interface BottomNavProps {
+  isNotificationVisible?: boolean
+  onNotificationToggle?: () => void
+}
+
+export default function BottomNav({ isNotificationVisible = false, onNotificationToggle }: BottomNavProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [isSettingsVisible, setIsSettingsVisible] = useState(false)
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false)
 
   const handleNavigation = (path: string) => {
     if (path === '/menu') {
@@ -32,14 +36,14 @@ export default function BottomNav() {
       {/* Notification Dropdown */}
       <NotificationDropdown 
         isVisible={isNotificationVisible} 
-        onClose={() => setIsNotificationVisible(false)} 
+        onClose={() => onNotificationToggle?.()} 
       />
       
       {/* Settings Panel */}
       <SettingsPanel 
         isVisible={isSettingsVisible} 
         onClose={() => setIsSettingsVisible(false)}
-        onNotificationClick={() => setIsNotificationVisible(true)}
+        onNotificationClick={() => onNotificationToggle?.()}
       />
       
       <nav style={{
@@ -105,8 +109,8 @@ export default function BottomNav() {
             top: '-24px',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '64px',
-            height: '64px',
+            width: '40px',
+            height: '40px',
             backgroundColor: 'transparent',
             color: brandColors.primary[600],
             border: `3px solid ${brandColors.primary[600]}`,

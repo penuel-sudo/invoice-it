@@ -57,11 +57,14 @@ export default function DashboardPage() {
     : allTransactions.filter(t => t.type === activeTab)
 
   return (
-    <Layout>
+    <Layout 
+      isNotificationVisible={isNotificationVisible}
+      onNotificationToggle={() => setIsNotificationVisible(!isNotificationVisible)}
+    >
       {/* Notification Dropdown */}
-      <NotificationDropdown 
-        isVisible={isNotificationVisible} 
-        onClose={() => setIsNotificationVisible(false)} 
+      <NotificationDropdown
+        isVisible={isNotificationVisible}
+        onClose={() => setIsNotificationVisible(false)}
       />
       
       <div style={{
@@ -151,10 +154,10 @@ export default function DashboardPage() {
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
-              backgroundColor: brandColors.primary[50],
+              backgroundColor: 'transparent',
               borderRadius: '16px',
               padding: '1rem 0.5rem',
-              border: `1px solid ${brandColors.primary[200]}`
+              border: `2px solid ${brandColors.primary[300]}`
             }}>
               <p style={{
                 fontSize: '1.75rem',
@@ -176,10 +179,10 @@ export default function DashboardPage() {
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
-              backgroundColor: brandColors.success[50],
+              backgroundColor: 'transparent',
               borderRadius: '16px',
               padding: '1rem 0.5rem',
-              border: `1px solid ${brandColors.success[200]}`
+              border: `2px solid ${brandColors.success[300]}`
             }}>
               <p style={{
                 fontSize: '1.75rem',
@@ -201,10 +204,10 @@ export default function DashboardPage() {
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
-              backgroundColor: brandColors.warning[50],
+              backgroundColor: 'transparent',
               borderRadius: '16px',
               padding: '1rem 0.5rem',
-              border: `1px solid ${brandColors.warning[200]}`
+              border: `2px solid ${brandColors.warning[300]}`
             }}>
               <p style={{
                 fontSize: '1.75rem',
@@ -228,7 +231,7 @@ export default function DashboardPage() {
 
         {/* 🔘 QUICK ACTIONS SECTION (2 rows with shadows) - 6 buttons in 2 rows */}
         <div style={{
-          padding: '2rem 1rem 1rem 1rem',
+          padding: '3rem 1rem 2rem 1rem',
           backgroundColor: 'transparent'
         }}>
           {/* Row 1 */}
