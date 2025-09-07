@@ -124,7 +124,7 @@ export default function DashboardPage() {
               onClick={() => setIsNotificationVisible(!isNotificationVisible)}
               style={{
                 padding: '0.75rem',
-                backgroundColor: 'transparent',
+                backgroundColor: isNotificationVisible ? brandColors.primary[100] : 'transparent',
                 border: 'none',
                 borderRadius: '12px',
                 cursor: 'pointer',
@@ -137,9 +137,12 @@ export default function DashboardPage() {
                 e.currentTarget.style.backgroundColor = brandColors.primary[100]
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.backgroundColor = isNotificationVisible ? brandColors.primary[100] : 'transparent'
               }}>
-              <Bell size={24} color={brandColors.neutral[700]} />
+              <Bell 
+                size={24} 
+                color={isNotificationVisible ? brandColors.primary[800] : brandColors.neutral[700]} 
+              />
             </button>
           </div>
 

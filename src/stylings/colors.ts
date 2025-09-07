@@ -35,14 +35,28 @@ export const brandColors = {
   // Minimal semantic colors (very subtle)
   success: {
     50: '#f0fdf4',
-    500: '#10b981', // Muted green
-    600: '#059669',
+    100: '#dcfce7',  // Light green
+    200: '#bbf7d0',  // Light green
+    300: '#86efac',  // Medium green
+    400: '#4ade80',  // Medium green
+    500: '#10b981',  // Muted green
+    600: '#059669',  // Dark green
+    700: '#047857',  // Darker green
+    800: '#065f46',  // Dark green
+    900: '#064e3b',  // Darkest green
   },
   
   warning: {
     50: '#fffbeb',
-    500: '#f59e0b', // Muted orange
-    600: '#d97706',
+    100: '#fef3c7',  // Light orange
+    200: '#fde68a',  // Light orange
+    300: '#fcd34d',  // Medium orange
+    400: '#fbbf24',  // Medium orange
+    500: '#f59e0b',  // Muted orange
+    600: '#d97706',  // Dark orange
+    700: '#b45309',  // Darker orange
+    800: '#92400e',  // Dark orange
+    900: '#78350f',  // Darkest orange
   },
   
   error: {
