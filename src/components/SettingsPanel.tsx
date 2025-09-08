@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { 
@@ -13,7 +13,7 @@ import {
   Upload,
   Trash2
 } from 'lucide-react'
-import { uploadProfilePicture, deleteProfilePicture, getUserDisplayName, getUserInitial } from '../lib/profilePicture'
+import { uploadProfilePicture, deleteProfilePicture, getUserDisplayName, getUserInitial, getUserProfilePictureUrl } from '../lib/profilePicture'
 import toast from 'react-hot-toast'
 
 interface SettingsPanelProps {
@@ -25,7 +25,25 @@ interface SettingsPanelProps {
 export default function SettingsPanel({ isVisible, onClose, onNotificationClick }: SettingsPanelProps) {
   const { user, signOut } = useAuth()
   const [isUploading, setIsUploading] = useState(false)
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Load profile picture when component mounts or user changes
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      if (user) {
+        try {
+          const url = await getUserProfilePictureUrl(user)
+          setProfilePictureUrl(url)
+        } catch (error) {
+          console.error('Error loading profile picture:', error)
+          setProfilePictureUrl(null)
+        }
+      }
+    }
+
+    loadProfilePicture()
+  }, [user])
 
   const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -37,8 +55,9 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
       
       if (result.success) {
         toast.success('Profile picture updated successfully!')
-        // Refresh the page to show new image
-        window.location.reload()
+        // Reload the profile picture
+        const url = await getUserProfilePictureUrl(user)
+        setProfilePictureUrl(url)
       } else {
         toast.error(result.error || 'Failed to upload image')
       }
@@ -57,7 +76,8 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
       
       if (result.success) {
         toast.success('Profile picture removed successfully!')
-        window.location.reload()
+        // Clear the profile picture
+        setProfilePictureUrl(null)
       } else {
         toast.error(result.error || 'Failed to remove image')
       }
@@ -174,23 +194,43 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
           gap: '1rem',
           marginBottom: '1rem'
         }}>
-          <div style={{
-            position: 'relative',
-            width: '60px',
-            height: '60px',
-            borderRadius: '25px',
-            backgroundColor: brandColors.primary[200],
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.5rem',
-            fontWeight: '600',
-            color: brandColors.primary[800],
-            border: `3px solid ${brandColors.white}`,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-          }}>
-            {getUserInitial(user)}
-          </div>
+          {profilePictureUrl ? (
+            <img
+              src={profilePictureUrl}
+              alt="Profile"
+              style={{
+                position: 'relative',
+                width: '60px',
+                height: '60px',
+                borderRadius: '25px',
+                objectFit: 'cover',
+                border: `3px solid ${brandColors.white}`,
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+              }}
+              onError={() => {
+                // If image fails to load, fallback to initial
+                setProfilePictureUrl(null)
+              }}
+            />
+          ) : (
+            <div style={{
+              position: 'relative',
+              width: '60px',
+              height: '60px',
+              borderRadius: '25px',
+              backgroundColor: brandColors.primary[200],
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: brandColors.primary[800],
+              border: `3px solid ${brandColors.white}`,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+            }}>
+              {getUserInitial(user)}
+            </div>
+          )}
           <div style={{ flex: 1 }}>
             <h3 style={{
               fontSize: '1rem',
@@ -348,6 +388,7 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
           fontWeight: '600',
           cursor: 'pointer',
           marginTop: '1rem',
+          marginBottom: '2rem',
           transition: 'all 0.2s ease'
         }}
         onMouseEnter={(e) => {

@@ -131,6 +131,16 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.boxShadow = '0 4px 12px 0 rgb(0 0 0 / 0.15)'
           }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.backgroundColor = brandColors.primary[600]
+            e.currentTarget.style.color = brandColors.white
+            e.currentTarget.style.borderColor = brandColors.white
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.backgroundColor = brandColors.primary[50]
+            e.currentTarget.style.color = brandColors.primary[600]
+            e.currentTarget.style.borderColor = brandColors.primary[600]
+          }}
         >
           <Plus size={28} />
         </button>

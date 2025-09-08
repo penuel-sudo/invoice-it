@@ -142,3 +142,44 @@ export function getUserInitial(user: any): string {
   const name = getUserDisplayName(user)
   return name.charAt(0).toUpperCase()
 }
+
+/**
+ * Get user's profile picture URL from storage or fallback to Google avatar
+ * @param user - Supabase user object
+ * @returns Profile picture URL or null
+ */
+export async function getUserProfilePictureUrl(user: any): Promise<string | null> {
+  try {
+    if (!user?.id) return null
+
+    // First, check if user has a custom profile picture in storage
+    const { data: files, error } = await supabase.storage
+      .from('profile-pictures')
+      .list(user.id, {
+        limit: 1,
+        offset: 0
+      })
+
+    if (error) {
+      console.error('Error checking profile picture:', error)
+    } else if (files && files.length > 0) {
+      // User has a custom profile picture
+      const { data } = supabase.storage
+        .from('profile-pictures')
+        .getPublicUrl(`${user.id}/${files[0].name}`)
+      
+      return data.publicUrl
+    }
+
+    // Fallback to Google avatar if available
+    const googleAvatarUrl = user?.user_metadata?.avatar_url
+    if (googleAvatarUrl) {
+      return googleAvatarUrl
+    }
+
+    return null
+  } catch (error) {
+    console.error('Error getting profile picture URL:', error)
+    return null
+  }
+}

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
-import { brandColors, typographyPresets } from '../stylings'
+import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
-import { getUserDisplayName, getUserInitial } from '../lib/profilePicture'
+import { getUserDisplayName, getUserProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
 import NotificationDropdown from '../components/NotificationDropdown'
+import StatusButton from '../components/StatusButton'
 import { 
   FileText, 
   TrendingUp, 
@@ -19,27 +20,35 @@ import {
   Receipt
 } from 'lucide-react'
 
-const getTypographyStyle = (preset: any) => {
-  return {
-    fontSize: Array.isArray(preset.fontSize) ? preset.fontSize[0] : preset.fontSize,
-    fontWeight: preset.fontWeight,
-    lineHeight: preset.lineHeight,
-    letterSpacing: preset.letterSpacing,
-    fontFamily: preset.fontFamily,
-  }
-}
-
 export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (window.location.hash.includes('access_token')) {
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
+
+  // Load profile picture when component mounts or user changes
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      if (user) {
+        try {
+          const url = await getUserProfilePictureUrl(user)
+          setProfilePictureUrl(url)
+        } catch (error) {
+          console.error('Error loading profile picture:', error)
+          setProfilePictureUrl(null)
+        }
+      }
+    }
+
+    loadProfilePicture()
+  }, [user])
 
   if (!user) { return null } // AuthWrapper handles redirection
 
@@ -68,7 +77,7 @@ export default function DashboardPage() {
       />
       
       <div style={{
-        paddingBottom: '6rem', // Space for bottom nav
+        paddingBottom: '4rem', // Space for bottom nav
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',
@@ -94,21 +103,39 @@ export default function DashboardPage() {
             backgroundColor: 'transparent'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '25px',
-                backgroundColor: brandColors.primary[200],
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                color: brandColors.primary[800],
-                border: `2px solid ${brandColors.white}`
-              }}>
-                {getUserInitial(user)}
-              </div>
+              {profilePictureUrl ? (
+                <img
+                  src={profilePictureUrl}
+                  alt="Profile"
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '25px',
+                    objectFit: 'cover',
+                    border: `2px solid ${brandColors.white}`
+                  }}
+                  onError={() => {
+                    // If image fails to load, fallback to initial
+                    setProfilePictureUrl(null)
+                  }}
+                />
+              ) : (
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '25px',
+                  backgroundColor: brandColors.primary[200],
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: brandColors.primary[800],
+                  border: `2px solid ${brandColors.white}`
+                }}>
+                  {getUserInitial(user)}
+                </div>
+              )}
               <div>
                 <p style={{
                   fontSize: '0.875rem',
@@ -131,7 +158,8 @@ export default function DashboardPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                position: 'relative'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = brandColors.primary[100]
@@ -143,6 +171,17 @@ export default function DashboardPage() {
                 size={24} 
                 color={isNotificationVisible ? brandColors.primary[800] : brandColors.neutral[700]} 
               />
+              {/* Red dot for unread notifications */}
+              <div style={{
+                position: 'absolute',
+                top: '8px',
+                right: '8px',
+                width: '8px',
+                height: '8px',
+                backgroundColor: brandColors.error[500],
+                borderRadius: '50%',
+                border: `2px solid ${brandColors.white}`
+              }} />
             </button>
           </div>
 
@@ -515,6 +554,16 @@ export default function DashboardPage() {
         </div>
 
         {/* 📑 TABS SECTION */}
+        {/* TODO: Hide this section for new users with no transaction data
+        const hasTransactions = allTransactions.length > 0
+        if (!hasTransactions) {
+          return (
+            <Layout>
+              <div>Welcome! Create your first invoice to see transactions here.</div>
+            </Layout>
+          )
+        }
+        */}
         <div style={{
           padding: '1.5rem 1rem 0.5rem 1rem'
         }}>
@@ -598,14 +647,20 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    color: transaction.type === 'income' ? brandColors.success[600] : brandColors.error[600],
-                    margin: 0
-                  }}>
-                    {transaction.type === 'income' ? '+' : '-'}{transaction.amount}
-                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: transaction.type === 'income' ? brandColors.success[600] : brandColors.error[600],
+                      margin: 0
+                    }}>
+                      {transaction.type === 'income' ? '+' : '-'}{transaction.amount}
+                    </p>
+                    <StatusButton 
+                      status={transaction.status === 'paid' ? 'paid' : 'pending'} 
+                      size="sm" 
+                    />
+                  </div>
                   <button style={{
                     padding: '0.25rem',
                     backgroundColor: 'transparent',
