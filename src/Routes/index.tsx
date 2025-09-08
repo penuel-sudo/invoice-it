@@ -3,6 +3,8 @@ import OnboardingPage from '../pages/OnboardingPage'
 import AuthPage from '../pages/AuthPage'
 import DashboardPage from '../pages/DashboardPage'
 import InvoiceCreatePage from '../pages/InvoiceCreatePage'
+import InvoicePreviewPage from '../pages/InvoicePreviewPage'
+import ProfilePage from '../pages/ProfilePage'
 import AuthWrapper from '../components/AuthWrapper'
 
 export const router = createBrowserRouter([
@@ -27,18 +29,26 @@ export const router = createBrowserRouter([
     )
   },
   {
-    path: '/dashboard',
-    element: (
-      <AuthWrapper requireAuth={true}>
-        <DashboardPage />
-      </AuthWrapper>
-    )
-  },
-  {
     path: '/invoice/new',
     element: (
       <AuthWrapper requireAuth={true}>
         <InvoiceCreatePage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/invoice/preview',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <InvoicePreviewPage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/profile',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <ProfilePage />
       </AuthWrapper>
     )
   }

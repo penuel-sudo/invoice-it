@@ -1,176 +1,252 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react'
+import { useAuth } from '../lib/useAuth'
+import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
-import { Button, Input, Label, Textarea } from '../components/ui'
-import { useInvoiceStore } from '../store'
-import { brandColors, typographyPresets } from '../stylings'
+import { 
+  ArrowLeft, 
+  Save, 
+  Eye, 
+  Plus, 
+  Trash2,
+  Calendar,
+  User,
+  Mail,
+  MapPin,
+  FileText,
+  DollarSign
+} from 'lucide-react'
 import toast from 'react-hot-toast'
 
-// Helper function to convert typography presets to inline styles
-const getTypographyStyle = (preset: any) => ({
-  fontSize: typeof preset.fontSize === 'string' ? preset.fontSize : (Array.isArray(preset.fontSize) ? preset.fontSize[0] : '1rem'),
-  fontWeight: preset.fontWeight,
-  lineHeight: preset.lineHeight,
-  letterSpacing: preset.letterSpacing,
-})
+interface InvoiceItem {
+  id: string
+  description: string
+  quantity: number
+  unitPrice: number
+  taxRate: number
+  lineTotal: number
+}
+
+interface InvoiceFormData {
+  clientName: string
+  clientEmail: string
+  clientAddress: string
+  invoiceNumber: string
+  invoiceDate: string
+  dueDate: string
+  items: InvoiceItem[]
+  notes: string
+  subtotal: number
+  taxTotal: number
+  grandTotal: number
+}
 
 export default function InvoiceCreatePage() {
+  const { user } = useAuth()
   const navigate = useNavigate()
-  const { 
-    formData, 
-    setFormData, 
-    addFormItem, 
-    updateFormItem, 
-    removeFormItem, 
-    calculateTotals, 
-    generateInvoiceNumber,
-    isFormValid,
-    resetForm
-  } = useInvoiceStore()
   
-  const [activeSection, setActiveSection] = useState('client')
-
-  useEffect(() => {
-    // Initialize form with generated invoice number
-    if (!formData.invoiceNumber) {
-      setFormData({ invoiceNumber: generateInvoiceNumber() })
-    }
-  }, [])
-
-  useEffect(() => {
-    // Recalculate totals when items change
-    calculateTotals()
-  }, [formData.items, calculateTotals])
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData({ [field]: value })
-  }
-
-  const handleItemChange = (id: string, field: string, value: string | number) => {
-    const updates = { [field]: value }
-    
-    // Auto-calculate item total
-    if (field === 'quantity' || field === 'unitPrice' || field === 'taxRate') {
-      const item = formData.items.find(item => item.id === id)
-      if (item) {
-        const quantity = field === 'quantity' ? value as number : item.quantity
-        const unitPrice = field === 'unitPrice' ? value as number : item.unitPrice
-        const taxRate = field === 'taxRate' ? value as number : item.taxRate
-        
-        updates.total = quantity * unitPrice
+  const [formData, setFormData] = useState<InvoiceFormData>({
+    clientName: '',
+    clientEmail: '',
+    clientAddress: '',
+    invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
+    invoiceDate: new Date().toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+    items: [
+      {
+        id: '1',
+        description: '',
+        quantity: 1,
+        unitPrice: 0,
+        taxRate: 0,
+        lineTotal: 0
       }
+    ],
+    notes: '',
+    subtotal: 0,
+    taxTotal: 0,
+    grandTotal: 0
+  })
+
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Calculate totals whenever items change
+  useEffect(() => {
+    const subtotal = formData.items.reduce((sum, item) => sum + item.lineTotal, 0)
+    const taxTotal = formData.items.reduce((sum, item) => sum + (item.lineTotal * item.taxRate / 100), 0)
+    const grandTotal = subtotal + taxTotal
+
+    setFormData(prev => ({
+      ...prev,
+      subtotal,
+      taxTotal,
+      grandTotal
+    }))
+  }, [formData.items])
+
+  const addItem = () => {
+    const newItem: InvoiceItem = {
+      id: Date.now().toString(),
+      description: '',
+      quantity: 1,
+      unitPrice: 0,
+      taxRate: 0,
+      lineTotal: 0
     }
-    
-    updateFormItem(id, updates)
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newItem]
+    }))
   }
 
-  const handleSaveDraft = async () => {
+  const removeItem = (id: string) => {
+    if (formData.items.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        items: prev.items.filter(item => item.id !== id)
+      }))
+    }
+  }
+
+  const updateItem = (id: string, field: keyof InvoiceItem, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.map(item => {
+        if (item.id === id) {
+          const updatedItem = { ...item, [field]: value }
+          // Recalculate line total
+          updatedItem.lineTotal = updatedItem.quantity * updatedItem.unitPrice
+          return updatedItem
+        }
+        return item
+      })
+    }))
+  }
+
+  const handleSave = async () => {
+    if (!formData.clientName.trim()) {
+      toast.error('Client name is required')
+      return
+    }
+
+    if (formData.items.some(item => !item.description.trim())) {
+      toast.error('All items must have a description')
+      return
+    }
+
+    setIsSaving(true)
     try {
-      // TODO: Save to Supabase
-      toast.success('Invoice saved as draft')
+      // TODO: Save to database
+      console.log('Saving invoice:', formData)
+      toast.success('Invoice saved successfully!')
     } catch (error) {
       toast.error('Failed to save invoice')
+    } finally {
+      setIsSaving(false)
     }
   }
 
   const handlePreview = () => {
-    if (!isFormValid()) {
-      toast.error('Please fill in all required fields')
+    if (!formData.clientName.trim()) {
+      toast.error('Client name is required')
       return
     }
-    // TODO: Navigate to preview page
-    toast.success('Preview functionality coming soon')
+
+    if (formData.items.some(item => !item.description.trim())) {
+      toast.error('All items must have a description')
+      return
+    }
+
+    // Navigate to preview with form data
+    navigate('/invoice/preview', { 
+      state: { invoiceData: formData } 
+    })
   }
 
-  const handleSaveAndSend = async () => {
-    if (!isFormValid()) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-    try {
-      // TODO: Save and send invoice
-      toast.success('Invoice saved and sent')
-      navigate('/dashboard')
-    } catch (error) {
-      toast.error('Failed to save and send invoice')
-    }
-  }
+  if (!user) { return null }
 
   return (
     <Layout>
       <div style={{
-        maxWidth: '800px',
-        margin: '0 auto',
-        paddingBottom: '6rem' // Space for sticky buttons
+        paddingBottom: '4rem',
+        backgroundColor: brandColors.white,
+        minHeight: '100vh',
+        width: '100%',
+        maxWidth: '100vw',
+        overflow: 'hidden'
       }}>
-        {/* Top Bar */}
+        {/* Header */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '2rem',
+          justifyContent: 'space-between',
           padding: '1rem',
           backgroundColor: brandColors.white,
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-          border: `1px solid ${brandColors.neutral[200]}`
+          borderBottom: `1px solid ${brandColors.neutral[200]}`,
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Button
-              variant="ghost"
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
               onClick={() => navigate('/dashboard')}
               style={{
                 padding: '0.5rem',
                 backgroundColor: 'transparent',
                 border: 'none',
+                borderRadius: '8px',
                 cursor: 'pointer',
-                color: brandColors.neutral[600],
-                borderRadius: '8px'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <ArrowLeft size={20} />
-            </Button>
+              <ArrowLeft size={20} color={brandColors.neutral[600]} />
+            </button>
             <h1 style={{
-              ...getTypographyStyle(typographyPresets.h2),
+              fontSize: '1.125rem',
+              fontWeight: '600',
               color: brandColors.neutral[900],
-              margin: 0,
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+              margin: 0
             }}>
               New Invoice
             </h1>
           </div>
           
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <Button
-              variant="outline"
-              onClick={handleSaveDraft}
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: 'transparent',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                color: brandColors.neutral[700],
+                backgroundColor: brandColors.neutral[100],
+                color: brandColors.neutral[600],
+                border: 'none',
                 borderRadius: '8px',
-                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: isSaving ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
+                opacity: isSaving ? 0.6 : 1
               }}
             >
               <Save size={16} />
-              Save Draft
-            </Button>
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
             
-            <Button
+            <button
               onClick={handlePreview}
-              disabled={!isFormValid()}
               style={{
                 padding: '0.5rem 1rem',
-                backgroundColor: isFormValid() ? brandColors.primary[600] : brandColors.neutral[300],
-                color: isFormValid() ? brandColors.white : brandColors.neutral[500],
+                backgroundColor: brandColors.primary[600],
+                color: brandColors.white,
                 border: 'none',
                 borderRadius: '8px',
-                cursor: isFormValid() ? 'pointer' : 'not-allowed',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem'
@@ -178,104 +254,116 @@ export default function InvoiceCreatePage() {
             >
               <Eye size={16} />
               Preview
-            </Button>
+            </button>
           </div>
         </div>
 
-        {/* Form Sections */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* Client Information */}
+        {/* Form Content */}
+        <div style={{ padding: '1rem' }}>
+          {/* Client Information Card */}
           <div style={{
             backgroundColor: brandColors.white,
+            borderRadius: '16px',
             padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
+            marginBottom: '1.5rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              ...getTypographyStyle(typographyPresets.h3),
-              color: brandColors.neutral[900],
-              margin: '0 0 1.5rem',
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1rem'
             }}>
-              1. Client Information
-            </h3>
-            
+              <User size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Client Information
+              </h2>
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <Label htmlFor="clientName" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
                   color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
+                  marginBottom: '0.5rem'
                 }}>
                   Client Name *
-                </Label>
-                <Input
-                  id="clientName"
+                </label>
+                <input
+                  type="text"
                   value={formData.clientName}
-                  onChange={(e) => handleInputChange('clientName', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
                   placeholder="Enter client name"
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
+                    border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '8px',
-                    fontSize: '14px'
+                    fontSize: '0.875rem',
+                    backgroundColor: brandColors.white,
+                    color: brandColors.neutral[900]
                   }}
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="clientEmail" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
                   color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
+                  marginBottom: '0.5rem'
                 }}>
-                  Client Email
-                </Label>
-                <Input
-                  id="clientEmail"
+                  Email
+                </label>
+                <input
                   type="email"
                   value={formData.clientEmail}
-                  onChange={(e) => handleInputChange('clientEmail', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
                   placeholder="client@example.com"
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
+                    border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '8px',
-                    fontSize: '14px'
+                    fontSize: '0.875rem',
+                    backgroundColor: brandColors.white,
+                    color: brandColors.neutral[900]
                   }}
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="clientAddress" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
                   color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
+                  marginBottom: '0.5rem'
                 }}>
-                  Client Address
-                </Label>
-                <Textarea
-                  id="clientAddress"
+                  Address
+                </label>
+                <textarea
                   value={formData.clientAddress}
-                  onChange={(e) => handleInputChange('clientAddress', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, clientAddress: e.target.value }))}
                   placeholder="Enter client address"
                   rows={3}
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
+                    border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '8px',
-                    fontSize: '14px',
+                    fontSize: '0.875rem',
+                    backgroundColor: brandColors.white,
+                    color: brandColors.neutral[900],
                     resize: 'vertical'
                   }}
                 />
@@ -283,503 +371,457 @@ export default function InvoiceCreatePage() {
             </div>
           </div>
 
-          {/* Invoice Details */}
+          {/* Invoice Details Card */}
           <div style={{
             backgroundColor: brandColors.white,
+            borderRadius: '16px',
             padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
+            marginBottom: '1.5rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              ...getTypographyStyle(typographyPresets.h3),
-              color: brandColors.neutral[900],
-              margin: '0 0 1.5rem',
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1rem'
             }}>
-              2. Invoice Details
-            </h3>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <FileText size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Invoice Details
+              </h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <Label htmlFor="invoiceNumber" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
                   color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
+                  marginBottom: '0.5rem'
                 }}>
                   Invoice Number
-                </Label>
-                <Input
-                  id="invoiceNumber"
+                </label>
+                <input
+                  type="text"
                   value={formData.invoiceNumber}
-                  onChange={(e) => handleInputChange('invoiceNumber', e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, invoiceNumber: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
+                    border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '8px',
-                    fontSize: '14px'
+                    fontSize: '0.875rem',
+                    backgroundColor: brandColors.white,
+                    color: brandColors.neutral[900]
                   }}
                 />
               </div>
-              
-              <div>
-                <Label htmlFor="invoiceDate" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
-                  color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
-                }}>
-                  Invoice Date
-                </Label>
-                <Input
-                  id="invoiceDate"
-                  type="date"
-                  value={formData.invoiceDate}
-                  onChange={(e) => handleInputChange('invoiceDate', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="dueDate" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
-                  color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
-                }}>
-                  Due Date
-                </Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => handleInputChange('dueDate', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                />
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Invoice Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.invoiceDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, invoiceDate: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.dueDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Line Items */}
+          {/* Line Items Card */}
           <div style={{
             backgroundColor: brandColors.white,
+            borderRadius: '16px',
             padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
+            marginBottom: '1.5rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <div style={{
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1.5rem'
+              justifyContent: 'space-between',
+              marginBottom: '1rem'
             }}>
-              <h3 style={{
-                ...getTypographyStyle(typographyPresets.h3),
-                color: brandColors.neutral[900],
-                margin: 0,
-                fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
-              }}>
-                3. Line Items
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <DollarSign size={20} color={brandColors.primary[600]} />
+                <h2 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0
+                }}>
+                  Line Items
+                </h2>
+              </div>
               
-              <Button
-                onClick={addFormItem}
+              <button
+                onClick={addItem}
                 style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: brandColors.primary[600],
-                  color: brandColors.white,
+                  padding: '0.5rem',
+                  backgroundColor: brandColors.primary[100],
+                  color: brandColors.primary[600],
                   border: 'none',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  fontSize: '14px'
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
                 }}
               >
                 <Plus size={16} />
                 Add Item
-              </Button>
+              </button>
             </div>
-            
-            {formData.items.length === 0 ? (
-              <div style={{
-                textAlign: 'center',
-                padding: '2rem',
-                color: brandColors.neutral[500]
-              }}>
-                <p style={{
-                  ...getTypographyStyle(typographyPresets.body),
-                  margin: 0
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {formData.items.map((item, index) => (
+                <div key={item.id} style={{
+                  padding: '1rem',
+                  backgroundColor: brandColors.neutral[50],
+                  borderRadius: '12px',
+                  border: `1px solid ${brandColors.neutral[200]}`
                 }}>
-                  No items added yet. Click "Add Item" to get started.
-                </p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {formData.items.map((item, index) => (
-                  <div key={item.id} style={{
-                    display: 'grid',
-                    gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr auto',
-                    gap: '1rem',
-                    alignItems: 'end',
-                    padding: '1rem',
-                    backgroundColor: brandColors.neutral[50],
-                    borderRadius: '8px',
-                    border: `1px solid ${brandColors.neutral[200]}`
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.75rem'
                   }}>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: brandColors.neutral[700]
+                    }}>
+                      Item {index + 1}
+                    </span>
+                    {formData.items.length > 1 && (
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        style={{
+                          padding: '0.25rem',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Trash2 size={16} color={brandColors.error[500]} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div>
-                      <Label style={{
-                        ...getTypographyStyle(typographyPresets.bodySmall),
-                        color: brandColors.neutral[700],
-                        fontWeight: '600',
-                        marginBottom: '0.5rem',
-                        display: 'block'
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[600],
+                        marginBottom: '0.25rem'
                       }}>
                         Description *
-                      </Label>
-                      <Input
+                      </label>
+                      <input
+                        type="text"
                         value={item.description}
-                        onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
-                        placeholder="Item description"
+                        onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                        placeholder="Enter item description"
                         style={{
                           width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '14px'
+                          padding: '0.5rem',
+                          border: `1px solid ${brandColors.neutral[200]}`,
+                          borderRadius: '6px',
+                          fontSize: '0.875rem',
+                          backgroundColor: brandColors.white,
+                          color: brandColors.neutral[900]
                         }}
                       />
                     </div>
-                    
-                    <div>
-                      <Label style={{
-                        ...getTypographyStyle(typographyPresets.bodySmall),
-                        color: brandColors.neutral[700],
-                        fontWeight: '600',
-                        marginBottom: '0.5rem',
-                        display: 'block'
-                      }}>
-                        Qty *
-                      </Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => handleItemChange(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '14px'
-                        }}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label style={{
-                        ...getTypographyStyle(typographyPresets.bodySmall),
-                        color: brandColors.neutral[700],
-                        fontWeight: '600',
-                        marginBottom: '0.5rem',
-                        display: 'block'
-                      }}>
-                        Unit Price *
-                      </Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.unitPrice}
-                        onChange={(e) => handleItemChange(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '14px'
-                        }}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label style={{
-                        ...getTypographyStyle(typographyPresets.bodySmall),
-                        color: brandColors.neutral[700],
-                        fontWeight: '600',
-                        marginBottom: '0.5rem',
-                        display: 'block'
-                      }}>
-                        Tax %
-                      </Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        value={item.taxRate}
-                        onChange={(e) => handleItemChange(item.id, 'taxRate', parseFloat(e.target.value) || 0)}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '14px'
-                        }}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label style={{
-                        ...getTypographyStyle(typographyPresets.bodySmall),
-                        color: brandColors.neutral[700],
-                        fontWeight: '600',
-                        marginBottom: '0.5rem',
-                        display: 'block'
-                      }}>
-                        Total
-                      </Label>
-                      <div style={{
-                        padding: '0.75rem',
-                        backgroundColor: brandColors.neutral[100],
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: brandColors.neutral[700],
-                        textAlign: 'center'
-                      }}>
-                        ${item.total.toFixed(2)}
+
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          color: brandColors.neutral[600],
+                          marginBottom: '0.25rem'
+                        }}>
+                          Qty
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: `1px solid ${brandColors.neutral[200]}`,
+                            borderRadius: '6px',
+                            fontSize: '0.875rem',
+                            backgroundColor: brandColors.white,
+                            color: brandColors.neutral[900]
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ flex: 1 }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          color: brandColors.neutral[600],
+                          marginBottom: '0.25rem'
+                        }}>
+                          Unit Price
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.unitPrice}
+                          onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: `1px solid ${brandColors.neutral[200]}`,
+                            borderRadius: '6px',
+                            fontSize: '0.875rem',
+                            backgroundColor: brandColors.white,
+                            color: brandColors.neutral[900]
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ flex: 1 }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          color: brandColors.neutral[600],
+                          marginBottom: '0.25rem'
+                        }}>
+                          Tax %
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={item.taxRate}
+                          onChange={(e) => updateItem(item.id, 'taxRate', parseFloat(e.target.value) || 0)}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: `1px solid ${brandColors.neutral[200]}`,
+                            borderRadius: '6px',
+                            fontSize: '0.875rem',
+                            backgroundColor: brandColors.white,
+                            color: brandColors.neutral[900]
+                          }}
+                        />
                       </div>
                     </div>
-                    
-                    <Button
-                      onClick={() => removeFormItem(item.id)}
-                      style={{
-                        padding: '0.75rem',
-                        backgroundColor: brandColors.error[50],
-                        color: brandColors.error[600],
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
+
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      paddingTop: '0.5rem',
+                      borderTop: `1px solid ${brandColors.neutral[200]}`
+                    }}>
+                      <span style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        color: brandColors.neutral[900]
+                      }}>
+                        Subtotal: ${item.lineTotal.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notes & Terms */}
-          <div style={{
-            backgroundColor: brandColors.white,
-            padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
-          }}>
-            <h3 style={{
-              ...getTypographyStyle(typographyPresets.h3),
-              color: brandColors.neutral[900],
-              margin: '0 0 1.5rem',
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
-            }}>
-              4. Notes & Terms
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <Label htmlFor="notes" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
-                  color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
-                }}>
-                  Notes
-                </Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  placeholder="Additional notes or comments"
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    resize: 'vertical'
-                  }}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="terms" style={{
-                  ...getTypographyStyle(typographyPresets.bodySmall),
-                  color: brandColors.neutral[700],
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  display: 'block'
-                }}>
-                  Payment Terms
-                </Label>
-                <Textarea
-                  id="terms"
-                  value={formData.terms}
-                  onChange={(e) => handleInputChange('terms', e.target.value)}
-                  placeholder="Payment terms and conditions"
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    resize: 'vertical'
-                  }}
-                />
-              </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Summary */}
+          {/* Notes Card */}
           <div style={{
             backgroundColor: brandColors.white,
+            borderRadius: '16px',
             padding: '1.5rem',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-            border: `1px solid ${brandColors.neutral[200]}`
+            marginBottom: '1.5rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              ...getTypographyStyle(typographyPresets.h3),
+            <h2 style={{
+              fontSize: '1rem',
+              fontWeight: '600',
               color: brandColors.neutral[900],
-              margin: '0 0 1.5rem',
-              fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+              margin: '0 0 1rem 0'
             }}>
-              5. Summary
-            </h3>
+              Notes / Terms
+            </h2>
             
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '1rem',
-              backgroundColor: brandColors.primary[50],
-              borderRadius: '8px',
-              border: `1px solid ${brandColors.primary[200]}`
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              placeholder="Enter payment terms or additional notes..."
+              rows={4}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: `1px solid ${brandColors.neutral[200]}`,
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                backgroundColor: brandColors.white,
+                color: brandColors.neutral[900],
+                resize: 'vertical'
+              }}
+            />
+          </div>
+
+          {/* Summary Card */}
+          <div style={{
+            backgroundColor: brandColors.white,
+            borderRadius: '16px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
+          }}>
+            <h2 style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: brandColors.neutral[900],
+              margin: '0 0 1rem 0'
             }}>
-              <div>
-                <p style={{
-                  ...getTypographyStyle(typographyPresets.body),
-                  color: brandColors.neutral[600],
-                  margin: '0 0 0.5rem'
+              Summary
+            </h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{
+                  fontSize: '0.875rem',
+                  color: brandColors.neutral[600]
                 }}>
-                  Subtotal: ${formData.subtotal.toFixed(2)}
-                </p>
-                <p style={{
-                  ...getTypographyStyle(typographyPresets.body),
-                  color: brandColors.neutral[600],
-                  margin: 0
+                  Subtotal
+                </span>
+                <span style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: brandColors.neutral[900]
                 }}>
-                  Tax: ${formData.taxAmount.toFixed(2)}
-                </p>
+                  ${formData.subtotal.toFixed(2)}
+                </span>
               </div>
               
-              <div style={{ textAlign: 'right' }}>
-                <p style={{
-                  ...getTypographyStyle(typographyPresets.h2),
-                  color: brandColors.primary[700],
-                  margin: 0,
-                  fontFamily: 'Space Grotesk, Plus Jakarta Sans, Inter, system-ui, sans-serif'
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{
+                  fontSize: '0.875rem',
+                  color: brandColors.neutral[600]
                 }}>
-                  Total: ${formData.total.toFixed(2)}
-                </p>
+                  Tax
+                </span>
+                <span style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: brandColors.neutral[900]
+                }}>
+                  ${formData.taxTotal.toFixed(2)}
+                </span>
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingTop: '0.75rem',
+                borderTop: `1px solid ${brandColors.neutral[200]}`
+              }}>
+                <span style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900]
+                }}>
+                  Total
+                </span>
+                <span style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  color: brandColors.primary[600]
+                }}>
+                  ${formData.grandTotal.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Sticky Action Buttons */}
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: brandColors.white,
-          borderTop: `1px solid ${brandColors.neutral[200]}`,
-          padding: '1rem',
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '1rem',
-          boxShadow: '0 -1px 3px 0 rgb(0 0 0 / 0.1)',
-          zIndex: 40
-        }}>
-          <Button
-            variant="outline"
-            onClick={handleSaveDraft}
-            style={{
-              padding: '0.75rem 2rem',
-              backgroundColor: 'transparent',
-              border: `1px solid ${brandColors.neutral[300]}`,
-              color: brandColors.neutral[700],
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '14px',
-              fontWeight: '600'
-            }}
-          >
-            <Save size={16} />
-            Save Draft
-          </Button>
-          
-          <Button
-            onClick={handleSaveAndSend}
-            disabled={!isFormValid()}
-            style={{
-              padding: '0.75rem 2rem',
-              backgroundColor: isFormValid() ? brandColors.primary[600] : brandColors.neutral[300],
-              color: isFormValid() ? brandColors.white : brandColors.neutral[500],
-              border: 'none',
-              borderRadius: '8px',
-              cursor: isFormValid() ? 'pointer' : 'not-allowed',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '14px',
-              fontWeight: '600'
-            }}
-          >
-            <Eye size={16} />
-            Save & Send
-          </Button>
         </div>
       </div>
     </Layout>

@@ -10,9 +10,15 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'paid':
+        return {
+          text: 'Paid',
+          backgroundColor: brandColors.success[100],
+          color: brandColors.success[700],
+          borderColor: brandColors.success[200]
+        }
       case 'income':
         return {
-          text: status === 'paid' ? 'Paid' : 'Income',
+          text: 'Income',
           backgroundColor: brandColors.success[100],
           color: brandColors.success[700],
           borderColor: brandColors.success[200]
@@ -26,9 +32,15 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
           borderColor: brandColors.warning[200]
         }
       case 'spent':
+        return {
+          text: 'Spent',
+          backgroundColor: brandColors.error[100],
+          color: brandColors.error[700],
+          borderColor: brandColors.error[200]
+        }
       case 'expense':
         return {
-          text: status === 'spent' ? 'Spent' : 'Expense',
+          text: 'Expense',
           backgroundColor: brandColors.error[100],
           color: brandColors.error[700],
           borderColor: brandColors.error[200]

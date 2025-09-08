@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { 
@@ -24,6 +25,7 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ isVisible, onClose, onNotificationClick }: SettingsPanelProps) {
   const { user, signOut } = useAuth()
+  const navigate = useNavigate()
   const [isUploading, setIsUploading] = useState(false)
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -96,6 +98,16 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
   }
 
   const settingsItems = [
+    {
+      id: 'profile',
+      icon: User,
+      title: 'Profile',
+      subtitle: 'Manage your profile and business information',
+      action: () => {
+        navigate('/profile')
+        onClose()
+      }
+    },
     {
       id: 'notifications',
       icon: Bell,
