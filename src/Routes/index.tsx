@@ -5,6 +5,7 @@ import DashboardPage from '../pages/DashboardPage'
 import InvoiceCreatePage from '../pages/InvoiceCreatePage'
 import InvoicePreviewPage from '../pages/InvoicePreviewPage'
 import ProfilePage from '../pages/ProfilePage'
+import NotFoundPage from '../pages/NotFoundPage'
 import AuthWrapper from '../components/AuthWrapper'
 
 export const router = createBrowserRouter([
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
         <ProfilePage />
       </AuthWrapper>
     )
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />
   }
 ])
 

@@ -5,6 +5,7 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { invoiceStorage } from '../lib/storage/invoiceStorage'
 import type { InvoiceFormData, InvoiceItem } from '../lib/storage/invoiceStorage'
+import { supabase } from '../lib/supabaseClient'
 import { 
   ArrowLeft, 
   Save, 
@@ -108,16 +109,67 @@ export default function InvoiceCreatePage() {
       return
     }
 
+    if (!user) {
+      toast.error('User not authenticated')
+      return
+    }
+
     setIsSaving(true)
     try {
-      // TODO: Save to database
-      console.log('Saving invoice:', formData)
-      
+      // Save invoice to database
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          user_id: user.id,
+          client_name: formData.clientName,
+          client_email: formData.clientEmail || null,
+          client_address: formData.clientAddress || null,
+          invoice_number: formData.invoiceNumber,
+          invoice_date: formData.invoiceDate,
+          due_date: formData.dueDate,
+          notes: formData.notes || null,
+          subtotal: formData.subtotal,
+          tax_total: formData.taxTotal,
+          grand_total: formData.grandTotal,
+          status: 'draft'
+        })
+        .select()
+        .single()
+
+      if (invoiceError) {
+        console.error('Error saving invoice:', invoiceError)
+        toast.error('Failed to save invoice: ' + invoiceError.message)
+        return
+      }
+
+      // Save invoice items
+      const invoiceItems = formData.items.map(item => ({
+        invoice_id: invoice.id,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        tax_rate: item.taxRate,
+        line_total: item.lineTotal
+      }))
+
+      const { error: itemsError } = await supabase
+        .from('invoice_items')
+        .insert(invoiceItems)
+
+      if (itemsError) {
+        console.error('Error saving invoice items:', itemsError)
+        // Clean up the invoice if items failed
+        await supabase.from('invoices').delete().eq('id', invoice.id)
+        toast.error('Failed to save invoice items: ' + itemsError.message)
+        return
+      }
+
       // Clear the draft from localStorage after successful save
       invoiceStorage.clearDraft()
       
       toast.success('Invoice saved successfully!')
     } catch (error) {
+      console.error('Error saving invoice:', error)
       toast.error('Failed to save invoice')
     } finally {
       setIsSaving(false)

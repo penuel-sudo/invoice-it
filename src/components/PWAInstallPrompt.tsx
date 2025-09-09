@@ -36,13 +36,22 @@ export default function PWAInstallPrompt() {
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
+      // Don't prevent default - let browser show its own prompt first
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       
-      // Show install prompt after a delay (not immediately)
-      setTimeout(() => {
-        setShowInstallPrompt(true)
-      }, 3000)
+      // Check if we should show our custom prompt
+      const hasSeenPrompt = localStorage.getItem('pwa-install-seen')
+      const hasDismissedPermanently = localStorage.getItem('pwa-install-dismissed-permanent')
+      
+      // Show our custom prompt if:
+      // 1. User hasn't seen it before, OR
+      // 2. User dismissed it but hasn't dismissed permanently
+      if (!hasSeenPrompt || (!hasDismissedPermanently && hasSeenPrompt)) {
+        // Show after a delay to let browser prompt show first
+        setTimeout(() => {
+          setShowInstallPrompt(true)
+        }, 2000)
+      }
     }
 
     // Listen for appinstalled event
@@ -50,14 +59,29 @@ export default function PWAInstallPrompt() {
       setIsInstalled(true)
       setShowInstallPrompt(false)
       setDeferredPrompt(null)
+      // Clear any dismiss flags since app is now installed
+      localStorage.removeItem('pwa-install-dismissed-permanent')
+      localStorage.removeItem('pwa-install-seen')
+    }
+
+    // Listen for custom trigger event from settings
+    const handleTriggerInstall = () => {
+      if (deferredPrompt && !isInstalled) {
+        setShowInstallPrompt(true)
+      } else if (!deferredPrompt) {
+        // If no deferred prompt available, show a message
+        alert('App installation is not available. Please try again later or use your browser\'s install option.')
+      }
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
+    window.addEventListener('trigger-install-prompt', handleTriggerInstall)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
+      window.removeEventListener('trigger-install-prompt', handleTriggerInstall)
     }
   }, [])
 
@@ -70,8 +94,13 @@ export default function PWAInstallPrompt() {
       
       if (outcome === 'accepted') {
         console.log('User accepted the install prompt')
+        // Mark as seen and clear dismiss flags
+        localStorage.setItem('pwa-install-seen', 'true')
+        localStorage.removeItem('pwa-install-dismissed-permanent')
       } else {
         console.log('User dismissed the install prompt')
+        // Mark as seen but don't dismiss permanently yet
+        localStorage.setItem('pwa-install-seen', 'true')
       }
       
       setDeferredPrompt(null)
@@ -83,17 +112,29 @@ export default function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowInstallPrompt(false)
-    // Don't show again for this session
-    sessionStorage.setItem('pwa-install-dismissed', 'true')
+    // Mark as seen
+    localStorage.setItem('pwa-install-seen', 'true')
   }
 
-  // Don't show if already installed or dismissed
-  if (isInstalled || !showInstallPrompt || !deferredPrompt) {
+  const handleDismissPermanently = () => {
+    setShowInstallPrompt(false)
+    // Mark as permanently dismissed
+    localStorage.setItem('pwa-install-dismissed-permanent', 'true')
+    localStorage.setItem('pwa-install-seen', 'true')
+  }
+
+  // Don't show if already installed
+  if (isInstalled) {
     return null
   }
 
-  // Check if user dismissed in this session
-  if (sessionStorage.getItem('pwa-install-dismissed')) {
+  // Don't show if permanently dismissed
+  if (localStorage.getItem('pwa-install-dismissed-permanent')) {
+    return null
+  }
+
+  // Don't show if no prompt available
+  if (!showInstallPrompt || !deferredPrompt) {
     return null
   }
 
@@ -150,7 +191,8 @@ export default function PWAInstallPrompt() {
           
           <div style={{
             display: 'flex',
-            gap: '0.5rem'
+            gap: '0.5rem',
+            marginBottom: '0.5rem'
           }}>
             <button
               onClick={handleInstallClick}
@@ -200,6 +242,32 @@ export default function PWAInstallPrompt() {
               <X size={16} />
             </button>
           </div>
+          
+          <button
+            onClick={handleDismissPermanently}
+            style={{
+              width: '100%',
+              padding: '0.25rem 0.5rem',
+              backgroundColor: 'transparent',
+              color: brandColors.neutral[500],
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '0.625rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'left'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+              e.currentTarget.style.color = brandColors.neutral[700]
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = brandColors.neutral[500]
+            }}
+          >
+            Don't show again
+          </button>
         </div>
       </div>
     </div>
