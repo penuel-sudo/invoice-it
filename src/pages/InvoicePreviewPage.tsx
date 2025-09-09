@@ -9,7 +9,8 @@ import {
   Edit, 
   Download,
   Send,
-  Share2
+  Share2,
+  FileText
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -193,305 +194,268 @@ export default function InvoicePreviewPage() {
         }}>
           <div style={{
             backgroundColor: brandColors.white,
-            borderRadius: '8px',
+            borderRadius: '16px',
             padding: '2rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[200]}`,
             width: '100%',
-            maxWidth: '800px',
-            minHeight: '800px'
+            maxWidth: '600px',
+            minHeight: '600px'
           }}>
-            {/* Invoice Header */}
+            {/* Invoice Header - Reorganized to match image */}
             <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              marginBottom: '2rem',
-              paddingBottom: '1.5rem',
-              borderBottom: `2px solid ${brandColors.neutral[200]}`
+              marginBottom: '2rem'
             }}>
-              <div>
-                <h1 style={{
-                  fontSize: '2rem',
-                  fontWeight: '700',
-                  color: brandColors.neutral[900],
-                  margin: '0 0 0.5rem 0'
-                }}>
-                  INVOICE
-                </h1>
+              {/* Payment Status Tag */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1.5rem'
+              }}>
                 <div style={{
-                  fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
-                  lineHeight: '1.5'
+                  backgroundColor: brandColors.primary[100],
+                  color: brandColors.primary[700],
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '20px',
+                  fontSize: '0.75rem',
+                  fontWeight: '500'
                 }}>
-                  <p style={{ margin: '0 0 0.25rem 0' }}>
-                    {user.user_metadata?.full_name || 'Your Business Name'}
-                  </p>
-                  <p style={{ margin: '0 0 0.25rem 0' }}>
-                    {user.email}
-                  </p>
-                  <p style={{ margin: 0 }}>
-                    Your Business Address
-                  </p>
+                  Payment - {invoiceData.invoiceNumber}
                 </div>
               </div>
-              
-              <div style={{ textAlign: 'right' }}>
+
+              {/* Total Amount - Prominently Displayed */}
+              <div style={{
+                textAlign: 'center',
+                marginBottom: '2rem'
+              }}>
                 <div style={{
-                  fontSize: '1.25rem',
-                  fontWeight: '600',
+                  fontSize: '3rem',
+                  fontWeight: '700',
                   color: brandColors.neutral[900],
                   marginBottom: '0.5rem'
                 }}>
-                  {invoiceData.invoiceNumber}
-                </div>
-                <div style={{
-                  fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
-                  lineHeight: '1.5'
-                }}>
-                  <p style={{ margin: '0 0 0.25rem 0' }}>
-                    <strong>Date:</strong> {new Date(invoiceData.invoiceDate).toLocaleDateString()}
-                  </p>
-                  <p style={{ margin: 0 }}>
-                    <strong>Due:</strong> {new Date(invoiceData.dueDate).toLocaleDateString()}
-                  </p>
+                  ${invoiceData.grandTotal.toFixed(2)}
                 </div>
               </div>
-            </div>
 
-            {/* Bill To Section */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: '2rem'
-            }}>
-              <div>
-                <h3 style={{
+              {/* Client Info Section */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                marginBottom: '2rem',
+                padding: '1rem',
+                backgroundColor: brandColors.neutral[50],
+                borderRadius: '12px'
+              }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  backgroundColor: brandColors.neutral[300],
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   fontSize: '1rem',
                   fontWeight: '600',
-                  color: brandColors.neutral[900],
-                  margin: '0 0 0.75rem 0'
-                }}>
-                  Bill To:
-                </h3>
-                <div style={{
-                  fontSize: '0.875rem',
                   color: brandColors.neutral[700],
-                  lineHeight: '1.5'
+                  flexShrink: 0
                 }}>
-                  <p style={{ margin: '0 0 0.25rem 0', fontWeight: '600' }}>
+                  {invoiceData.clientName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </div>
+                
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    color: brandColors.neutral[900],
+                    marginBottom: '0.25rem'
+                  }}>
                     {invoiceData.clientName}
-                  </p>
-                  {invoiceData.clientEmail && (
-                    <p style={{ margin: '0 0 0.25rem 0' }}>
-                      {invoiceData.clientEmail}
-                    </p>
-                  )}
-                  {invoiceData.clientAddress && (
-                    <p style={{ margin: 0, whiteSpace: 'pre-line' }}>
-                      {invoiceData.clientAddress}
-                    </p>
-                  )}
+                  </div>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[600]
+                  }}>
+                    {new Date(invoiceData.invoiceDate).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })}
+                  </div>
+                </div>
+                
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: brandColors.primary[100],
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <FileText size={16} color={brandColors.primary[600]} />
                 </div>
               </div>
             </div>
 
-            {/* Items Table */}
+            {/* Invoice Details Card - Matching Image Style */}
             <div style={{
+              backgroundColor: brandColors.white,
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '2rem',
+              border: `1px solid ${brandColors.neutral[200]}`,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+            }}>
+              <h3 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: '0 0 1rem 0',
+                textAlign: 'center'
+              }}>
+                Invoice Details
+              </h3>
+              
+              {/* Service Items */}
+              <div style={{
+                marginBottom: '1rem'
+              }}>
+                {invoiceData.items.map((item, index) => (
+                  <div key={item.id} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.5rem 0',
+                    borderBottom: index < invoiceData.items.length - 1 ? `1px solid ${brandColors.neutral[100]}` : 'none'
+                  }}>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[700],
+                      fontWeight: '500'
+                    }}>
+                      {item.quantity} {item.description}
+                    </span>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[900],
+                      fontWeight: '600'
+                    }}>
+                      ${item.lineTotal.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Total Line */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.75rem 0',
+                borderTop: `2px solid ${brandColors.neutral[200]}`,
+                marginTop: '0.5rem'
+              }}>
+                <span style={{
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  color: brandColors.neutral[900]
+                }}>
+                  TOTAL
+                </span>
+                <span style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  color: brandColors.neutral[900]
+                }}>
+                  ${invoiceData.grandTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Additional Invoice Information */}
+            <div style={{
+              backgroundColor: brandColors.neutral[50],
+              borderRadius: '12px',
+              padding: '1.5rem',
               marginBottom: '2rem'
             }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
+              <h4 style={{
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                color: brandColors.neutral[700],
+                margin: '0 0 1rem 0'
+              }}>
+                Invoice Information
+              </h4>
+              
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '1rem',
                 fontSize: '0.875rem'
               }}>
-                <thead>
-                  <tr style={{
-                    backgroundColor: brandColors.neutral[50],
-                    borderBottom: `2px solid ${brandColors.neutral[200]}`
-                  }}>
-                    <th style={{
-                      padding: '0.75rem',
-                      textAlign: 'left',
-                      fontWeight: '600',
-                      color: brandColors.neutral[700]
-                    }}>
-                      Description
-                    </th>
-                    <th style={{
-                      padding: '0.75rem',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: brandColors.neutral[700]
-                    }}>
-                      Qty
-                    </th>
-                    <th style={{
-                      padding: '0.75rem',
-                      textAlign: 'right',
-                      fontWeight: '600',
-                      color: brandColors.neutral[700]
-                    }}>
-                      Unit Price
-                    </th>
-                    <th style={{
-                      padding: '0.75rem',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: brandColors.neutral[700]
-                    }}>
-                      Tax %
-                    </th>
-                    <th style={{
-                      padding: '0.75rem',
-                      textAlign: 'right',
-                      fontWeight: '600',
-                      color: brandColors.neutral[700]
-                    }}>
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoiceData.items.map((item, index) => (
-                    <tr key={item.id} style={{
-                      borderBottom: `1px solid ${brandColors.neutral[200]}`,
-                      backgroundColor: index % 2 === 0 ? brandColors.white : brandColors.neutral[25]
-                    }}>
-                      <td style={{
-                        padding: '0.75rem',
-                        color: brandColors.neutral[900]
-                      }}>
-                        {item.description}
-                      </td>
-                      <td style={{
-                        padding: '0.75rem',
-                        textAlign: 'center',
-                        color: brandColors.neutral[700]
-                      }}>
-                        {item.quantity}
-                      </td>
-                      <td style={{
-                        padding: '0.75rem',
-                        textAlign: 'right',
-                        color: brandColors.neutral[700]
-                      }}>
-                        ${item.unitPrice.toFixed(2)}
-                      </td>
-                      <td style={{
-                        padding: '0.75rem',
-                        textAlign: 'center',
-                        color: brandColors.neutral[700]
-                      }}>
-                        {item.taxRate}%
-                      </td>
-                      <td style={{
-                        padding: '0.75rem',
-                        textAlign: 'right',
-                        fontWeight: '500',
-                        color: brandColors.neutral[900]
-                      }}>
-                        ${item.lineTotal.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Totals Section */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              marginBottom: '2rem'
-            }}>
-              <div style={{
-                width: '300px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '0.5rem 0',
-                  borderBottom: `1px solid ${brandColors.neutral[200]}`
-                }}>
-                  <span style={{
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600]
-                  }}>
-                    Subtotal:
-                  </span>
-                  <span style={{
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[900]
-                  }}>
+                <div>
+                  <span style={{ color: brandColors.neutral[600] }}>Invoice Number:</span>
+                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
+                    {invoiceData.invoiceNumber}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ color: brandColors.neutral[600] }}>Invoice Date:</span>
+                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
+                    {new Date(invoiceData.invoiceDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ color: brandColors.neutral[600] }}>Due Date:</span>
+                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
+                    {new Date(invoiceData.dueDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ color: brandColors.neutral[600] }}>Subtotal:</span>
+                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
                     ${invoiceData.subtotal.toFixed(2)}
-                  </span>
-                </div>
-                
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '0.5rem 0',
-                  borderBottom: `1px solid ${brandColors.neutral[200]}`
-                }}>
-                  <span style={{
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600]
-                  }}>
-                    Tax:
-                  </span>
-                  <span style={{
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[900]
-                  }}>
-                    ${invoiceData.taxTotal.toFixed(2)}
-                  </span>
-                </div>
-                
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '0.75rem 0',
-                  borderTop: `2px solid ${brandColors.neutral[300]}`,
-                  borderBottom: `2px solid ${brandColors.neutral[300]}`
-                }}>
-                  <span style={{
-                    fontSize: '1.125rem',
-                    fontWeight: '700',
-                    color: brandColors.neutral[900]
-                  }}>
-                    Total:
-                  </span>
-                  <span style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '700',
-                    color: brandColors.neutral[900]
-                  }}>
-                    ${invoiceData.grandTotal.toFixed(2)}
-                  </span>
+                  </div>
                 </div>
               </div>
+              
+              {invoiceData.taxTotal > 0 && (
+                <div style={{
+                  marginTop: '1rem',
+                  paddingTop: '1rem',
+                  borderTop: `1px solid ${brandColors.neutral[200]}`
+                }}>
+                  <span style={{ color: brandColors.neutral[600], fontSize: '0.875rem' }}>Tax Total:</span>
+                  <div style={{ fontWeight: '500', color: brandColors.neutral[900], fontSize: '0.875rem' }}>
+                    ${invoiceData.taxTotal.toFixed(2)}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Notes Section */}
             {invoiceData.notes && (
               <div style={{
+                backgroundColor: brandColors.white,
+                borderRadius: '12px',
+                padding: '1.5rem',
                 marginBottom: '2rem',
-                padding: '1rem',
-                backgroundColor: brandColors.neutral[50],
-                borderRadius: '8px',
-                border: `1px solid ${brandColors.neutral[200]}`
+                border: `1px solid ${brandColors.neutral[200]}`,
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
               }}>
                 <h4 style={{
                   fontSize: '0.875rem',
                   fontWeight: '600',
                   color: brandColors.neutral[700],
-                  margin: '0 0 0.5rem 0'
+                  margin: '0 0 0.75rem 0'
                 }}>
-                  Notes:
+                  Additional Notes
                 </h4>
                 <p style={{
                   fontSize: '0.875rem',
