@@ -68,9 +68,9 @@ export default function PWAInstallPrompt() {
     const handleTriggerInstall = () => {
       if (deferredPrompt && !isInstalled) {
         setShowInstallPrompt(true)
-      } else if (!deferredPrompt) {
+      } else if (!deferredPrompt && !isInstalled) {
         // If no deferred prompt available, show a message
-        alert('App installation is not available. Please try again later or use your browser\'s install option.')
+        alert('App installation is not available right now. Please try:\n\n1. Using your browser\'s install option (usually in the address bar)\n2. Refreshing the page and trying again\n3. Making sure you\'re using a supported browser (Chrome, Edge, Safari)')
       }
     }
 
@@ -192,13 +192,12 @@ export default function PWAInstallPrompt() {
           <div style={{
             display: 'flex',
             gap: '0.5rem',
-            marginBottom: '0.5rem'
+            alignItems: 'center'
           }}>
             <button
               onClick={handleInstallClick}
               style={{
-                flex: 1,
-                padding: '0.5rem 0.75rem',
+                padding: '0.5rem 1rem',
                 backgroundColor: brandColors.primary[600],
                 color: brandColors.white,
                 border: 'none',
@@ -206,7 +205,8 @@ export default function PWAInstallPrompt() {
                 fontSize: '0.75rem',
                 fontWeight: '500',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = brandColors.primary[700]
@@ -219,55 +219,30 @@ export default function PWAInstallPrompt() {
             </button>
             
             <button
-              onClick={handleDismiss}
+              onClick={handleDismissPermanently}
               style={{
-                padding: '0.5rem',
+                padding: '0.5rem 0.75rem',
                 backgroundColor: 'transparent',
                 color: brandColors.neutral[500],
                 border: 'none',
                 borderRadius: '8px',
+                fontSize: '0.75rem',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = brandColors.neutral[100]
+                e.currentTarget.style.color = brandColors.neutral[700]
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = brandColors.neutral[500]
               }}
             >
-              <X size={16} />
+              Don't show again
             </button>
           </div>
-          
-          <button
-            onClick={handleDismissPermanently}
-            style={{
-              width: '100%',
-              padding: '0.25rem 0.5rem',
-              backgroundColor: 'transparent',
-              color: brandColors.neutral[500],
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.625rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              textAlign: 'left'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-              e.currentTarget.style.color = brandColors.neutral[700]
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = brandColors.neutral[500]
-            }}
-          >
-            Don't show again
-          </button>
         </div>
       </div>
     </div>

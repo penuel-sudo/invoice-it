@@ -35,7 +35,7 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
 
   const handleInstallApp = () => {
     // Check if PWA can be installed
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
+    if ('serviceWorker' in navigator) {
       // Trigger the install prompt
       const event = new CustomEvent('trigger-install-prompt')
       window.dispatchEvent(event)

@@ -134,7 +134,7 @@ export default function Sidebar() {
 
       {/* Logout Button - Fixed at Bottom */}
       <div style={{
-        padding: '1.5rem',
+        padding: '0 1.5rem 1.5rem 1.5rem',
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         marginTop: 'auto'
       }}>
@@ -146,6 +146,7 @@ export default function Sidebar() {
             alignItems: 'center',
             gap: '0.75rem',
             padding: '0.75rem 1rem',
+            marginBottom: '0.5rem',
             backgroundColor: 'transparent',
             color: brandColors.error[600],
             border: `1px solid ${brandColors.error[200]}`,
