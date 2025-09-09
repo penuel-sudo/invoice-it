@@ -1,20 +1,16 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { 
   User, 
-  Camera, 
   LogOut, 
   Bell, 
   Shield, 
   HelpCircle, 
   X,
-  ChevronRight,
-  Upload,
-  Trash2
+  ChevronRight
 } from 'lucide-react'
-import { uploadProfilePicture, deleteProfilePicture, getUserDisplayName, getUserInitial, getUserProfilePictureUrl } from '../lib/profilePicture'
 import toast from 'react-hot-toast'
 
 interface SettingsPanelProps {
@@ -26,67 +22,6 @@ interface SettingsPanelProps {
 export default function SettingsPanel({ isVisible, onClose, onNotificationClick }: SettingsPanelProps) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
-  const [isUploading, setIsUploading] = useState(false)
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Load profile picture when component mounts or user changes
-  useEffect(() => {
-    const loadProfilePicture = async () => {
-      if (user) {
-        try {
-          const url = await getUserProfilePictureUrl(user)
-          setProfilePictureUrl(url)
-        } catch (error) {
-          console.error('Error loading profile picture:', error)
-          setProfilePictureUrl(null)
-        }
-      }
-    }
-
-    loadProfilePicture()
-  }, [user])
-
-  const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file || !user) return
-
-    setIsUploading(true)
-    try {
-      const result = await uploadProfilePicture({ file, userId: user.id })
-      
-      if (result.success) {
-        toast.success('Profile picture updated successfully!')
-        // Reload the profile picture
-        const url = await getUserProfilePictureUrl(user)
-        setProfilePictureUrl(url)
-      } else {
-        toast.error(result.error || 'Failed to upload image')
-      }
-    } catch (error) {
-      toast.error('Failed to upload image')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleDeleteProfilePicture = async () => {
-    if (!user) return
-
-    try {
-      const result = await deleteProfilePicture(user.id)
-      
-      if (result.success) {
-        toast.success('Profile picture removed successfully!')
-        // Clear the profile picture
-        setProfilePictureUrl(null)
-      } else {
-        toast.error(result.error || 'Failed to remove image')
-      }
-    } catch (error) {
-      toast.error('Failed to remove image')
-    }
-  }
 
   const handleLogout = async () => {
     try {
@@ -193,133 +128,6 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
         </button>
       </div>
 
-      {/* Profile Section */}
-      <div style={{
-        backgroundColor: brandColors.neutral[50],
-        borderRadius: '16px',
-        padding: '1.5rem',
-        marginBottom: '1.5rem'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '1rem'
-        }}>
-          {profilePictureUrl ? (
-            <img
-              src={profilePictureUrl}
-              alt="Profile"
-              style={{
-                position: 'relative',
-                width: '60px',
-                height: '60px',
-                borderRadius: '25px',
-                objectFit: 'cover',
-                border: `3px solid ${brandColors.white}`,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-              }}
-              onError={() => {
-                // If image fails to load, fallback to initial
-                setProfilePictureUrl(null)
-              }}
-            />
-          ) : (
-            <div style={{
-              position: 'relative',
-              width: '60px',
-              height: '60px',
-              borderRadius: '25px',
-              backgroundColor: brandColors.primary[200],
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: brandColors.primary[800],
-              border: `3px solid ${brandColors.white}`,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-            }}>
-              {getUserInitial(user)}
-            </div>
-          )}
-          <div style={{ flex: 1 }}>
-            <h3 style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: '0 0 0.25rem 0'
-            }}>
-              {getUserDisplayName(user)}
-            </h3>
-            <p style={{
-              fontSize: '0.875rem',
-              color: brandColors.neutral[500],
-              margin: 0
-            }}>
-              {user?.email}
-            </p>
-          </div>
-        </div>
-
-        {/* Profile Picture Actions */}
-        <div style={{
-          display: 'flex',
-          gap: '0.75rem'
-        }}>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem',
-              backgroundColor: brandColors.primary[600],
-              color: brandColors.white,
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: isUploading ? 'not-allowed' : 'pointer',
-              opacity: isUploading ? 0.7 : 1,
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Upload size={16} />
-            {isUploading ? 'Uploading...' : 'Upload Photo'}
-          </button>
-          
-          <button
-            onClick={handleDeleteProfilePicture}
-            style={{
-              padding: '0.75rem',
-              backgroundColor: brandColors.error[100],
-              color: brandColors.error[600],
-              border: 'none',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleProfilePictureUpload}
-          style={{ display: 'none' }}
-        />
-      </div>
 
       {/* Settings Items */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

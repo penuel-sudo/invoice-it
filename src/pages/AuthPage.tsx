@@ -118,8 +118,8 @@ export default function AuthPage() {
           margin: '0 auto 1rem auto'
         }}>
           <img 
-            src="/logo3_assets_bundle/icon-256x256.png" 
-            alt="Invoice Jet" 
+            src="/logo_web_app_256x256.png" 
+            alt="Invoice-It" 
             style={{ width: '50px', height: '50px' }}
           />
         </div>

@@ -56,7 +56,7 @@ export default function Header() {
         gap: '0.75rem'
       }}>
         <img 
-          src="/logo3_assets_bundle/icon-64x64.png" 
+          src="/logo_web_app_64x64.png" 
           alt="Invoice-It" 
           style={{ 
             width: '32px', 

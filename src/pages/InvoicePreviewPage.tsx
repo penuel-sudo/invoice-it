@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
-import { Layout } from '../components/layout'
+import { invoiceStorage } from '../lib/storage/invoiceStorage'
+import type { InvoiceData } from '../lib/storage/invoiceStorage'
 import { 
   ArrowLeft, 
   Edit, 
@@ -12,28 +13,6 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-interface InvoiceItem {
-  id: string
-  description: string
-  quantity: number
-  unitPrice: number
-  taxRate: number
-  lineTotal: number
-}
-
-interface InvoiceData {
-  clientName: string
-  clientEmail: string
-  clientAddress: string
-  invoiceNumber: string
-  invoiceDate: string
-  dueDate: string
-  items: InvoiceItem[]
-  notes: string
-  subtotal: number
-  taxTotal: number
-  grandTotal: number
-}
 
 export default function InvoicePreviewPage() {
   const { user } = useAuth()
@@ -46,8 +25,14 @@ export default function InvoicePreviewPage() {
     if (location.state?.invoiceData) {
       setInvoiceData(location.state.invoiceData)
     } else {
-      // If no data, redirect back to create page
-      navigate('/invoice/new')
+      // Try to get data from localStorage
+      const savedData = invoiceStorage.getDraft()
+      if (savedData) {
+        setInvoiceData(savedData)
+      } else {
+        // If no data, redirect back to create page
+        navigate('/invoice/new')
+      }
     }
   }, [location.state, navigate])
 
@@ -80,48 +65,44 @@ export default function InvoicePreviewPage() {
 
   if (!user || !invoiceData) { 
     return (
-      <Layout>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: brandColors.white
+      }}>
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          backgroundColor: brandColors.white
+          textAlign: 'center',
+          padding: '2rem'
         }}>
-          <div style={{
-            textAlign: 'center',
-            padding: '2rem'
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            marginBottom: '0.5rem'
           }}>
-            <h2 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              marginBottom: '0.5rem'
-            }}>
-              Loading Invoice...
-            </h2>
-            <p style={{
-              fontSize: '0.875rem',
-              color: brandColors.neutral[600]
-            }}>
-              Please wait while we load your invoice preview.
-            </p>
-          </div>
+            Loading Invoice...
+          </h2>
+          <p style={{
+            fontSize: '0.875rem',
+            color: brandColors.neutral[600]
+          }}>
+            Please wait while we load your invoice preview.
+          </p>
         </div>
-      </Layout>
+      </div>
     )
   }
 
   return (
-    <Layout>
-      <div style={{
-        paddingBottom: '4rem',
-        backgroundColor: brandColors.neutral[50],
-        minHeight: '100vh',
-        width: '100%',
-        maxWidth: '100vw',
-        overflow: 'hidden'
-      }}>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: brandColors.neutral[50],
+      width: '100%',
+      maxWidth: '100vw',
+      overflow: 'hidden'
+    }}>
         {/* Header */}
         <div style={{
           display: 'flex',
@@ -207,13 +188,14 @@ export default function InvoicePreviewPage() {
         <div style={{
           padding: '1rem',
           display: 'flex',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          paddingBottom: '5rem' // Space for bottom buttons
         }}>
           <div style={{
             backgroundColor: brandColors.white,
-            borderRadius: '12px',
+            borderRadius: '8px',
             padding: '2rem',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[200]}`,
             width: '100%',
             maxWidth: '800px',
@@ -226,13 +208,13 @@ export default function InvoicePreviewPage() {
               alignItems: 'flex-start',
               marginBottom: '2rem',
               paddingBottom: '1.5rem',
-              borderBottom: `2px solid ${brandColors.primary[200]}`
+              borderBottom: `2px solid ${brandColors.neutral[200]}`
             }}>
               <div>
                 <h1 style={{
                   fontSize: '2rem',
                   fontWeight: '700',
-                  color: brandColors.primary[600],
+                  color: brandColors.neutral[900],
                   margin: '0 0 0.5rem 0'
                 }}>
                   INVOICE
@@ -473,8 +455,8 @@ export default function InvoicePreviewPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   padding: '0.75rem 0',
-                  borderTop: `2px solid ${brandColors.primary[200]}`,
-                  borderBottom: `2px solid ${brandColors.primary[200]}`
+                  borderTop: `2px solid ${brandColors.neutral[300]}`,
+                  borderBottom: `2px solid ${brandColors.neutral[300]}`
                 }}>
                   <span style={{
                     fontSize: '1.125rem',
@@ -486,7 +468,7 @@ export default function InvoicePreviewPage() {
                   <span style={{
                     fontSize: '1.25rem',
                     fontWeight: '700',
-                    color: brandColors.primary[600]
+                    color: brandColors.neutral[900]
                   }}>
                     ${invoiceData.grandTotal.toFixed(2)}
                   </span>
@@ -544,98 +526,107 @@ export default function InvoicePreviewPage() {
         {/* Action Buttons */}
         <div style={{
           position: 'fixed',
-          bottom: '80px',
+          bottom: '1rem',
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
-          gap: '0.75rem',
+          gap: '0.5rem',
           backgroundColor: brandColors.white,
-          padding: '1rem',
-          borderRadius: '16px',
+          padding: '0.75rem',
+          borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          border: `1px solid ${brandColors.neutral[200]}`
+          border: `1px solid ${brandColors.neutral[200]}`,
+          maxWidth: 'calc(100vw - 2rem)',
+          overflowX: 'auto'
         }}>
           <button
             onClick={handleEdit}
             style={{
-              padding: '0.75rem 1.5rem',
+              padding: '0.5rem 0.75rem',
               backgroundColor: brandColors.neutral[100],
               color: brandColors.neutral[600],
               border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
               fontWeight: '500',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.25rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Edit size={16} />
+            <Edit size={14} />
             Edit
           </button>
           
           <button
             onClick={handleDownload}
             style={{
-              padding: '0.75rem 1.5rem',
+              padding: '0.5rem 0.75rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
               border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
               fontWeight: '500',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.25rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Download size={16} />
-            Download PDF
+            <Download size={14} />
+            PDF
           </button>
           
           <button
             onClick={handleSend}
             style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: brandColors.success[600],
+              padding: '0.5rem 0.75rem',
+              backgroundColor: brandColors.neutral[600],
               color: brandColors.white,
               border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
               fontWeight: '500',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.25rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Send size={16} />
+            <Send size={14} />
             Send
           </button>
           
           <button
             onClick={handleShare}
             style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: brandColors.warning[600],
+              padding: '0.5rem 0.75rem',
+              backgroundColor: brandColors.neutral[600],
               color: brandColors.white,
               border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
               fontWeight: '500',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.25rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <Share2 size={16} />
+            <Share2 size={14} />
             Share
           </button>
         </div>
       </div>
-    </Layout>
   )
 }

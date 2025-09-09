@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
+import { invoiceStorage } from '../lib/storage/invoiceStorage'
+import type { InvoiceFormData, InvoiceItem } from '../lib/storage/invoiceStorage'
 import { 
   ArrowLeft, 
   Save, 
@@ -18,55 +20,22 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-interface InvoiceItem {
-  id: string
-  description: string
-  quantity: number
-  unitPrice: number
-  taxRate: number
-  lineTotal: number
-}
-
-interface InvoiceFormData {
-  clientName: string
-  clientEmail: string
-  clientAddress: string
-  invoiceNumber: string
-  invoiceDate: string
-  dueDate: string
-  items: InvoiceItem[]
-  notes: string
-  subtotal: number
-  taxTotal: number
-  grandTotal: number
-}
 
 export default function InvoiceCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   
-  const [formData, setFormData] = useState<InvoiceFormData>({
-    clientName: '',
-    clientEmail: '',
-    clientAddress: '',
-    invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
-    invoiceDate: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-    items: [
-      {
-        id: '1',
-        description: '',
-        quantity: 1,
-        unitPrice: 0,
-        taxRate: 0,
-        lineTotal: 0
-      }
-    ],
-    notes: '',
-    subtotal: 0,
-    taxTotal: 0,
-    grandTotal: 0
-  })
+  // Initialize form data from location state or localStorage
+  const getInitialFormData = (): InvoiceFormData => {
+    if (location.state?.invoiceData) {
+      return location.state.invoiceData
+    }
+    
+    return invoiceStorage.getDraftWithFallback()
+  }
+  
+  const [formData, setFormData] = useState<InvoiceFormData>(getInitialFormData())
 
   const [isSaving, setIsSaving] = useState(false)
 
@@ -83,6 +52,11 @@ export default function InvoiceCreatePage() {
       grandTotal
     }))
   }, [formData.items])
+
+  // Auto-save form data to localStorage
+  useEffect(() => {
+    invoiceStorage.saveDraftDebounced(formData)
+  }, [formData])
 
   const addItem = () => {
     const newItem: InvoiceItem = {
@@ -138,6 +112,10 @@ export default function InvoiceCreatePage() {
     try {
       // TODO: Save to database
       console.log('Saving invoice:', formData)
+      
+      // Clear the draft from localStorage after successful save
+      invoiceStorage.clearDraft()
+      
       toast.success('Invoice saved successfully!')
     } catch (error) {
       toast.error('Failed to save invoice')
@@ -424,8 +402,12 @@ export default function InvoiceCreatePage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <div style={{ flex: 1 }}>
+              <div style={{ 
+                display: 'flex', 
+                gap: '1rem',
+                flexDirection: window.innerWidth < 768 ? 'column' : 'row'
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <label style={{
                     display: 'block',
                     fontSize: '0.875rem',
@@ -446,12 +428,13 @@ export default function InvoiceCreatePage() {
                       borderRadius: '8px',
                       fontSize: '0.875rem',
                       backgroundColor: brandColors.white,
-                      color: brandColors.neutral[900]
+                      color: brandColors.neutral[900],
+                      boxSizing: 'border-box'
                     }}
                   />
                 </div>
 
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <label style={{
                     display: 'block',
                     fontSize: '0.875rem',
@@ -472,7 +455,8 @@ export default function InvoiceCreatePage() {
                       borderRadius: '8px',
                       fontSize: '0.875rem',
                       backgroundColor: brandColors.white,
-                      color: brandColors.neutral[900]
+                      color: brandColors.neutral[900],
+                      boxSizing: 'border-box'
                     }}
                   />
                 </div>
