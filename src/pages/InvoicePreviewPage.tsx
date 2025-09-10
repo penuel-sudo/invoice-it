@@ -158,7 +158,7 @@ export default function InvoicePreviewPage() {
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[200]}`,
             width: '100%',
-            maxWidth: '600px',
+            maxWidth: '700px',
             minHeight: '600px'
           }}>
             {/* Top Section */}
