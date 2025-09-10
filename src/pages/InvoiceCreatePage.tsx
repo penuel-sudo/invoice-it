@@ -116,14 +116,47 @@ export default function InvoiceCreatePage() {
 
     setIsSaving(true)
     try {
-      // Save invoice to database
+      // Step 1: Save or find client
+      let clientId: string
+      
+      // Check if client already exists
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('client_name', formData.clientName)
+        .eq('client_email', formData.clientEmail || '')
+        .single()
+
+      if (existingClient) {
+        clientId = existingClient.id
+      } else {
+        // Create new client
+        const { data: client, error: clientError } = await supabase
+          .from('clients')
+          .insert({
+            user_id: user.id,
+            client_name: formData.clientName,
+            client_email: formData.clientEmail || null,
+            client_address: formData.clientAddress || null
+          })
+          .select()
+          .single()
+
+        if (clientError) {
+          console.error('Error saving client:', clientError)
+          toast.error('Failed to save client: ' + clientError.message)
+          return
+        }
+        clientId = client.id
+      }
+
+      // Step 2: Save invoice to database
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
           user_id: user.id,
-          client_name: formData.clientName,
-          client_email: formData.clientEmail || null,
-          client_address: formData.clientAddress || null,
+          client_id: clientId,
           invoice_number: formData.invoiceNumber,
           invoice_date: formData.invoiceDate,
           due_date: formData.dueDate,

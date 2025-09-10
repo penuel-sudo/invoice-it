@@ -146,7 +146,7 @@ export default function InvoicePreviewPage() {
 
         {/* Invoice Preview */}
         <div style={{
-          padding: '1rem',
+          padding: window.innerWidth < 768 ? '0.5rem' : '1rem',
           display: 'flex',
           justifyContent: 'center',
           paddingBottom: '5rem' // Space for bottom buttons
@@ -154,7 +154,7 @@ export default function InvoicePreviewPage() {
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
-            padding: '2rem',
+            padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[200]}`,
             width: '100%',
@@ -214,9 +214,9 @@ export default function InvoicePreviewPage() {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: window.innerWidth < 768 ? '1.25rem' : '1rem',
                 marginBottom: '2rem',
-                padding: '1rem',
+                padding: window.innerWidth < 768 ? '1.5rem' : '1rem',
                 backgroundColor: brandColors.neutral[50],
                 borderRadius: '12px'
               }}>
@@ -285,7 +285,7 @@ export default function InvoicePreviewPage() {
             <div style={{
               backgroundColor: brandColors.neutral[50],
               borderRadius: '12px',
-              padding: '1.5rem',
+              padding: window.innerWidth < 768 ? '2rem' : '1.5rem',
               marginBottom: '2rem',
               border: `1px solid ${brandColors.neutral[200]}`
             }}>
@@ -301,8 +301,8 @@ export default function InvoicePreviewPage() {
               
               {/* Client Info */}
               <div style={{
-                marginBottom: '1.5rem',
-                paddingBottom: '1rem',
+                marginBottom: window.innerWidth < 768 ? '2rem' : '1.5rem',
+                paddingBottom: window.innerWidth < 768 ? '1.5rem' : '1rem',
                 borderBottom: `1px solid ${brandColors.neutral[200]}`
               }}>
                 <div style={{
@@ -338,7 +338,7 @@ export default function InvoicePreviewPage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '0.5rem 0',
+                    padding: window.innerWidth < 768 ? '0.75rem 0' : '0.5rem 0',
                     borderBottom: index < invoiceData.items.length - 1 ? `1px solid ${brandColors.neutral[200]}` : 'none'
                   }}>
                     <span style={{
@@ -373,7 +373,7 @@ export default function InvoicePreviewPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.25rem 0'
+                  padding: window.innerWidth < 768 ? '0.5rem 0' : '0.25rem 0'
                 }}>
                   <span style={{
                     fontSize: '0.875rem',
@@ -395,7 +395,7 @@ export default function InvoicePreviewPage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '0.25rem 0'
+                    padding: window.innerWidth < 768 ? '0.5rem 0' : '0.25rem 0'
                   }}>
                     <span style={{
                       fontSize: '0.875rem',
@@ -417,9 +417,9 @@ export default function InvoicePreviewPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.5rem 0',
+                  padding: window.innerWidth < 768 ? '0.75rem 0' : '0.5rem 0',
                   borderTop: `1px solid ${brandColors.neutral[200]}`,
-                  marginTop: '0.5rem'
+                  marginTop: window.innerWidth < 768 ? '0.75rem' : '0.5rem'
                 }}>
                   <span style={{
                     fontSize: '1rem',
