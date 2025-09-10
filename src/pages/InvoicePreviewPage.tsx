@@ -116,73 +116,32 @@ export default function InvoicePreviewPage() {
           top: 0,
           zIndex: 10
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                padding: '0.5rem',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <ArrowLeft size={20} color={brandColors.neutral[600]} />
-            </button>
-            <h1 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: 0
-            }}>
-              Invoice Preview
-            </h1>
-          </div>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <ArrowLeft size={20} color={brandColors.neutral[600]} />
+          </button>
           
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={handleEdit}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.neutral[100],
-                color: brandColors.neutral[600],
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <Edit size={16} />
-              Edit
-            </button>
-            
-            <button
-              onClick={handleDownload}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.primary[600],
-                color: brandColors.white,
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <Download size={16} />
-              PDF
-            </button>
-          </div>
+          <h1 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            margin: 0
+          }}>
+            Invoice Preview
+          </h1>
+          
+          <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
         </div>
 
         {/* Invoice Preview */}
@@ -202,11 +161,11 @@ export default function InvoicePreviewPage() {
             maxWidth: '600px',
             minHeight: '600px'
           }}>
-            {/* Invoice Header - Reorganized to match image */}
+            {/* Top Section */}
             <div style={{
               marginBottom: '2rem'
             }}>
-              {/* Payment Status Tag */}
+              {/* Payment Status and Status Button */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -222,6 +181,17 @@ export default function InvoicePreviewPage() {
                   fontWeight: '500'
                 }}>
                   Payment - {invoiceData.invoiceNumber}
+                </div>
+                
+                <div style={{
+                  backgroundColor: brandColors.warning[100],
+                  color: brandColors.warning[700],
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '20px',
+                  fontSize: '0.75rem',
+                  fontWeight: '500'
+                }}>
+                  Pending
                 </div>
               </div>
 
@@ -240,7 +210,7 @@ export default function InvoicePreviewPage() {
                 </div>
               </div>
 
-              {/* Client Info Section */}
+              {/* Issuer Info Section */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -253,17 +223,17 @@ export default function InvoicePreviewPage() {
                 <div style={{
                   width: '48px',
                   height: '48px',
-                  backgroundColor: brandColors.neutral[300],
+                  backgroundColor: brandColors.primary[100],
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '1rem',
                   fontWeight: '600',
-                  color: brandColors.neutral[700],
+                  color: brandColors.primary[700],
                   flexShrink: 0
                 }}>
-                  {invoiceData.clientName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  {user.user_metadata?.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'BI'}
                 </div>
                 
                 <div style={{ flex: 1 }}>
@@ -273,7 +243,7 @@ export default function InvoicePreviewPage() {
                     color: brandColors.neutral[900],
                     marginBottom: '0.25rem'
                   }}>
-                    {invoiceData.clientName}
+                    {user.user_metadata?.full_name || 'Your Business'}
                   </div>
                   <div style={{
                     fontSize: '0.875rem',
@@ -288,28 +258,36 @@ export default function InvoicePreviewPage() {
                 </div>
                 
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  backgroundColor: brandColors.primary[100],
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
+                  textAlign: 'right'
                 }}>
-                  <FileText size={16} color={brandColors.primary[600]} />
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: brandColors.neutral[500],
+                    marginBottom: '0.25rem'
+                  }}>
+                    Due
+                  </div>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: brandColors.neutral[900]
+                  }}>
+                    {new Date(invoiceData.dueDate).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Invoice Details Card - Matching Image Style */}
+            {/* Main Grey Card */}
             <div style={{
-              backgroundColor: brandColors.white,
+              backgroundColor: brandColors.neutral[50],
               borderRadius: '12px',
               padding: '1.5rem',
               marginBottom: '2rem',
-              border: `1px solid ${brandColors.neutral[200]}`,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+              border: `1px solid ${brandColors.neutral[200]}`
             }}>
               <h3 style={{
                 fontSize: '1rem',
@@ -321,6 +299,36 @@ export default function InvoicePreviewPage() {
                 Invoice Details
               </h3>
               
+              {/* Client Info */}
+              <div style={{
+                marginBottom: '1.5rem',
+                paddingBottom: '1rem',
+                borderBottom: `1px solid ${brandColors.neutral[200]}`
+              }}>
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: brandColors.neutral[600],
+                  marginBottom: '0.25rem'
+                }}>
+                  Bill To:
+                </div>
+                <div style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900]
+                }}>
+                  {invoiceData.clientName}
+                </div>
+                {invoiceData.clientEmail && (
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[600]
+                  }}>
+                    {invoiceData.clientEmail}
+                  </div>
+                )}
+              </div>
+              
               {/* Service Items */}
               <div style={{
                 marginBottom: '1rem'
@@ -331,7 +339,7 @@ export default function InvoicePreviewPage() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     padding: '0.5rem 0',
-                    borderBottom: index < invoiceData.items.length - 1 ? `1px solid ${brandColors.neutral[100]}` : 'none'
+                    borderBottom: index < invoiceData.items.length - 1 ? `1px solid ${brandColors.neutral[200]}` : 'none'
                   }}>
                     <span style={{
                       fontSize: '0.875rem',
@@ -351,139 +359,129 @@ export default function InvoicePreviewPage() {
                 ))}
               </div>
               
-              {/* Total Line */}
+              {/* Separator Line */}
               <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0.75rem 0',
-                borderTop: `2px solid ${brandColors.neutral[200]}`,
-                marginTop: '0.5rem'
-              }}>
-                <span style={{
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  color: brandColors.neutral[900]
-                }}>
-                  TOTAL
-                </span>
-                <span style={{
-                  fontSize: '1.25rem',
-                  fontWeight: '700',
-                  color: brandColors.neutral[900]
-                }}>
-                  ${invoiceData.grandTotal.toFixed(2)}
-                </span>
-              </div>
-            </div>
-
-            {/* Additional Invoice Information */}
-            <div style={{
-              backgroundColor: brandColors.neutral[50],
-              borderRadius: '12px',
-              padding: '1.5rem',
-              marginBottom: '2rem'
-            }}>
-              <h4 style={{
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                color: brandColors.neutral[700],
-                margin: '0 0 1rem 0'
-              }}>
-                Invoice Information
-              </h4>
+                borderTop: `1px solid ${brandColors.neutral[200]}`,
+                margin: '1rem 0'
+              }}></div>
               
+              {/* Totals Section */}
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1rem',
-                fontSize: '0.875rem'
+                marginBottom: '1rem'
               }}>
-                <div>
-                  <span style={{ color: brandColors.neutral[600] }}>Invoice Number:</span>
-                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
-                    {invoiceData.invoiceNumber}
-                  </div>
-                </div>
-                <div>
-                  <span style={{ color: brandColors.neutral[600] }}>Invoice Date:</span>
-                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
-                    {new Date(invoiceData.invoiceDate).toLocaleDateString()}
-                  </div>
-                </div>
-                <div>
-                  <span style={{ color: brandColors.neutral[600] }}>Due Date:</span>
-                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
-                    {new Date(invoiceData.dueDate).toLocaleDateString()}
-                  </div>
-                </div>
-                <div>
-                  <span style={{ color: brandColors.neutral[600] }}>Subtotal:</span>
-                  <div style={{ fontWeight: '500', color: brandColors.neutral[900] }}>
-                    ${invoiceData.subtotal.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-              
-              {invoiceData.taxTotal > 0 && (
                 <div style={{
-                  marginTop: '1rem',
-                  paddingTop: '1rem',
-                  borderTop: `1px solid ${brandColors.neutral[200]}`
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.25rem 0'
                 }}>
-                  <span style={{ color: brandColors.neutral[600], fontSize: '0.875rem' }}>Tax Total:</span>
-                  <div style={{ fontWeight: '500', color: brandColors.neutral[900], fontSize: '0.875rem' }}>
-                    ${invoiceData.taxTotal.toFixed(2)}
-                  </div>
+                  <span style={{
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[600]
+                  }}>
+                    Subtotal:
+                  </span>
+                  <span style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[900]
+                  }}>
+                    ${invoiceData.subtotal.toFixed(2)}
+                  </span>
                 </div>
-              )}
-            </div>
-
-            {/* Notes Section */}
-            {invoiceData.notes && (
-              <div style={{
-                backgroundColor: brandColors.white,
-                borderRadius: '12px',
-                padding: '1.5rem',
-                marginBottom: '2rem',
-                border: `1px solid ${brandColors.neutral[200]}`,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
-              }}>
-                <h4 style={{
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: brandColors.neutral[700],
-                  margin: '0 0 0.75rem 0'
+                
+                {invoiceData.taxTotal > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.25rem 0'
+                  }}>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[600]
+                    }}>
+                      Tax:
+                    </span>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: brandColors.neutral[900]
+                    }}>
+                      ${invoiceData.taxTotal.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.5rem 0',
+                  borderTop: `1px solid ${brandColors.neutral[200]}`,
+                  marginTop: '0.5rem'
                 }}>
-                  Additional Notes
-                </h4>
-                <p style={{
-                  fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
-                  lineHeight: '1.5',
-                  margin: 0,
-                  whiteSpace: 'pre-line'
-                }}>
-                  {invoiceData.notes}
-                </p>
+                  <span style={{
+                    fontSize: '1rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[900]
+                  }}>
+                    Total:
+                  </span>
+                  <span style={{
+                    fontSize: '1rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[900]
+                  }}>
+                    ${invoiceData.grandTotal.toFixed(2)}
+                  </span>
+                </div>
               </div>
-            )}
-
-            {/* Footer */}
-            <div style={{
-              textAlign: 'center',
-              paddingTop: '2rem',
-              borderTop: `1px solid ${brandColors.neutral[200]}`,
-              color: brandColors.neutral[400],
-              fontSize: '0.75rem'
-            }}>
-              <p style={{ margin: 0 }}>
-                Thank you for your business!
-              </p>
-              <p style={{ margin: '0.5rem 0 0 0' }}>
-                Generated by InvoiceIt
-              </p>
+              
+              {/* Notes Section */}
+              {invoiceData.notes && (
+                <>
+                  <div style={{
+                    borderTop: `1px solid ${brandColors.neutral[200]}`,
+                    margin: '1rem 0',
+                    paddingTop: '1rem'
+                  }}>
+                    <div style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: brandColors.neutral[700],
+                      marginBottom: '0.5rem'
+                    }}>
+                      Notes:
+                    </div>
+                    <div style={{
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[600],
+                      lineHeight: '1.4',
+                      whiteSpace: 'pre-line'
+                    }}>
+                      {invoiceData.notes}
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              {/* Disclaimer */}
+              <div style={{
+                borderTop: `1px solid ${brandColors.neutral[200]}`,
+                marginTop: '1rem',
+                paddingTop: '1rem',
+                textAlign: 'center'
+              }}>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[400]
+                }}>
+                  Created by InvoiceIt
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
 
