@@ -10,7 +10,10 @@ import {
   Download,
   Send,
   Share2,
-  FileText
+  FileText,
+  Copy,
+  Check,
+  X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -21,6 +24,8 @@ export default function InvoicePreviewPage() {
   const location = useLocation()
   
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
+  const [showSharePopup, setShowSharePopup] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (location.state?.invoiceData) {
@@ -58,10 +63,24 @@ export default function InvoicePreviewPage() {
   }
 
   const handleShare = () => {
-    // TODO: Implement share link
-    toast('Share link will be available in Phase 2!', {
-      icon: 'ℹ️',
-    })
+    setShowSharePopup(true)
+  }
+
+  const handleCopyLink = async () => {
+    const invoiceLink = `${window.location.origin}/invoice/preview?invoice=${invoiceData?.invoiceNumber}`
+    try {
+      await navigator.clipboard.writeText(invoiceLink)
+      setCopied(true)
+      toast.success('Link copied to clipboard!')
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  const handleCloseSharePopup = () => {
+    setShowSharePopup(false)
+    setCopied(false)
   }
 
   if (!user || !invoiceData) { 
@@ -108,7 +127,7 @@ export default function InvoicePreviewPage() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           padding: '1rem',
           backgroundColor: brandColors.white,
           borderBottom: `1px solid ${brandColors.neutral[200]}`,
@@ -116,22 +135,6 @@ export default function InvoicePreviewPage() {
           top: 0,
           zIndex: 10
         }}>
-          <button
-            onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <ArrowLeft size={20} color={brandColors.neutral[600]} />
-          </button>
-          
           <h1 style={{
             fontSize: '1.125rem',
             fontWeight: '600',
@@ -140,8 +143,6 @@ export default function InvoicePreviewPage() {
           }}>
             Invoice Preview
           </h1>
-          
-          <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
         </div>
 
         {/* Invoice Preview */}
@@ -589,6 +590,154 @@ export default function InvoicePreviewPage() {
             Share
           </button>
         </div>
+
+        {/* Share Popup */}
+        {showSharePopup && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem'
+          }}>
+            <div style={{
+              backgroundColor: brandColors.white,
+              borderRadius: '16px',
+              padding: '2rem',
+              maxWidth: '400px',
+              width: '100%',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)'
+            }}>
+              {/* Header */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0
+                }}>
+                  Share Invoice
+                </h3>
+                <button
+                  onClick={handleCloseSharePopup}
+                  style={{
+                    padding: '0.5rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <X size={20} color={brandColors.neutral[600]} />
+                </button>
+              </div>
+
+              {/* Link Input */}
+              <div style={{
+                marginBottom: '1.5rem'
+              }}>
+                <label style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: brandColors.neutral[700],
+                  marginBottom: '0.5rem',
+                  display: 'block'
+                }}>
+                  Invoice Link
+                </label>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem',
+                  backgroundColor: brandColors.neutral[50],
+                  border: `1px solid ${brandColors.neutral[200]}`,
+                  borderRadius: '8px'
+                }}>
+                  <input
+                    type="text"
+                    value={`${window.location.origin}/invoice/preview?invoice=${invoiceData?.invoiceNumber}`}
+                    readOnly
+                    style={{
+                      flex: 1,
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[600],
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    style={{
+                      padding: '0.5rem',
+                      backgroundColor: copied ? brandColors.success[100] : brandColors.primary[100],
+                      color: copied ? brandColors.success[600] : brandColors.primary[600],
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Share Button */}
+              <button
+                onClick={() => {
+                  // TODO: Implement platform sharing
+                  toast('Platform sharing will be available in Phase 2!', {
+                    icon: 'ℹ️',
+                  })
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: brandColors.primary[600],
+                  color: brandColors.white,
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = brandColors.primary[700]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = brandColors.primary[600]
+                }}
+              >
+                <Share2 size={16} />
+                Share to Platforms
+              </button>
+            </div>
+          </div>
+        )}
       </div>
   )
 }

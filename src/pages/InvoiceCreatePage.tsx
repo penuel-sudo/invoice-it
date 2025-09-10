@@ -124,8 +124,8 @@ export default function InvoiceCreatePage() {
         .from('clients')
         .select('id')
         .eq('user_id', user.id)
-        .eq('client_name', formData.clientName)
-        .eq('client_email', formData.clientEmail || '')
+        .eq('name', formData.clientName)
+        .eq('email', formData.clientEmail || '')
         .single()
 
       if (existingClient) {
@@ -136,9 +136,9 @@ export default function InvoiceCreatePage() {
           .from('clients')
           .insert({
             user_id: user.id,
-            client_name: formData.clientName,
-            client_email: formData.clientEmail || null,
-            client_address: formData.clientAddress || null
+            name: formData.clientName,
+            email: formData.clientEmail || null,
+            address: formData.clientAddress || null
           })
           .select()
           .single()
@@ -158,12 +158,12 @@ export default function InvoiceCreatePage() {
           user_id: user.id,
           client_id: clientId,
           invoice_number: formData.invoiceNumber,
-          invoice_date: formData.invoiceDate,
+          issue_date: formData.invoiceDate,
           due_date: formData.dueDate,
           notes: formData.notes || null,
           subtotal: formData.subtotal,
-          tax_total: formData.taxTotal,
-          grand_total: formData.grandTotal,
+          tax_amount: formData.taxTotal,
+          total_amount: formData.grandTotal,
           status: 'draft'
         })
         .select()
@@ -242,7 +242,7 @@ export default function InvoiceCreatePage() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           padding: '1rem',
           backgroundColor: brandColors.white,
           borderBottom: `1px solid ${brandColors.neutral[200]}`,
@@ -250,75 +250,14 @@ export default function InvoiceCreatePage() {
           top: 0,
           zIndex: 10
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                padding: '0.5rem',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <ArrowLeft size={20} color={brandColors.neutral[600]} />
-            </button>
-            <h1 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: 0
-            }}>
-              New Invoice
-            </h1>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.neutral[100],
-                color: brandColors.neutral[600],
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: isSaving ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                opacity: isSaving ? 0.6 : 1
-              }}
-            >
-              <Save size={16} />
-              {isSaving ? 'Saving...' : 'Save'}
-            </button>
-            
-            <button
-              onClick={handlePreview}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.primary[600],
-                color: brandColors.white,
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <Eye size={16} />
-              Preview
-            </button>
-          </div>
+          <h1 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            margin: 0
+          }}>
+            New Invoice
+          </h1>
         </div>
 
         {/* Form Content */}
@@ -891,6 +830,73 @@ export default function InvoiceCreatePage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Floating Action Buttons */}
+        <div style={{
+          position: 'fixed',
+          bottom: '1rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: '0.5rem',
+          backgroundColor: brandColors.white,
+          padding: '0.75rem',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          border: `1px solid ${brandColors.neutral[200]}`,
+          maxWidth: 'calc(100vw - 2rem)',
+          overflowX: 'auto'
+        }}>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            style={{
+              flex: 1,
+              padding: '0.5rem 0.75rem',
+              backgroundColor: brandColors.neutral[100],
+              color: brandColors.neutral[600],
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.25rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              opacity: isSaving ? 0.6 : 1
+            }}
+          >
+            <Save size={14} />
+            {isSaving ? 'Saving...' : 'Save'}
+          </button>
+          
+          <button
+            onClick={handlePreview}
+            style={{
+              flex: 1,
+              padding: '0.5rem 0.75rem',
+              backgroundColor: brandColors.primary[600],
+              color: brandColors.white,
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.25rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            <Eye size={14} />
+            Preview
+          </button>
         </div>
       </div>
     </Layout>
