@@ -147,7 +147,7 @@ export default function InvoicePreviewPage() {
 
         {/* Invoice Preview */}
         <div style={{
-          padding: window.innerWidth < 768 ? '0.5rem' : '1rem',
+          padding: window.innerWidth < 768 ? '1rem' : '1rem',
           display: 'flex',
           justifyContent: 'center',
           paddingBottom: '5rem' // Space for bottom buttons
@@ -155,7 +155,7 @@ export default function InvoicePreviewPage() {
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
-            padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
+            padding: window.innerWidth < 768 ? '1rem 1.25rem' : '2rem',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[200]}`,
             width: '100%',
@@ -345,7 +345,10 @@ export default function InvoicePreviewPage() {
                     <span style={{
                       fontSize: '0.875rem',
                       color: brandColors.neutral[700],
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      wordBreak: 'break-word',
+                      maxWidth: '60%',
+                      paddingRight: '1rem'
                     }}>
                       {item.quantity} {item.description}
                     </span>

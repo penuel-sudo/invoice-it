@@ -229,20 +229,19 @@ export default function InvoiceCreatePage() {
   if (!user) { return null }
 
   return (
-    <Layout>
-      <div style={{
-        paddingBottom: '4rem',
-        backgroundColor: brandColors.white,
-        minHeight: '100vh',
-        width: '100%',
-        maxWidth: '100vw',
-        overflow: 'hidden'
-      }}>
+    <div style={{
+      paddingBottom: '4rem',
+      backgroundColor: brandColors.white,
+      minHeight: '100vh',
+      width: '100%',
+      maxWidth: '100vw',
+      overflow: 'hidden'
+    }}>
         {/* Header */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           padding: '1rem',
           backgroundColor: brandColors.white,
           borderBottom: `1px solid ${brandColors.neutral[200]}`,
@@ -250,6 +249,22 @@ export default function InvoiceCreatePage() {
           top: 0,
           zIndex: 10
         }}>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <ArrowLeft size={20} color={brandColors.neutral[600]} />
+          </button>
+          
           <h1 style={{
             fontSize: '1.125rem',
             fontWeight: '600',
@@ -258,6 +273,8 @@ export default function InvoiceCreatePage() {
           }}>
             New Invoice
           </h1>
+          
+          <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
         </div>
 
         {/* Form Content */}
@@ -853,24 +870,24 @@ export default function InvoiceCreatePage() {
             disabled={isSaving}
             style={{
               flex: 1,
-              padding: '0.5rem 0.75rem',
+              padding: '0.75rem 1.5rem',
               backgroundColor: brandColors.neutral[100],
               color: brandColors.neutral[600],
               border: 'none',
               borderRadius: '8px',
-              fontSize: '0.75rem',
+              fontSize: '0.875rem',
               fontWeight: '500',
               cursor: isSaving ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.25rem',
+              gap: '0.5rem',
               whiteSpace: 'nowrap',
               flexShrink: 0,
               opacity: isSaving ? 0.6 : 1
             }}
           >
-            <Save size={14} />
+            <Save size={16} />
             {isSaving ? 'Saving...' : 'Save'}
           </button>
           
@@ -878,27 +895,26 @@ export default function InvoiceCreatePage() {
             onClick={handlePreview}
             style={{
               flex: 1,
-              padding: '0.5rem 0.75rem',
+              padding: '0.75rem 1.5rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
               border: 'none',
               borderRadius: '8px',
-              fontSize: '0.75rem',
+              fontSize: '0.875rem',
               fontWeight: '500',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.25rem',
+              gap: '0.5rem',
               whiteSpace: 'nowrap',
               flexShrink: 0
             }}
           >
-            <Eye size={14} />
+            <Eye size={16} />
             Preview
           </button>
         </div>
-      </div>
-    </Layout>
+    </div>
   )
 }
