@@ -62,7 +62,7 @@ export default function CountryPhoneSelector({
       phoneCode: countryInfo?.phoneCode || '',
       flag: countryInfo?.flag || '🌍'
     }
-  }).filter(country => country.phoneCode) // Only include countries with phone codes
+  }).filter(country => country.phoneCode && country.phoneCode.length > 0) // Only include countries with valid phone codes
 
   // Auto-detect user's country on mount
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function CountryPhoneSelector({
 
   // Validate phone number when it changes
   useEffect(() => {
-    if (phoneNumber && selectedCountry) {
+    if (phoneNumber && selectedCountry && selectedCountry.phoneCode) {
       try {
         const fullNumber = `+${selectedCountry.phoneCode}${phoneNumber}`
         const isValidNumber = isValidPhoneNumber(fullNumber)
@@ -116,6 +116,7 @@ export default function CountryPhoneSelector({
           setValidationError('')
         }
       } catch (error) {
+        console.warn('Phone validation error:', error)
         setIsValid(false)
         setValidationError('Invalid phone number format')
       }

@@ -170,7 +170,15 @@ export function getCountryInfo(countryCode: string): CountryInfo | null {
   const country = countries.getData().find(c => c.code === countryCode)
   if (!country) return null
 
-  const phoneCode = getCountryCallingCode(countryCode as any) || ''
+  let phoneCode = ''
+  try {
+    phoneCode = getCountryCallingCode(countryCode as any) || ''
+  } catch (error) {
+    // Handle unknown country codes (like AQ - Antarctica)
+    console.warn(`Unknown country code: ${countryCode}`)
+    phoneCode = ''
+  }
+
   const language = countryLanguageMap[countryCode] || 'en'
   const currency = countryCurrencyMap[countryCode] || 'USD'
   const timezone = countryTimezoneMap[countryCode] || 'UTC'
