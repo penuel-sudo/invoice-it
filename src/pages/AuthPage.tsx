@@ -5,6 +5,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { Button, Input, Label } from '../components/ui'
+import ForgotPasswordModal from '../components/ForgotPasswordModal'
 
 const getTypographyStyle = (preset: any) => {
   return {
@@ -26,6 +27,7 @@ export default function AuthPage() {
     password: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false)
 
   const { signUp, signIn, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
@@ -245,7 +247,8 @@ export default function AuthPage() {
                     outline: 'none',
                     transition: 'all 0.2s ease',
                     boxSizing: 'border-box',
-                    fontFamily: 'Poppins, sans-serif'
+                    fontFamily: 'Poppins, sans-serif',
+                    height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
                   }}
                 />
                 <Label htmlFor="name" style={{ 
@@ -412,6 +415,7 @@ export default function AuthPage() {
             }}>
               <button
                 type="button"
+                onClick={() => setIsForgotPasswordModalOpen(true)}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -578,6 +582,12 @@ export default function AuthPage() {
         </form>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordModalOpen}
+        onClose={() => setIsForgotPasswordModalOpen(false)}
+      />
     </div>
   )
 }
