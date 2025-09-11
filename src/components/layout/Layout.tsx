@@ -8,9 +8,10 @@ interface LayoutProps {
   children: React.ReactNode
   isNotificationVisible?: boolean
   onNotificationToggle?: () => void
+  hideBottomNav?: boolean
 }
 
-export default function Layout({ children, isNotificationVisible, onNotificationToggle }: LayoutProps) {
+export default function Layout({ children, isNotificationVisible, onNotificationToggle, hideBottomNav = false }: LayoutProps) {
   const { user } = useAuth()
   const [isMobile, setIsMobile] = useState(false)
 
@@ -54,7 +55,7 @@ export default function Layout({ children, isNotificationVisible, onNotification
           width: '100%',
           maxWidth: isMobile ? '100vw' : 'calc(100vw - 280px)',
           padding: isMobile ? '0' : '2rem',
-          paddingBottom: isMobile ? '5rem' : '2rem', // Space for bottom nav on mobile
+          paddingBottom: isMobile && !hideBottomNav ? '5rem' : '2rem', // Space for bottom nav on mobile
           marginLeft: isMobile ? 0 : '280px', // Sidebar width
           transition: 'margin-left 0.3s ease',
           overflowX: 'hidden',
@@ -65,7 +66,7 @@ export default function Layout({ children, isNotificationVisible, onNotification
       </div>
       
       {/* Bottom Navigation - Mobile only */}
-      {isMobile && <BottomNav isNotificationVisible={isNotificationVisible} onNotificationToggle={onNotificationToggle} />}
+      {isMobile && !hideBottomNav && <BottomNav isNotificationVisible={isNotificationVisible} onNotificationToggle={onNotificationToggle} />}
     </div>
   )
 }
