@@ -6,12 +6,6 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { Button, Input, Label } from '../components/ui'
 
-// Import Poppins font
-const link = document.createElement('link')
-link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'
-link.rel = 'stylesheet'
-document.head.appendChild(link)
-
 const getTypographyStyle = (preset: any) => {
   return {
     fontSize: Array.isArray(preset.fontSize) ? preset.fontSize[0] : preset.fontSize,
@@ -149,7 +143,7 @@ export default function AuthPage() {
         </div>
       )}
 
-      {/* Desktop Logo on Left */}
+      {/* Desktop Logo on Right */}
       {window.innerWidth >= 768 && (
         <div style={{
           position: 'fixed',
@@ -215,153 +209,95 @@ export default function AuthPage() {
         <div style={{
           width: '100%'
         }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {!isLogin && (
-            <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
-              <Input
-                id="name"
-                type="text"
-                placeholder=" "
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: window.innerWidth < 768 ? '1.25rem 1.5rem 0.75rem 1.5rem' : '1.5rem 1.5rem 1rem 1.5rem',
-                  border: `1px solid ${brandColors.neutral[300]}`,
-                  borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
-                  backgroundColor: 'transparent',
-                  outline: 'none',
-                  transition: 'all 0.2s ease',
-                  boxSizing: 'border-box',
-                  fontFamily: 'Poppins, sans-serif'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = brandColors.primary[400]
-                  e.target.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = brandColors.neutral[300]
-                  e.target.style.boxShadow = 'none'
-                }}
-              />
+            <div>
               <Label htmlFor="name" style={{ 
-                position: 'absolute',
-                left: '1.5rem',
-                top: formData.name ? '0.5rem' : '50%',
-                transform: formData.name ? 'translateY(0)' : 'translateY(-50%)',
-                fontSize: formData.name ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
                 fontWeight: '500',
-                color: formData.name ? brandColors.primary[600] : brandColors.neutral[500],
-                backgroundColor: brandColors.white,
-                padding: formData.name ? '0 0.5rem' : '0',
-                transition: 'all 0.2s ease',
-                pointerEvents: 'none',
+                color: brandColors.neutral[700],
                 fontFamily: 'Poppins, sans-serif'
               }}>
                 Name
               </Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                style={{
+                  borderRadius: '50px',
+                  border: `1px solid ${brandColors.neutral[300]}`,
+                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                  fontFamily: 'Poppins, sans-serif',
+                  padding: window.innerWidth < 768 ? '0.75rem 1.5rem' : '1rem 1.5rem'
+                }}
+              />
             </div>
           )}
 
-          <div style={{ position: 'relative' }}>
-            <Input
-              id="email"
-              type="email"
-              placeholder=" "
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              style={{
-                width: '100%',
-                padding: window.innerWidth < 768 ? '1.25rem 1.5rem 0.75rem 1.5rem' : '1.5rem 1.5rem 1rem 1.5rem',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '50px',
-                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
-                backgroundColor: 'transparent',
-                outline: 'none',
-                transition: 'all 0.2s ease',
-                boxSizing: 'border-box',
-                fontFamily: 'Poppins, sans-serif'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = brandColors.primary[400]
-                e.target.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = brandColors.neutral[300]
-                e.target.style.boxShadow = 'none'
-              }}
-            />
+          <div>
             <Label htmlFor="email" style={{ 
-              position: 'absolute',
-              left: '1.5rem',
-              top: formData.email ? '0.5rem' : '50%',
-              transform: formData.email ? 'translateY(0)' : 'translateY(-50%)',
-              fontSize: formData.email ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
               fontWeight: '500',
-              color: formData.email ? brandColors.primary[600] : brandColors.neutral[500],
-              backgroundColor: brandColors.white,
-              padding: formData.email ? '0 0.5rem' : '0',
-              transition: 'all 0.2s ease',
-              pointerEvents: 'none',
+              color: brandColors.neutral[700],
               fontFamily: 'Poppins, sans-serif'
             }}>
               Email
             </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              style={{
+                borderRadius: '50px',
+                border: `1px solid ${brandColors.neutral[300]}`,
+                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                fontFamily: 'Poppins, sans-serif',
+                padding: window.innerWidth < 768 ? '0.75rem 1.5rem' : '1rem 1.5rem'
+              }}
+            />
           </div>
 
           <div style={{ position: 'relative' }}>
-            <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder=" "
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              style={{
-                width: '100%',
-                padding: window.innerWidth < 768 ? '1.25rem 3.5rem 0.75rem 1.5rem' : '1.5rem 3.5rem 1rem 1.5rem',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '50px',
-                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
-                backgroundColor: 'transparent',
-                outline: 'none',
-                transition: 'all 0.2s ease',
-                boxSizing: 'border-box',
-                fontFamily: 'Poppins, sans-serif'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = brandColors.primary[400]
-                e.target.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = brandColors.neutral[300]
-                e.target.style.boxShadow = 'none'
-              }}
-            />
             <Label htmlFor="password" style={{ 
-              position: 'absolute',
-              left: '1.5rem',
-              top: formData.password ? '0.5rem' : '50%',
-              transform: formData.password ? 'translateY(0)' : 'translateY(-50%)',
-              fontSize: formData.password ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
               fontWeight: '500',
-              color: formData.password ? brandColors.primary[600] : brandColors.neutral[500],
-              backgroundColor: brandColors.white,
-              padding: formData.password ? '0 0.5rem' : '0',
-              transition: 'all 0.2s ease',
-              pointerEvents: 'none',
+              color: brandColors.neutral[700],
               fontFamily: 'Poppins, sans-serif'
             }}>
               Password
             </Label>
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+              style={{
+                borderRadius: '50px',
+                border: `1px solid ${brandColors.neutral[300]}`,
+                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                fontFamily: 'Poppins, sans-serif',
+                padding: window.innerWidth < 768 ? '0.75rem 3.5rem 0.75rem 1.5rem' : '1rem 3.5rem 1rem 1.5rem'
+              }}
+            />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               style={{
                 position: 'absolute',
                 right: '1.5rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
+                top: '2.25rem',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
@@ -401,12 +337,13 @@ export default function AuthPage() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full"
             style={{
+              width: '100%',
               padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
               border: 'none',
+              marginTop: '0.5rem',
               borderRadius: '50px',
               fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
@@ -445,31 +382,23 @@ export default function AuthPage() {
               right: 0,
               height: '1px',
               backgroundColor: brandColors.neutral[300]
-            }}></div>
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: 0,
-              right: 0,
-              height: '1px',
-              backgroundColor: brandColors.neutral[300]
-            }}></div>
+            }}>
             <span style={{
               backgroundColor: brandColors.white,
               padding: '0 1rem',
               color: brandColors.neutral[500]
             }}>
-              ——————— Or ———————
+              OR
             </span>
+            </div>
           </div>
 
-          <Button
+          <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            variant="outline"
-            className="w-full"
             style={{
+              width: '100%',
               padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: 'transparent',
               color: brandColors.neutral[700],
@@ -494,19 +423,19 @@ export default function AuthPage() {
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.borderColor = brandColors.neutral[300]
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
                 e.currentTarget.style.backgroundColor = 'transparent'
               }
             }}
           >
-            <svg width={window.innerWidth < 768 ? 18 : 20} height={window.innerWidth < 768 ? 18 : 20} viewBox="0 0 24 24">
+            <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
             Continue with Google
-          </Button>
+          </button>
 
           <div style={{
             textAlign: 'center',
@@ -525,8 +454,7 @@ export default function AuthPage() {
                 color: brandColors.primary[600],
                 fontWeight: '600',
                 cursor: 'pointer',
-                textDecoration: 'none',
-                fontFamily: 'Poppins, sans-serif'
+                textDecoration: 'none'
               }}
             >
               {isLogin ? 'Sign up' : 'Sign in'}
