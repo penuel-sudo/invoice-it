@@ -6,6 +6,7 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { Button, Input, Label } from '../components/ui'
 import ForgotPasswordModal from '../components/ForgotPasswordModal'
+import CountryPhoneSelector from '../components/CountryPhoneSelector'
 
 const getTypographyStyle = (preset: any) => {
   return {
@@ -24,7 +25,19 @@ export default function AuthPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    countryCode: '',
+    phoneNumber: ''
+  })
+  const [phoneData, setPhoneData] = useState({
+    countryCode: '',
+    phoneNumber: '',
+    isValid: false,
+    countryName: '',
+    phonePrefix: '',
+    languageCode: '',
+    currencyCode: '',
+    timezone: ''
   })
   const [isLoading, setIsLoading] = useState(false)
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false)
@@ -49,6 +62,16 @@ export default function AuthPage() {
       return
     }
 
+    if (!isLogin && (!phoneData.countryCode || !phoneData.phoneNumber)) {
+      toast.error('Please enter your phone number')
+      return
+    }
+
+    if (!isLogin && phoneData.phoneNumber && !phoneData.isValid) {
+      toast.error('Please enter a valid phone number')
+      return
+    }
+
     if (formData.password.length < 6) {
       toast.error('Password must be at least 6 characters')
       return
@@ -66,7 +89,15 @@ export default function AuthPage() {
           navigate('/dashboard')
         }
       } else {
-        const { error } = await signUp(formData.email, formData.password, formData.name)
+        const { error } = await signUp(formData.email, formData.password, formData.name, {
+          countryCode: phoneData.countryCode,
+          phoneNumber: phoneData.phoneNumber,
+          countryName: phoneData.countryName || '',
+          phonePrefix: phoneData.phonePrefix || '',
+          languageCode: phoneData.languageCode || '',
+          currencyCode: phoneData.currencyCode || '',
+          timezone: phoneData.timezone || ''
+        })
         if (error) {
           toast.error(error.message)
         } else {
@@ -270,6 +301,35 @@ export default function AuthPage() {
                 </Label>
               </div>
             </div>
+          )}
+
+          {!isLogin && (
+            <CountryPhoneSelector
+              value={{
+                countryCode: phoneData.countryCode,
+                phoneNumber: phoneData.phoneNumber
+              }}
+              onChange={(value) => {
+                setPhoneData({
+                  countryCode: value.countryCode,
+                  phoneNumber: value.phoneNumber,
+                  isValid: value.isValid,
+                  countryName: value.countryName || '',
+                  phonePrefix: value.phonePrefix || '',
+                  languageCode: value.languageCode || '',
+                  currencyCode: value.currencyCode || '',
+                  timezone: value.timezone || ''
+                })
+                setFormData(prev => ({
+                  ...prev,
+                  countryCode: value.countryCode,
+                  phoneNumber: value.phoneNumber
+                }))
+              }}
+              placeholder="Enter your phone number"
+              required={true}
+              autoDetectCountry={true}
+            />
           )}
 
           <div style={{ position: 'relative' }}>

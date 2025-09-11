@@ -18,22 +18,45 @@ export function useAuth() {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) {
-        console.error('Error getting session:', error)
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Error getting session:', error)
+        } else {
+          console.log('Initial session loaded:', session ? 'User logged in' : 'No session')
+        }
+        setAuthState({
+          user: session?.user ?? null,
+          session,
+          loading: false
+        })
+      } catch (error) {
+        console.error('Failed to get initial session:', error)
+        setAuthState({
+          user: null,
+          session: null,
+          loading: false
+        })
       }
-      setAuthState({
-        user: session?.user ?? null,
-        session,
-        loading: false
-      })
     }
 
     getInitialSession()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log('Auth state changed:', event, session ? 'User logged in' : 'User logged out')
+        
+        // Handle token refresh
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully')
+        }
+        
+        // Handle sign out
+        if (event === 'SIGNED_OUT') {
+          console.log('User signed out')
+        }
+        
         setAuthState({
           user: session?.user ?? null,
           session,
@@ -45,14 +68,29 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = async (email: string, password: string, name?: string, profileData?: {
+    countryCode?: string
+    phoneNumber?: string
+    countryName?: string
+    phonePrefix?: string
+    languageCode?: string
+    currencyCode?: string
+    timezone?: string
+  }) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            name: name || ''
+            name: name || '',
+            country_code: profileData?.countryCode || '',
+            phone: profileData?.phoneNumber || '',
+            country_name: profileData?.countryName || '',
+            phone_prefix: profileData?.phonePrefix || '',
+            language_code: profileData?.languageCode || '',
+            currency_code: profileData?.currencyCode || '',
+            timezone: profileData?.timezone || ''
           }
         }
       })
@@ -134,6 +172,48 @@ export function useAuth() {
     }
   }
 
+  const refreshSession = async () => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession()
+      if (error) {
+        console.error('Session refresh failed:', error)
+        return { error }
+      }
+      console.log('Session refreshed successfully')
+      return { data, error: null }
+    } catch (error) {
+      console.error('Session refresh exception:', error)
+      return { error: error as any }
+    }
+  }
+
+  const checkSessionStatus = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) {
+        console.error('Session check failed:', error)
+        return { session: null, error }
+      }
+      
+      if (session) {
+        const expiresAt = new Date(session.expires_at! * 1000)
+        const now = new Date()
+        const timeUntilExpiry = expiresAt.getTime() - now.getTime()
+        
+        console.log('Session status:', {
+          isValid: session.expires_at! > now.getTime() / 1000,
+          expiresAt: expiresAt.toLocaleString(),
+          timeUntilExpiry: Math.round(timeUntilExpiry / 1000 / 60) + ' minutes'
+        })
+      }
+      
+      return { session, error: null }
+    } catch (error) {
+      console.error('Session status check failed:', error)
+      return { session: null, error: error as any }
+    }
+  }
+
   return {
     ...authState,
     signUp,
@@ -141,6 +221,8 @@ export function useAuth() {
     signInWithGoogle,
     resetPassword,
     updatePassword,
-    signOut
+    signOut,
+    refreshSession,
+    checkSessionStatus
   }
 }
