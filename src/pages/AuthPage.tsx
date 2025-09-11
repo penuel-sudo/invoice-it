@@ -234,10 +234,10 @@ export default function AuthPage() {
                   }}
                   style={{
                     width: '100%',
-                    padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
+                    padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
                     border: 'none',
                     borderRadius: '50px',
-                    fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                    fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
                     backgroundColor: 'transparent',
                     outline: 'none',
                     transition: 'all 0.2s ease',
@@ -248,8 +248,8 @@ export default function AuthPage() {
                 <Label htmlFor="name" style={{ 
                   position: 'absolute',
                   left: '1.5rem',
-                  top: formData.name ? '-0.5rem' : '50%',
-                  transform: formData.name ? 'translateY(0)' : 'translateY(-50%)',
+                top: (formData.name || focused) ? '-0.5rem' : '50%',
+                transform: (formData.name || focused) ? 'translateY(0)' : 'translateY(-50%)',
                   fontSize: formData.name ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
                   fontWeight: '500',
                   color: formData.name ? brandColors.primary[600] : brandColors.neutral[500],
@@ -289,15 +289,16 @@ export default function AuthPage() {
                 }}
                 style={{
                   width: '100%',
-                  padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
+                  padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                  fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
                   backgroundColor: 'transparent',
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
-                  fontFamily: 'Poppins, sans-serif'
+                  fontFamily: 'Poppins, sans-serif',
+                  height: window.innerWidth < 768 ? '3.5rem' : '3.5rem'
                 }}
               />
               <Label htmlFor="email" style={{ 
@@ -343,10 +344,10 @@ export default function AuthPage() {
                 }}
                 style={{
                   width: '100%',
-                  padding: window.innerWidth < 768 ? '1rem 3.5rem 1rem 1.5rem' : '1.25rem 3.5rem 1.25rem 1.5rem',
+                  padding: window.innerWidth < 768 ? '1.25rem 3.5rem 1.25rem 1.5rem' : '1.25rem 3.5rem 1.25rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                  fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
                   backgroundColor: 'transparent',
                   outline: 'none',
                   transition: 'all 0.2s ease',
@@ -422,13 +423,13 @@ export default function AuthPage() {
             disabled={isLoading}
             style={{
               width: '100%',
-              padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
+              padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
               border: 'none',
               marginTop: '0.5rem',
               borderRadius: '50px',
-              fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+              fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '600',
               cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -451,29 +452,29 @@ export default function AuthPage() {
           </Button>
 
           <div style={{
-            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
             margin: '1.5rem 0',
-            fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
-            color: brandColors.neutral[500],
-            position: 'relative',
             fontFamily: 'Poppins, sans-serif'
           }}>
             <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: 0,
-              right: 0,
+              flexGrow: 1,
               height: '1px',
               backgroundColor: brandColors.neutral[300]
-            }}>
+            }}></div>
             <span style={{
-              backgroundColor: brandColors.white,
               padding: '0 1rem',
-              color: brandColors.neutral[500]
+              fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+              color: brandColors.neutral[500],
+              fontWeight: '500'
             }}>
               OR
             </span>
-            </div>
+            <div style={{
+              flexGrow: 1,
+              height: '1px',
+              backgroundColor: brandColors.neutral[300]
+            }}></div>
           </div>
 
           <button
@@ -482,12 +483,12 @@ export default function AuthPage() {
             disabled={isLoading}
             style={{
               width: '100%',
-              padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
+              padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: 'transparent',
               color: brandColors.neutral[700],
               border: `1px solid ${brandColors.neutral[300]}`,
               borderRadius: '50px',
-              fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+              fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '500',
               cursor: isLoading ? 'not-allowed' : 'pointer',
