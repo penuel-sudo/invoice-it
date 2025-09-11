@@ -95,60 +95,81 @@ export default function AuthPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: brandColors.white,
+      backgroundColor: brandColors.neutral[50],
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '1rem'
+      padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
-      {/* Logo and Welcome */}
+      {/* Header with Logo and Site Name */}
       <div style={{
-        textAlign: 'center',
-        marginBottom: '2rem'
+        position: 'fixed',
+        top: '1.5rem',
+        right: window.innerWidth < 768 ? '1.5rem' : '2rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        zIndex: 10
       }}>
-        <div style={{
-          width: '80px',
-          height: '80px',
-          backgroundColor: brandColors.primary[100],
-          borderRadius: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 1rem auto'
-        }}>
-          <img 
-            src="/logo_web_app_256x256.png" 
-            alt="Invoice-It" 
-            style={{ width: '50px', height: '50px' }}
-          />
-        </div>
-        <h1 style={{
-          ...getTypographyStyle(typographyPresets.h2),
-          color: brandColors.neutral[900],
-          margin: '0 0 0.5rem 0',
-          fontWeight: '700'
-        }}>
-          Hi, Welcome back!
-        </h1>
-        <p style={{
-          ...getTypographyStyle(typographyPresets.body),
-          color: brandColors.neutral[600],
-          margin: 0
-        }}>
-          Sign in with your credentials
-        </p>
+        <img 
+          src="/logo_web_app_256x256.png" 
+          alt="InvoiceIt" 
+          style={{ 
+            width: window.innerWidth < 768 ? '32px' : '40px', 
+            height: window.innerWidth < 768 ? '32px' : '40px' 
+          }}
+        />
+        {window.innerWidth >= 768 && (
+          <span style={{
+            fontSize: '1.25rem',
+            fontWeight: '700',
+            color: brandColors.neutral[900],
+            letterSpacing: '-0.025em'
+          }}>
+            InvoiceIt
+          </span>
+        )}
       </div>
 
-      {/* Auth Form */}
+      {/* Main Content */}
       <div style={{
         width: '100%',
         maxWidth: '400px',
-        backgroundColor: brandColors.white,
-        padding: '2rem',
-        borderRadius: '16px'
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
       }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {/* Welcome Section */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '2.5rem'
+        }}>
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            margin: '0 0 0.5rem 0',
+            letterSpacing: '-0.025em'
+          }}>
+            {isLogin ? 'Welcome back' : 'Create your account'}
+          </h1>
+          <p style={{
+            fontSize: '1rem',
+            color: brandColors.neutral[600],
+            margin: 0,
+            fontWeight: '400'
+          }}>
+            {isLogin ? 'Sign in to your account' : 'Get started with InvoiceIt'}
+          </p>
+        </div>
+
+        {/* Auth Form */}
+        <div style={{
+          width: '100%'
+        }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {!isLogin && (
             <div>
               <Label htmlFor="name" style={{ 
@@ -168,11 +189,22 @@ export default function AuthPage() {
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
+                  padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
                   border: `1px solid ${brandColors.neutral[200]}`,
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   fontSize: '1rem',
-                  backgroundColor: brandColors.white
+                  backgroundColor: brandColors.white,
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = brandColors.primary[300]
+                  e.target.style.boxShadow = `0 0 0 3px ${brandColors.primary[100]}`
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = brandColors.neutral[200]
+                  e.target.style.boxShadow = 'none'
                 }}
               />
             </div>
@@ -196,11 +228,22 @@ export default function AuthPage() {
               onChange={(e) => handleInputChange('email', e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.75rem',
+                padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
                 border: `1px solid ${brandColors.neutral[200]}`,
-                borderRadius: '8px',
+                borderRadius: '12px',
                 fontSize: '1rem',
-                backgroundColor: brandColors.white
+                backgroundColor: brandColors.white,
+                outline: 'none',
+                transition: 'all 0.2s ease',
+                boxSizing: 'border-box'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = brandColors.primary[300]
+                e.target.style.boxShadow = `0 0 0 3px ${brandColors.primary[100]}`
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = brandColors.neutral[200]
+                e.target.style.boxShadow = 'none'
               }}
             />
           </div>
@@ -224,12 +267,23 @@ export default function AuthPage() {
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
-                  paddingRight: '3rem',
+                  padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
+                  paddingRight: '3.5rem',
                   border: `1px solid ${brandColors.neutral[200]}`,
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   fontSize: '1rem',
-                  backgroundColor: brandColors.white
+                  backgroundColor: brandColors.white,
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = brandColors.primary[300]
+                  e.target.style.boxShadow = `0 0 0 3px ${brandColors.primary[100]}`
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = brandColors.neutral[200]
+                  e.target.style.boxShadow = 'none'
                 }}
               />
               <button
@@ -237,13 +291,14 @@ export default function AuthPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   position: 'absolute',
-                  right: '0.75rem',
+                  right: '1rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: brandColors.neutral[500]
+                  color: brandColors.neutral[500],
+                  padding: '0.25rem'
                 }}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -291,16 +346,27 @@ export default function AuthPage() {
             disabled={isLoading}
             style={{
               width: '100%',
-              padding: '0.875rem',
+              padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '12px',
               fontSize: '1rem',
               fontWeight: '600',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.7 : 1,
-              marginTop: '0.5rem'
+              transition: 'all 0.2s ease',
+              boxSizing: 'border-box'
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.backgroundColor = brandColors.primary[700]
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.backgroundColor = brandColors.primary[600]
+              }
             }}
           >
             {isLoading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
@@ -308,11 +374,26 @@ export default function AuthPage() {
 
           <div style={{
             textAlign: 'center',
-            margin: '1rem 0',
+            margin: '1.5rem 0',
             fontSize: '0.875rem',
-            color: brandColors.neutral[500]
+            color: brandColors.neutral[500],
+            position: 'relative'
           }}>
-            Or Sign in with email
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: 0,
+              right: 0,
+              height: '1px',
+              backgroundColor: brandColors.neutral[200]
+            }}></div>
+            <span style={{
+              backgroundColor: brandColors.neutral[50],
+              padding: '0 1rem',
+              color: brandColors.neutral[500]
+            }}>
+              OR
+            </span>
           </div>
 
           <button
@@ -321,18 +402,32 @@ export default function AuthPage() {
             disabled={isLoading}
             style={{
               width: '100%',
-              padding: '0.875rem',
+              padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: brandColors.white,
               color: brandColors.neutral[700],
               border: `1px solid ${brandColors.neutral[200]}`,
-              borderRadius: '8px',
+              borderRadius: '12px',
               fontSize: '1rem',
               fontWeight: '500',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.5rem'
+              gap: '0.75rem',
+              transition: 'all 0.2s ease',
+              boxSizing: 'border-box'
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.borderColor = brandColors.neutral[300]
+                e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
+                e.currentTarget.style.backgroundColor = brandColors.white
+              }
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24">
@@ -341,16 +436,16 @@ export default function AuthPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Sign in with Google
+            Continue with Google
           </button>
 
           <div style={{
             textAlign: 'center',
-            marginTop: '1.5rem',
+            marginTop: '2rem',
             fontSize: '0.875rem',
             color: brandColors.neutral[600]
           }}>
-            {isLogin ? "Not sign up yet? " : "Already have an account? "}
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
@@ -360,30 +455,33 @@ export default function AuthPage() {
                 color: brandColors.primary[600],
                 fontWeight: '600',
                 cursor: 'pointer',
-                textDecoration: 'underline'
+                textDecoration: 'none'
               }}
             >
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
           </div>
         </form>
+        </div>
       </div>
 
       {/* Footer Links */}
       <div style={{
-        marginTop: '2rem',
+        position: 'fixed',
+        bottom: '1.5rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
         textAlign: 'center',
         fontSize: '0.75rem',
         color: brandColors.neutral[500]
       }}>
-        By continuing, you agree to our{' '}
-        <a href="#" style={{ color: brandColors.primary[600], textDecoration: 'none' }}>
-          Terms of Service
-        </a>{' '}
-        and{' '}
-        <a href="#" style={{ color: brandColors.primary[600], textDecoration: 'none' }}>
+        <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>
+          Terms of Use
+        </span>
+        <span style={{ margin: '0 0.5rem' }}>|</span>
+        <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>
           Privacy Policy
-        </a>
+        </span>
       </div>
     </div>
   )

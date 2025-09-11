@@ -28,6 +28,8 @@ export interface InvoiceFormData {
   clientName: string
   clientEmail: string
   clientAddress: string
+  clientPhone: string
+  clientCompanyName: string
   invoiceNumber: string
   invoiceDate: string
   dueDate: string
@@ -155,6 +157,8 @@ export const invoiceStorage = {
       clientName: '',
       clientEmail: '',
       clientAddress: '',
+      clientPhone: '',
+      clientCompanyName: '',
       invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
       invoiceDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],

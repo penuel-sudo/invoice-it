@@ -138,7 +138,9 @@ export default function InvoiceCreatePage() {
             user_id: user.id,
             name: formData.clientName,
             email: formData.clientEmail || null,
-            address: formData.clientAddress || null
+            address: formData.clientAddress || null,
+            phone: formData.clientPhone || null,
+            company_name: formData.clientCompanyName || null
           })
           .select()
           .single()
@@ -229,14 +231,15 @@ export default function InvoiceCreatePage() {
   if (!user) { return null }
 
   return (
-    <div style={{
-      paddingBottom: '4rem',
-      backgroundColor: brandColors.white,
-      minHeight: '100vh',
-      width: '100%',
-      maxWidth: '100vw',
-      overflow: 'hidden'
-    }}>
+    <Layout>
+      <div style={{
+        paddingBottom: '4rem',
+        backgroundColor: brandColors.white,
+        minHeight: '100vh',
+        width: '100%',
+        maxWidth: '100vw',
+        overflow: 'hidden'
+      }}>
         {/* Header */}
         <div style={{
           display: 'flex',
@@ -386,6 +389,62 @@ export default function InvoiceCreatePage() {
                     resize: 'vertical'
                   }}
                 />
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.clientPhone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
+                    placeholder="+1 (555) 123-4567"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Company Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.clientCompanyName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clientCompanyName: e.target.value }))}
+                    placeholder="Company Inc."
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -915,6 +974,7 @@ export default function InvoiceCreatePage() {
             Preview
           </button>
         </div>
-    </div>
+      </div>
+    </Layout>
   )
 }
