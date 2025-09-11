@@ -7,6 +7,8 @@ import { brandColors } from '../stylings'
 import { Button, Input, Label } from '../components/ui'
 
 export default function ResetPasswordPage() {
+  console.log('ResetPasswordPage component rendered')
+  
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
@@ -20,16 +22,32 @@ export default function ResetPasswordPage() {
   const { updatePassword } = useAuth()
   const navigate = useNavigate()
 
-  // Check if we have the necessary tokens from the URL
+  // Handle Supabase password reset flow
   useEffect(() => {
-    const accessToken = searchParams.get('access_token')
-    const refreshToken = searchParams.get('refresh_token')
+    // Check if we have tokens in URL fragments (Supabase redirects with #)
+    const hash = window.location.hash
+    const urlParams = new URLSearchParams(hash.substring(1))
     
-    if (!accessToken || !refreshToken) {
-      toast.error('Invalid or expired reset link')
-      navigate('/auth')
+    const accessToken = urlParams.get('access_token')
+    const refreshToken = urlParams.get('refresh_token')
+    const type = urlParams.get('type')
+    
+    console.log('Reset password URL params:', { 
+      accessToken: !!accessToken, 
+      refreshToken: !!refreshToken, 
+      type,
+      hash: hash.substring(0, 50) + '...'
+    })
+    
+    // If we have tokens, set the session
+    if (accessToken && refreshToken && type === 'recovery') {
+      // Supabase will automatically handle the session when tokens are in URL
+      console.log('Password reset tokens detected, session should be set')
+    } else if (!hash) {
+      // No tokens in URL, might be a direct visit
+      console.log('No reset tokens found in URL')
     }
-  }, [searchParams, navigate])
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -56,14 +74,18 @@ export default function ResetPasswordPage() {
     setIsLoading(true)
 
     try {
+      console.log('Attempting to update password...')
       const { error } = await updatePassword(formData.password)
       if (error) {
+        console.error('Password update error:', error)
         toast.error(error.message)
       } else {
+        console.log('Password updated successfully')
         toast.success('Password updated successfully!')
         navigate('/auth')
       }
     } catch (error: any) {
+      console.error('Password update exception:', error)
       toast.error(error.message || 'An error occurred')
     } finally {
       setIsLoading(false)
@@ -81,6 +103,20 @@ export default function ResetPasswordPage() {
       padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
       fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
+      {/* Debug info */}
+      <div style={{ 
+        position: 'absolute', 
+        top: '10px', 
+        left: '10px', 
+        fontSize: '12px', 
+        color: '#666',
+        backgroundColor: '#f0f0f0',
+        padding: '4px 8px',
+        borderRadius: '4px',
+        border: '1px solid #ccc'
+      }}>
+        Reset Password Page Loaded - {new Date().toLocaleTimeString()}
+      </div>
       {/* Back Button */}
       <button
         onClick={() => navigate('/auth')}

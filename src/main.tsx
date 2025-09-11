@@ -5,7 +5,9 @@ import './index.css'
 import './styles/responsive.css'
 import App from './App.tsx'
 
-// Register Service Worker for PWA functionality
+// Service Worker disabled for debugging
+// TODO: Re-enable after fixing caching issues
+/*
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -30,6 +32,17 @@ if ('serviceWorker' in navigator) {
       .catch((error) => {
         console.log('Service Worker registration failed:', error)
       })
+  })
+}
+*/
+
+// Unregister any existing service workers
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      console.log('Unregistering service worker:', registration.scope)
+      registration.unregister()
+    })
   })
 }
 
