@@ -19,6 +19,7 @@ const getTypographyStyle = (preset: any) => {
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [focused, setFocused] = useState('')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -143,7 +144,7 @@ export default function AuthPage() {
         </div>
       )}
 
-      {/* Desktop Logo on Right */}
+      {/* Desktop Logo on left */}
       {window.innerWidth >= 768 && (
         <div style={{
           position: 'fixed',
@@ -182,7 +183,7 @@ export default function AuthPage() {
         <div style={{
           textAlign: 'center',
           marginBottom: window.innerWidth < 768 ? '3rem' : '2.5rem',
-          marginTop: window.innerWidth < 768 ? '6rem' : '0'
+          marginTop: window.innerWidth < 768 ? '6rem' : '1.5rem'
         }}>
           <h1 style={{
             fontSize: window.innerWidth < 768 ? '1.75rem' : '2rem',
@@ -225,10 +226,12 @@ export default function AuthPage() {
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   onFocus={(e) => {
+                    setFocused('name')
                     e.target.parentElement.style.borderColor = brandColors.primary[400]
                     e.target.parentElement.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
                   }}
                   onBlur={(e) => {
+                    setFocused('')
                     e.target.parentElement.style.borderColor = brandColors.neutral[300]
                     e.target.parentElement.style.boxShadow = 'none'
                   }}
@@ -248,8 +251,8 @@ export default function AuthPage() {
                 <Label htmlFor="name" style={{ 
                   position: 'absolute',
                   left: '1.5rem',
-                top: (formData.name || focused) ? '-0.5rem' : '50%',
-                transform: (formData.name || focused) ? 'translateY(0)' : 'translateY(-50%)',
+                top: (formData.name || focused === 'name') ? '-0.5rem' : '50%',
+                transform: (formData.name || focused === 'name') ? 'translateY(0)' : 'translateY(-50%)',
                   fontSize: formData.name ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
                   fontWeight: '500',
                   color: formData.name ? brandColors.primary[600] : brandColors.neutral[500],
@@ -280,16 +283,19 @@ export default function AuthPage() {
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 onFocus={(e) => {
+                  setFocused('email')
                   e.target.parentElement.style.borderColor = brandColors.primary[400]
                   e.target.parentElement.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
                 }}
                 onBlur={(e) => {
+                  setFocused('')
                   e.target.parentElement.style.borderColor = brandColors.neutral[300]
                   e.target.parentElement.style.boxShadow = 'none'
                 }}
                 style={{
                   width: '100%',
-                  padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
+                  maxWidth: '400px',
+                  padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
                   fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
@@ -298,14 +304,14 @@ export default function AuthPage() {
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  height: window.innerWidth < 768 ? '3.5rem' : '3.5rem'
+                  height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
                 }}
               />
               <Label htmlFor="email" style={{ 
                 position: 'absolute',
                 left: '1.5rem',
-                top: formData.email ? '-0.5rem' : '50%',
-                transform: formData.email ? 'translateY(0)' : 'translateY(-50%)',
+                top: (formData.email || focused === 'email') ? '-0.5rem' : '50%',
+                transform: (formData.email || focused === 'email') ? 'translateY(0)' : 'translateY(-50%)',
                 fontSize: formData.email ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: formData.email ? brandColors.primary[600] : brandColors.neutral[500],
@@ -335,16 +341,19 @@ export default function AuthPage() {
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 onFocus={(e) => {
+                  setFocused('password')
                   e.target.parentElement.style.borderColor = brandColors.primary[400]
                   e.target.parentElement.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
                 }}
                 onBlur={(e) => {
+                  setFocused('')
                   e.target.parentElement.style.borderColor = brandColors.neutral[300]
                   e.target.parentElement.style.boxShadow = 'none'
                 }}
                 style={{
                   width: '100%',
-                  padding: window.innerWidth < 768 ? '1.25rem 3.5rem 1.25rem 1.5rem' : '1.25rem 3.5rem 1.25rem 1.5rem',
+                  maxWidth: '400px',
+                  padding: window.innerWidth < 768 ? '1.125rem 3.5rem 1.125rem 1.5rem' : '1.125rem 3.5rem 1.125rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
                   fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
@@ -352,14 +361,15 @@ export default function AuthPage() {
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
-                  fontFamily: 'Poppins, sans-serif'
+                  fontFamily: 'Poppins, sans-serif',
+                  height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
                 }}
               />
               <Label htmlFor="password" style={{ 
                 position: 'absolute',
                 left: '1.5rem',
-                top: formData.password ? '-0.5rem' : '50%',
-                transform: formData.password ? 'translateY(0)' : 'translateY(-50%)',
+                top: (formData.password || focused === 'password') ? '-0.5rem' : '50%',
+                transform: (formData.password || focused === 'password') ? 'translateY(0)' : 'translateY(-50%)',
                 fontSize: formData.password ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: formData.password ? brandColors.primary[600] : brandColors.neutral[500],
@@ -423,7 +433,8 @@ export default function AuthPage() {
             disabled={isLoading}
             style={{
               width: '100%',
-              padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
+              maxWidth: '400px',
+              padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
               border: 'none',
@@ -435,7 +446,8 @@ export default function AuthPage() {
               cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.7 : 1,
               transition: 'all 0.2s ease',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
@@ -483,6 +495,7 @@ export default function AuthPage() {
             disabled={isLoading}
             style={{
               width: '100%',
+              maxWidth: '400px',
               padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: 'transparent',
               color: brandColors.neutral[700],
@@ -497,7 +510,8 @@ export default function AuthPage() {
               justifyContent: 'center',
               gap: '0.75rem',
               transition: 'all 0.2s ease',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              height: window.innerWidth < 768 ? '3.5rem' : '3.5rem'
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
