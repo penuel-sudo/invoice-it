@@ -211,102 +211,185 @@ export default function AuthPage() {
         }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {!isLogin && (
-            <div>
-              <Label htmlFor="name" style={{ 
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
-                fontWeight: '500',
-                color: brandColors.neutral[700],
-                fontFamily: 'Poppins, sans-serif'
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'relative',
+                border: `1px solid ${brandColors.neutral[300]}`,
+                borderRadius: '50px',
+                transition: 'all 0.2s ease'
               }}>
-                Name
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Enter your name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                style={{
-                  borderRadius: '50px',
-                  border: `1px solid ${brandColors.neutral[300]}`,
-                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder=" "
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  onFocus={(e) => {
+                    e.target.parentElement.style.borderColor = brandColors.primary[400]
+                    e.target.parentElement.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
+                  }}
+                  onBlur={(e) => {
+                    e.target.parentElement.style.borderColor = brandColors.neutral[300]
+                    e.target.parentElement.style.boxShadow = 'none'
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
+                    border: 'none',
+                    borderRadius: '50px',
+                    fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                    backgroundColor: 'transparent',
+                    outline: 'none',
+                    transition: 'all 0.2s ease',
+                    boxSizing: 'border-box',
+                    fontFamily: 'Poppins, sans-serif'
+                  }}
+                />
+                <Label htmlFor="name" style={{ 
+                  position: 'absolute',
+                  left: '1.5rem',
+                  top: formData.name ? '-0.5rem' : '50%',
+                  transform: formData.name ? 'translateY(0)' : 'translateY(-50%)',
+                  fontSize: formData.name ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                  fontWeight: '500',
+                  color: formData.name ? brandColors.primary[600] : brandColors.neutral[500],
+                  backgroundColor: brandColors.white,
+                  padding: formData.name ? '0 0.5rem' : '0',
+                  transition: 'all 0.2s ease',
+                  pointerEvents: 'none',
                   fontFamily: 'Poppins, sans-serif',
-                  padding: window.innerWidth < 768 ? '0.75rem 1.5rem' : '1rem 1.5rem'
-                }}
-              />
+                  zIndex: 20
+                }}>
+                  Name
+                </Label>
+              </div>
             </div>
           )}
 
-          <div>
-            <Label htmlFor="email" style={{ 
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
-              fontWeight: '500',
-              color: brandColors.neutral[700],
-              fontFamily: 'Poppins, sans-serif'
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              position: 'relative',
+              border: `1px solid ${brandColors.neutral[300]}`,
+              borderRadius: '50px',
+              transition: 'all 0.2s ease'
             }}>
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              style={{
-                borderRadius: '50px',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+              <Input
+                id="email"
+                type="email"
+                placeholder=" "
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                onFocus={(e) => {
+                  e.target.parentElement.style.borderColor = brandColors.primary[400]
+                  e.target.parentElement.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
+                }}
+                onBlur={(e) => {
+                  e.target.parentElement.style.borderColor = brandColors.neutral[300]
+                  e.target.parentElement.style.boxShadow = 'none'
+                }}
+                style={{
+                  width: '100%',
+                  padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
+                  border: 'none',
+                  borderRadius: '50px',
+                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                  backgroundColor: 'transparent',
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box',
+                  fontFamily: 'Poppins, sans-serif'
+                }}
+              />
+              <Label htmlFor="email" style={{ 
+                position: 'absolute',
+                left: '1.5rem',
+                top: formData.email ? '-0.5rem' : '50%',
+                transform: formData.email ? 'translateY(0)' : 'translateY(-50%)',
+                fontSize: formData.email ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                fontWeight: '500',
+                color: formData.email ? brandColors.primary[600] : brandColors.neutral[500],
+                backgroundColor: brandColors.white,
+                padding: formData.email ? '0 0.5rem' : '0',
+                transition: 'all 0.2s ease',
+                pointerEvents: 'none',
                 fontFamily: 'Poppins, sans-serif',
-                padding: window.innerWidth < 768 ? '0.75rem 1.5rem' : '1rem 1.5rem'
-              }}
-            />
+                zIndex: 20
+              }}>
+                Email
+              </Label>
+            </div>
           </div>
 
           <div style={{ position: 'relative' }}>
-            <Label htmlFor="password" style={{ 
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
-              fontWeight: '500',
-              color: brandColors.neutral[700],
-              fontFamily: 'Poppins, sans-serif'
+            <div style={{
+              position: 'relative',
+              border: `1px solid ${brandColors.neutral[300]}`,
+              borderRadius: '50px',
+              transition: 'all 0.2s ease'
             }}>
-              Password
-            </Label>
-            <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              style={{
-                borderRadius: '50px',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
-                fontFamily: 'Poppins, sans-serif',
-                padding: window.innerWidth < 768 ? '0.75rem 3.5rem 0.75rem 1.5rem' : '1rem 3.5rem 1rem 1.5rem'
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder=" "
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                onFocus={(e) => {
+                  e.target.parentElement.style.borderColor = brandColors.primary[400]
+                  e.target.parentElement.style.boxShadow = `0 0 0 2px ${brandColors.primary[100]}`
+                }}
+                onBlur={(e) => {
+                  e.target.parentElement.style.borderColor = brandColors.neutral[300]
+                  e.target.parentElement.style.boxShadow = 'none'
+                }}
+                style={{
+                  width: '100%',
+                  padding: window.innerWidth < 768 ? '1rem 3.5rem 1rem 1.5rem' : '1.25rem 3.5rem 1.25rem 1.5rem',
+                  border: 'none',
+                  borderRadius: '50px',
+                  fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                  backgroundColor: 'transparent',
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box',
+                  fontFamily: 'Poppins, sans-serif'
+                }}
+              />
+              <Label htmlFor="password" style={{ 
                 position: 'absolute',
-                right: '1.5rem',
-                top: '2.25rem',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: brandColors.neutral[500],
-                padding: '0.25rem'
-              }}
-            >
-              {showPassword ? <EyeOff size={window.innerWidth < 768 ? 18 : 20} /> : <Eye size={window.innerWidth < 768 ? 18 : 20} />}
-            </button>
+                left: '1.5rem',
+                top: formData.password ? '-0.5rem' : '50%',
+                transform: formData.password ? 'translateY(0)' : 'translateY(-50%)',
+                fontSize: formData.password ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                fontWeight: '500',
+                color: formData.password ? brandColors.primary[600] : brandColors.neutral[500],
+                backgroundColor: brandColors.white,
+                padding: formData.password ? '0 0.5rem' : '0',
+                transition: 'all 0.2s ease',
+                pointerEvents: 'none',
+                fontFamily: 'Poppins, sans-serif',
+                zIndex: 20
+              }}>
+                Password
+              </Label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '1.5rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: brandColors.neutral[500],
+                  padding: '0.25rem',
+                  zIndex: 10
+                }}
+              >
+                {showPassword ? <EyeOff size={window.innerWidth < 768 ? 18 : 20} /> : <Eye size={window.innerWidth < 768 ? 18 : 20} />}
+              </button>
+            </div>
           </div>
 
           {isLogin && (
@@ -423,7 +506,7 @@ export default function AuthPage() {
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.borderColor = brandColors.neutral[200]
+                e.currentTarget.style.borderColor = brandColors.neutral[300]
                 e.currentTarget.style.backgroundColor = 'transparent'
               }
             }}
