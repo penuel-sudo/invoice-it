@@ -149,12 +149,12 @@ export default function AuthPage() {
         </div>
       )}
 
-      {/* Desktop Logo on Right */}
+      {/* Desktop Logo on Left */}
       {window.innerWidth >= 768 && (
         <div style={{
           position: 'fixed',
           top: '1.5rem',
-          right: '2rem',
+          left: '2rem',
           display: 'flex',
           alignItems: 'center',
           gap: '0.75rem',
@@ -215,9 +215,9 @@ export default function AuthPage() {
         <div style={{
           width: '100%'
         }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {!isLogin && (
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
               <Input
                 id="name"
                 type="text"
@@ -401,8 +401,8 @@ export default function AuthPage() {
           <Button
             type="submit"
             disabled={isLoading}
+            className="w-full"
             style={{
-              width: '100%',
               padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
@@ -446,21 +446,30 @@ export default function AuthPage() {
               height: '1px',
               backgroundColor: brandColors.neutral[300]
             }}></div>
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: 0,
+              right: 0,
+              height: '1px',
+              backgroundColor: brandColors.neutral[300]
+            }}></div>
             <span style={{
               backgroundColor: brandColors.white,
               padding: '0 1rem',
               color: brandColors.neutral[500]
             }}>
-              OR
+              ——————— Or ———————
             </span>
           </div>
 
-          <button
+          <Button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
+            variant="outline"
+            className="w-full"
             style={{
-              width: '100%',
               padding: window.innerWidth < 768 ? '1rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: 'transparent',
               color: brandColors.neutral[700],
@@ -485,7 +494,7 @@ export default function AuthPage() {
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.borderColor = brandColors.neutral[200]
+                e.currentTarget.style.borderColor = brandColors.neutral[300]
                 e.currentTarget.style.backgroundColor = 'transparent'
               }
             }}
@@ -497,7 +506,7 @@ export default function AuthPage() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
             Continue with Google
-          </button>
+          </Button>
 
           <div style={{
             textAlign: 'center',
