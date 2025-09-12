@@ -293,7 +293,7 @@ export default function CountryPhoneSelector({
               borderRadius: '12px',
               boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
               zIndex: 50,
-              height: "100%",
+              width: "100%",
               maxHeight: '400px',
               maxWidth: '400px',
               overflow: 'hidden'
