@@ -25,6 +25,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
   return (
     <aside style={{
       width: '280px',
+      height: '100vh',
       backgroundColor: brandColors.white,
       borderRight: `1px solid ${brandColors.neutral[200]}`,
       padding: '2rem 0',
