@@ -225,21 +225,6 @@ export default function CountryPhoneSelector({
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Label */}
-      {required && (
-        <label style={{
-          fontSize: '0.875rem',
-          fontWeight: '500',
-          lineHeight: '1.5',
-          letterSpacing: '0',
-          fontFamily: 'Poppins, sans-serif',
-          color: brandColors.neutral[700],
-          marginBottom: '0.5rem',
-          display: 'block'
-        }}>
-          Phone Number *
-        </label>
-      )}
 
       {/* Main Input Container */}
       <div style={{
@@ -308,7 +293,9 @@ export default function CountryPhoneSelector({
               borderRadius: '12px',
               boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
               zIndex: 50,
+              height: "100%",
               maxHeight: '400px',
+              maxWidth: '400px',
               overflow: 'hidden'
             }}>
               {/* Search Input */}
