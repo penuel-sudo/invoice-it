@@ -6,6 +6,7 @@ import { Layout } from '../components/layout'
 import { getUserDisplayName, getUserProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
 import NotificationDropdown from '../components/NotificationDropdown'
 import DesktopSettingsPanel from '../components/DesktopSettingsPanel'
+import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
 import { 
   FileText, 
@@ -72,7 +73,6 @@ export default function DashboardPage() {
       isNotificationVisible={isNotificationVisible}
       onNotificationToggle={() => setIsNotificationVisible(!isNotificationVisible)}
       onSettingsOpen={() => setIsSettingsVisible(true)}
-      showTopbar={true}
     >
       {/* Desktop Settings Panel */}
       <DesktopSettingsPanel
@@ -95,6 +95,13 @@ export default function DashboardPage() {
         maxWidth: '100vw',
         overflow: 'hidden'
       }}>
+        
+        {/* Topbar - Above display panel */}
+        <Topbar 
+          onNotificationClick={() => setIsNotificationVisible(!isNotificationVisible)}
+          onSettingsOpen={() => setIsSettingsVisible(true)}
+          unreadCount={3}
+        />
         
         {/* 📊 INVOICE STATS SECTION - Transparent background with green border */}
         <div style={{

@@ -47,7 +47,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
   return (
     <div style={{
       height: '70px',
-      backgroundColor: brandColors.white,
+      backgroundColor: 'transparent',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
