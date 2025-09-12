@@ -246,7 +246,7 @@ export default function CountryPhoneSelector({
         display: 'flex',
         width: '100%',
         border: `1px solid ${error || validationError ? brandColors.error[300] : brandColors.neutral[300]}`,
-        borderRadius: '12px',
+        borderRadius: '50px',
         backgroundColor: disabled ? brandColors.neutral[50] : brandColors.white,
         transition: 'all 0.2s ease',
         position: 'relative'
@@ -308,7 +308,7 @@ export default function CountryPhoneSelector({
               borderRadius: '12px',
               boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
               zIndex: 50,
-              maxHeight: '300px',
+              maxHeight: '400px',
               overflow: 'hidden'
             }}>
               {/* Search Input */}
