@@ -217,7 +217,7 @@ export default function ProfileDropdown({
           borderRadius: '8px',
           boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
           padding: '0.5rem',
-          minWidth: variant === 'sidebar' ? '280px' : '250px'
+          minWidth: variant === 'sidebar' ? '240px' : '200px'
         }}
       >
         {/* Profile Info Header */}

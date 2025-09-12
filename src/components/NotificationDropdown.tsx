@@ -86,10 +86,19 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
 
 
   return (
-    <div
-      style={{
+    <>
+      <style>
+        {`
+          .notification-dropdown::-webkit-scrollbar {
+            display: none;
+          }
+        `}
+      </style>
+      <div
+        className="notification-dropdown"
+        style={{
         position: 'fixed',
-        top: isVisible ? '80px' : '-100vh',
+        top: isVisible ? '70px' : '-100vh',
         right: isMobile ? '1rem' : '2rem',
         left: isMobile ? '1rem' : 'auto',
         width: isMobile ? 'auto' : '400px',
@@ -101,6 +110,8 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
         transition: 'top 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         maxHeight: '60vh',
         overflowY: 'auto',
+        scrollbarWidth: 'none', // Firefox
+        msOverflowStyle: 'none', // IE/Edge
         border: `1px solid ${brandColors.neutral[100]}`
       }}
     >
@@ -187,5 +198,6 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
         </button>
       </div>
     </div>
+    </>
   )
 }

@@ -72,6 +72,7 @@ export default function DashboardPage() {
       isNotificationVisible={isNotificationVisible}
       onNotificationToggle={() => setIsNotificationVisible(!isNotificationVisible)}
       onSettingsOpen={() => setIsSettingsVisible(true)}
+      showTopbar={true}
     >
       {/* Desktop Settings Panel */}
       <DesktopSettingsPanel
@@ -94,16 +95,21 @@ export default function DashboardPage() {
         maxWidth: '100vw',
         overflow: 'hidden'
       }}>
-        {/* 📊 INVOICE STATS SECTION - Simple green background with rounded corners */}
+        {/* 📊 INVOICE STATS SECTION - Light green background with rounded corners */}
         <div style={{
           height: '20vh',
           minHeight: '160px',
-          backgroundColor: brandColors.primary[500],
+          backgroundColor: brandColors.primary[100],
           borderRadius: '40px',
-          padding: '2rem 1.5rem',
+          border: `2px solid ${brandColors.white}`,
+          padding: '2rem 1.5rem 2rem 2rem',
+          paddingRight: '3rem',
           width: '100%',
           position: 'relative',
-          margin: '1rem'
+          margin: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
 
           {/* Stats Container - 3 columns without borders */}
@@ -123,14 +129,14 @@ export default function DashboardPage() {
               <p style={{
                 fontSize: '2rem',
                 fontWeight: '700',
-                color: brandColors.white,
+                color: brandColors.primary[800],
                 margin: '0 0 0.5rem 0'
               }}>
                 35
               </p>
               <p style={{
                 fontSize: '0.875rem',
-                color: brandColors.primary[100],
+                color: brandColors.primary[600],
                 margin: 0,
                 fontWeight: '500'
               }}>
@@ -146,14 +152,14 @@ export default function DashboardPage() {
               <p style={{
                 fontSize: '2rem',
                 fontWeight: '700',
-                color: brandColors.white,
+                color: brandColors.primary[800],
                 margin: '0 0 0.5rem 0'
               }}>
                 28
               </p>
               <p style={{
                 fontSize: '0.875rem',
-                color: brandColors.primary[100],
+                color: brandColors.primary[600],
                 margin: 0,
                 fontWeight: '500'
               }}>
@@ -169,14 +175,14 @@ export default function DashboardPage() {
               <p style={{
                 fontSize: '2rem',
                 fontWeight: '700',
-                color: brandColors.white,
+                color: brandColors.primary[800],
                 margin: '0 0 0.5rem 0'
               }}>
                 7
               </p>
               <p style={{
                 fontSize: '0.875rem',
-                color: brandColors.primary[100],
+                color: brandColors.primary[600],
                 margin: 0,
                 fontWeight: '500'
               }}>

@@ -11,9 +11,10 @@ interface LayoutProps {
   onNotificationToggle?: () => void
   onSettingsOpen?: () => void
   hideBottomNav?: boolean
+  showTopbar?: boolean
 }
 
-export default function Layout({ children, isNotificationVisible, onNotificationToggle, onSettingsOpen, hideBottomNav = false }: LayoutProps) {
+export default function Layout({ children, isNotificationVisible, onNotificationToggle, onSettingsOpen, hideBottomNav = false, showTopbar = false }: LayoutProps) {
   const { user } = useAuth()
   const [isMobile, setIsMobile] = useState(false)
 
@@ -40,12 +41,14 @@ export default function Layout({ children, isNotificationVisible, onNotification
       maxWidth: '100vw',
       overflow: 'hidden'
     }}>
-      {/* Topbar */}
-      <Topbar 
-        onNotificationClick={() => onNotificationToggle?.()}
-        onSettingsOpen={onSettingsOpen}
-        unreadCount={3}
-      />
+      {/* Topbar - Only show when showTopbar is true */}
+      {showTopbar && (
+        <Topbar 
+          onNotificationClick={() => onNotificationToggle?.()}
+          onSettingsOpen={onSettingsOpen}
+          unreadCount={3}
+        />
+      )}
       
       <div style={{
         display: 'flex',
@@ -53,8 +56,7 @@ export default function Layout({ children, isNotificationVisible, onNotification
         position: 'relative',
         width: '100%',
         maxWidth: '100vw',
-        overflow: 'hidden',
-        marginTop: '70px' // Space for topbar
+        overflow: 'hidden'
       }}>
         {/* Sidebar - Desktop only */}
         {!isMobile && <Sidebar onSettingsOpen={onSettingsOpen} />}
