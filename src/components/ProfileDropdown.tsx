@@ -10,7 +10,7 @@ import NotificationDropdown from './NotificationDropdown'
 import toast from 'react-hot-toast'
 
 interface ProfileDropdownProps {
-  variant?: 'sidebar' | 'header'
+  variant?: 'sidebar' | 'header' | 'topbar'
   showPlan?: boolean
   onSettingsOpen?: () => void
 }
@@ -80,6 +80,16 @@ export default function ProfileDropdown({
     alignItems: 'center',
     gap: '0.75rem',
     textAlign: 'left' as const
+  } : variant === 'topbar' ? {
+    padding: '0',
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    textAlign: 'left' as const
   } : {
     padding: '0.25rem',
     backgroundColor: 'transparent',
@@ -96,6 +106,11 @@ export default function ProfileDropdown({
     width: '40px',
     height: '40px',
     flexShrink: 0
+  } : variant === 'topbar' ? {
+    width: '40px',
+    height: '40px',
+    flexShrink: 0,
+    border: `2px solid ${brandColors.neutral[200]}`
   } : {
     width: '32px',
     height: '32px',
@@ -135,15 +150,15 @@ export default function ProfileDropdown({
             </AvatarFallback>
           </Avatar>
 
-          {/* Profile Info (only in sidebar variant) */}
-          {variant === 'sidebar' && (
+          {/* Profile Info (sidebar and topbar variants) */}
+          {(variant === 'sidebar' || variant === 'topbar') && (
             <>
               <div style={{
                 flex: 1,
                 minWidth: 0
               }}>
                 <p style={{
-                  fontSize: '14px',
+                  fontSize: variant === 'topbar' ? '16px' : '14px',
                   fontWeight: '600',
                   color: brandColors.neutral[900],
                   lineHeight: '1.4',
@@ -154,7 +169,19 @@ export default function ProfileDropdown({
                 }}>
                   {displayName}
                 </p>
-                {showPlan && (
+                {variant === 'topbar' ? (
+                  <p style={{
+                    fontSize: '14px',
+                    color: brandColors.neutral[500],
+                    lineHeight: '1.2',
+                    margin: 0,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    Good morning! 👋
+                  </p>
+                ) : showPlan && (
                   <p style={{
                     fontSize: '12px',
                     fontWeight: '500',
@@ -190,7 +217,7 @@ export default function ProfileDropdown({
           borderRadius: '8px',
           boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
           padding: '0.5rem',
-          minWidth: variant === 'sidebar' ? '220px' : '200px'
+          minWidth: variant === 'sidebar' ? '280px' : '250px'
         }}
       >
         {/* Profile Info Header */}
@@ -292,7 +319,7 @@ export default function ProfileDropdown({
         
         <DropdownMenuItem 
           onClick={() => {
-            if (variant === 'sidebar' && onSettingsOpen) {
+            if ((variant === 'sidebar' || variant === 'topbar') && onSettingsOpen) {
               onSettingsOpen()
             } else {
               setIsSettingsVisible(true)

@@ -94,188 +94,93 @@ export default function DashboardPage() {
         maxWidth: '100vw',
         overflow: 'hidden'
       }}>
-        {/* 🎨 GRADIENT SECTION (30% height) - Green gradient with orange/blue touches */}
+        {/* 📊 INVOICE STATS SECTION - Simple green background with rounded corners */}
         <div style={{
-          height: '30vh',
-          minHeight: '240px',
-          background: `linear-gradient(135deg, ${brandColors.primary[200]} 0%, ${brandColors.primary[100]} 50%, ${brandColors.warning[100]} 100%)`,
-          padding: '1rem',
-          paddingTop: '0',
+          height: '20vh',
+          minHeight: '160px',
+          backgroundColor: brandColors.primary[500],
+          borderRadius: '40px',
+          padding: '2rem 1.5rem',
           width: '100%',
-          position: 'relative'
+          position: 'relative',
+          margin: '1rem'
         }}>
-          {/* User Header - Transparent div */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '1rem 0 1.5rem 0',
-            backgroundColor: 'transparent'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              {profilePictureUrl ? (
-                <img
-                  src={profilePictureUrl}
-                  alt="Profile"
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '25px',
-                    objectFit: 'cover',
-                    border: `2px solid ${brandColors.white}`
-                  }}
-                  onError={() => {
-                    // If image fails to load, fallback to initial
-                    setProfilePictureUrl(null)
-                  }}
-                />
-              ) : (
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '25px',
-                  backgroundColor: brandColors.primary[200],
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: brandColors.primary[800],
-                  border: `2px solid ${brandColors.white}`
-                }}>
-                  {getUserInitial(user)}
-                </div>
-              )}
-              <div>
-                <p style={{
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: brandColors.neutral[900],
-                  margin: 0
-                }}>
-                  {getUserDisplayName(user)}
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setIsNotificationVisible(!isNotificationVisible)}
-              style={{
-                padding: '0.75rem',
-                backgroundColor: isNotificationVisible ? brandColors.primary[100] : 'transparent',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease',
-                position: 'relative'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = brandColors.primary[100]
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = isNotificationVisible ? brandColors.primary[100] : 'transparent'
-              }}>
-              <Bell 
-                size={24} 
-                color={isNotificationVisible ? brandColors.primary[800] : brandColors.neutral[700]} 
-              />
-              {/* Red dot for unread notifications */}
-              <div style={{
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                width: '8px',
-                height: '8px',
-                backgroundColor: brandColors.error[500],
-                borderRadius: '50%',
-                border: `2px solid ${brandColors.white}`
-              }} />
-            </button>
-          </div>
 
-          {/* Stats Summary - Colored cards */}
+          {/* Stats Container - 3 columns without borders */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            padding: '0.5rem 0',
+            padding: '1rem 0',
             backgroundColor: 'transparent',
-            gap: '0.75rem'
+            gap: '1rem'
           }}>
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
               backgroundColor: 'transparent',
-              borderRadius: '16px',
-              padding: '1rem 0.5rem',
-              border: `2px solid ${brandColors.primary[300]}`
+              padding: '1.5rem 0.5rem'
             }}>
               <p style={{
-                fontSize: '1.75rem',
+                fontSize: '2rem',
                 fontWeight: '700',
-                color: brandColors.primary[800],
-                margin: '0 0 0.25rem 0'
+                color: brandColors.white,
+                margin: '0 0 0.5rem 0'
               }}>
                 35
               </p>
               <p style={{
-                fontSize: '0.75rem',
-                color: brandColors.primary[600],
+                fontSize: '0.875rem',
+                color: brandColors.primary[100],
                 margin: 0,
                 fontWeight: '500'
               }}>
-                Total
+                Total Invoices
               </p>
             </div>
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
               backgroundColor: 'transparent',
-              borderRadius: '16px',
-              padding: '1rem 0.5rem',
-              border: `2px solid ${brandColors.success[300]}`
+              padding: '1.5rem 0.5rem'
             }}>
               <p style={{
-                fontSize: '1.75rem',
+                fontSize: '2rem',
                 fontWeight: '700',
-                color: brandColors.success[800],
-                margin: '0 0 0.25rem 0'
+                color: brandColors.white,
+                margin: '0 0 0.5rem 0'
               }}>
                 28
               </p>
               <p style={{
-                fontSize: '0.75rem',
-                color: brandColors.success[600],
+                fontSize: '0.875rem',
+                color: brandColors.primary[100],
                 margin: 0,
                 fontWeight: '500'
               }}>
-                Paid
+                Paid Invoices
               </p>
             </div>
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
               backgroundColor: 'transparent',
-              borderRadius: '16px',
-              padding: '1rem 0.5rem',
-              border: `2px solid ${brandColors.warning[300]}`
+              padding: '1.5rem 0.5rem'
             }}>
               <p style={{
-                fontSize: '1.75rem',
+                fontSize: '2rem',
                 fontWeight: '700',
-                color: brandColors.warning[800],
-                margin: '0 0 0.25rem 0'
+                color: brandColors.white,
+                margin: '0 0 0.5rem 0'
               }}>
                 7
               </p>
               <p style={{
-                fontSize: '0.75rem',
-                color: brandColors.warning[600],
+                fontSize: '0.875rem',
+                color: brandColors.primary[100],
                 margin: 0,
                 fontWeight: '500'
               }}>
-                Pending
+                Pending Invoices
               </p>
             </div>
           </div>

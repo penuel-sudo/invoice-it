@@ -107,19 +107,27 @@ export default function DesktopSettingsPanel({
   if (!isVisible) return null
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      zIndex: 1000,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
+    <>
+      <style>
+        {`
+          .settings-modal::-webkit-scrollbar {
+            display: none;
+          }
+        `}
+      </style>
       <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+      <div className="settings-modal" style={{
         backgroundColor: brandColors.white,
         borderRadius: '16px',
         padding: '2rem',
@@ -127,6 +135,8 @@ export default function DesktopSettingsPanel({
         width: '90%',
         maxHeight: '80vh',
         overflowY: 'auto',
+        scrollbarWidth: 'none', // Firefox
+        msOverflowStyle: 'none', // IE/Edge
         boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
         position: 'relative'
       }}>
@@ -272,6 +282,7 @@ export default function DesktopSettingsPanel({
           Sign Out
         </button>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

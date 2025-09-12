@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../lib/useAuth'
 import Sidebar from './Sidebar.tsx'
 import BottomNav from './BottomNav.tsx'
+import Topbar from './Topbar.tsx'
 import { brandColors } from '../../stylings'
 
 interface LayoutProps {
@@ -39,13 +40,21 @@ export default function Layout({ children, isNotificationVisible, onNotification
       maxWidth: '100vw',
       overflow: 'hidden'
     }}>
+      {/* Topbar */}
+      <Topbar 
+        onNotificationClick={() => onNotificationToggle?.()}
+        onSettingsOpen={onSettingsOpen}
+        unreadCount={3}
+      />
+      
       <div style={{
         display: 'flex',
         flex: 1,
         position: 'relative',
         width: '100%',
         maxWidth: '100vw',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        marginTop: '70px' // Space for topbar
       }}>
         {/* Sidebar - Desktop only */}
         {!isMobile && <Sidebar onSettingsOpen={onSettingsOpen} />}
