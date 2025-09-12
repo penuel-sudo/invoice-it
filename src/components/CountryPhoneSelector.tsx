@@ -287,7 +287,7 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              right: 0,
+              right: 400,
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',
