@@ -8,10 +8,11 @@ interface LayoutProps {
   children: React.ReactNode
   isNotificationVisible?: boolean
   onNotificationToggle?: () => void
+  onSettingsOpen?: () => void
   hideBottomNav?: boolean
 }
 
-export default function Layout({ children, isNotificationVisible, onNotificationToggle, hideBottomNav = false }: LayoutProps) {
+export default function Layout({ children, isNotificationVisible, onNotificationToggle, onSettingsOpen, hideBottomNav = false }: LayoutProps) {
   const { user } = useAuth()
   const [isMobile, setIsMobile] = useState(false)
 
@@ -47,7 +48,7 @@ export default function Layout({ children, isNotificationVisible, onNotification
         overflow: 'hidden'
       }}>
         {/* Sidebar - Desktop only */}
-        {!isMobile && <Sidebar />}
+        {!isMobile && <Sidebar onSettingsOpen={onSettingsOpen} />}
         
         {/* Main Content */}
         <main style={{

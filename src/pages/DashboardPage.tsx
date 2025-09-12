@@ -5,6 +5,7 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { getUserDisplayName, getUserProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
 import NotificationDropdown from '../components/NotificationDropdown'
+import DesktopSettingsPanel from '../components/DesktopSettingsPanel'
 import StatusButton from '../components/StatusButton'
 import { 
   FileText, 
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false)
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -69,7 +71,15 @@ export default function DashboardPage() {
     <Layout 
       isNotificationVisible={isNotificationVisible}
       onNotificationToggle={() => setIsNotificationVisible(!isNotificationVisible)}
+      onSettingsOpen={() => setIsSettingsVisible(true)}
     >
+      {/* Desktop Settings Panel */}
+      <DesktopSettingsPanel
+        isVisible={isSettingsVisible}
+        onClose={() => setIsSettingsVisible(false)}
+        onNotificationClick={() => setIsNotificationVisible(true)}
+      />
+      
       {/* Notification Dropdown */}
       <NotificationDropdown
         isVisible={isNotificationVisible}

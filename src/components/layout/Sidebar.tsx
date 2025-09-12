@@ -1,33 +1,25 @@
-import { Home, FileText, Plus, DollarSign, Settings, Users, LogOut } from 'lucide-react'
+import { Home, FileText, Plus, DollarSign, Users } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../lib/useAuth'
 import { brandColors, typographyPresets } from '../../stylings'
-import toast from 'react-hot-toast'
+import ProfileDropdown from '../ProfileDropdown'
 
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
   { id: 'invoices', label: 'Invoices', icon: FileText, path: '/invoices' },
   { id: 'clients', label: 'Clients', icon: Users, path: '/clients' },
-  { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/expenses' },
-  { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' }
+  { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/expenses' }
 ]
 
-export default function Sidebar() {
+interface SidebarProps {
+  onSettingsOpen?: () => void
+}
+
+export default function Sidebar({ onSettingsOpen }: SidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { signOut } = useAuth()
 
   const handleNavigation = (path: string) => {
     navigate(path)
-  }
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      toast.success('Logged out successfully!')
-    } catch (error) {
-      toast.error('Failed to logout')
-    }
   }
 
   return (
@@ -132,45 +124,13 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Logout Button - Fixed at Bottom */}
+      {/* Profile Dropdown - Fixed at Bottom */}
       <div style={{
-        padding: '0 1.5rem 1.5rem 1.5rem',
+        padding: '0.75rem 1.5rem 0.25rem 1.5rem',
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         marginTop: 'auto'
       }}>
-        <button
-          onClick={handleLogout}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.75rem 1rem',
-            marginBottom: '0.5rem',
-            backgroundColor: 'transparent',
-            color: brandColors.error[600],
-            border: `1px solid ${brandColors.error[200]}`,
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            transition: 'all 0.2s ease',
-            textAlign: 'left'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.error[50]
-            e.currentTarget.style.borderColor = brandColors.error[300]
-            e.currentTarget.style.color = brandColors.error[700]
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.borderColor = brandColors.error[200]
-            e.currentTarget.style.color = brandColors.error[600]
-          }}
-        >
-          <LogOut size={20} />
-          Logout
-        </button>
+        <ProfileDropdown variant="sidebar" showPlan={true} onSettingsOpen={onSettingsOpen} />
       </div>
     </aside>
   )

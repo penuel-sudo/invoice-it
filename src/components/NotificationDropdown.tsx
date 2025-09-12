@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { brandColors } from '../stylings'
 import NotificationItem from './NotificationItem'
 import { 
@@ -27,6 +27,19 @@ interface Notification {
 }
 
 export default function NotificationDropdown({ isVisible, onClose }: NotificationDropdownProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   // Sample notifications data
   const notifications: Notification[] = [
     {
@@ -77,8 +90,9 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
       style={{
         position: 'fixed',
         top: isVisible ? '80px' : '-100vh',
-        right: '1rem',
-        left: '1rem',
+        right: isMobile ? '1rem' : '2rem',
+        left: isMobile ? '1rem' : 'auto',
+        width: isMobile ? 'auto' : '400px',
         backgroundColor: brandColors.white,
         borderRadius: '20px',
         padding: '1.5rem',
