@@ -68,7 +68,6 @@ export default function Layout({ children, isNotificationVisible, onNotification
           maxWidth: isMobile ? '100vw' : 'calc(100vw - 280px)',
           padding: isMobile ? '0' : '2rem',
           paddingBottom: isMobile && !hideBottomNav ? '5rem' : '2rem', // Space for bottom nav on mobile
-          marginLeft: isMobile ? 0 : '280px', // Sidebar width
           transition: 'margin-left 0.3s ease',
           overflowX: 'hidden',
           boxSizing: 'border-box'

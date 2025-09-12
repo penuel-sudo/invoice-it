@@ -24,18 +24,14 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
 
   return (
     <aside style={{
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      bottom: 0,
       width: '280px',
       backgroundColor: brandColors.white,
       borderRight: `1px solid ${brandColors.neutral[200]}`,
       padding: '2rem 0',
-      zIndex: 40,
       overflowY: 'auto',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      flexShrink: 0
     }}>
       {/* Main Content */}
       <div style={{ flex: 1 }}>
