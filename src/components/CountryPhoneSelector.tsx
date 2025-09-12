@@ -3,13 +3,14 @@ import { brandColors, typographyPresets } from '../stylings'
 import { ChevronDown, Search, Phone } from 'lucide-react'
 import countries from 'country-list'
 import { parsePhoneNumber, isValidPhoneNumber, getCountryCallingCode } from 'libphonenumber-js'
-import { getCountryInfo, getCountryFlag, detectUserCountry } from '../lib/countryUtils'
+import { getCountryInfo, getCountryFlag, getCountryFlagEmoji, detectUserCountry } from '../lib/countryUtils'
 
 interface CountryData {
   code: string
   name: string
   phoneCode: string
   flag: string
+  flagEmoji: string
 }
 
 interface CountryPhoneSelectorProps {
@@ -60,7 +61,8 @@ export default function CountryPhoneSelector({
       code: country.code,
       name: country.name,
       phoneCode: countryInfo?.phoneCode || '',
-      flag: countryInfo?.flag || '🌍'
+      flag: getCountryFlag(country.code),
+      flagEmoji: getCountryFlagEmoji(country.code)
     }
   }).filter(country => country.phoneCode && country.phoneCode.length > 0) // Only include countries with valid phone codes
 
@@ -251,15 +253,35 @@ export default function CountryPhoneSelector({
               backgroundColor: 'transparent',
               cursor: disabled ? 'not-allowed' : 'pointer',
               borderRight: `1px solid ${brandColors.neutral[200]}`,
-              borderRadius: '12px 0 0 12px',
+              borderRadius: '50px 0 0 50px',
               minWidth: '120px',
               justifyContent: 'space-between'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>
-                {selectedCountry?.flag || '🌍'}
-              </span>
+              {selectedCountry ? (
+                <img 
+                  src={selectedCountry.flag} 
+                  alt={`${selectedCountry.name} flag`}
+                  style={{ 
+                    width: '20px', 
+                    height: '15px', 
+                    objectFit: 'cover',
+                    borderRadius: '2px'
+                  }}
+                  onError={(e) => {
+                    // Fallback to emoji if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const fallbackSpan = document.createElement('span');
+                    fallbackSpan.textContent = selectedCountry.flagEmoji;
+                    fallbackSpan.style.fontSize = '1.25rem';
+                    target.parentNode?.insertBefore(fallbackSpan, target);
+                  }}
+                />
+              ) : (
+                <span style={{ fontSize: '1.25rem' }}>🌍</span>
+              )}
               <span style={{
                 fontSize: '0.875rem',
                 fontWeight: '400',
@@ -287,15 +309,13 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              right: 400,
+              width: '400px',
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',
               boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
               zIndex: 50,
-              width: "100%",
               maxHeight: '400px',
-              maxWidth: '400px',
               overflow: 'hidden'
             }}>
               {/* Search Input */}
@@ -366,7 +386,25 @@ export default function CountryPhoneSelector({
                       }
                     }}
                   >
-                    <span style={{ fontSize: '1.25rem' }}>{country.flag}</span>
+                    <img 
+                      src={country.flag} 
+                      alt={`${country.name} flag`}
+                      style={{ 
+                        width: '20px', 
+                        height: '15px', 
+                        objectFit: 'cover',
+                        borderRadius: '2px'
+                      }}
+                      onError={(e) => {
+                        // Fallback to emoji if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallbackSpan = document.createElement('span');
+                        fallbackSpan.textContent = country.flagEmoji;
+                        fallbackSpan.style.fontSize = '1.25rem';
+                        target.parentNode?.insertBefore(fallbackSpan, target);
+                      }}
+                    />
                     <div style={{ flex: 1 }}>
                       <div style={{
                         fontSize: '0.875rem',
@@ -406,13 +444,17 @@ export default function CountryPhoneSelector({
             disabled={disabled}
             style={{
               width: '100%',
-              padding: '0.875rem 1rem 0.875rem 0.75rem',
+              padding: '0.875rem 3.5rem 0.875rem 0.75rem',
               border: 'none',
               outline: 'none',
               backgroundColor: 'transparent',
               fontSize: '1rem',
               color: brandColors.neutral[900],
-              borderRadius: '0 12px 12px 0'
+              borderRadius: '0 50px 50px 0',
+              // Ensure text doesn't overlap with phone icon on small screens
+              boxSizing: 'border-box',
+              // Add minimum width to prevent overlap on very small screens
+              minWidth: '120px'
             }}
           />
           <Phone 
@@ -420,10 +462,12 @@ export default function CountryPhoneSelector({
             color={brandColors.neutral[400]}
             style={{
               position: 'absolute',
-              right: '1rem',
+              right: '1.25rem',
               top: '50%',
               transform: 'translateY(-50%)',
-              opacity: phoneNumber ? 0.3 : 1
+              opacity: phoneNumber ? 0.3 : 1,
+              // Ensure icon doesn't interfere with text on small screens
+              pointerEvents: 'none'
             }}
           />
         </div>

@@ -450,7 +450,7 @@ export default function AuthPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   position: 'absolute',
-                  right: '1.5rem',
+                  right: '1rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'none',

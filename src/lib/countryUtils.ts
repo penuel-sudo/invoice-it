@@ -195,7 +195,13 @@ export function getCountryInfo(countryCode: string): CountryInfo | null {
 }
 
 export function getCountryFlag(countryCode: string): string {
-  // Simple flag emoji mapping for common countries
+  // Return actual flag image URL using flagsapi.com CDN
+  // This service provides high-quality SVG flag images
+  return `https://flagsapi.com/${countryCode}/flat/64.png`
+}
+
+export function getCountryFlagEmoji(countryCode: string): string {
+  // Fallback emoji mapping for cases where images might not load
   const flagMap: { [key: string]: string } = {
     'US': '🇺🇸', 'GB': '🇬🇧', 'CA': '🇨🇦', 'AU': '🇦🇺', 'DE': '🇩🇪',
     'FR': '🇫🇷', 'IT': '🇮🇹', 'ES': '🇪🇸', 'NL': '🇳🇱', 'SE': '🇸🇪',
