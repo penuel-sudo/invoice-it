@@ -110,14 +110,14 @@ export default function DashboardPage() {
           backgroundColor: 'transparent',
           borderRadius: '15px',
           border: `2px solid ${brandColors.primary[500]}`,
-          padding: '1.5rem 1.4rem 0.5rem 1.4rem',
+          padding: '1.5rem 1rem 0.5rem 1rem',
           width: '100%',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxSizing: 'border-box',
-          margin: '0 1rem'
+          
         }}>
 
           {/* Stats Container - 3 columns */}
