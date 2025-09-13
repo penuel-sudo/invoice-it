@@ -9,8 +9,7 @@ import {
   Shield, 
   HelpCircle, 
   X,
-  ChevronRight,
-  Download
+  ChevronRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -33,17 +32,6 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
     }
   }
 
-  const handleInstallApp = () => {
-    // Check if PWA can be installed
-    if ('serviceWorker' in navigator) {
-      // Trigger the install prompt
-      const event = new CustomEvent('trigger-install-prompt')
-      window.dispatchEvent(event)
-      toast.success('Install prompt triggered!')
-    } else {
-      toast.error('App installation not supported on this device')
-    }
-  }
 
   const settingsItems = [
     {
@@ -53,16 +41,6 @@ export default function SettingsPanel({ isVisible, onClose, onNotificationClick 
       subtitle: 'Manage your profile and business information',
       action: () => {
         navigate('/profile')
-        onClose()
-      }
-    },
-    {
-      id: 'install',
-      icon: Download,
-      title: 'Install App',
-      subtitle: 'Install Invoice-It for quick access',
-      action: () => {
-        handleInstallApp()
         onClose()
       }
     },

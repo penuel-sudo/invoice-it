@@ -10,7 +10,6 @@ import {
   HelpCircle, 
   X,
   ChevronRight,
-  Download,
   CreditCard
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -38,17 +37,6 @@ export default function DesktopSettingsPanel({
     }
   }
 
-  const handleInstallApp = () => {
-    // Check if PWA can be installed
-    if ('serviceWorker' in navigator) {
-      // Trigger the install prompt
-      const event = new CustomEvent('trigger-install-prompt')
-      window.dispatchEvent(event)
-      toast.success('Install prompt triggered!')
-    } else {
-      toast.error('App installation not supported on this device')
-    }
-  }
 
   const settingsItems = [
     {
@@ -67,16 +55,6 @@ export default function DesktopSettingsPanel({
       title: 'Billing & Plans',
       subtitle: 'Manage your subscription and billing',
       action: () => toast('Billing settings coming soon!', { icon: '💳' })
-    },
-    {
-      id: 'install',
-      icon: Download,
-      title: 'Install App',
-      subtitle: 'Install Invoice-It for quick access',
-      action: () => {
-        handleInstallApp()
-        onClose()
-      }
     },
     {
       id: 'notifications',
