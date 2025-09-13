@@ -111,7 +111,7 @@ export default function DashboardPage() {
           borderRadius: '15px',
           border: `2px solid ${brandColors.primary[500]}`,
           padding: '1.5rem 1rem 0.5rem 1rem',
-          margin: '0 1rem',
+          margin: '0 1.5rem',
           width: '100%',
           position: 'relative',
           display: 'flex',
@@ -127,11 +127,14 @@ export default function DashboardPage() {
             padding: '1rem 0',
             backgroundColor: 'transparent',
             gap: '0.5rem',
-            width: '100%'
+            width: '100%',
+            flexShrink: 1,
+            minWidth: 0
           }}>
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
+              flexShrink: 1,
               backgroundColor: 'transparent',
               padding: '1.5rem 0.25rem'
             }}>
@@ -155,6 +158,7 @@ export default function DashboardPage() {
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
+              flexShrink: 1,
               backgroundColor: 'transparent',
               padding: '1.5rem 0.25rem'
             }}>
@@ -178,6 +182,7 @@ export default function DashboardPage() {
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
+              flexShrink: 1,
               backgroundColor: 'transparent',
               padding: '1.5rem 0.25rem'
             }}>
