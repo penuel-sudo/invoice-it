@@ -47,6 +47,7 @@ export default function CountryPhoneSelector({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState(value.phoneNumber)
   const [isValid, setIsValid] = useState(false)
   const [validationError, setValidationError] = useState('')
@@ -93,6 +94,18 @@ export default function CountryPhoneSelector({
       }
     }
   }, [autoDetectCountry, value.countryCode])
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Set initial country from value
   useEffect(() => {
@@ -309,9 +322,9 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              width: '100%',
+              width: isMobile ? '100%' : '400px',
               minWidth: '280px',
-              maxWidth: '400px',
+              maxWidth: isMobile ? '100vw' : '400px',
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',
