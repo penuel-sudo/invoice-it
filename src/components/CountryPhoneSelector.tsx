@@ -316,7 +316,8 @@ export default function CountryPhoneSelector({
               boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
               zIndex: 50,
               maxHeight: '400px',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              boxSizing: 'border-box'
             }}>
               {/* Search Input */}
               <div style={{
@@ -356,7 +357,9 @@ export default function CountryPhoneSelector({
               {/* Countries List */}
               <div style={{
                 maxHeight: '200px',
-                overflowY: 'auto'
+                overflowY: 'auto',
+                width: '100%',
+                boxSizing: 'border-box'
               }}>
                 {filteredCountries.map((country) => (
                   <button

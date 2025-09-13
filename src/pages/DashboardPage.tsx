@@ -116,7 +116,8 @@ export default function DashboardPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          margin: '0 1rem'
         }}>
 
           {/* Stats Container - 3 columns */}

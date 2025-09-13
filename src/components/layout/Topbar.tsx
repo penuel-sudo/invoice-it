@@ -51,7 +51,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 2rem',
+      padding: '0 0.5rem',
       borderBottom: `1px solid ${brandColors.neutral[100]}`,
       boxSizing: 'border-box',
       width: '100%',
