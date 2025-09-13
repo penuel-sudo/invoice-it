@@ -172,7 +172,7 @@ export default function AuthPage() {
             color: brandColors.neutral[900],
             letterSpacing: '-0.025em'
           }}>
-            InvoiceIt
+          
           </span>
         </div>
       )}
@@ -216,7 +216,7 @@ export default function AuthPage() {
         <div style={{
           textAlign: 'center',
           marginBottom: window.innerWidth < 768 ? '3rem' : '2.5rem',
-          marginTop: window.innerWidth < 768 ? '6rem' : '1.5rem'
+          marginTop: window.innerWidth < 768 ? '6rem' : '2rem'
         }}>
           <h1 style={{
             fontSize: window.innerWidth < 768 ? '1.75rem' : '2rem',
