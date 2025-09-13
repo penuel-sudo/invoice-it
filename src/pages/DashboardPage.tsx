@@ -111,7 +111,7 @@ export default function DashboardPage() {
           borderRadius: '15px',
           border: `2px solid ${brandColors.primary[500]}`,
           padding: '1.5rem 1rem 0.5rem 1rem',
-          margin: '0 5rem',
+          margin: '0rem 5rem 0rem 0rem',
           width: '100%',
           position: 'relative',
           display: 'flex',
