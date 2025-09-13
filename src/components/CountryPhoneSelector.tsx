@@ -309,7 +309,9 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              width: '400px',
+              width: '100%',
+              minWidth: '280px',
+              maxWidth: '400px',
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',
@@ -348,7 +350,9 @@ export default function CountryPhoneSelector({
                       borderRadius: '8px',
                       fontSize: '0.875rem',
                       outline: 'none',
-                      backgroundColor: brandColors.neutral[50]
+                      backgroundColor: brandColors.neutral[50],
+                      boxSizing: 'border-box',
+                      minWidth: 0
                     }}
                   />
                 </div>
@@ -408,14 +412,21 @@ export default function CountryPhoneSelector({
                         target.parentNode?.insertBefore(fallbackSpan, target);
                       }}
                     />
-                    <div style={{ flex: 1 }}>
+                    <div style={{ 
+                      flex: 1, 
+                      minWidth: 0,
+                      overflow: 'hidden'
+                    }}>
                       <div style={{
                         fontSize: '0.875rem',
                         fontWeight: '400',
                         lineHeight: '1.5',
                         letterSpacing: '0',
                         fontFamily: 'Poppins, sans-serif',
-                        color: brandColors.neutral[900]
+                        color: brandColors.neutral[900],
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
                       }}>
                         {country.name}
                       </div>
@@ -426,7 +437,8 @@ export default function CountryPhoneSelector({
                       lineHeight: '1.5',
                       letterSpacing: '0',
                       fontFamily: 'Poppins, sans-serif',
-                      color: brandColors.neutral[600]
+                      color: brandColors.neutral[600],
+                      flexShrink: 0
                     }}>
                       +{country.phoneCode}
                     </span>
