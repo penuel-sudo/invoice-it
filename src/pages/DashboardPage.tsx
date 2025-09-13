@@ -126,14 +126,14 @@ export default function DashboardPage() {
             justifyContent: 'space-between',
             padding: '1rem 0',
             backgroundColor: 'transparent',
-            gap: '1rem',
+            gap: '0.5rem',
             width: '100%'
           }}>
             <div style={{ 
               textAlign: 'center', 
               flex: 1,
               backgroundColor: 'transparent',
-              padding: '1.5rem 0.5rem'
+              padding: '1.5rem 0.25rem'
             }}>
               <p style={{
                 fontSize: '2rem',
@@ -156,7 +156,7 @@ export default function DashboardPage() {
               textAlign: 'center', 
               flex: 1,
               backgroundColor: 'transparent',
-              padding: '1.5rem 0.5rem'
+              padding: '1.5rem 0.25rem'
             }}>
               <p style={{
                 fontSize: '2rem',
@@ -179,7 +179,7 @@ export default function DashboardPage() {
               textAlign: 'center', 
               flex: 1,
               backgroundColor: 'transparent',
-              padding: '1.5rem 0.5rem'
+              padding: '1.5rem 0.25rem'
             }}>
               <p style={{
                 fontSize: '2rem',
