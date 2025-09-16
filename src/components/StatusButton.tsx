@@ -1,7 +1,7 @@
 import { brandColors } from '../stylings'
 
 interface StatusButtonProps {
-  status: 'paid' | 'due' | 'spent' | 'pending' | 'income' | 'expense'
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense'
   size?: 'sm' | 'md' | 'lg'
   className?: string
 }
@@ -9,6 +9,20 @@ interface StatusButtonProps {
 export default function StatusButton({ status, size = 'sm', className = '' }: StatusButtonProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
+      case 'draft':
+        return {
+          text: 'Draft',
+          backgroundColor: brandColors.neutral[100],
+          color: brandColors.neutral[700],
+          borderColor: brandColors.neutral[200]
+        }
+      case 'pending':
+        return {
+          text: 'Pending',
+          backgroundColor: brandColors.warning[100],
+          color: brandColors.warning[700],
+          borderColor: brandColors.warning[200]
+        }
       case 'paid':
         return {
           text: 'Paid',
@@ -16,20 +30,12 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
           color: brandColors.success[700],
           borderColor: brandColors.success[200]
         }
-      case 'income':
+      case 'overdue':
         return {
-          text: 'Income',
-          backgroundColor: brandColors.success[100],
-          color: brandColors.success[700],
-          borderColor: brandColors.success[200]
-        }
-      case 'due':
-      case 'pending':
-        return {
-          text: status === 'due' ? 'Due' : 'Pending',
-          backgroundColor: brandColors.warning[100],
-          color: brandColors.warning[700],
-          borderColor: brandColors.warning[200]
+          text: 'Overdue',
+          backgroundColor: brandColors.error[100],
+          color: brandColors.error[700],
+          borderColor: brandColors.error[200]
         }
       case 'spent':
         return {

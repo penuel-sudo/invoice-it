@@ -5,7 +5,7 @@ import ProfileDropdown from '../ProfileDropdown'
 
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
-  { id: 'invoices', label: 'Invoices', icon: FileText, path: '/invoices' },
+  { id: 'invoices', label: 'Transactions', icon: FileText, path: '/invoices' },
   { id: 'clients', label: 'Clients', icon: Users, path: '/clients' },
   { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/expenses' }
 ]

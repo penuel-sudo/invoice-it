@@ -4,6 +4,7 @@ import AuthPage from '../pages/AuthPage'
 import DashboardPage from '../pages/DashboardPage'
 import InvoiceCreatePage from '../pages/InvoiceCreatePage'
 import InvoicePreviewPage from '../pages/InvoicePreviewPage'
+import TransactionPage from '../pages/TransactionPage'
 import ResetPasswordPage from '../pages/reset-password'
 import ProfilePage from '../pages/ProfilePage'
 import NotFoundPage from '../pages/NotFoundPage'
@@ -43,6 +44,14 @@ export const router = createBrowserRouter([
     element: (
       <AuthWrapper requireAuth={true}>
         <InvoicePreviewPage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/invoices',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <TransactionPage />
       </AuthWrapper>
     )
   },

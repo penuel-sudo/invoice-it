@@ -7,7 +7,7 @@ import NotificationDropdown from '../NotificationDropdown'
 
 const navigationItems = [
   { id: 'Home', icon: Home, path: '/dashboard' },
-  { id: 'Invoices', icon: FileText, path: '/invoices' },
+  { id: 'Transaction', icon: FileText, path: '/invoices' },
   { id: 'Reports', icon: BarChart3, path: '/reports' },
   { id: 'Menu', icon: Menu, path: '/menu' }
 ]
@@ -87,7 +87,8 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
                 fontSize: '10px',
                 fontWeight: '500',
                 transition: 'all 0.2s ease',
-                minWidth: '60px'
+                flex: 1,
+                minWidth: 0
               }}
             >
               <Icon size={24} />
