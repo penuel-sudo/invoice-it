@@ -67,16 +67,19 @@ export default function TransactionPage() {
 
     try {
       setLoading(true)
+      console.log('Loading transactions for user:', user.id)
+      
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
 
       if (error) {
         console.error('Error loading transactions:', error)
-        toast.error('Failed to load transactions')
+        toast.error('Failed to load transactions: ' + error.message)
         return
       }
 
+      console.log('Transactions loaded:', data)
       setTransactions(data || [])
     } catch (error) {
       console.error('Error loading transactions:', error)
@@ -232,7 +235,16 @@ export default function TransactionPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'MMM dd, yyyy')
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date'
+      }
+      return format(date, 'MMM dd, yyyy')
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Date string:', dateString)
+      return 'Invalid Date'
+    }
   }
 
   const getValidStatus = (status: string): 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' => {
@@ -533,7 +545,7 @@ export default function TransactionPage() {
                         {transaction.type === 'invoice' 
                           ? (transaction.client_name || 'Client')
                           : (transaction.category || 'Expense')
-                        } • {formatDate(transaction.date)}
+                        } • {transaction.date ? formatDate(transaction.date) : 'No Date'}
                       </p>
                     </div>
                   </div>
