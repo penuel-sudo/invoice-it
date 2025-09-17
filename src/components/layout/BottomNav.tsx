@@ -57,13 +57,14 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         borderTopRightRadius: '25px',
         borderBottomLeftRadius: '25px',
         borderBottomRightRadius: '25px',
-        padding: '0.75rem 0.5rem 1rem 0.5rem',
+        padding: '0.75rem 1.5rem 1rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'space-between',
         zIndex: 50,
         boxShadow: '0 -4px 12px 0 rgb(0 0 0 / 0.1)'
       }}>
-        {/* Home - Closer to left edge */}
+        {/* Left Section: Home */}
         <button
           onClick={() => handleNavigation('/dashboard')}
           style={{
@@ -79,8 +80,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease',
-            marginRight: 'auto'
+            transition: 'all 0.2s ease'
           }}
         >
           <Home size={24} />
@@ -92,7 +92,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
           </span>
         </button>
 
-        {/* Transaction - With spacing from Create button */}
+        {/* Left Center Section: Transaction */}
         <button
           onClick={() => handleNavigation('/invoices')}
           style={{
@@ -108,8 +108,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease',
-            marginRight: '1rem'
+            transition: 'all 0.2s ease'
           }}
         >
           <FileText size={24} />
@@ -121,41 +120,38 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
           </span>
         </button>
 
-        {/* Create Invoice Button - Center */}
+        {/* Center Section: Create Button */}
         <button
           onClick={() => navigate('/invoice/new')}
           style={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            gap: '0.25rem',
-            padding: '0.5rem',
+            justifyContent: 'center',
+            padding: '0.75rem 1rem',
             backgroundColor: 'transparent',
             color: brandColors.primary[600],
-            border: 'none',
-            borderRadius: '8px',
+            border: `2px solid ${brandColors.primary[600]}`,
+            borderRadius: '12px',
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            minWidth: '48px',
+            minHeight: '48px'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.primary[50]
+            e.currentTarget.style.backgroundColor = brandColors.primary[600]
+            e.currentTarget.style.color = brandColors.white
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = brandColors.primary[600]
           }}
         >
-          <Plus size={24} />
-          <span style={{
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
-            Create
-          </span>
+          <Plus size={28} />
         </button>
 
-        {/* Reports - With spacing from Create button */}
+        {/* Right Center Section: Reports */}
         <button
           onClick={() => handleNavigation('/reports')}
           style={{
@@ -171,8 +167,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease',
-            marginLeft: '1rem'
+            transition: 'all 0.2s ease'
           }}
         >
           <BarChart3 size={24} />
@@ -184,7 +179,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
           </span>
         </button>
 
-        {/* Menu - Closer to right edge */}
+        {/* Right Section: Menu */}
         <button
           onClick={() => handleNavigation('/menu')}
           style={{
@@ -200,8 +195,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease',
-            marginLeft: 'auto'
+            transition: 'all 0.2s ease'
           }}
         >
           <Menu size={24} />

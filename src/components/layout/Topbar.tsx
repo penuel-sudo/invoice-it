@@ -109,49 +109,35 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
           onClick={onNotificationClick}
           style={{
             position: 'relative',
-            padding: '0.75rem',
-            backgroundColor: brandColors.neutral[50],
-            border: `1px solid ${brandColors.neutral[200]}`,
-            borderRadius: '12px',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            border: 'none',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'all 0.2s ease'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.neutral[100]
-            e.currentTarget.style.transform = 'translateY(-1px)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-            e.currentTarget.style.transform = 'translateY(0)'
-          }}
         >
           <Bell size={20} color={brandColors.neutral[600]} />
           
-          {/* Notification Dot */}
+          {/* Bare Notification Number */}
           {unreadCount > 0 && (
-            <div style={{
+            <span style={{
               position: 'absolute',
-              top: '8px',
-              right: '8px',
-              width: '12px',
-              height: '12px',
-              backgroundColor: brandColors.error[500],
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: `2px solid ${brandColors.white}`,
+              top: '2px',
+              right: '2px',
               fontSize: '10px',
               fontWeight: '700',
-              color: brandColors.white,
-              minWidth: '12px',
-              padding: '0 2px'
+              color: brandColors.error[500],
+              backgroundColor: 'transparent',
+              border: 'none',
+              padding: 0,
+              margin: 0,
+              lineHeight: 1
             }}>
               {unreadCount > 9 ? '9+' : unreadCount}
-            </div>
+            </span>
           )}
         </button>
       </div>

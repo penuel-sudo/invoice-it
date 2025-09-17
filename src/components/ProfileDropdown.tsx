@@ -134,21 +134,23 @@ export default function ProfileDropdown({
             }
           }}
         >
-          {/* Profile Picture */}
-          <Avatar style={avatarStyle}>
-            <AvatarImage 
-              src={profilePictureUrl || user?.user_metadata?.avatar_url} 
-              alt={displayName} 
-            />
-            <AvatarFallback style={{
-              backgroundColor: brandColors.primary[100],
-              color: brandColors.primary[700],
-              fontSize: variant === 'sidebar' ? '14px' : '12px',
-              fontWeight: '600'
-            }}>
-              {userInitials}
-            </AvatarFallback>
-          </Avatar>
+          {/* Profile Picture - Hidden for sidebar */}
+          {variant !== 'sidebar' && (
+            <Avatar style={avatarStyle}>
+              <AvatarImage 
+                src={profilePictureUrl || user?.user_metadata?.avatar_url} 
+                alt={displayName} 
+              />
+              <AvatarFallback style={{
+                backgroundColor: brandColors.primary[100],
+                color: brandColors.primary[700],
+                fontSize: variant === 'sidebar' ? '14px' : '12px',
+                fontWeight: '600'
+              }}>
+                {userInitials}
+              </AvatarFallback>
+            </Avatar>
+          )}
 
           {/* Profile Info (sidebar and topbar variants) */}
           {(variant === 'sidebar' || variant === 'topbar') && (
@@ -220,73 +222,75 @@ export default function ProfileDropdown({
           minWidth: variant === 'sidebar' ? '240px' : '200px'
         }}
       >
-        {/* Profile Info Header */}
-        <div style={{
-          padding: '0.75rem',
-          borderBottom: `1px solid ${brandColors.neutral[200]}`,
-          marginBottom: '0.25rem'
-        }}>
+        {/* Profile Info Header - Simplified for sidebar */}
+        {variant !== 'sidebar' && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
+            padding: '0.75rem',
+            borderBottom: `1px solid ${brandColors.neutral[200]}`,
             marginBottom: '0.25rem'
           }}>
-            <Avatar style={{ width: '32px', height: '32px' }}>
-              <AvatarImage 
-                src={profilePictureUrl || user?.user_metadata?.avatar_url} 
-                alt={displayName} 
-              />
-              <AvatarFallback style={{
-                backgroundColor: brandColors.primary[100],
-                color: brandColors.primary[700],
-                fontSize: '12px',
-                fontWeight: '600'
-              }}>
-                {userInitials}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
-                margin: 0,
-                lineHeight: '1.4'
-              }}>
-                {displayName}
-              </p>
-              <p style={{
-                fontSize: '12px',
-                color: brandColors.neutral[500],
-                margin: 0,
-                lineHeight: '1.3'
-              }}>
-                {userEmail}
-              </p>
-            </div>
-          </div>
-          {showPlan && (
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.25rem 0.5rem',
-              backgroundColor: brandColors.primary[50],
-              borderRadius: '4px',
-              marginTop: '0.5rem'
+              gap: '0.75rem',
+              marginBottom: '0.25rem'
             }}>
-              <CreditCard size={12} color={brandColors.primary[600]} />
-              <span style={{
-                fontSize: '12px',
-                fontWeight: '500',
-                color: brandColors.primary[700]
-              }}>
-                Free Plan
-              </span>
+              <Avatar style={{ width: '32px', height: '32px' }}>
+                <AvatarImage 
+                  src={profilePictureUrl || user?.user_metadata?.avatar_url} 
+                  alt={displayName} 
+                />
+                <AvatarFallback style={{
+                  backgroundColor: brandColors.primary[100],
+                  color: brandColors.primary[700],
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0,
+                  lineHeight: '1.4'
+                }}>
+                  {displayName}
+                </p>
+                <p style={{
+                  fontSize: '12px',
+                  color: brandColors.neutral[500],
+                  margin: 0,
+                  lineHeight: '1.3'
+                }}>
+                  {userEmail}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+            {showPlan && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.25rem 0.5rem',
+                backgroundColor: brandColors.primary[50],
+                borderRadius: '4px',
+                marginTop: '0.5rem'
+              }}>
+                <CreditCard size={12} color={brandColors.primary[600]} />
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  color: brandColors.primary[700]
+                }}>
+                  Free Plan
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Menu Items */}
         <DropdownMenuItem style={{

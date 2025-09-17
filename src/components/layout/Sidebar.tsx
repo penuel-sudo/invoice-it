@@ -20,7 +20,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
 
   const handleNavigation = (path: string) => {
     navigate(path)
-  }
+  }//i
 
   return (
     <aside style={{
@@ -31,7 +31,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
       width: '280px',
       backgroundColor: brandColors.white,
       borderRight: `1px solid ${brandColors.neutral[200]}`,
-      padding: '2rem 0',
+      padding: '1.5rem 0.5rem',
       zIndex: 40,
       overflowY: 'auto',
       display: 'flex',
@@ -40,7 +40,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
       {/* Main Content */}
       <div style={{ flex: 1 }}>
         {/* Navigation Items */}
-        <nav style={{ padding: '0 1.5rem' }}>
+        <nav style={{ padding: '0 0.5rem' }}>
           {navigationItems.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.path
@@ -87,7 +87,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
         </nav>
 
         {/* Create Invoice Button */}
-        <div style={{ padding: '1.5rem' }}>
+        <div style={{ padding: '1rem 0.5rem' }}>
           <button
             onClick={() => navigate('/invoice/new')}
             style={{
@@ -126,7 +126,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
 
       {/* Profile Dropdown - Fixed at Bottom */}
       <div style={{
-        padding: '0.75rem 1.5rem 0.25rem 1.5rem',
+        padding: '0.5rem 0.5rem 0.25rem 0.5rem',
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         marginTop: 'auto'
       }}>

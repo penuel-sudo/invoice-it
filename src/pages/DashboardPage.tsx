@@ -110,8 +110,8 @@ export default function DashboardPage() {
           backgroundColor: 'transparent',
           borderRadius: '15px',
           border: `2px solid ${brandColors.primary[500]}`,
-          padding: '1.5rem 1rem 0.5rem 1rem',
-          margin: '0rem 5rem 0rem 0rem',
+          padding: '1rem 1rem 0.5rem 1rem',
+          margin: '0.5rem 5rem 0rem 0rem',
           width: '100%',
           position: 'relative',
           display: 'flex',
@@ -124,7 +124,7 @@ export default function DashboardPage() {
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            padding: '1rem 0',
+            padding: '1rem 0.5rem',
             backgroundColor: 'transparent',
             gap: '0.5rem',
             width: '100%',
@@ -150,7 +150,8 @@ export default function DashboardPage() {
                 fontSize: '0.875rem',
                 color: brandColors.primary[600],
                 margin: 0,
-                fontWeight: '500'
+                fontWeight: '500',
+                whiteSpace: 'nowrap'
               }}>
                 Total Invoices
               </p>
@@ -174,7 +175,8 @@ export default function DashboardPage() {
                 fontSize: '0.875rem',
                 color: brandColors.primary[600],
                 margin: 0,
-                fontWeight: '500'
+                fontWeight: '500',
+                whiteSpace: 'nowrap'
               }}>
                 Paid Invoices
               </p>
@@ -198,7 +200,8 @@ export default function DashboardPage() {
                 fontSize: '0.875rem',
                 color: brandColors.primary[600],
                 margin: 0,
-                fontWeight: '500'
+                fontWeight: '500',
+                whiteSpace: 'nowrap'
               }}>
                 Pending Invoices
               </p>
@@ -532,36 +535,6 @@ export default function DashboardPage() {
                 {tab.label}
               </button>
             ))}
-          </div>
-
-          {/* View All Transactions Button */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '1rem'
-          }}>
-            <button
-              onClick={() => navigate('/invoices?tab=all')}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: 'transparent',
-                color: brandColors.primary[600],
-                border: `1px solid ${brandColors.primary[600]}`,
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = brandColors.primary[50]
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              View All Transactions
-            </button>
           </div>
 
           {/* Transaction List with Shadows */}
