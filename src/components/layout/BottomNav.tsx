@@ -57,93 +57,160 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         borderTopRightRadius: '25px',
         borderBottomLeftRadius: '25px',
         borderBottomRightRadius: '25px',
-        padding: '0.75rem 1rem 1rem 1rem',
+        padding: '0.75rem 0.5rem 1rem 0.5rem',
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 50,
         boxShadow: '0 -4px 12px 0 rgb(0 0 0 / 0.1)'
       }}>
-        {/* Regular Navigation Items */}
-        {navigationItems.map((item) => {
-          const Icon = item.icon
-          const isActive = location.pathname === item.path || (item.path === '/menu' && isSettingsVisible)
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleNavigation(item.path)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.25rem',
-                padding: '0.5rem',
-                backgroundColor: 'transparent',
-                color: isActive ? brandColors.primary[600] : brandColors.neutral[500],
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '10px',
-                fontWeight: '500',
-                transition: 'all 0.2s ease',
-                flex: 1,
-                minWidth: 0
-              }}
-            >
-              <Icon size={24} />
-              <span style={{
-                fontSize: '11px',
-                fontWeight: '500'
-              }}>
-                {item.id}
-              </span>
-            </button>
-          )
-        })}
+        {/* Home - Closer to left edge */}
+        <button
+          onClick={() => handleNavigation('/dashboard')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: location.pathname === '/dashboard' ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+            marginRight: 'auto'
+          }}
+        >
+          <Home size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Home
+          </span>
+        </button>
 
-        {/* Floating Action Button - Create Invoice */}
+        {/* Transaction - With spacing from Create button */}
+        <button
+          onClick={() => handleNavigation('/invoices')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: location.pathname === '/invoices' ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+            marginRight: '1rem'
+          }}
+        >
+          <FileText size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Transaction
+          </span>
+        </button>
+
+        {/* Create Invoice Button - Center */}
         <button
           onClick={() => navigate('/invoice/new')}
           style={{
-            position: 'absolute',
-            top: '-24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '55px',
-            height: '55px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
             backgroundColor: 'transparent',
             color: brandColors.primary[600],
-            border: `3px solid ${brandColors.primary[600]}`,
-            borderRadius: '50%',
+            border: 'none',
+            borderRadius: '8px',
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px 0 rgb(0 0 0 / 0.15)',
-            transition: 'all 0.2s ease',
-            zIndex: 10
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = brandColors.primary[50]
-            e.currentTarget.style.boxShadow = '0 6px 16px 0 rgb(0 0 0 / 0.2)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.boxShadow = '0 4px 12px 0 rgb(0 0 0 / 0.15)'
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.primary[600]
-            e.currentTarget.style.color = brandColors.white
-            e.currentTarget.style.borderColor = brandColors.white
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.primary[50]
-            e.currentTarget.style.color = brandColors.primary[600]
-            e.currentTarget.style.borderColor = brandColors.primary[600]
           }}
         >
-          <Plus size={28} />
+          <Plus size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Create
+          </span>
+        </button>
+
+        {/* Reports - With spacing from Create button */}
+        <button
+          onClick={() => handleNavigation('/reports')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: location.pathname === '/reports' ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+            marginLeft: '1rem'
+          }}
+        >
+          <BarChart3 size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Reports
+          </span>
+        </button>
+
+        {/* Menu - Closer to right edge */}
+        <button
+          onClick={() => handleNavigation('/menu')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: (location.pathname === '/menu' || isSettingsVisible) ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease',
+            marginLeft: 'auto'
+          }}
+        >
+          <Menu size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Menu
+          </span>
         </button>
       </nav>
     </>

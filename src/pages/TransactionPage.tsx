@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
@@ -14,7 +14,8 @@ import {
   Check,
   X,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  ChevronDown
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
@@ -36,13 +37,34 @@ export default function TransactionPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-
+  
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all')
   const [bulkMode, setBulkMode] = useState(false)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [showBulkActions, setShowBulkActions] = useState(false)
+  const [showTopbarDropdown, setShowTopbarDropdown] = useState(false)
+  const [showTransactionDropdown, setShowTransactionDropdown] = useState<string | null>(null)
+  const topbarDropdownRef = useRef<HTMLDivElement>(null)
+  const transactionDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Mockup data for demonstration
+  const mockupTransactions: Transaction[] = [
+    // Invoice transactions
+    { id: '1', type: 'invoice', description: 'Web Development Services', amount: 2500, status: 'paid', date: '2024-01-15', created_at: '2024-01-15T10:00:00Z', client_name: 'Acme Corp', invoice_number: 'INV-001' },
+    { id: '2', type: 'invoice', description: 'Mobile App Development', amount: 1800, status: 'pending', date: '2024-01-14', created_at: '2024-01-14T14:30:00Z', client_name: 'TechStart Inc', invoice_number: 'INV-002' },
+    { id: '3', type: 'invoice', description: 'UI/UX Design', amount: 1200, status: 'draft', date: '2024-01-13', created_at: '2024-01-13T09:15:00Z', client_name: 'Design Co', invoice_number: 'INV-003' },
+    { id: '4', type: 'invoice', description: 'Consulting Services', amount: 950, status: 'overdue', date: '2024-01-10', created_at: '2024-01-10T16:45:00Z', client_name: 'Business Solutions', invoice_number: 'INV-004' },
+    { id: '5', type: 'invoice', description: 'Database Optimization', amount: 750, status: 'paid', date: '2024-01-12', created_at: '2024-01-12T11:20:00Z', client_name: 'DataCorp', invoice_number: 'INV-005' },
+    
+    // Expense transactions
+    { id: '6', type: 'expense', description: 'Office Supplies', amount: 150, status: 'spent', date: '2024-01-16', created_at: '2024-01-16T08:30:00Z', category: 'Office' },
+    { id: '7', type: 'expense', description: 'Software License', amount: 299, status: 'expense', date: '2024-01-15', created_at: '2024-01-15T13:45:00Z', category: 'Software' },
+    { id: '8', type: 'expense', description: 'Internet Bill', amount: 89, status: 'spent', date: '2024-01-14', created_at: '2024-01-14T10:00:00Z', category: 'Utilities' },
+    { id: '9', type: 'expense', description: 'Marketing Campaign', amount: 450, status: 'expense', date: '2024-01-13', created_at: '2024-01-13T15:30:00Z', category: 'Marketing' },
+    { id: '10', type: 'expense', description: 'Travel Expenses', amount: 320, status: 'spent', date: '2024-01-12', created_at: '2024-01-12T12:15:00Z', category: 'Travel' }
+  ]
 
   // Load transactions from database
   useEffect(() => {
@@ -50,6 +72,21 @@ export default function TransactionPage() {
       loadTransactions()
     }
   }, [user])
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (topbarDropdownRef.current && !topbarDropdownRef.current.contains(event.target as Node)) {
+        setShowTopbarDropdown(false)
+      }
+      if (transactionDropdownRef.current && !transactionDropdownRef.current.contains(event.target as Node)) {
+        setShowTransactionDropdown(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Update URL when tab changes
   useEffect(() => {
@@ -69,6 +106,11 @@ export default function TransactionPage() {
       setLoading(true)
       console.log('Loading transactions for user:', user.id)
       
+      // Use mockup data for now
+      setTransactions(mockupTransactions)
+      
+      // Uncomment below for real database integration
+      /*
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
@@ -81,6 +123,7 @@ export default function TransactionPage() {
 
       console.log('Transactions loaded:', data)
       setTransactions(data || [])
+      */
     } catch (error) {
       console.error('Error loading transactions:', error)
       toast.error('Failed to load transactions')
@@ -221,6 +264,7 @@ export default function TransactionPage() {
     setBulkMode(true)
     setSelectedItems(new Set())
     setShowBulkActions(false)
+    setShowTopbarDropdown(false)
   }
 
   const exitBulkMode = () => {
@@ -300,28 +344,10 @@ export default function TransactionPage() {
             {bulkMode ? `${selectedItems.size} selected` : 'Transaction'}
           </h1>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
             {bulkMode ? (
-              <>
-                <button
-                  onClick={exitBulkMode}
-                  style={{
-                    padding: '0.5rem',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <X size={20} color={brandColors.neutral[600]} />
-                </button>
-              </>
-            ) : (
               <button
-                onClick={enterBulkMode}
+                onClick={exitBulkMode}
                 style={{
                   padding: '0.5rem',
                   backgroundColor: 'transparent',
@@ -333,92 +359,82 @@ export default function TransactionPage() {
                   justifyContent: 'center'
                 }}
               >
-                <MoreVertical size={20} color={brandColors.neutral[600]} />
+                <X size={20} color={brandColors.neutral[600]} />
               </button>
+            ) : (
+              <div ref={topbarDropdownRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowTopbarDropdown(!showTopbarDropdown)}
+                  style={{
+                    padding: '0.5rem',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <MoreVertical size={20} color={brandColors.neutral[600]} />
+                </button>
+                
+                {/* Topbar Dropdown */}
+                {showTopbarDropdown && (
+                  <div style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '100%',
+                    backgroundColor: brandColors.white,
+                    border: `1px solid ${brandColors.neutral[200]}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    zIndex: 20,
+                    minWidth: '150px',
+                    padding: '0.5rem 0'
+                  }}>
+                    <button
+                      onClick={enterBulkMode}
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 1rem',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        color: brandColors.neutral[700]
+                      }}
+                    >
+                      <Check size={16} />
+                      Select
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
 
-        {/* Bulk Actions */}
-        {showBulkActions && (
+        {/* Bulk Actions - Replace Tab Navigation */}
+        {bulkMode && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '1rem',
-            backgroundColor: brandColors.primary[50],
-            borderBottom: `1px solid ${brandColors.primary[200]}`
+            padding: '1.5rem 1rem 0.5rem 1rem'
           }}>
-            <button
-              onClick={() => handleBulkAction('mark_paid')}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.success[600],
-                color: brandColors.white,
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              Mark Paid
-            </button>
-            <button
-              onClick={() => handleBulkAction('mark_pending')}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.warning[600],
-                color: brandColors.white,
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              Mark Pending
-            </button>
-            <button
-              onClick={() => handleBulkAction('delete')}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.error[600],
-                color: brandColors.white,
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        {/* Tab Navigation */}
-        <div style={{
-          padding: '1.5rem 1rem 0.5rem 1rem'
-        }}>
-          <div style={{
-            display: 'flex',
-            gap: '0.75rem',
-            marginBottom: '1rem'
-          }}>
-            {[
-              { id: 'all', label: 'All' },
-              { id: 'invoice', label: 'Invoice' },
-              { id: 'expenses', label: 'Expenses' }
-            ].map((tab) => (
+            <div style={{
+              display: 'flex',
+              gap: '0.75rem',
+              marginBottom: '1rem'
+            }}>
               <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
+                onClick={() => handleBulkAction('mark_paid')}
                 style={{
                   padding: '0.75rem 1.5rem',
-                  backgroundColor: activeTab === tab.id ? brandColors.primary[600] : brandColors.neutral[100],
-                  color: activeTab === tab.id ? brandColors.white : brandColors.neutral[600],
-                  border: 'none',
+                  backgroundColor: 'transparent',
+                  color: brandColors.primary[600],
+                  border: `1px solid ${brandColors.primary[600]}`,
                   borderRadius: '20px',
                   fontSize: '0.875rem',
                   fontWeight: '500',
@@ -426,13 +442,107 @@ export default function TransactionPage() {
                   transition: 'all 0.2s ease',
                   flex: 1
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = brandColors.primary[50]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
               >
-                {tab.label}
+                Mark Paid
               </button>
-            ))}
+              <button
+                onClick={() => handleBulkAction('mark_pending')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: 'transparent',
+                  color: brandColors.primary[600],
+                  border: `1px solid ${brandColors.primary[600]}`,
+                  borderRadius: '20px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  flex: 1
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = brandColors.primary[50]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                Mark Pending
+              </button>
+              <button
+                onClick={() => handleBulkAction('delete')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: 'transparent',
+                  color: brandColors.primary[600],
+                  border: `1px solid ${brandColors.primary[600]}`,
+                  borderRadius: '20px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  flex: 1
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = brandColors.primary[50]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
+        )}
 
-          {/* Transaction List */}
+        {/* Tab Navigation - Only show when not in bulk mode */}
+        {!bulkMode && (
+          <div style={{
+            padding: '1.5rem 1rem 0.5rem 1rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              gap: '0.75rem',
+              marginBottom: '1rem'
+            }}>
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'invoice', label: 'Invoice' },
+                { id: 'expenses', label: 'Expenses' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: activeTab === tab.id ? brandColors.primary[600] : brandColors.neutral[100],
+                    color: activeTab === tab.id ? brandColors.white : brandColors.neutral[600],
+                    border: 'none',
+                    borderRadius: '20px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    flex: 1
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Transaction List */}
+        <div style={{
+          padding: bulkMode ? '0 1rem 0.5rem 1rem' : '0 1rem 0.5rem 1rem'
+        }}>
           {loading ? (
             <div style={{
               display: 'flex',
@@ -567,139 +677,172 @@ export default function TransactionPage() {
                     </div>
                     
                     {!bulkMode && (
-                      <div style={{ position: 'relative' }}>
-                        <button style={{
-                          padding: '0.25rem',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          borderRadius: '4px'
-                        }}>
+                      <div ref={transactionDropdownRef} style={{ position: 'relative' }}>
+                        <button 
+                          onClick={() => setShowTransactionDropdown(showTransactionDropdown === transaction.id ? null : transaction.id)}
+                          style={{
+                            padding: '0.25rem',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            borderRadius: '4px'
+                          }}
+                        >
                           <MoreVertical size={16} color={brandColors.neutral[400]} />
                         </button>
                         
-                        {/* Dropdown Menu */}
-                        <div style={{
-                          position: 'absolute',
-                          right: 0,
-                          top: '100%',
-                          backgroundColor: brandColors.white,
-                          border: `1px solid ${brandColors.neutral[200]}`,
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                          zIndex: 20,
-                          minWidth: '150px',
-                          padding: '0.5rem 0'
-                        }}>
-                          <button
-                            onClick={() => navigate(`/invoice/preview`, { state: { transactionId: transaction.id } })}
-                            style={{
-                              width: '100%',
-                              padding: '0.5rem 1rem',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              fontSize: '0.875rem',
-                              color: brandColors.neutral[700]
-                            }}
-                          >
-                            <Eye size={16} />
-                            View
-                          </button>
-                          
-                          <button
-                            onClick={() => navigate(`/invoice/edit`, { state: { transactionId: transaction.id } })}
-                            style={{
-                              width: '100%',
-                              padding: '0.5rem 1rem',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              fontSize: '0.875rem',
-                              color: brandColors.neutral[700]
-                            }}
-                          >
-                            <Edit size={16} />
-                            Edit
-                          </button>
-                          
-                          {transaction.type === 'invoice' && transaction.status !== 'paid' && (
-                            <button
-                              onClick={() => handleTransactionAction(transaction.id, 'mark_paid')}
-                              style={{
-                                width: '100%',
-                                padding: '0.5rem 1rem',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontSize: '0.875rem',
-                                color: brandColors.success[600]
-                              }}
-                            >
-                              <Check size={16} />
-                              Mark Paid
-                            </button>
-                          )}
-                          
-                          {transaction.type === 'invoice' && transaction.status !== 'pending' && (
-                            <button
-                              onClick={() => handleTransactionAction(transaction.id, 'mark_pending')}
-                              style={{
-                                width: '100%',
-                                padding: '0.5rem 1rem',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                fontSize: '0.875rem',
-                                color: brandColors.warning[600]
-                              }}
-                            >
-                              <Check size={16} />
-                              Mark Pending
-                            </button>
-                          )}
-                          
+                        {/* Modern Dropdown Menu */}
+                        {showTransactionDropdown === transaction.id && (
                           <div style={{
-                            height: '1px',
-                            backgroundColor: brandColors.neutral[200],
-                            margin: '0.5rem 0'
-                          }} />
-                          
-                          <button
-                            onClick={() => {
-                              if (window.confirm('Are you sure you want to delete this transaction?')) {
-                                handleTransactionAction(transaction.id, 'delete')
-                              }
-                            }}
-                            style={{
-                              width: '100%',
-                              padding: '0.5rem 1rem',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              fontSize: '0.875rem',
-                              color: brandColors.error[600]
-                            }}
-                          >
-                            <Trash2 size={16} />
-                            Delete
-                          </button>
-                        </div>
+                            position: 'absolute',
+                            right: 0,
+                            top: '100%',
+                            backgroundColor: brandColors.white,
+                            border: `1px solid ${brandColors.neutral[200]}`,
+                            borderRadius: '12px',
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+                            zIndex: 30,
+                            minWidth: '180px',
+                            padding: '0.5rem 0',
+                            marginTop: '0.25rem'
+                          }}>
+                            {/* View */}
+                            <button
+                              onClick={() => {
+                                navigate(`/invoice/preview`, { state: { transactionId: transaction.id } })
+                                setShowTransactionDropdown(null)
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '0.75rem 1rem',
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '0.875rem',
+                                color: brandColors.neutral[700],
+                                transition: 'background-color 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent'
+                              }}
+                            >
+                              <Eye size={16} />
+                              View
+                            </button>
+                            
+                            {/* Status Actions for Invoices */}
+                            {transaction.type === 'invoice' && (
+                              <>
+                                {transaction.status !== 'paid' && (
+                                  <button
+                                    onClick={() => {
+                                      handleTransactionAction(transaction.id, 'mark_paid')
+                                      setShowTransactionDropdown(null)
+                                    }}
+                                    style={{
+                                      width: '100%',
+                                      padding: '0.75rem 1rem',
+                                      backgroundColor: 'transparent',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.75rem',
+                                      fontSize: '0.875rem',
+                                      color: brandColors.success[600],
+                                      transition: 'background-color 0.2s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = brandColors.success[50]
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = 'transparent'
+                                    }}
+                                  >
+                                    <Check size={16} />
+                                    Mark Paid
+                                  </button>
+                                )}
+                                
+                                {transaction.status !== 'pending' && (
+                                  <button
+                                    onClick={() => {
+                                      handleTransactionAction(transaction.id, 'mark_pending')
+                                      setShowTransactionDropdown(null)
+                                    }}
+                                    style={{
+                                      width: '100%',
+                                      padding: '0.75rem 1rem',
+                                      backgroundColor: 'transparent',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.75rem',
+                                      fontSize: '0.875rem',
+                                      color: brandColors.warning[600],
+                                      transition: 'background-color 0.2s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = brandColors.warning[50]
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = 'transparent'
+                                    }}
+                                  >
+                                    <Check size={16} />
+                                    Mark Pending
+                                  </button>
+                                )}
+                              </>
+                            )}
+                            
+                            {/* Separator */}
+                            <div style={{
+                              height: '1px',
+                              backgroundColor: brandColors.neutral[200],
+                              margin: '0.5rem 0'
+                            }} />
+                            
+                            {/* Delete */}
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this transaction?')) {
+                                  handleTransactionAction(transaction.id, 'delete')
+                                  setShowTransactionDropdown(null)
+                                }
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '0.75rem 1rem',
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '0.875rem',
+                                color: brandColors.error[600],
+                                transition: 'background-color 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = brandColors.error[50]
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent'
+                              }}
+                            >
+                              <Trash2 size={16} />
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
