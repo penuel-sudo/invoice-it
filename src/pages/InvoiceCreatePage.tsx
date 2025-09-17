@@ -912,8 +912,8 @@ export default function InvoiceCreatePage() {
         <div style={{
           position: 'fixed',
           bottom: '1rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          left: '1rem',
+          right: '1rem',
           display: 'flex',
           gap: '0.5rem',
           backgroundColor: brandColors.white,
@@ -922,7 +922,8 @@ export default function InvoiceCreatePage() {
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           border: `1px solid ${brandColors.neutral[200]}`,
           maxWidth: 'calc(100vw - 2rem)',
-          overflowX: 'auto'
+          overflowX: 'auto',
+          zIndex: 100
         }}>
           <button
             onClick={handleSave}

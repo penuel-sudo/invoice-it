@@ -60,7 +60,6 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         padding: '0.75rem 1.5rem 1rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
         zIndex: 50,
         boxShadow: '0 -4px 12px 0 rgb(0 0 0 / 0.1)'
       }}>
@@ -80,7 +79,8 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
           <Home size={24} />
@@ -108,7 +108,8 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
           <FileText size={24} />
@@ -137,7 +138,9 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             fontWeight: '500',
             transition: 'all 0.2s ease',
             minWidth: '48px',
-            minHeight: '48px'
+            minHeight: '48px',
+            flex: 0,
+            margin: '0 1rem'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = brandColors.primary[600]
@@ -167,7 +170,8 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
           <BarChart3 size={24} />
@@ -195,7 +199,8 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             cursor: 'pointer',
             fontSize: '10px',
             fontWeight: '500',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
           <Menu size={24} />

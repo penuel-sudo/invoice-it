@@ -46,13 +46,12 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
 
   return (
     <div style={{
-      height: '70px',
+      height: '60px',
       backgroundColor: 'transparent',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 0.5rem',
-      borderBottom: `1px solid ${brandColors.neutral[100]}`,
+      padding: '0.5rem 0.5rem 0 0.5rem',
       boxSizing: 'border-box',
       width: '100%',
       flexShrink: 0
