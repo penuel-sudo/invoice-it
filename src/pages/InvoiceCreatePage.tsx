@@ -908,23 +908,22 @@ export default function InvoiceCreatePage() {
           </div>
         </div>
 
-        {/* Floating Action Buttons */}
+        {/* Action Buttons - Non-floating */}
         <div style={{
-          position: 'fixed',
-          bottom: '1rem',
-          left: '1rem',
-          right: '1rem',
-          display: 'flex',
-          gap: '0.5rem',
-          backgroundColor: brandColors.white,
-          padding: '0.75rem',
-          borderRadius: '12px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          border: `1px solid ${brandColors.neutral[200]}`,
-          maxWidth: 'calc(100vw - 2rem)',
-          overflowX: 'auto',
-          zIndex: 100
+          padding: '1rem',
+          marginTop: '1rem'
         }}>
+          <div style={{
+            display: 'flex',
+            gap: '0.5rem',
+            backgroundColor: brandColors.white,
+            padding: '0.75rem',
+            borderRadius: '16px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`,
+            maxWidth: '100%',
+            overflowX: 'auto'
+          }}>
           <button
             onClick={handleSave}
             disabled={isSaving}
@@ -974,6 +973,7 @@ export default function InvoiceCreatePage() {
             <Eye size={16} />
             Preview
           </button>
+          </div>
         </div>
       </div>
     </Layout>
