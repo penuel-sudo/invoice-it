@@ -60,65 +60,65 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         padding: '0.75rem 1.5rem 1rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'space-between',
         zIndex: 50,
         boxShadow: '0 -4px 12px 0 rgb(0 0 0 / 0.1)'
       }}>
-        {/* Left Side - Home and Transaction */}
-        <div style={{ display: 'flex', gap: '1rem', flex: 1, justifyContent: 'flex-start' }}>
-          <button
-            onClick={() => handleNavigation('/dashboard')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem',
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              color: location.pathname === '/dashboard' ? brandColors.primary[600] : brandColors.neutral[500],
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '10px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Home size={24} />
-            <span style={{
-              fontSize: '11px',
-              fontWeight: '500'
-            }}>
-              Home
-            </span>
-          </button>
+        {/* Left Section: Home */}
+        <button
+          onClick={() => handleNavigation('/dashboard')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: location.pathname === '/dashboard' ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Home size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Home
+          </span>
+        </button>
 
-          <button
-            onClick={() => handleNavigation('/invoices')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem',
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              color: location.pathname === '/invoices' ? brandColors.primary[600] : brandColors.neutral[500],
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '10px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <FileText size={24} />
-            <span style={{
-              fontSize: '11px',
-              fontWeight: '500'
-            }}>
-              Transaction
-            </span>
-          </button>
-        </div>
+        {/* Left Center Section: Transaction */}
+        <button
+          onClick={() => handleNavigation('/invoices')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: location.pathname === '/invoices' ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <FileText size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Transaction
+          </span>
+        </button>
 
         {/* Center Section: Create Button */}
         <button
@@ -137,8 +137,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             fontWeight: '500',
             transition: 'all 0.2s ease',
             minWidth: '48px',
-            minHeight: '48px',
-            flex: 0
+            minHeight: '48px'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = brandColors.primary[600]
@@ -152,62 +151,61 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
           <Plus size={28} />
         </button>
 
-        {/* Right Side - Reports and Menu */}
-        <div style={{ display: 'flex', gap: '1rem', flex: 1, justifyContent: 'flex-end' }}>
-          <button
-            onClick={() => handleNavigation('/reports')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem',
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              color: location.pathname === '/reports' ? brandColors.primary[600] : brandColors.neutral[500],
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '10px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <BarChart3 size={24} />
-            <span style={{
-              fontSize: '11px',
-              fontWeight: '500'
-            }}>
-              Reports
-            </span>
-          </button>
+        {/* Right Center Section: Reports */}
+        <button
+          onClick={() => handleNavigation('/reports')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: location.pathname === '/reports' ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <BarChart3 size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Reports
+          </span>
+        </button>
 
-          <button
-            onClick={() => handleNavigation('/menu')}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem',
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              color: (location.pathname === '/menu' || isSettingsVisible) ? brandColors.primary[600] : brandColors.neutral[500],
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '10px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Menu size={24} />
-            <span style={{
-              fontSize: '11px',
-              fontWeight: '500'
-            }}>
-              Menu
-            </span>
-          </button>
-        </div>
+        {/* Right Section: Menu */}
+        <button
+          onClick={() => handleNavigation('/menu')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+            padding: '0.5rem',
+            backgroundColor: 'transparent',
+            color: (location.pathname === '/menu' || isSettingsVisible) ? brandColors.primary[600] : brandColors.neutral[500],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: '500',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Menu size={24} />
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '500'
+          }}>
+            Menu
+          </span>
+        </button>
       </nav>
     </>
   )
