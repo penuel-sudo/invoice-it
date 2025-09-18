@@ -98,7 +98,7 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
         className="notification-dropdown"
         style={{
         position: 'fixed',
-        top: isVisible ? '70px' : '-100vh',
+        top: isVisible ? (isMobile ? '70px' : '80px') : '-100vh',
         right: isMobile ? '1rem' : '2rem',
         left: isMobile ? '1rem' : 'auto',
         width: isMobile ? 'auto' : '400px',
