@@ -51,7 +51,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: brandColors.primary[25],
+        backgroundColor: brandColors.white,
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         borderTopLeftRadius: '25px',
         borderTopRightRadius: '25px',

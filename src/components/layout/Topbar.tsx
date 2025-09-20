@@ -43,15 +43,21 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
 
   return (
     <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
       height: '60px',
-      backgroundColor: 'transparent',
+      backgroundColor: brandColors.white,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '0.5rem 0.5rem 0 0.5rem',
       boxSizing: 'border-box',
       width: '100%',
-      flexShrink: 0
+      flexShrink: 0,
+      zIndex: 40,
+      borderBottom: `1px solid ${brandColors.neutral[100]}`
     }}>
       {/* Left Side - Profile */}
       <div style={{
@@ -86,15 +92,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
             margin: 0,
             lineHeight: '1.3'
           }}>
-            {displayName}
-          </p>
-          <p style={{
-            fontSize: '14px',
-            color: brandColors.neutral[500],
-            margin: 0,
-            lineHeight: '1.2'
-          }}>
-            {getGreeting()}
+            {`Hi, ${displayName}`}
           </p>
         </div>
       </div>

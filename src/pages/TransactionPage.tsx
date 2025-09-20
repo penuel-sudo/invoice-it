@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
+import { StatusLogic } from '../lib/statusLogic'
 
 interface Transaction {
   id: string
@@ -129,96 +130,52 @@ export default function TransactionPage() {
   const handleTransactionAction = async (transactionId: string, action: string) => {
     if (!user) return
 
-    try {
-      const transaction = transactions.find(t => t.id === transactionId)
-      if (!transaction) return
+    const transaction = transactions.find(t => t.id === transactionId)
+    if (!transaction) return
 
-      if (action === 'delete') {
-        if (transaction.type === 'invoice') {
-          const { error } = await supabase
-            .from('invoices')
-            .delete()
-            .eq('id', transactionId)
-            .eq('user_id', user.id)
-          
-          if (error) throw error
-        } else {
-          const { error } = await supabase
-            .from('expenses')
-            .delete()
-            .eq('id', transactionId)
-            .eq('user_id', user.id)
-          
-          if (error) throw error
-        }
-        toast.success('Transaction deleted successfully')
-      } else if (action === 'mark_paid' && transaction.type === 'invoice') {
-        const { error } = await supabase.rpc('update_invoice_status', {
-          invoice_id: transactionId,
-          new_status: 'paid'
-        })
-        
-        if (error) throw error
-        toast.success('Invoice marked as paid')
-      } else if (action === 'mark_pending' && transaction.type === 'invoice') {
-        const { error } = await supabase.rpc('update_invoice_status', {
-          invoice_id: transactionId,
-          new_status: 'pending'
-        })
-        
-        if (error) throw error
-        toast.success('Invoice marked as pending')
-      }
+    // Use the reusable StatusLogic component
+    const result = await StatusLogic.handleTransactionAction(
+      transactionId,
+      action,
+      transaction.type,
+      user.id,
+      transaction.status
+    )
 
-      // Reload transactions
+    // Only reload if the action was successful
+    if (result.success) {
       loadTransactions()
-    } catch (error) {
-      console.error('Error updating transaction:', error)
-      toast.error('Failed to update transaction')
     }
   }
 
   const handleBulkAction = async (action: string) => {
     if (!user || selectedItems.size === 0) return
 
+    const selectedTransactions = transactions.filter(t => selectedItems.has(t.id))
+    let successCount = 0
+
     try {
-      const selectedTransactions = transactions.filter(t => selectedItems.has(t.id))
-      
+      for (const transaction of selectedTransactions) {
+        const result = await StatusLogic.handleTransactionAction(
+          transaction.id,
+          action,
+          transaction.type,
+          user.id,
+          transaction.status
+        )
+        
+        if (result.success) {
+          successCount++
+        }
+      }
+
+      // Show summary toast
       if (action === 'delete') {
-        for (const transaction of selectedTransactions) {
-          if (transaction.type === 'invoice') {
-            await supabase
-              .from('invoices')
-              .delete()
-              .eq('id', transaction.id)
-              .eq('user_id', user.id)
-          } else {
-            await supabase
-              .from('expenses')
-              .delete()
-              .eq('id', transaction.id)
-              .eq('user_id', user.id)
-          }
-        }
-        toast.success(`${selectedItems.size} transactions deleted successfully`)
+        toast.success(`${successCount} transactions deleted successfully`)
       } else if (action === 'mark_paid') {
-        const invoices = selectedTransactions.filter(t => t.type === 'invoice')
-        for (const invoice of invoices) {
-          await supabase.rpc('update_invoice_status', {
-            invoice_id: invoice.id,
-            new_status: 'paid'
-          })
-        }
-        toast.success(`${invoices.length} invoices marked as paid`)
+        toast.success(`${successCount} invoices marked as paid`)
       } else if (action === 'mark_pending') {
-        const invoices = selectedTransactions.filter(t => t.type === 'invoice')
-        for (const invoice of invoices) {
-          await supabase.rpc('update_invoice_status', {
-            invoice_id: invoice.id,
-            new_status: 'pending'
-          })
-        }
-        toast.success(`${invoices.length} invoices marked as pending`)
+        toast.success(`${successCount} invoices marked as pending`)
       }
 
       // Clear selection and reload
@@ -256,7 +213,8 @@ export default function TransactionPage() {
     setShowBulkActions(false)
   }
 
-  const formatAmount = (amount: number, type: string) => {
+  const formatAmount = (amount: number | undefined, type: string) => {
+    if (!amount || isNaN(amount)) return type === 'invoice' ? '+$0.00' : '-$0.00'
     const formatted = `$${amount.toFixed(2)}`
     return type === 'invoice' ? `+${formatted}` : `-${formatted}`
   }
@@ -274,10 +232,8 @@ export default function TransactionPage() {
     }
   }
 
-  const getValidStatus = (status: string): 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' => {
-    const validStatuses = ['draft', 'pending', 'paid', 'overdue', 'spent', 'expense']
-    return validStatuses.includes(status) ? status as 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' : 'draft'
-  }
+  // Use StatusLogic for status validation
+  const getValidStatus = StatusLogic.getValidStatus
 
   if (!user) return null
 

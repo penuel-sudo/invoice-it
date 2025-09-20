@@ -126,7 +126,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
 
       {/* Profile Dropdown - Fixed at Bottom */}
       <div style={{
-        padding: '0.5rem 0.5rem 0.25rem 0.5rem',
+        padding: '0.5rem 0.5rem 0.125rem 0.5rem',
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         marginTop: 'auto'
       }}>
