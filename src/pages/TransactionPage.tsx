@@ -536,9 +536,22 @@ export default function TransactionPage() {
                   borderRadius: '12px',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                   border: `1px solid ${brandColors.neutral[100]}`,
-                  cursor: bulkMode ? 'pointer' : 'default'
+                  cursor: bulkMode ? 'pointer' : 'pointer',
+                  transition: 'all 0.2s ease'
                 }}
-                onClick={() => bulkMode && toggleSelection(transaction.id)}
+                onClick={() => bulkMode ? toggleSelection(transaction.id) : undefined}
+                onMouseEnter={(e) => {
+                  if (!bulkMode) {
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!bulkMode) {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
+                  }
+                }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     {bulkMode && (
@@ -582,7 +595,7 @@ export default function TransactionPage() {
                         margin: '0 0 0.125rem 0'
                       }}>
                         {transaction.type === 'invoice' 
-                          ? (transaction.invoice_number ? `Invoice #${transaction.invoice_number}` : 'Invoice')
+                          ? (transaction.client_name || 'Client')
                           : (transaction.description || 'Expense')
                         }
                       </p>
@@ -592,7 +605,7 @@ export default function TransactionPage() {
                         margin: 0
                       }}>
                         {transaction.type === 'invoice' 
-                          ? (transaction.client_name || 'Client')
+                          ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
                           : (transaction.category || 'Expense')
                         } • {transaction.issue_date ? formatDate(transaction.issue_date) : 'No Date'}
                       </p>
