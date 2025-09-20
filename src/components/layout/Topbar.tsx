@@ -15,6 +15,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
   const { user } = useAuth()
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const loadProfilePicture = async () => {
@@ -33,6 +34,18 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
     loadProfilePicture()
   }, [user])
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   const displayName = getUserDisplayName(user)
   const userInitials = getUserInitial(user)
 
@@ -43,10 +56,10 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
 
   return (
     <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
+      position: isMobile ? 'fixed' : 'relative',
+      top: isMobile ? 0 : 'auto',
+      left: isMobile ? 0 : 'auto',
+      right: isMobile ? 0 : 'auto',
       height: '60px',
       backgroundColor: brandColors.white,
       display: 'flex',
@@ -56,7 +69,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
       boxSizing: 'border-box',
       width: '100%',
       flexShrink: 0,
-      zIndex: 40,
+      zIndex: isMobile ? 40 : 'auto',
       borderBottom: `1px solid ${brandColors.neutral[100]}`
     }}>
       {/* Left Side - Profile */}

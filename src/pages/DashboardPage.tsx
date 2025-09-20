@@ -88,7 +88,7 @@ export default function DashboardPage() {
       />
       
       <div style={{
-        paddingTop: '60px', // Space for fixed topbar
+        paddingTop: window.innerWidth < 768 ? '60px' : '0', // Space for fixed topbar on mobile only
         paddingBottom: '4rem', // Space for bottom nav
         backgroundColor: brandColors.white,
         minHeight: '100vh',

@@ -31,7 +31,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
       width: '280px',
       backgroundColor: brandColors.white,
       borderRight: `1px solid ${brandColors.neutral[200]}`,
-      padding: '1.5rem 0.5rem',
+      padding: '1.5rem 0.5rem 0.5rem 0.5rem',
       zIndex: 40,
       overflowY: 'auto',
       display: 'flex',
