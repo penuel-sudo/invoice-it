@@ -23,14 +23,19 @@ import { format } from 'date-fns'
 interface Transaction {
   id: string
   type: 'invoice' | 'expense'
-  description: string
-  amount: number
-  status: string
-  date: string
-  created_at: string
+  invoice_number?: string
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense'
+  issue_date?: string
+  due_date?: string
+  subtotal?: number
+  tax_amount?: number
+  total_amount: number
+  notes?: string
   client_name?: string
   category?: string
-  invoice_number?: string
+  description?: string
+  created_at: string
+  updated_at?: string
 }
 
 export default function TransactionPage() {
@@ -49,22 +54,6 @@ export default function TransactionPage() {
   const topbarDropdownRef = useRef<HTMLDivElement>(null)
   const transactionDropdownRef = useRef<HTMLDivElement>(null)
 
-  // Mockup data for demonstration
-  const mockupTransactions: Transaction[] = [
-    // Invoice transactions
-    { id: '1', type: 'invoice', description: 'Web Development Services', amount: 2500, status: 'paid', date: '2024-01-15', created_at: '2024-01-15T10:00:00Z', client_name: 'Acme Corp', invoice_number: 'INV-001' },
-    { id: '2', type: 'invoice', description: 'Mobile App Development', amount: 1800, status: 'pending', date: '2024-01-14', created_at: '2024-01-14T14:30:00Z', client_name: 'TechStart Inc', invoice_number: 'INV-002' },
-    { id: '3', type: 'invoice', description: 'UI/UX Design', amount: 1200, status: 'draft', date: '2024-01-13', created_at: '2024-01-13T09:15:00Z', client_name: 'Design Co', invoice_number: 'INV-003' },
-    { id: '4', type: 'invoice', description: 'Consulting Services', amount: 950, status: 'overdue', date: '2024-01-10', created_at: '2024-01-10T16:45:00Z', client_name: 'Business Solutions', invoice_number: 'INV-004' },
-    { id: '5', type: 'invoice', description: 'Database Optimization', amount: 750, status: 'paid', date: '2024-01-12', created_at: '2024-01-12T11:20:00Z', client_name: 'DataCorp', invoice_number: 'INV-005' },
-    
-    // Expense transactions
-    { id: '6', type: 'expense', description: 'Office Supplies', amount: 150, status: 'spent', date: '2024-01-16', created_at: '2024-01-16T08:30:00Z', category: 'Office' },
-    { id: '7', type: 'expense', description: 'Software License', amount: 299, status: 'expense', date: '2024-01-15', created_at: '2024-01-15T13:45:00Z', category: 'Software' },
-    { id: '8', type: 'expense', description: 'Internet Bill', amount: 89, status: 'spent', date: '2024-01-14', created_at: '2024-01-14T10:00:00Z', category: 'Utilities' },
-    { id: '9', type: 'expense', description: 'Marketing Campaign', amount: 450, status: 'expense', date: '2024-01-13', created_at: '2024-01-13T15:30:00Z', category: 'Marketing' },
-    { id: '10', type: 'expense', description: 'Travel Expenses', amount: 320, status: 'spent', date: '2024-01-12', created_at: '2024-01-12T12:15:00Z', category: 'Travel' }
-  ]
 
   // Load transactions from database
   useEffect(() => {
@@ -106,11 +95,6 @@ export default function TransactionPage() {
       setLoading(true)
       console.log('Loading transactions for user:', user.id)
       
-      // Use mockup data for now
-      setTransactions(mockupTransactions)
-      
-      // Uncomment below for real database integration
-      /*
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
@@ -123,7 +107,6 @@ export default function TransactionPage() {
 
       console.log('Transactions loaded:', data)
       setTransactions(data || [])
-      */
     } catch (error) {
       console.error('Error loading transactions:', error)
       toast.error('Failed to load transactions')
@@ -643,8 +626,8 @@ export default function TransactionPage() {
                         margin: '0 0 0.125rem 0'
                       }}>
                         {transaction.type === 'invoice' 
-                          ? (transaction.invoice_number ? `Invoice #${transaction.invoice_number}` : transaction.description)
-                          : transaction.description
+                          ? (transaction.invoice_number ? `Invoice #${transaction.invoice_number}` : 'Invoice')
+                          : (transaction.description || 'Expense')
                         }
                       </p>
                       <p style={{
@@ -655,7 +638,7 @@ export default function TransactionPage() {
                         {transaction.type === 'invoice' 
                           ? (transaction.client_name || 'Client')
                           : (transaction.category || 'Expense')
-                        } • {transaction.date ? formatDate(transaction.date) : 'No Date'}
+                        } • {transaction.issue_date ? formatDate(transaction.issue_date) : 'No Date'}
                       </p>
                     </div>
                   </div>
@@ -668,7 +651,7 @@ export default function TransactionPage() {
                         color: transaction.type === 'invoice' ? brandColors.success[600] : brandColors.error[600],
                         margin: 0
                       }}>
-                        {formatAmount(transaction.amount, transaction.type)}
+                        {formatAmount(transaction.total_amount, transaction.type)}
                       </p>
                       <StatusButton 
                         status={getValidStatus(transaction.status)} 

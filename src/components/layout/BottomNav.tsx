@@ -51,7 +51,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: brandColors.white,
+        backgroundColor: brandColors.primary[25],
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         borderTopLeftRadius: '25px',
         borderTopRightRadius: '25px',
@@ -93,32 +93,32 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         </button>
 
         {/* Left Center Section: Transaction */}
-        <button
+            <button
           onClick={() => handleNavigation('/invoices')}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            padding: '0.5rem',
-            backgroundColor: 'transparent',
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.25rem',
+                padding: '0.5rem',
+                backgroundColor: 'transparent',
             color: location.pathname === '/invoices' ? brandColors.primary[600] : brandColors.neutral[500],
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: '500',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '10px',
+                fontWeight: '500',
             transition: 'all 0.2s ease'
-          }}
-        >
+              }}
+            >
           <FileText size={24} />
-          <span style={{
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
+              <span style={{
+                fontSize: '11px',
+                fontWeight: '500'
+              }}>
             Transaction
-          </span>
-        </button>
+              </span>
+            </button>
 
         {/* Center Section: Create Button */}
         <button

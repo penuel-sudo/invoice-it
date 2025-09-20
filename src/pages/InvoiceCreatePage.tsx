@@ -914,16 +914,16 @@ export default function InvoiceCreatePage() {
           marginTop: '1rem'
         }}>
           <div style={{
-            display: 'flex',
-            gap: '0.5rem',
-            backgroundColor: brandColors.white,
-            padding: '0.75rem',
+          display: 'flex',
+          gap: '0.5rem',
+          backgroundColor: brandColors.white,
+          padding: '0.75rem',
             borderRadius: '16px',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`,
             maxWidth: '100%',
-            overflowX: 'auto'
-          }}>
+          overflowX: 'auto'
+        }}>
           <button
             onClick={handleSave}
             disabled={isSaving}

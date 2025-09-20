@@ -36,12 +36,9 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
   const displayName = getUserDisplayName(user)
   const userInitials = getUserInitial(user)
 
-  // Get greeting based on current time
+  // Get greeting with user name
   const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'Good morning! ☀️'
-    if (hour < 17) return 'Good afternoon! 🌤️'
-    return 'Good evening! 🌙'
+    return `Hi, ${displayName}`
   }
 
   return (

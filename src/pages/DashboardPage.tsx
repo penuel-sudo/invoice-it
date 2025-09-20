@@ -103,11 +103,11 @@ export default function DashboardPage() {
           unreadCount={3}
         />
         
-        {/* 📊 INVOICE STATS SECTION - Transparent background with green border */}
+        {/* 📊 INVOICE STATS SECTION - Subtle brand color background with green border */}
         <div style={{
           height: '20vh',
           minHeight: '160px',
-          backgroundColor: 'transparent',
+          backgroundColor: brandColors.primary[50],
           borderRadius: '15px',
           border: `2px solid ${brandColors.primary[500]}`,
           padding: '1rem 1rem 0.5rem 1rem',
@@ -544,13 +544,13 @@ export default function DashboardPage() {
                 key={transaction.id} 
                 onClick={() => navigate(`/invoices?tab=${transaction.type === 'income' ? 'invoice' : 'expenses'}`)}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '1rem',
-                  backgroundColor: brandColors.white,
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '1rem',
+                backgroundColor: brandColors.white,
+                borderRadius: '12px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                   border: `1px solid ${brandColors.neutral[100]}`,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
