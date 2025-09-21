@@ -236,13 +236,8 @@ export default function TransactionPage() {
 
     try {
       setLoading(true)
-      console.log('Loading mockup transactions...')
+      console.log('Loading transactions for user:', user.id)
       
-      // Use mockup data for demonstration
-      setTransactions(mockupTransactions)
-      
-      // Uncomment below for real database integration
-      /*
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
@@ -253,12 +248,38 @@ export default function TransactionPage() {
         return
       }
 
-      console.log('Transactions loaded:', data)
-      setTransactions(data || [])
-      */
+      console.log('Raw database response:', data)
+
+      // Transform database response to match Transaction interface
+      const transformedTransactions: Transaction[] = (data || []).map((dbTransaction: any) => {
+        const isInvoice = dbTransaction.transaction_type === 'invoice'
+        const isExpense = dbTransaction.transaction_type === 'expense'
+
+        return {
+          id: dbTransaction.id,
+          type: dbTransaction.transaction_type as 'invoice' | 'expense',
+          // For invoices: reference_number = invoice_number, for expenses: reference_number = category
+          invoice_number: isInvoice ? dbTransaction.reference_number : undefined,
+          category: isExpense ? dbTransaction.reference_number : undefined,
+          status: dbTransaction.status as 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense',
+          issue_date: dbTransaction.transaction_date,
+          total_amount: dbTransaction.amount,
+          client_name: isInvoice ? dbTransaction.client_name : undefined,
+          description: isExpense ? dbTransaction.client_name : undefined, // For expenses, client_name contains description
+          created_at: dbTransaction.created_at,
+          updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
+        }
+      })
+
+      console.log('Transformed transactions:', transformedTransactions)
+      setTransactions(transformedTransactions)
     } catch (error) {
       console.error('Error loading transactions:', error)
       toast.error('Failed to load transactions')
+      
+      // Fallback to mockup data if database fails
+      console.log('Falling back to mockup data...')
+      setTransactions(mockupTransactions)
     } finally {
       setLoading(false)
     }
