@@ -239,6 +239,14 @@ export default function TransactionPage() {
       setLoading(true)
       console.log('Loading transactions for user:', user.id)
       
+      // Check for overdue invoices first (background task)
+      try {
+        await StatusLogic.checkAndUpdateOverdueInvoices(user.id)
+      } catch (overdueError) {
+        console.warn('Overdue check failed:', overdueError)
+        // Don't block transaction loading if overdue check fails
+      }
+      
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
@@ -273,7 +281,13 @@ export default function TransactionPage() {
       })
 
       console.log('Transformed transactions:', transformedTransactions)
-      setTransactions(transformedTransactions)
+      
+      // Sort by created_at DESC (latest first) as additional safety
+      const sortedTransactions = transformedTransactions.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      
+      setTransactions(sortedTransactions)
     } catch (error) {
       console.error('Error loading transactions:', error)
       toast.error('Failed to load transactions')
