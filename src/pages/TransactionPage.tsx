@@ -878,7 +878,11 @@ export default function TransactionPage() {
                             {/* View */}
                             <button
                               onClick={() => {
-                                navigate(`/invoice/preview`, { state: { transactionId: transaction.id } })
+                                if (transaction.type === 'invoice') {
+                                  navigate(`/invoice/preview`, { state: { transactionId: transaction.id } })
+                                } else {
+                                  navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
+                                }
                                 setShowTransactionDropdown(null)
                               }}
                               style={{

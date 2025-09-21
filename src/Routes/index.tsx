@@ -5,6 +5,8 @@ import DashboardPage from '../pages/DashboardPage'
 import InvoiceCreatePage from '../pages/InvoiceCreatePage'
 import InvoicePreviewPage from '../pages/InvoicePreviewPage'
 import TransactionPage from '../pages/TransactionPage'
+import ExpenseCreatePage from '../pages/ExpenseCreatePage'
+import ExpensePreviewPage from '../pages/ExpensePreviewPage'
 import ResetPasswordPage from '../pages/reset-password'
 import ProfilePage from '../pages/ProfilePage'
 import NotFoundPage from '../pages/NotFoundPage'
@@ -52,6 +54,22 @@ export const router = createBrowserRouter([
     element: (
       <AuthWrapper requireAuth={true}>
         <TransactionPage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/expense/new',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <ExpenseCreatePage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/expense/preview',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <ExpensePreviewPage />
       </AuthWrapper>
     )
   },
