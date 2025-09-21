@@ -15,7 +15,8 @@ import {
   X,
   ArrowUpRight,
   ArrowDownRight,
-  ChevronDown
+  ChevronDown,
+  Clock
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
@@ -302,18 +303,39 @@ export default function TransactionPage() {
     const transaction = transactions.find(t => t.id === transactionId)
     if (!transaction) return
 
+    // Store original status for rollback
+    const originalStatus = transaction.status
+
+    // Optimistic update for status changes
+    if (action === 'mark_paid' || action === 'mark_pending') {
+      const newStatus = action === 'mark_paid' ? 'paid' : 'pending'
+      
+      // Immediate UI update (optimistic)
+      setTransactions(prev => prev.map(t => 
+        t.id === transactionId ? { ...t, status: newStatus } : t
+      ))
+    }
+
     // Use the reusable StatusLogic component
     const result = await StatusLogic.handleTransactionAction(
       transactionId,
       action,
       transaction.type,
       user.id,
-      transaction.status
+      originalStatus
     )
 
-    // Only reload if the action was successful
+    // Handle result
     if (result.success) {
+      // Keep optimistic change, reload to get latest data
       loadTransactions()
+    } else {
+      // Revert optimistic change on error
+      if (action === 'mark_paid' || action === 'mark_pending') {
+        setTransactions(prev => prev.map(t => 
+          t.id === transactionId ? { ...t, status: originalStatus } : t
+        ))
+      }
     }
   }
 
@@ -802,30 +824,42 @@ export default function TransactionPage() {
                         <button 
                           onClick={() => setShowTransactionDropdown(showTransactionDropdown === transaction.id ? null : transaction.id)}
                           style={{
-                            padding: '0.25rem',
+                            padding: '0.5rem',
                             backgroundColor: 'transparent',
                             border: 'none',
                             cursor: 'pointer',
-                            borderRadius: '4px'
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background-color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = brandColors.neutral[100]
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
                           }}
                         >
-                          <MoreVertical size={16} color={brandColors.neutral[400]} />
+                          <MoreVertical size={18} color={brandColors.neutral[600]} />
                         </button>
                         
-                        {/* Modern Dropdown Menu */}
+                        {/* WhatsApp-style Dropdown Menu - Positioned to the left */}
                         {showTransactionDropdown === transaction.id && (
                           <div style={{
                             position: 'absolute',
-                            right: 0,
-                            top: '100%',
+                            top: '50%',
+                            right: '100%',
+                            transform: 'translateY(-50%)',
+                            marginRight: '0.5rem',
                             backgroundColor: brandColors.white,
                             border: `1px solid ${brandColors.neutral[200]}`,
                             borderRadius: '12px',
-                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                             zIndex: 30,
-                            minWidth: '180px',
+                            width: '160px',
                             padding: '0.5rem 0',
-                            marginTop: '0.25rem'
+                            overflow: 'hidden'
                           }}>
                             {/* View */}
                             <button
@@ -835,7 +869,7 @@ export default function TransactionPage() {
                               }}
                               style={{
                                 width: '100%',
-                                padding: '0.75rem 1rem',
+                                padding: '0.875rem 1rem',
                                 backgroundColor: 'transparent',
                                 border: 'none',
                                 cursor: 'pointer',
@@ -843,8 +877,10 @@ export default function TransactionPage() {
                                 alignItems: 'center',
                                 gap: '0.75rem',
                                 fontSize: '0.875rem',
-                                color: brandColors.neutral[700],
-                                transition: 'background-color 0.2s ease'
+                                fontWeight: '500',
+                                color: brandColors.neutral[800],
+                                transition: 'background-color 0.2s ease',
+                                textAlign: 'left'
                               }}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = brandColors.neutral[50]
@@ -853,8 +889,8 @@ export default function TransactionPage() {
                                 e.currentTarget.style.backgroundColor = 'transparent'
                               }}
                             >
-                              <Eye size={16} />
-                              View
+                              <Eye size={16} color={brandColors.neutral[600]} />
+                              View Details
                             </button>
                             
                             {/* Status Actions for Invoices */}
@@ -868,7 +904,7 @@ export default function TransactionPage() {
                                     }}
                                     style={{
                                       width: '100%',
-                                      padding: '0.75rem 1rem',
+                                      padding: '0.875rem 1rem',
                                       backgroundColor: 'transparent',
                                       border: 'none',
                                       cursor: 'pointer',
@@ -876,18 +912,20 @@ export default function TransactionPage() {
                                       alignItems: 'center',
                                       gap: '0.75rem',
                                       fontSize: '0.875rem',
-                                      color: brandColors.success[600],
-                                      transition: 'background-color 0.2s ease'
+                                      fontWeight: '500',
+                                      color: brandColors.neutral[800],
+                                      transition: 'background-color 0.2s ease',
+                                      textAlign: 'left'
                                     }}
                                     onMouseEnter={(e) => {
-                                      e.currentTarget.style.backgroundColor = brandColors.success[50]
+                                      e.currentTarget.style.backgroundColor = brandColors.neutral[50]
                                     }}
                                     onMouseLeave={(e) => {
                                       e.currentTarget.style.backgroundColor = 'transparent'
                                     }}
                                   >
-                                    <Check size={16} />
-                                    Mark Paid
+                                    <Check size={16} color={brandColors.success[600]} />
+                                    Mark as Paid
                                   </button>
                                 )}
                                 
@@ -899,7 +937,7 @@ export default function TransactionPage() {
                                     }}
                                     style={{
                                       width: '100%',
-                                      padding: '0.75rem 1rem',
+                                      padding: '0.875rem 1rem',
                                       backgroundColor: 'transparent',
                                       border: 'none',
                                       cursor: 'pointer',
@@ -907,18 +945,20 @@ export default function TransactionPage() {
                                       alignItems: 'center',
                                       gap: '0.75rem',
                                       fontSize: '0.875rem',
-                                      color: brandColors.warning[600],
-                                      transition: 'background-color 0.2s ease'
+                                      fontWeight: '500',
+                                      color: brandColors.neutral[800],
+                                      transition: 'background-color 0.2s ease',
+                                      textAlign: 'left'
                                     }}
                                     onMouseEnter={(e) => {
-                                      e.currentTarget.style.backgroundColor = brandColors.warning[50]
+                                      e.currentTarget.style.backgroundColor = brandColors.neutral[50]
                                     }}
                                     onMouseLeave={(e) => {
                                       e.currentTarget.style.backgroundColor = 'transparent'
                                     }}
                                   >
-                                    <Check size={16} />
-                                    Mark Pending
+                                    <Check size={16} color={brandColors.warning[600]} />
+                                    Mark as Pending
                                   </button>
                                 )}
                               </>
@@ -941,7 +981,7 @@ export default function TransactionPage() {
                               }}
                               style={{
                                 width: '100%',
-                                padding: '0.75rem 1rem',
+                                padding: '0.875rem 1rem',
                                 backgroundColor: 'transparent',
                                 border: 'none',
                                 cursor: 'pointer',
@@ -949,8 +989,10 @@ export default function TransactionPage() {
                                 alignItems: 'center',
                                 gap: '0.75rem',
                                 fontSize: '0.875rem',
+                                fontWeight: '500',
                                 color: brandColors.error[600],
-                                transition: 'background-color 0.2s ease'
+                                transition: 'background-color 0.2s ease',
+                                textAlign: 'left'
                               }}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = brandColors.error[50]
@@ -959,7 +1001,7 @@ export default function TransactionPage() {
                                 e.currentTarget.style.backgroundColor = 'transparent'
                               }}
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={16} color={brandColors.error[600]} />
                               Delete
                             </button>
                           </div>
