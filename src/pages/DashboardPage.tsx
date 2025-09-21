@@ -404,7 +404,9 @@ export default function DashboardPage() {
               </span>
             </button>
 
-            <button style={{
+            <button 
+              onClick={() => navigate('/expense/new')}
+              style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -443,7 +445,7 @@ export default function DashboardPage() {
                 fontWeight: '500',
                 color: brandColors.neutral[700]
               }}>
-                Expenses
+                Create Expense
               </span>
             </button>
 
