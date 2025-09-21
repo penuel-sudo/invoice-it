@@ -383,36 +383,32 @@ export default function ExpenseCreatePage() {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: '0 0 1.5rem 0',
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              marginBottom: '1rem'
             }}>
-              <FileText size={20} />
-              Basic Information
-            </h3>
+              <FileText size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Basic Information
+              </h2>
+            </div>
             
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '1.5rem'
-            }}>
-              {/* Description */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: brandColors.neutral[700],
                   marginBottom: '0.5rem'
                 }}>
-                  <FileText size={16} />
                   Description *
                 </label>
                 <input
@@ -422,9 +418,9 @@ export default function ExpenseCreatePage() {
                   placeholder="What did you purchase?"
                   style={{
                     width: '100%',
-                    padding: '0.875rem 1rem',
-                    border: `1px solid ${errors.description ? brandColors.error[300] : brandColors.neutral[300]}`,
-                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    border: `1px solid ${errors.description ? brandColors.error[300] : brandColors.neutral[200]}`,
+                    borderRadius: '8px',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[900],
                     backgroundColor: brandColors.white,
@@ -450,18 +446,14 @@ export default function ExpenseCreatePage() {
                 )}
               </div>
 
-              {/* Category */}
               <div>
                 <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: brandColors.neutral[700],
                   marginBottom: '0.5rem'
                 }}>
-                  <Tag size={16} />
                   Category *
                 </label>
                 <select
@@ -469,9 +461,9 @@ export default function ExpenseCreatePage() {
                   onChange={(e) => handleInputChange('category', e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.875rem 1rem',
-                    border: `1px solid ${errors.category ? brandColors.error[300] : brandColors.neutral[300]}`,
-                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    border: `1px solid ${errors.category ? brandColors.error[300] : brandColors.neutral[200]}`,
+                    borderRadius: '8px',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[900],
                     backgroundColor: brandColors.white,
@@ -505,18 +497,14 @@ export default function ExpenseCreatePage() {
                 )}
               </div>
 
-              {/* Amount */}
               <div>
                 <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: brandColors.neutral[700],
                   marginBottom: '0.5rem'
                 }}>
-                  <DollarSign size={16} />
                   Amount *
                 </label>
                 <input
@@ -528,9 +516,9 @@ export default function ExpenseCreatePage() {
                   placeholder="0.00"
                   style={{
                     width: '100%',
-                    padding: '0.875rem 1rem',
-                    border: `1px solid ${errors.amount ? brandColors.error[300] : brandColors.neutral[300]}`,
-                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    border: `1px solid ${errors.amount ? brandColors.error[300] : brandColors.neutral[200]}`,
+                    borderRadius: '8px',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[900],
                     backgroundColor: brandColors.white,
@@ -556,18 +544,14 @@ export default function ExpenseCreatePage() {
                 )}
               </div>
 
-              {/* Expense Date */}
               <div>
                 <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: brandColors.neutral[700],
                   marginBottom: '0.5rem'
                 }}>
-                  <Calendar size={16} />
                   Expense Date *
                 </label>
                 <input
@@ -576,9 +560,9 @@ export default function ExpenseCreatePage() {
                   onChange={(e) => handleInputChange('expense_date', e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.875rem 1rem',
-                    border: `1px solid ${errors.expense_date ? brandColors.error[300] : brandColors.neutral[300]}`,
-                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    border: `1px solid ${errors.expense_date ? brandColors.error[300] : brandColors.neutral[200]}`,
+                    borderRadius: '8px',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[900],
                     backgroundColor: brandColors.white,
@@ -615,36 +599,32 @@ export default function ExpenseCreatePage() {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: '0 0 1.5rem 0',
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              marginBottom: '1rem'
             }}>
-              <CreditCard size={20} />
-              Payment & Client Information
-            </h3>
+              <CreditCard size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Payment & Client Information
+              </h2>
+            </div>
             
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '1.5rem'
-            }}>
-              {/* Payment Method */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: brandColors.neutral[700],
                   marginBottom: '0.5rem'
                 }}>
-                  <CreditCard size={16} />
                   Payment Method *
                 </label>
                 <select
@@ -652,9 +632,9 @@ export default function ExpenseCreatePage() {
                   onChange={(e) => handleInputChange('payment_method', e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.875rem 1rem',
-                    border: `1px solid ${errors.payment_method ? brandColors.error[300] : brandColors.neutral[300]}`,
-                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    border: `1px solid ${errors.payment_method ? brandColors.error[300] : brandColors.neutral[200]}`,
+                    borderRadius: '8px',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[900],
                     backgroundColor: brandColors.white,
@@ -687,18 +667,14 @@ export default function ExpenseCreatePage() {
                 )}
               </div>
 
-              {/* Client Selection */}
               <div>
                 <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: brandColors.neutral[700],
                   marginBottom: '0.5rem'
                 }}>
-                  <User size={16} />
                   Client (Optional)
                 </label>
                 <select
@@ -706,9 +682,9 @@ export default function ExpenseCreatePage() {
                   onChange={(e) => handleInputChange('client_id', e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.875rem 1rem',
-                    border: `1px solid ${brandColors.neutral[300]}`,
-                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    border: `1px solid ${brandColors.neutral[200]}`,
+                    borderRadius: '8px',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[900],
                     backgroundColor: brandColors.white,
@@ -744,18 +720,22 @@ export default function ExpenseCreatePage() {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: '0 0 1.5rem 0',
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              marginBottom: '1rem'
             }}>
-              <Receipt size={20} />
-              Tax Information
-            </h3>
+              <Receipt size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Tax Information
+              </h2>
+            </div>
             
             <div style={{
               display: 'flex',
@@ -882,18 +862,14 @@ export default function ExpenseCreatePage() {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              fontSize: '1.125rem',
+            <h2 style={{
+              fontSize: '1rem',
               fontWeight: '600',
               color: brandColors.neutral[900],
-              margin: '0 0 1rem 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
+              margin: '0 0 1rem 0'
             }}>
-              <StickyNote size={20} />
               Additional Notes
-            </h3>
+            </h2>
             
             <textarea
               value={formData.notes}
@@ -902,9 +878,9 @@ export default function ExpenseCreatePage() {
               rows={3}
               style={{
                 width: '100%',
-                padding: '0.875rem 1rem',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '12px',
+                padding: '0.75rem',
+                border: `1px solid ${brandColors.neutral[200]}`,
+                borderRadius: '8px',
                 fontSize: '0.875rem',
                 color: brandColors.neutral[900],
                 backgroundColor: brandColors.white,
@@ -932,18 +908,22 @@ export default function ExpenseCreatePage() {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: '0 0 1rem 0',
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              marginBottom: '1rem'
             }}>
-              <Upload size={20} />
-              Receipt Upload (Optional)
-            </h3>
+              <Upload size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Receipt Upload (Optional)
+              </h2>
+            </div>
             
             {!formData.receipt_file ? (
               <div style={{
