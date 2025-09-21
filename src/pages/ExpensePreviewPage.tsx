@@ -72,6 +72,35 @@ export default function ExpensePreviewPage() {
         return
       }
 
+      // Check if we have form data from create page
+      const expenseData = location.state?.expenseData
+      if (expenseData) {
+        // Transform form data to match Expense interface
+        const transformedExpense: Expense = {
+          id: 'preview',
+          description: expenseData.description,
+          category: expenseData.category,
+          amount: parseFloat(expenseData.amount),
+          status: 'spent',
+          expense_date: expenseData.expense_date,
+          notes: expenseData.notes,
+          client_id: expenseData.client_id,
+          client_name: undefined, // Will be loaded from clients
+          payment_method: expenseData.payment_method,
+          is_tax_deductible: expenseData.is_tax_deductible,
+          tax_rate: parseFloat(expenseData.tax_rate),
+          tax_amount: expenseData.is_tax_deductible ? (parseFloat(expenseData.amount) * parseFloat(expenseData.tax_rate) / 100) : 0,
+          receipt_url: expenseData.receipt_url,
+          receipt_filename: expenseData.receipt_filename,
+          receipt_size: expenseData.receipt_file?.size,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+        setExpense(transformedExpense)
+        setLoading(false)
+        return
+      }
+
       // Get expense ID from location state or URL params
       const expenseId = location.state?.expenseId || new URLSearchParams(location.search).get('id')
       

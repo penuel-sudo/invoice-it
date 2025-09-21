@@ -213,7 +213,7 @@ export default function ExpenseCreatePage() {
     }))
   }
 
-  const handleSave = async (status: 'spent' | 'expense') => {
+  const handleSave = async () => {
     if (!user) return
 
     if (!validateForm()) {
@@ -257,7 +257,7 @@ export default function ExpenseCreatePage() {
           description: formData.description.trim(),
           category: formData.category,
           amount: parseFloat(formData.amount),
-          status: status,
+          status: 'spent',
           expense_date: formData.expense_date,
           notes: formData.notes.trim() || null,
           client_id: formData.client_id || null,
@@ -276,11 +276,7 @@ export default function ExpenseCreatePage() {
         return
       }
 
-      const successMessage = status === 'spent' 
-        ? 'Expense saved successfully' 
-        : 'Expense categorized successfully'
-      
-      toast.success(successMessage)
+      toast.success('Expense saved successfully!')
       navigate('/invoices')
     } catch (error) {
       console.error('Error saving expense:', error)
@@ -288,6 +284,18 @@ export default function ExpenseCreatePage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePreview = () => {
+    if (!validateForm()) {
+      toast.error('Please fix the errors before previewing')
+      return
+    }
+
+    // Navigate to preview with form data
+    navigate('/expense/preview', { 
+      state: { expenseData: formData } 
+    })
   }
 
   if (authLoading) {
@@ -315,80 +323,65 @@ export default function ExpenseCreatePage() {
   if (!user) return null
 
   return (
-    <Layout>
+    <Layout hideBottomNav={true}>
       <div style={{
-        padding: '1rem',
+        paddingBottom: '0.5rem',
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',
         maxWidth: '100vw',
         overflow: 'hidden'
       }}>
-        {/* Header */}
+        {/* Header - Match InvoiceCreatePage exactly */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '2rem',
-          paddingBottom: '1rem',
-          borderBottom: `1px solid ${brandColors.neutral[200]}`
+          padding: '1rem',
+          backgroundColor: brandColors.white,
+          borderBottom: `1px solid ${brandColors.neutral[200]}`,
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem'
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <ArrowLeft size={20} color={brandColors.neutral[600]} />
+          </button>
+          
+          <h1 style={{
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            margin: 0
           }}>
-            <button
-              onClick={() => navigate('/invoices')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '40px',
-                height: '40px',
-                backgroundColor: 'transparent',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '10px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-                e.currentTarget.style.borderColor = brandColors.neutral[400]
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.borderColor = brandColors.neutral[300]
-              }}
-            >
-              <ArrowLeft size={20} color={brandColors.neutral[600]} />
-            </button>
-            <h1 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: 0
-            }}>
-              Create Expense
-            </h1>
-          </div>
+            New Expense
+          </h1>
+          
+          <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
         </div>
 
-        {/* Form - InvoiceCreatePage Style */}
-        <div style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.5rem'
-        }}>
+        {/* Form Content */}
+        <div style={{ padding: '1rem' }}>
           {/* Basic Information Card */}
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
-            border: `1px solid ${brandColors.neutral[200]}`,
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            padding: '1.5rem'
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <h3 style={{
               fontSize: '1.125rem',
@@ -617,9 +610,10 @@ export default function ExpenseCreatePage() {
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
-            border: `1px solid ${brandColors.neutral[200]}`,
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            padding: '1.5rem'
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <h3 style={{
               fontSize: '1.125rem',
@@ -745,9 +739,10 @@ export default function ExpenseCreatePage() {
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
-            border: `1px solid ${brandColors.neutral[200]}`,
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            padding: '1.5rem'
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <h3 style={{
               fontSize: '1.125rem',
@@ -882,9 +877,10 @@ export default function ExpenseCreatePage() {
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
-            border: `1px solid ${brandColors.neutral[200]}`,
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            padding: '1.5rem'
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <h3 style={{
               fontSize: '1.125rem',
@@ -931,9 +927,10 @@ export default function ExpenseCreatePage() {
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
-            border: `1px solid ${brandColors.neutral[200]}`,
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            padding: '1.5rem'
+            border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <h3 style={{
               fontSize: '1.125rem',
@@ -1058,7 +1055,7 @@ export default function ExpenseCreatePage() {
 
         </div>
 
-        {/* Action Buttons - InvoiceCreatePage Style */}
+        {/* Action Buttons - Match InvoiceCreatePage exactly */}
         <div style={{
           padding: '1rem',
           marginTop: '1rem'
@@ -1075,72 +1072,53 @@ export default function ExpenseCreatePage() {
             overflowX: 'auto'
           }}>
             <button
-              onClick={() => navigate('/invoices')}
+              onClick={handleSave}
               disabled={loading}
               style={{
+                flex: 1,
                 padding: '0.75rem 1.5rem',
-                backgroundColor: 'transparent',
+                backgroundColor: brandColors.neutral[100],
                 color: brandColors.neutral[600],
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '12px',
+                border: 'none',
+                borderRadius: '8px',
                 fontSize: '0.875rem',
                 fontWeight: '500',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: loading ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '0.5rem',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-                  e.currentTarget.style.borderColor = brandColors.neutral[400]
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.borderColor = brandColors.neutral[300]
-                }
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                opacity: loading ? 0.6 : 1
               }}
             >
-              Cancel
+              <Save size={16} />
+              {loading ? 'Saving...' : 'Save'}
             </button>
             
             <button
-              onClick={() => handleSave('spent')}
-              disabled={loading}
+              onClick={handlePreview}
               style={{
+                flex: 1,
                 padding: '0.75rem 1.5rem',
                 backgroundColor: brandColors.primary[600],
                 color: brandColors.white,
                 border: 'none',
-                borderRadius: '12px',
+                borderRadius: '8px',
                 fontSize: '0.875rem',
                 fontWeight: '500',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: loading ? 0.6 : 1,
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '0.5rem',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = brandColors.primary[700]
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = brandColors.primary[600]
-                }
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
-              <Save size={16} />
-              {loading ? 'Saving...' : 'Save Expense'}
+              <Eye size={16} />
+              Preview
             </button>
           </div>
         </div>
