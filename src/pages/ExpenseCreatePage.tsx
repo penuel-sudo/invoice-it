@@ -69,7 +69,6 @@ export default function ExpenseCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [authLoading, setAuthLoading] = useState(true)
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
     category: '',
@@ -88,18 +87,10 @@ export default function ExpenseCreatePage() {
   const [clients, setClients] = useState<Client[]>([])
 
   useEffect(() => {
-    // Wait a bit for auth to initialize
-    const timer = setTimeout(() => {
-      setAuthLoading(false)
-      if (!user) {
-        navigate('/auth')
-      } else {
-        loadClients()
-      }
-    }, 100)
-
-    return () => clearTimeout(timer)
-  }, [user, navigate])
+    if (user) {
+      loadClients()
+    }
+  }, [user])
 
   const loadClients = async () => {
     if (!user) return
@@ -232,6 +223,8 @@ export default function ExpenseCreatePage() {
         const fileExt = formData.receipt_file.name.split('.').pop()
         const fileName = `${user.id}/${Date.now()}.${fileExt}`
         
+        console.log('Uploading receipt:', fileName)
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('expense-receipts')
           .upload(fileName, formData.receipt_file)
@@ -242,33 +235,41 @@ export default function ExpenseCreatePage() {
           return
         }
 
+        console.log('Receipt uploaded successfully:', uploadData)
+
+        // Get the public URL (works for public buckets)
         const { data: urlData } = supabase.storage
           .from('expense-receipts')
           .getPublicUrl(fileName)
 
+        console.log('Receipt URL:', urlData.publicUrl)
         receiptUrl = urlData.publicUrl
         receiptFilename = formData.receipt_file.name
       }
 
+      const expenseData = {
+        user_id: user.id,
+        description: formData.description.trim(),
+        category: formData.category,
+        amount: parseFloat(formData.amount),
+        status: 'spent',
+        expense_date: formData.expense_date,
+        notes: formData.notes.trim() || null,
+        client_id: formData.client_id || null,
+        payment_method: formData.payment_method,
+        is_tax_deductible: formData.is_tax_deductible,
+        tax_rate: formData.is_tax_deductible ? parseFloat(formData.tax_rate) : 0,
+        tax_amount: formData.is_tax_deductible ? (parseFloat(formData.amount) * parseFloat(formData.tax_rate) / 100) : 0,
+        receipt_url: receiptUrl,
+        receipt_filename: receiptFilename,
+        receipt_size: formData.receipt_file?.size || null
+      }
+
+      console.log('Saving expense with data:', expenseData)
+
       const { error } = await supabase
         .from('expenses')
-        .insert({
-          user_id: user.id,
-          description: formData.description.trim(),
-          category: formData.category,
-          amount: parseFloat(formData.amount),
-          status: 'spent',
-          expense_date: formData.expense_date,
-          notes: formData.notes.trim() || null,
-          client_id: formData.client_id || null,
-          payment_method: formData.payment_method,
-          is_tax_deductible: formData.is_tax_deductible,
-          tax_rate: formData.is_tax_deductible ? parseFloat(formData.tax_rate) : 0,
-          tax_amount: formData.is_tax_deductible ? (parseFloat(formData.amount) * parseFloat(formData.tax_rate) / 100) : 0,
-          receipt_url: receiptUrl,
-          receipt_filename: receiptFilename,
-          receipt_size: formData.receipt_file?.size || null
-        })
+        .insert(expenseData)
 
       if (error) {
         console.error('Error saving expense:', error)
@@ -296,28 +297,6 @@ export default function ExpenseCreatePage() {
     navigate('/expense/preview', { 
       state: { expenseData: formData } 
     })
-  }
-
-  if (authLoading) {
-    return (
-      <Layout>
-        <div style={{
-          padding: '2rem',
-          backgroundColor: brandColors.white,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{
-            fontSize: '1rem',
-            color: brandColors.neutral[600]
-          }}>
-            Loading...
-          </div>
-        </div>
-      </Layout>
-    )
   }
 
   if (!user) return null
