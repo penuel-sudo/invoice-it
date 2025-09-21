@@ -233,7 +233,7 @@ export default function InvoiceCreatePage() {
   return (
     <Layout hideBottomNav={true}>
       <div style={{
-        paddingBottom: '4rem',
+        paddingBottom: '1rem',
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',

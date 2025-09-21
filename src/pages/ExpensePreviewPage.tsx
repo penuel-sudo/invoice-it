@@ -13,11 +13,25 @@ import {
   FileText,
   Tag,
   StickyNote,
-  ArrowDownRight
+  ArrowDownRight,
+  CreditCard,
+  User,
+  Receipt,
+  CheckCircle,
+  Download,
+  Share2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
 import { StatusLogic } from '../lib/statusLogic'
+
+const PAYMENT_METHODS = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'card', label: 'Credit/Debit Card' },
+  { value: 'bank_transfer', label: 'Bank Transfer' },
+  { value: 'check', label: 'Check' },
+  { value: 'other', label: 'Other' }
+]
 
 interface Expense {
   id: string
@@ -27,6 +41,15 @@ interface Expense {
   status: 'spent' | 'expense'
   expense_date: string
   notes?: string
+  client_id?: string
+  client_name?: string
+  payment_method: string
+  is_tax_deductible: boolean
+  tax_rate: number
+  tax_amount: number
+  receipt_url?: string
+  receipt_filename?: string
+  receipt_size?: number
   created_at: string
   updated_at?: string
 }
@@ -246,7 +269,7 @@ export default function ExpensePreviewPage() {
         maxWidth: '100vw',
         overflow: 'hidden'
       }}>
-        {/* Header */}
+        {/* Header - Clean Design */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -285,14 +308,23 @@ export default function ExpensePreviewPage() {
             >
               <ArrowLeft size={20} color={brandColors.neutral[600]} />
             </button>
-            <h1 style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: 0
-            }}>
-              Expense Details
-            </h1>
+            <div>
+              <h1 style={{
+                fontSize: '1.5rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: '0 0 0.25rem 0'
+              }}>
+                Expense Receipt
+              </h1>
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[500],
+                margin: 0
+              }}>
+                {formatDate(expense.expense_date)}
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -300,6 +332,35 @@ export default function ExpensePreviewPage() {
             display: 'flex',
             gap: '0.5rem'
           }}>
+            <button
+              onClick={() => navigate('/expense/new', { state: { expenseData: expense } })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.75rem 1rem',
+                backgroundColor: 'transparent',
+                color: brandColors.primary[600],
+                border: `1px solid ${brandColors.primary[300]}`,
+                borderRadius: '10px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = brandColors.primary[50]
+                e.currentTarget.style.borderColor = brandColors.primary[400]
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.borderColor = brandColors.primary[300]
+              }}
+            >
+              <Edit size={16} />
+              Edit
+            </button>
+            
             <button
               onClick={handleDelete}
               disabled={deleting}
@@ -337,222 +398,376 @@ export default function ExpensePreviewPage() {
           </div>
         </div>
 
-        {/* Expense Details */}
+        {/* Main Content - Clean Card Layout */}
         <div style={{
-          maxWidth: '600px',
-          margin: '0 auto'
+          maxWidth: '800px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.5rem'
         }}>
-          {/* Main Info Card */}
+          {/* Expense Summary Card */}
           <div style={{
             backgroundColor: brandColors.white,
             borderRadius: '16px',
             border: `1px solid ${brandColors.neutral[200]}`,
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            marginBottom: '1.5rem',
-            overflow: 'hidden'
+            padding: '2rem',
+            textAlign: 'center'
           }}>
-            {/* Header */}
+            {/* Expense Icon & Status */}
             <div style={{
-              padding: '1.5rem 1.5rem 1rem 1.5rem',
-              borderBottom: `1px solid ${brandColors.neutral[100]}`
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '1rem',
+              marginBottom: '1.5rem'
             }}>
               <div style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                backgroundColor: brandColors.error[100],
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '0.5rem'
+                justifyContent: 'center'
               }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: brandColors.error[100],
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <ArrowDownRight size={20} color={brandColors.error[600]} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h2 style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '600',
-                    color: brandColors.neutral[900],
-                    margin: '0 0 0.25rem 0'
-                  }}>
-                    {expense.description}
-                  </h2>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[500],
-                    margin: 0
-                  }}>
-                    {formatDate(expense.expense_date)}
-                  </p>
-                </div>
-                <StatusButton status={expense.status} size="md" />
+                <ArrowDownRight size={28} color={brandColors.error[600]} />
               </div>
+              <StatusButton status={expense.status} size="lg" />
             </div>
 
-            {/* Details */}
+            {/* Description */}
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: brandColors.neutral[900],
+              margin: '0 0 0.5rem 0'
+            }}>
+              {expense.description}
+            </h2>
+
+            {/* Amount */}
             <div style={{
+              fontSize: '2.5rem',
+              fontWeight: '700',
+              color: brandColors.error[600],
+              margin: '0 0 0.5rem 0'
+            }}>
+              {formatAmount(expense.amount)}
+            </div>
+
+            {/* Category */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: brandColors.neutral[100],
+              borderRadius: '20px',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: brandColors.neutral[700]
+            }}>
+              <Tag size={16} />
+              {expense.category}
+            </div>
+          </div>
+
+          {/* Details Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '1.5rem'
+          }}>
+            {/* Payment Information */}
+            <div style={{
+              backgroundColor: brandColors.white,
+              borderRadius: '16px',
+              border: `1px solid ${brandColors.neutral[200]}`,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               padding: '1.5rem'
             }}>
-              {/* Amount */}
-              <div style={{
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: '0 0 1rem 0',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '1.5rem'
+                gap: '0.5rem'
               }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '8px',
-                  backgroundColor: brandColors.error[100],
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <DollarSign size={16} color={brandColors.error[600]} />
-                </div>
-                <div style={{ flex: 1 }}>
+                <CreditCard size={20} />
+                Payment Details
+              </h3>
+              
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div>
                   <p style={{
                     fontSize: '0.875rem',
                     fontWeight: '500',
                     color: brandColors.neutral[700],
                     margin: '0 0 0.25rem 0'
                   }}>
-                    Amount
-                  </p>
-                  <p style={{
-                    fontSize: '1.125rem',
-                    fontWeight: '600',
-                    color: brandColors.error[600],
-                    margin: 0
-                  }}>
-                    {formatAmount(expense.amount)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Category */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '1.5rem'
-              }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '8px',
-                  backgroundColor: brandColors.neutral[100],
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Tag size={16} color={brandColors.neutral[600]} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[700],
-                    margin: '0 0 0.25rem 0'
-                  }}>
-                    Category
+                    Payment Method
                   </p>
                   <p style={{
                     fontSize: '1rem',
-                    fontWeight: '500',
                     color: brandColors.neutral[900],
                     margin: 0
                   }}>
-                    {expense.category}
+                    {PAYMENT_METHODS.find(m => m.value === expense.payment_method)?.label || expense.payment_method}
                   </p>
                 </div>
-              </div>
-
-              {/* Notes */}
-              {expense.notes && (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem',
-                  marginBottom: '1.5rem'
-                }}>
-                  <div style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '8px',
-                    backgroundColor: brandColors.neutral[100],
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <StickyNote size={16} color={brandColors.neutral[600]} />
-                  </div>
-                  <div style={{ flex: 1 }}>
+                
+                {expense.client_name && (
+                  <div>
                     <p style={{
                       fontSize: '0.875rem',
                       fontWeight: '500',
                       color: brandColors.neutral[700],
                       margin: '0 0 0.25rem 0'
                     }}>
-                      Notes
+                      Client
                     </p>
                     <p style={{
-                      fontSize: '0.875rem',
-                      color: brandColors.neutral[600],
-                      margin: 0,
-                      lineHeight: '1.5'
+                      fontSize: '1rem',
+                      color: brandColors.neutral[900],
+                      margin: 0
                     }}>
-                      {expense.notes}
+                      {expense.client_name}
                     </p>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
 
-              {/* Created Date */}
+            {/* Tax Information */}
+            <div style={{
+              backgroundColor: brandColors.white,
+              borderRadius: '16px',
+              border: `1px solid ${brandColors.neutral[200]}`,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              padding: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: '0 0 1rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <Receipt size={20} />
+                Tax Information
+              </h3>
+              
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <CheckCircle 
+                    size={16} 
+                    color={expense.is_tax_deductible ? brandColors.success[600] : brandColors.neutral[400]} 
+                  />
+                  <span style={{
+                    fontSize: '0.875rem',
+                    color: expense.is_tax_deductible ? brandColors.success[700] : brandColors.neutral[600]
+                  }}>
+                    {expense.is_tax_deductible ? 'Tax Deductible' : 'Not Tax Deductible'}
+                  </span>
+                </div>
+                
+                {expense.is_tax_deductible && expense.tax_rate && expense.tax_rate > 0 && (
+                  <>
+                    <div>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        Tax Rate
+                      </p>
+                      <p style={{
+                        fontSize: '1rem',
+                        color: brandColors.neutral[900],
+                        margin: 0
+                      }}>
+                        {expense.tax_rate}%
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        Tax Amount
+                      </p>
+                      <p style={{
+                        fontSize: '1rem',
+                        color: brandColors.neutral[900],
+                        margin: 0
+                      }}>
+                        {formatAmount(expense.tax_amount || 0)}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Notes Section */}
+          {expense.notes && (
+            <div style={{
+              backgroundColor: brandColors.white,
+              borderRadius: '16px',
+              border: `1px solid ${brandColors.neutral[200]}`,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              padding: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: '0 0 1rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <StickyNote size={20} />
+                Notes
+              </h3>
+              
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[700],
+                margin: 0,
+                lineHeight: '1.6'
+              }}>
+                {expense.notes}
+              </p>
+            </div>
+          )}
+
+          {/* Receipt Section - Only show if receipt exists */}
+          {expense.receipt_url && (
+            <div style={{
+              backgroundColor: brandColors.white,
+              borderRadius: '16px',
+              border: `1px solid ${brandColors.neutral[200]}`,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              padding: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: '0 0 1rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <Receipt size={20} />
+                Receipt
+              </h3>
+              
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.75rem',
-                paddingTop: '1rem',
-                borderTop: `1px solid ${brandColors.neutral[100]}`
+                gap: '1rem',
+                padding: '1rem',
+                backgroundColor: brandColors.neutral[50],
+                borderRadius: '12px',
+                border: `1px solid ${brandColors.neutral[200]}`
               }}>
                 <div style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '48px',
+                  height: '48px',
                   borderRadius: '8px',
-                  backgroundColor: brandColors.neutral[100],
+                  backgroundColor: brandColors.primary[100],
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Calendar size={16} color={brandColors.neutral[600]} />
+                  <Receipt size={24} color={brandColors.primary[600]} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <p style={{
                     fontSize: '0.875rem',
                     fontWeight: '500',
-                    color: brandColors.neutral[700],
+                    color: brandColors.neutral[900],
                     margin: '0 0 0.25rem 0'
                   }}>
-                    Created
+                    {expense.receipt_filename || 'Receipt'}
                   </p>
                   <p style={{
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
+                    fontSize: '0.75rem',
+                    color: brandColors.neutral[500],
                     margin: 0
                   }}>
-                    {formatDate(expense.created_at)}
+                    {expense.receipt_size ? `${(expense.receipt_size / 1024 / 1024).toFixed(2)} MB` : 'Receipt file'}
                   </p>
                 </div>
+                <button
+                  onClick={() => window.open(expense.receipt_url, '_blank')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    backgroundColor: brandColors.primary[600],
+                    color: brandColors.white,
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = brandColors.primary[700]
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = brandColors.primary[600]
+                  }}
+                >
+                  <Download size={16} />
+                  View
+                </button>
               </div>
             </div>
+          )}
+
+          {/* Footer Information */}
+          <div style={{
+            backgroundColor: brandColors.neutral[50],
+            borderRadius: '12px',
+            padding: '1rem',
+            textAlign: 'center'
+          }}>
+            <p style={{
+              fontSize: '0.75rem',
+              color: brandColors.neutral[500],
+              margin: 0
+            }}>
+              Created on {formatDate(expense.created_at)} • Expense ID: {expense.id.slice(0, 8).toUpperCase()}
+            </p>
           </div>
         </div>
       </div>

@@ -36,6 +36,10 @@ interface Transaction {
   client_name?: string
   category?: string
   description?: string
+  payment_method?: string
+  is_tax_deductible?: boolean
+  receipt_url?: string
+  receipt_filename?: string
   created_at: string
   updated_at?: string
 }
@@ -275,6 +279,10 @@ export default function TransactionPage() {
           total_amount: dbTransaction.amount,
           client_name: isInvoice ? dbTransaction.client_name : undefined,
           description: isExpense ? dbTransaction.client_name : undefined, // For expenses, client_name contains description
+          payment_method: isExpense ? dbTransaction.payment_method : undefined,
+          is_tax_deductible: isExpense ? dbTransaction.is_tax_deductible : undefined,
+          receipt_url: isExpense ? dbTransaction.receipt_url : undefined,
+          receipt_filename: isExpense ? dbTransaction.receipt_filename : undefined,
           created_at: dbTransaction.created_at,
           updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
         }
