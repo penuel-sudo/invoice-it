@@ -37,22 +37,29 @@ export default function ExpensePreviewPage() {
   const location = useLocation()
   const [expense, setExpense] = useState<Expense | null>(null)
   const [loading, setLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth')
-      return
-    }
+    // Wait a bit for auth to initialize
+    const timer = setTimeout(() => {
+      setAuthLoading(false)
+      if (!user) {
+        navigate('/auth')
+        return
+      }
 
-    // Get expense ID from location state or URL params
-    const expenseId = location.state?.expenseId || new URLSearchParams(location.search).get('id')
-    
-    if (expenseId) {
-      loadExpense(expenseId)
-    } else {
-      navigate('/invoices')
-    }
+      // Get expense ID from location state or URL params
+      const expenseId = location.state?.expenseId || new URLSearchParams(location.search).get('id')
+      
+      if (expenseId) {
+        loadExpense(expenseId)
+      } else {
+        navigate('/invoices')
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [user, navigate, location])
 
   const loadExpense = async (expenseId: string) => {
@@ -131,6 +138,28 @@ export default function ExpensePreviewPage() {
       console.error('Error formatting date:', error)
       return 'Invalid Date'
     }
+  }
+
+  if (authLoading) {
+    return (
+      <Layout>
+        <div style={{
+          padding: '2rem',
+          backgroundColor: brandColors.white,
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            fontSize: '1rem',
+            color: brandColors.neutral[600]
+          }}>
+            Loading...
+          </div>
+        </div>
+      </Layout>
+    )
   }
 
   if (!user) return null

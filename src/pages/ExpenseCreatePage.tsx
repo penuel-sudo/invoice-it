@@ -40,6 +40,7 @@ export default function ExpenseCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [authLoading, setAuthLoading] = useState(true)
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
     category: '',
@@ -50,9 +51,15 @@ export default function ExpenseCreatePage() {
   const [errors, setErrors] = useState<Partial<ExpenseFormData>>({})
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth')
-    }
+    // Wait a bit for auth to initialize
+    const timer = setTimeout(() => {
+      setAuthLoading(false)
+      if (!user) {
+        navigate('/auth')
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [user, navigate])
 
   const validateForm = (): boolean => {
@@ -142,6 +149,28 @@ export default function ExpenseCreatePage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (authLoading) {
+    return (
+      <Layout>
+        <div style={{
+          padding: '2rem',
+          backgroundColor: brandColors.white,
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            fontSize: '1rem',
+            color: brandColors.neutral[600]
+          }}>
+            Loading...
+          </div>
+        </div>
+      </Layout>
+    )
   }
 
   if (!user) return null
