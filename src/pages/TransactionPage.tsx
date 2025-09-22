@@ -265,6 +265,7 @@ export default function TransactionPage() {
 
       // Transform database response to match Transaction interface
       const transformedTransactions: Transaction[] = (data || []).map((dbTransaction: any) => {
+        console.log('Processing transaction:', dbTransaction.transaction_type, 'status:', dbTransaction.status)
         const isInvoice = dbTransaction.transaction_type === 'invoice'
         const isExpense = dbTransaction.transaction_type === 'expense'
 
@@ -839,6 +840,10 @@ export default function TransactionPage() {
                         status={getValidStatus(transaction.status)} 
                         size="sm" 
                       />
+                      {/* Debug: Show raw status */}
+                      <span style={{ fontSize: '0.5rem', color: 'red', marginLeft: '0.25rem' }}>
+                        ({transaction.status})
+                      </span>
                     </div>
                     
                     {!bulkMode && (

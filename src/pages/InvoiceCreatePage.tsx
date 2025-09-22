@@ -202,6 +202,9 @@ export default function InvoiceCreatePage() {
       // Clear the draft from localStorage after successful save
       invoiceStorage.clearDraft()
       
+      // Reset form to default state
+      setFormData(invoiceStorage.getDraftWithFallback())
+      
       toast.success('Invoice saved successfully!')
     } catch (error) {
       console.error('Error saving invoice:', error)
