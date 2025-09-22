@@ -110,71 +110,7 @@ export default function TransactionPage() {
 
       if (error) {
         console.error('Error loading transactions:', error)
-        console.log('RPC failed, trying direct table queries...')
-        
-        // Fallback: Load data directly from tables
-        const [invoicesData, expensesData] = await Promise.all([
-          supabase
-            .from('invoices')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('expenses')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-        ])
-
-        const allData = [
-          ...(invoicesData.data || []).map(item => ({ ...item, transaction_type: 'invoice' })),
-          ...(expensesData.data || []).map(item => ({ ...item, transaction_type: 'expense' }))
-        ]
-
-        if (allData.length > 0) {
-          // Transform the fallback data to match Transaction interface
-          const transformedTransactions: Transaction[] = allData.map((dbTransaction: any) => {
-            console.log('Processing fallback transaction:', dbTransaction.transaction_type, 'status:', dbTransaction.status)
-            const isInvoice = dbTransaction.transaction_type === 'invoice'
-            const isExpense = dbTransaction.transaction_type === 'expense'
-
-            return {
-              id: dbTransaction.id,
-              type: dbTransaction.transaction_type as 'invoice' | 'expense',
-              invoice_number: isInvoice ? dbTransaction.invoice_number : undefined,
-              status: dbTransaction.status,
-              issue_date: dbTransaction.issue_date,
-              due_date: isInvoice ? dbTransaction.due_date : dbTransaction.issue_date,
-              subtotal: isInvoice ? dbTransaction.subtotal : dbTransaction.amount,
-              tax_amount: isInvoice ? dbTransaction.tax_amount : 0,
-              total_amount: isInvoice ? dbTransaction.total_amount : dbTransaction.amount,
-              notes: dbTransaction.notes,
-              client_name: isInvoice ? dbTransaction.client_name : dbTransaction.description,
-              created_at: dbTransaction.created_at,
-              updated_at: dbTransaction.updated_at,
-              // Expense-specific fields
-              description: isExpense ? dbTransaction.description : undefined,
-              category: isExpense ? dbTransaction.category : undefined,
-              payment_method: isExpense ? dbTransaction.payment_method : undefined,
-              is_tax_deductible: isExpense ? dbTransaction.is_tax_deductible : undefined,
-              tax_rate: isExpense ? dbTransaction.tax_rate : undefined,
-              receipt_url: isExpense ? dbTransaction.receipt_url : undefined,
-              receipt_filename: isExpense ? dbTransaction.receipt_filename : undefined,
-              receipt_size: isExpense ? dbTransaction.receipt_size : undefined
-            }
-          })
-
-          // Sort by created_at DESC
-          const sortedTransactions = transformedTransactions.sort((a, b) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          )
-
-          setTransactions(sortedTransactions)
-          console.log('Loaded', sortedTransactions.length, 'transactions from fallback')
-        } else {
-          setTransactions([])
-          console.log('No transactions found in fallback')
-        }
+        toast.error('Failed to load transactions: ' + error.message)
         return
       }
 
