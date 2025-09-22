@@ -836,14 +836,16 @@ export default function TransactionPage() {
                       }}>
                         {formatAmount(transaction.total_amount, transaction.type)}
                       </p>
-                      <StatusButton 
-                        status={getValidStatus(transaction.status)} 
-                        size="sm" 
-                      />
-                      {/* Debug: Show raw status */}
-                      <span style={{ fontSize: '0.5rem', color: 'red', marginLeft: '0.25rem' }}>
-                        ({transaction.status})
-                      </span>
+                      {/* Debug: Test if StatusButton is rendering */}
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <StatusButton 
+                          status={getValidStatus(transaction.status)} 
+                          size="sm" 
+                        />
+                        <span style={{ fontSize: '0.5rem', color: 'red' }}>
+                          StatusButton rendered
+                        </span>
+                      </div>
                     </div>
                     
                     {!bulkMode && (
