@@ -8,6 +8,7 @@ import NotificationDropdown from '../components/NotificationDropdown'
 import DesktopSettingsPanel from '../components/DesktopSettingsPanel'
 import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
+import { supabase } from '../lib/supabaseClient'
 import { 
   FileText, 
   TrendingUp, 
@@ -29,6 +30,8 @@ export default function DashboardPage() {
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
   const [isSettingsVisible, setIsSettingsVisible] = useState(false)
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (window.location.hash.includes('access_token')) {
@@ -53,20 +56,62 @@ export default function DashboardPage() {
     loadProfilePicture()
   }, [user])
 
+  // Load real transaction data
+  const loadTransactions = async () => {
+    if (!user) return
+
+    try {
+      setLoading(true)
+      const { data, error } = await supabase.rpc('get_user_transactions', {
+        user_id: user.id
+      })
+
+      if (error) {
+        console.error('Error loading transactions:', error)
+        return
+      }
+
+      if (data) {
+        // Transform the data to match the expected format
+        const transformedTransactions = data.map((item: any) => ({
+          id: item.id,
+          name: item.client_name || item.description || 'Unknown',
+          type: item.type === 'invoice' ? 'income' : 'expense',
+          invoice: item.invoice_number || item.expense_number || `#${item.type.toUpperCase()}${item.id.slice(-4)}`,
+          date: new Date(item.created_at).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+          }),
+          amount: `$${parseFloat(item.total_amount || item.amount || 0).toLocaleString()}`,
+          status: item.status
+        }))
+
+        // Sort by created_at DESC and take only the latest 4
+        const sortedTransactions = transformedTransactions
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 4)
+
+        setTransactions(sortedTransactions)
+      }
+    } catch (error) {
+      console.error('Error in loadTransactions:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      loadTransactions()
+    }
+  }, [user])
+
   if (!user) { return null } // AuthWrapper handles redirection
 
-  // Sample data for transactions
-  const allTransactions = [
-    { id: 1, name: 'Karim Ahmed', type: 'income', invoice: '#INV0078', date: '25 Jun 2024', amount: '$5,000', status: 'paid' },
-    { id: 2, name: 'Office Supplies', type: 'expense', invoice: '#EXP001', date: '26 Jun 2024', amount: '$200', status: 'pending' },
-    { id: 3, name: 'Nasir Hussain', type: 'income', invoice: '#INV0079', date: '27 Jun 2024', amount: '$3,500', status: 'paid' },
-    { id: 4, name: 'Internet Bill', type: 'expense', invoice: '#EXP002', date: '28 Jun 2024', amount: '$80', status: 'paid' },
-    { id: 5, name: 'Kabir Ahmed', type: 'income', invoice: '#INV0080', date: '29 Jun 2024', amount: '$2,800', status: 'pending' }
-  ]
-
   const filteredTransactions = activeTab === 'all' 
-    ? allTransactions 
-    : allTransactions.filter(t => t.type === activeTab)
+    ? transactions 
+    : transactions.filter(t => t.type === activeTab)
 
   return (
     <Layout 
@@ -495,16 +540,8 @@ export default function DashboardPage() {
         </div>
 
         {/* 📑 TABS SECTION */}
-        {/* TODO: Hide this section for new users with no transaction data
-        const hasTransactions = allTransactions.length > 0
-        if (!hasTransactions) {
-          return (
-            <Layout>
-              <div>Welcome! Create your first invoice to see transactions here.</div>
-            </Layout>
-          )
-        }
-        */}
+        {/* Hide this section for new users with no transaction data */}
+        {!loading && transactions.length > 0 && (
         <div style={{
           padding: '1.5rem 1rem 0.5rem 1rem'
         }}>
@@ -545,7 +582,7 @@ export default function DashboardPage() {
             {filteredTransactions.map((transaction) => (
               <div 
                 key={transaction.id} 
-                onClick={() => navigate(`/invoices?tab=${transaction.type === 'income' ? 'invoice' : 'expenses'}`)}
+                onClick={() => navigate(`/transactions?tab=${transaction.type === 'income' ? 'invoice' : 'expense'}`)}
                 style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -616,20 +653,12 @@ export default function DashboardPage() {
                       size="sm" 
                     />
                   </div>
-                  <button style={{
-                    padding: '0.25rem',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    borderRadius: '4px'
-                  }}>
-                    <MoreVertical size={16} color={brandColors.neutral[400]} />
-                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
+        )}
       </div>
     </Layout>
   )

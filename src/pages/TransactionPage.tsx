@@ -95,24 +95,6 @@ export default function TransactionPage() {
     setSearchParams(newSearchParams)
   }, [activeTab, searchParams, setSearchParams])
 
-  // Mockup data that matches dashboard transaction structure exactly
-  const mockupTransactions: Transaction[] = [
-    // Invoice transactions (like dashboard income)
-    { 
-      id: '1', 
-      type: 'invoice', 
-      invoice_number: 'INV0078',
-      status: 'paid', 
-      issue_date: '2024-06-25', 
-      due_date: '2024-07-25',
-      subtotal: 4500,
-      tax_amount: 450,
-      total_amount: 5000,
-      notes: 'Web development services',
-      client_name: 'Karim Ahmed',
-      created_at: '2024-06-25T10:00:00Z',
-      updated_at: '2024-06-25T10:00:00Z'
-    },
     { 
       id: '2', 
       type: 'invoice', 
@@ -296,9 +278,9 @@ export default function TransactionPage() {
       console.error('Error loading transactions:', error)
       toast.error('Failed to load transactions')
       
-      // Fallback to mockup data if database fails
-      console.log('Falling back to mockup data...')
-      setTransactions(mockupTransactions)
+      // Set empty array if database fails
+      console.log('No transactions found or database error')
+      setTransactions([])
     } finally {
       setLoading(false)
     }
@@ -407,6 +389,13 @@ export default function TransactionPage() {
     }
     setSelectedItems(newSelected)
     setShowBulkActions(newSelected.size > 0)
+  }
+
+  const handleLongPress = (transactionId: string) => {
+    if (!bulkMode) {
+      setBulkMode(true)
+    }
+    toggleSelection(transactionId)
   }
 
   const enterBulkMode = () => {
@@ -527,7 +516,7 @@ export default function TransactionPage() {
                   <MoreVertical size={20} color={brandColors.neutral[600]} />
                 </button>
                 
-                {/* Topbar Dropdown */}
+                {/* Topbar Dropdown - WhatsApp Style */}
                 {showTopbarDropdown && (
                   <div style={{
                     position: 'absolute',
@@ -535,29 +524,54 @@ export default function TransactionPage() {
                     top: '100%',
                     backgroundColor: brandColors.white,
                     border: `1px solid ${brandColors.neutral[200]}`,
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    zIndex: 20,
-                    minWidth: '150px',
-                    padding: '0.5rem 0'
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                    zIndex: 40,
+                    width: '160px',
+                    padding: '0.5rem 0',
+                    overflow: 'hidden'
                   }}>
                     <button
-                      onClick={enterBulkMode}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        enterBulkMode()
+                        setShowTopbarDropdown(false)
+                      }}
                       style={{
                         width: '100%',
-                        padding: '0.5rem 1rem',
+                        padding: '0.875rem 1rem',
                         backgroundColor: 'transparent',
                         border: 'none',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
+                        gap: '0.75rem',
                         fontSize: '0.875rem',
-                        color: brandColors.neutral[700]
+                        fontWeight: '500',
+                        color: brandColors.neutral[800],
+                        transition: 'background-color 0.2s ease',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
                       }}
                     >
-                      <Check size={16} />
-                      Select
+                      <div style={{
+                        width: '16px',
+                        height: '16px',
+                        border: `2px solid ${brandColors.primary[600]}`,
+                        borderRadius: '3px',
+                        backgroundColor: brandColors.primary[600],
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Check size={10} color={brandColors.white} />
+                      </div>
+                      Select Multiple
                     </button>
                   </div>
                 )}
@@ -758,6 +772,20 @@ export default function TransactionPage() {
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => bulkMode ? toggleSelection(transaction.id) : undefined}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  const startTime = Date.now()
+                  const longPressTimer = setTimeout(() => {
+                    handleLongPress(transaction.id)
+                  }, 500) // 500ms for long press
+                  
+                  const handleMouseUp = () => {
+                    clearTimeout(longPressTimer)
+                    document.removeEventListener('mouseup', handleMouseUp)
+                  }
+                  
+                  document.addEventListener('mouseup', handleMouseUp)
+                }}
                 onMouseEnter={(e) => {
                   if (!bulkMode) {
                     e.currentTarget.style.transform = 'translateY(-1px)'
@@ -883,14 +911,15 @@ export default function TransactionPage() {
                             border: `1px solid ${brandColors.neutral[200]}`,
                             borderRadius: '12px',
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                            zIndex: 30,
+                            zIndex: 50,
                             width: '160px',
                             padding: '0.5rem 0',
                             overflow: 'hidden'
                           }}>
                             {/* View */}
                             <button
-                              onClick={() => {
+                              onMouseDown={(e) => {
+                                e.preventDefault()
                                 if (transaction.type === 'invoice') {
                                   navigate(`/invoice/preview`, { state: { transactionId: transaction.id } })
                                 } else {
@@ -929,7 +958,8 @@ export default function TransactionPage() {
                               <>
                                 {transaction.status !== 'paid' && (
                                   <button
-                                    onClick={() => {
+                                    onMouseDown={(e) => {
+                                      e.preventDefault()
                                       handleTransactionAction(transaction.id, 'mark_paid')
                                       setShowTransactionDropdown(null)
                                     }}
@@ -962,7 +992,8 @@ export default function TransactionPage() {
                                 
                                 {transaction.status !== 'pending' && (
                                   <button
-                                    onClick={() => {
+                                    onMouseDown={(e) => {
+                                      e.preventDefault()
                                       handleTransactionAction(transaction.id, 'mark_pending')
                                       setShowTransactionDropdown(null)
                                     }}
@@ -1004,7 +1035,8 @@ export default function TransactionPage() {
                             
                             {/* Delete */}
                             <button
-                              onClick={() => {
+                              onMouseDown={(e) => {
+                                e.preventDefault()
                                 if (window.confirm('Are you sure you want to delete this transaction?')) {
                                   handleTransactionAction(transaction.id, 'delete')
                                   setShowTransactionDropdown(null)
