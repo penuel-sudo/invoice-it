@@ -61,10 +61,14 @@ export class StatusLogic {
     userId: string
   ): Promise<StatusUpdateResult> {
     try {
-      const { error } = await supabase.rpc('update_expense_status', {
-        expense_id: expenseId,
-        new_status: newStatus
-      })
+      const { error } = await supabase
+        .from('expenses')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', expenseId)
+        .eq('user_id', userId)
 
       if (error) {
         console.error('Error updating expense status:', error)
@@ -193,100 +197,4 @@ export class StatusLogic {
     return validStatuses.includes(status) ? status as 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' : 'draft'
   }
 
-  /**
-   * Check and update overdue invoices for a user
-   * This should be called daily or when user visits the TransactionPage
-   */
-  static async checkAndUpdateOverdueInvoices(userId: string): Promise<StatusUpdateResult> {
-    try {
-      console.log('Checking overdue invoices for user:', userId)
-
-      // First, get all pending invoices that are past due date
-      const { data: overdueInvoices, error: fetchError } = await supabase
-        .from('invoices')
-        .select(`
-          id,
-          client_id,
-          due_date,
-          clients!inner(id, overdue_count)
-        `)
-        .eq('user_id', userId)
-        .eq('status', 'pending')
-        .lt('due_date', new Date().toISOString().split('T')[0]) // Due date is before today
-
-      if (fetchError) {
-        console.error('Error fetching overdue invoices:', fetchError)
-        return {
-          success: false,
-          message: `Failed to fetch overdue invoices: ${fetchError.message}`
-        }
-      }
-
-      if (!overdueInvoices || overdueInvoices.length === 0) {
-        console.log('No overdue invoices found')
-        return {
-          success: true,
-          message: 'No overdue invoices found'
-        }
-      }
-
-      console.log(`Found ${overdueInvoices.length} overdue invoices`)
-
-      // Update invoice statuses to overdue
-      const invoiceIds = overdueInvoices.map(inv => inv.id)
-      const { error: updateInvoiceError } = await supabase
-        .from('invoices')
-        .update({ 
-          status: 'overdue',
-          updated_at: new Date().toISOString()
-        })
-        .in('id', invoiceIds)
-
-      if (updateInvoiceError) {
-        console.error('Error updating invoice statuses:', updateInvoiceError)
-        return {
-          success: false,
-          message: `Failed to update invoice statuses: ${updateInvoiceError.message}`
-        }
-      }
-
-      // Update client overdue counts
-      const clientUpdates = new Map<string, number>()
-      
-      overdueInvoices.forEach(invoice => {
-        const clientId = invoice.client_id
-        const currentCount = clientUpdates.get(clientId) || invoice.clients.overdue_count
-        clientUpdates.set(clientId, currentCount + 1)
-      })
-
-      // Update each client's overdue count
-      for (const [clientId, newCount] of clientUpdates) {
-        const { error: updateClientError } = await supabase
-          .from('clients')
-          .update({ 
-            overdue_count: newCount,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', clientId)
-          .eq('user_id', userId)
-
-        if (updateClientError) {
-          console.error(`Error updating client ${clientId} overdue count:`, updateClientError)
-        }
-      }
-
-      console.log(`Successfully updated ${overdueInvoices.length} invoices to overdue status`)
-      
-      return {
-        success: true,
-        message: `Updated ${overdueInvoices.length} invoices to overdue status`
-      }
-    } catch (error) {
-      console.error('Error in checkAndUpdateOverdueInvoices:', error)
-      return {
-        success: false,
-        message: 'Failed to check overdue invoices'
-      }
-    }
-  }
 }

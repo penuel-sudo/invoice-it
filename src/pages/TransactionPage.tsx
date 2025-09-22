@@ -21,6 +21,7 @@ import {
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { StatusLogic } from '../lib/statusLogic'
+import OverdueDetector from '../components/OverdueDetector'
 
 interface Transaction {
   id: string
@@ -243,13 +244,7 @@ export default function TransactionPage() {
       setLoading(true)
       console.log('Loading transactions for user:', user.id)
       
-      // Check for overdue invoices first (background task)
-      try {
-        await StatusLogic.checkAndUpdateOverdueInvoices(user.id)
-      } catch (overdueError) {
-        console.warn('Overdue check failed:', overdueError)
-        // Don't block transaction loading if overdue check fails
-      }
+      // Overdue detection is now handled by OverdueDetector component
       
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
@@ -659,6 +654,15 @@ export default function TransactionPage() {
           <div style={{
             padding: '1.5rem 1rem 0.5rem 1rem'
           }}>
+            {/* Overdue Detector */}
+            {user && (
+              <div style={{ marginBottom: '1rem' }}>
+                <OverdueDetector 
+                  userId={user.id}
+                  showWarnings={true}
+                />
+              </div>
+            )}
             <div style={{
               display: 'flex',
               gap: '0.75rem',
@@ -836,16 +840,10 @@ export default function TransactionPage() {
                       }}>
                         {formatAmount(transaction.total_amount, transaction.type)}
                       </p>
-                      {/* Debug: Test if StatusButton is rendering */}
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <StatusButton 
-                          status={getValidStatus(transaction.status)} 
-                          size="sm" 
-                        />
-                        <span style={{ fontSize: '0.5rem', color: 'red' }}>
-                          StatusButton rendered
-                        </span>
-                      </div>
+                      <StatusButton 
+                        status={getValidStatus(transaction.status)} 
+                        size="sm" 
+                      />
                     </div>
                     
                     {!bulkMode && (
