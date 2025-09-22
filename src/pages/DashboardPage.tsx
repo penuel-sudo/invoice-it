@@ -80,16 +80,65 @@ export default function DashboardPage() {
       // If no data exists in either table, don't show the transaction section
       if ((!invoicesResult.data || invoicesResult.data.length === 0) && 
           (!expensesResult.data || expensesResult.data.length === 0)) {
+        console.log('No data found in invoices or expenses tables')
         setTransactions([])
         return
       }
 
+      console.log('Data found in tables, loading transactions...')
+      console.log('Invoices result:', invoicesResult.data?.length || 0, 'items')
+      console.log('Expenses result:', expensesResult.data?.length || 0, 'items')
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
 
       if (error) {
         console.error('Error loading transactions:', error)
+        // Don't return here, try to load data directly from tables
+        console.log('RPC failed, trying direct table queries...')
+        
+        // Fallback: Load data directly from tables
+        const [invoicesData, expensesData] = await Promise.all([
+          supabase
+            .from('invoices')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(2),
+          supabase
+            .from('expenses')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(2)
+        ])
+
+        const allData = [
+          ...(invoicesData.data || []).map(item => ({ ...item, type: 'invoice' })),
+          ...(expensesData.data || []).map(item => ({ ...item, type: 'expense' }))
+        ]
+
+        if (allData.length > 0) {
+          const transformedTransactions = allData.map((item: any) => ({
+            id: item.id,
+            name: item.client_name || item.description || 'Unknown',
+            type: item.type === 'invoice' ? 'income' : 'expense',
+            invoice: item.invoice_number || `#EXP${item.id.slice(-4)}`,
+            date: new Date(item.created_at).toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            }),
+            amount: `$${parseFloat(item.total_amount || item.amount || 0).toLocaleString()}`,
+            status: item.status
+          }))
+
+          const sortedTransactions = transformedTransactions
+            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 4)
+
+          setTransactions(sortedTransactions)
+        }
         return
       }
 
@@ -671,7 +720,7 @@ export default function DashboardPage() {
                       {transaction.type === 'income' ? '+' : '-'}{transaction.amount}
                     </p>
                     <StatusButton 
-                      status={transaction.status === 'paid' ? 'paid' : 'pending'} 
+                      status={transaction.status as 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense'} 
                       size="sm" 
                     />
                   </div>
