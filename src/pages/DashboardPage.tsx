@@ -119,11 +119,14 @@ export default function DashboardPage() {
         ]
 
         if (allData.length > 0) {
-          const transformedTransactions = allData.map((item: any) => ({
+          console.log('Fallback data sample:', allData[0])
+          const transformedTransactions = allData.map((item: any) => {
+            console.log('Processing item:', item)
+            return {
             id: item.id,
             name: item.client_name || item.description || 'Unknown',
             type: item.type === 'invoice' ? 'income' : 'expense',
-            invoice: item.invoice_number || `#EXP${item.id.slice(-4)}`,
+            invoice: item.invoice_number || `#${(item.type || 'EXP').toUpperCase()}${item.id.slice(-4)}`,
             date: new Date(item.created_at).toLocaleDateString('en-GB', {
               day: '2-digit',
               month: 'short',
@@ -131,7 +134,8 @@ export default function DashboardPage() {
             }),
             amount: `$${parseFloat(item.total_amount || item.amount || 0).toLocaleString()}`,
             status: item.status
-          }))
+            }
+          })
 
           const sortedTransactions = transformedTransactions
             .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -148,7 +152,7 @@ export default function DashboardPage() {
           id: item.id,
           name: item.client_name || item.description || 'Unknown',
           type: item.type === 'invoice' ? 'income' : 'expense',
-          invoice: item.invoice_number || item.expense_number || `#${item.type.toUpperCase()}${item.id.slice(-4)}`,
+          invoice: item.invoice_number || item.expense_number || `#${(item.type || 'EXP').toUpperCase()}${item.id.slice(-4)}`,
           date: new Date(item.created_at).toLocaleDateString('en-GB', {
             day: '2-digit',
             month: 'short',
@@ -720,7 +724,7 @@ export default function DashboardPage() {
                       {transaction.type === 'income' ? '+' : '-'}{transaction.amount}
                     </p>
                     <StatusButton 
-                      status={transaction.status as 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense'} 
+                      status={transaction.status === 'paid' ? 'paid' : 'pending'} 
                       size="sm" 
                     />
                   </div>
