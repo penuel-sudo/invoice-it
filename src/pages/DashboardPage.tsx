@@ -62,6 +62,28 @@ export default function DashboardPage() {
 
     try {
       setLoading(true)
+      
+      // Check if there's any data in invoices or expenses tables
+      const [invoicesResult, expensesResult] = await Promise.all([
+        supabase
+          .from('invoices')
+          .select('id, created_at')
+          .eq('user_id', user.id)
+          .limit(1),
+        supabase
+          .from('expenses')
+          .select('id, created_at')
+          .eq('user_id', user.id)
+          .limit(1)
+      ])
+
+      // If no data exists in either table, don't show the transaction section
+      if ((!invoicesResult.data || invoicesResult.data.length === 0) && 
+          (!expensesResult.data || expensesResult.data.length === 0)) {
+        setTransactions([])
+        return
+      }
+
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })

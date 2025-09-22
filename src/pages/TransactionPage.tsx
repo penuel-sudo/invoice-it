@@ -402,7 +402,7 @@ export default function TransactionPage() {
                     border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '12px',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    zIndex: 40,
+                    zIndex: 90,
                     width: '160px',
                     padding: '0.5rem 0',
                     overflow: 'hidden'
@@ -787,7 +787,7 @@ export default function TransactionPage() {
                             border: `1px solid ${brandColors.neutral[200]}`,
                             borderRadius: '12px',
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                            zIndex: 50,
+                            zIndex: 100,
                             width: '160px',
                             padding: '0.5rem 0',
                             overflow: 'hidden'

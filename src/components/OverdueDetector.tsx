@@ -26,17 +26,20 @@ export default function OverdueDetector({
       setLoading(true)
       console.log('Checking overdue invoices for user:', userId)
 
-      // Get all pending invoices where due_date >= issue_date
+      // Get all pending invoices where due_date <= today (overdue)
+      const today = new Date().toISOString().split('T')[0] // Get today's date in YYYY-MM-DD format
+      
       const { data: overdueInvoices, error: fetchError } = await supabase
         .from('invoices')
         .select(`
           id,
           due_date,
-          issue_date
+          issue_date,
+          status
         `)
         .eq('user_id', userId)
         .eq('status', 'pending')
-        .gte('due_date', 'issue_date') // due_date >= issue_date
+        .lte('due_date', today) // due_date <= today (overdue)
 
       if (fetchError) {
         console.error('Error fetching overdue invoices:', fetchError)
