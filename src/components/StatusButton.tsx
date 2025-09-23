@@ -154,6 +154,11 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
   const validStatus = forceStatusStyling(status)
   const statusConfig = getStatusConfig(validStatus)
   const sizeConfig = getSizeConfig(size)
+  
+  // DEBUG: Log what's happening inside StatusButton
+  console.log('StatusButton DEBUG - Input status:', status)
+  console.log('StatusButton DEBUG - Valid status:', validStatus)
+  console.log('StatusButton DEBUG - Status config:', statusConfig)
 
   return (
     <span
