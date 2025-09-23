@@ -836,10 +836,41 @@ export default function TransactionPage() {
                       }}>
                         {formatAmount(transaction.total_amount, transaction.type)}
                       </p>
-                      <StatusButton 
-                        status={transaction.status} 
-                        size="sm" 
-                      />
+                      {/* DEBUG: Validate and force styling for problematic statuses */}
+                      {(() => {
+                        const status = transaction.status
+                        console.log('DEBUG - Checking status:', status)
+                        
+                        // Check if the displayed text contains any of the three problematic statuses
+                        if (status && (
+                          status.toLowerCase().includes('overdue') || 
+                          status.toLowerCase().includes('spent') || 
+                          status.toLowerCase().includes('expense')
+                        )) {
+                          console.log('DEBUG - Found problematic status, forcing correct styling for:', status)
+                          
+                          // Force the correct status to get proper styling
+                          let forcedStatus = status
+                          if (status.toLowerCase().includes('overdue')) forcedStatus = 'overdue'
+                          if (status.toLowerCase().includes('spent')) forcedStatus = 'spent'
+                          if (status.toLowerCase().includes('expense')) forcedStatus = 'expense'
+                          
+                          return (
+                            <StatusButton 
+                              status={forcedStatus} 
+                              size="sm" 
+                            />
+                          )
+                        }
+                        
+                        // For other statuses, use normal StatusButton
+                        return (
+                          <StatusButton 
+                            status={status} 
+                            size="sm" 
+                          />
+                        )
+                      })()}
                     </div>
                     
                     {!bulkMode && (
