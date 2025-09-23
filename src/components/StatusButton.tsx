@@ -41,6 +41,17 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
     return statusMap[dbStatus] || 'pending' // Default fallback
   }
 
+  // TEMPORARY DEBUG: Force styling for problematic statuses
+  const forceStatusStyling = (dbStatus: string): ValidStatus => {
+    // Force these three statuses to get their proper styling
+    if (dbStatus.toLowerCase().includes('overdue')) return 'overdue'
+    if (dbStatus.toLowerCase().includes('spent')) return 'spent' 
+    if (dbStatus.toLowerCase().includes('expense')) return 'expense'
+    
+    // For other statuses, use normal validation
+    return getValidStatus(dbStatus)
+  }
+
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'draft':
@@ -139,8 +150,8 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
     }
   }
 
-  // Validate the incoming status
-  const validStatus = getValidStatus(status)
+  // TEMPORARY DEBUG: Force styling for problematic statuses
+  const validStatus = forceStatusStyling(status)
   const statusConfig = getStatusConfig(validStatus)
   const sizeConfig = getSizeConfig(size)
 
