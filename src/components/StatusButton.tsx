@@ -1,7 +1,7 @@
 import { brandColors } from '../stylings'
 
 interface StatusButtonProps {
-  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense'
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' | 'due'
   size?: 'sm' | 'md' | 'lg'
   className?: string
 }
@@ -51,6 +51,13 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
           color: brandColors.error[700],
           borderColor: brandColors.error[200]
         }
+      case 'due':
+        return {
+          text: 'Due',
+          backgroundColor: brandColors.warning[100],
+          color: brandColors.warning[700],
+          borderColor: brandColors.warning[200]
+        }
       default:
         return {
           text: 'Unknown',
@@ -67,25 +74,33 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
         return {
           padding: '0.25rem 0.5rem',
           fontSize: '0.625rem',
-          borderRadius: '6px'
+          borderRadius: '6px',
+          width: '60px',
+          minWidth: '60px'
         }
       case 'md':
         return {
           padding: '0.375rem 0.75rem',
           fontSize: '0.75rem',
-          borderRadius: '8px'
+          borderRadius: '8px',
+          width: '70px',
+          minWidth: '70px'
         }
       case 'lg':
         return {
           padding: '0.5rem 1rem',
           fontSize: '0.875rem',
-          borderRadius: '10px'
+          borderRadius: '10px',
+          width: '80px',
+          minWidth: '80px'
         }
       default:
         return {
           padding: '0.25rem 0.5rem',
           fontSize: '0.625rem',
-          borderRadius: '6px'
+          borderRadius: '6px',
+          width: '60px',
+          minWidth: '60px'
         }
     }
   }
@@ -109,7 +124,10 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
         fontWeight: '600',
         textTransform: 'uppercase',
         letterSpacing: '0.025em',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        width: sizeConfig.width,
+        minWidth: sizeConfig.minWidth,
+        textAlign: 'center'
       }}
     >
       {statusConfig.text}

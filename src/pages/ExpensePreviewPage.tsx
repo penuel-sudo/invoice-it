@@ -153,9 +153,9 @@ export default function ExpensePreviewPage() {
     try {
       setDeleting(true)
 
-      const result = await StatusLogic.deleteTransaction(
+      const result = await StatusLogic.handleTransactionAction(
         expense.id,
-        'expense',
+        'delete',
         user.id
       )
 
@@ -463,7 +463,7 @@ export default function ExpensePreviewPage() {
               }}>
                 <ArrowDownRight size={28} color={brandColors.error[600]} />
               </div>
-              <StatusButton status={expense.status} size="lg" />
+              <StatusButton status={StatusLogic.getValidStatus(expense.status)} size="lg" />
             </div>
 
             {/* Description */}

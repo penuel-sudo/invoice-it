@@ -8,6 +8,7 @@ import NotificationDropdown from '../components/NotificationDropdown'
 import DesktopSettingsPanel from '../components/DesktopSettingsPanel'
 import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
+import { StatusLogic } from '../lib/statusLogic'
 import { supabase } from '../lib/supabaseClient'
 import { 
   FileText, 
@@ -724,7 +725,7 @@ export default function DashboardPage() {
                       {transaction.type === 'income' ? '+' : '-'}{transaction.amount}
                     </p>
                     <StatusButton 
-                      status={transaction.status === 'paid' ? 'paid' : 'pending'} 
+                      status={StatusLogic.getValidStatus(transaction.status)} 
                       size="sm" 
                     />
                   </div>

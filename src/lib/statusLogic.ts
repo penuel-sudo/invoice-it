@@ -6,16 +6,52 @@ export interface StatusUpdateResult {
   message: string
 }
 
+// Valid statuses that match StatusButton component
+const VALID_STATUSES = ['draft', 'pending', 'paid', 'overdue', 'spent', 'expense', 'due'] as const
+type ValidStatus = typeof VALID_STATUSES[number]
+
 /**
- * Reusable status logic for handling transaction status updates
+ * Simple status validation and management
  */
 export class StatusLogic {
+  /**
+   * Get valid status from database status
+   * This is the main function that components should use
+   */
+  static getValidStatus(dbStatus: string): ValidStatus {
+    // Check if the status from DB matches our valid statuses
+    if (VALID_STATUSES.includes(dbStatus as ValidStatus)) {
+      return dbStatus as ValidStatus
+    }
+    
+    // Handle common database status variations
+    const statusMap: Record<string, ValidStatus> = {
+      'draft': 'draft',
+      'pending': 'pending', 
+      'paid': 'paid',
+      'overdue': 'overdue',
+      'spent': 'spent',
+      'expense': 'expense',
+      'due': 'due',
+      // Handle any variations
+      'DRAFT': 'draft',
+      'PENDING': 'pending',
+      'PAID': 'paid',
+      'OVERDUE': 'overdue',
+      'SPENT': 'spent',
+      'EXPENSE': 'expense',
+      'DUE': 'due'
+    }
+    
+    return statusMap[dbStatus] || 'pending' // Default fallback
+  }
+
   /**
    * Update invoice status using the database function
    */
   static async updateInvoiceStatus(
     invoiceId: string, 
-    newStatus: 'draft' | 'pending' | 'paid' | 'overdue',
+    newStatus: ValidStatus,
     userId: string
   ): Promise<StatusUpdateResult> {
     try {
@@ -36,12 +72,13 @@ export class StatusLogic {
         draft: 'Invoice saved as draft',
         pending: 'Invoice marked as pending',
         paid: 'Invoice marked as paid',
-        overdue: 'Invoice marked as overdue'
+        overdue: 'Invoice marked as overdue',
+        due: 'Invoice marked as due'
       }
 
       return {
         success: true,
-        message: statusMessages[newStatus]
+        message: statusMessages[newStatus] || 'Status updated'
       }
     } catch (error) {
       console.error('Error updating invoice status:', error)
@@ -53,11 +90,11 @@ export class StatusLogic {
   }
 
   /**
-   * Update expense status
+   * Update expense status directly in the database
    */
   static async updateExpenseStatus(
     expenseId: string,
-    newStatus: 'spent' | 'expense',
+    newStatus: ValidStatus,
     userId: string
   ): Promise<StatusUpdateResult> {
     try {
@@ -80,12 +117,14 @@ export class StatusLogic {
 
       const statusMessages = {
         spent: 'Expense marked as spent',
-        expense: 'Expense categorized'
+        expense: 'Expense marked as expense',
+        draft: 'Expense saved as draft',
+        pending: 'Expense marked as pending'
       }
 
       return {
         success: true,
-        message: statusMessages[newStatus]
+        message: statusMessages[newStatus] || 'Status updated'
       }
     } catch (error) {
       console.error('Error updating expense status:', error)
@@ -97,15 +136,63 @@ export class StatusLogic {
   }
 
   /**
+   * Handle transaction action (mark as paid, pending, delete, etc.)
+   */
+  static async handleTransactionAction(
+    transactionId: string,
+    action: string,
+    userId: string
+  ): Promise<StatusUpdateResult> {
+    try {
+      // First, get the transaction to determine if it's an invoice or expense
+      const { data: transaction, error: fetchError } = await supabase
+        .from('invoices')
+        .select('id, status')
+        .eq('id', transactionId)
+        .eq('user_id', userId)
+        .single()
+
+      if (fetchError) {
+        // Try expenses table
+        const { data: expense, error: expenseError } = await supabase
+          .from('expenses')
+          .select('id, status')
+          .eq('id', transactionId)
+          .eq('user_id', userId)
+          .single()
+
+        if (expenseError) {
+          return {
+            success: false,
+            message: 'Transaction not found'
+          }
+        }
+
+        // Handle expense actions
+        return await this.updateExpenseStatus(transactionId, action as ValidStatus, userId)
+      }
+
+      // Handle invoice actions
+      return await this.updateInvoiceStatus(transactionId, action as ValidStatus, userId)
+    } catch (error) {
+      console.error('Error handling transaction action:', error)
+      return {
+        success: false,
+        message: 'Failed to perform action'
+      }
+    }
+  }
+
+  /**
    * Delete transaction (invoice or expense)
    */
   static async deleteTransaction(
     transactionId: string,
-    type: 'invoice' | 'expense',
+    transactionType: 'invoice' | 'expense',
     userId: string
   ): Promise<StatusUpdateResult> {
     try {
-      const tableName = type === 'invoice' ? 'invoices' : 'expenses'
+      const tableName = transactionType === 'invoice' ? 'invoices' : 'expenses'
       
       const { error } = await supabase
         .from(tableName)
@@ -114,87 +201,23 @@ export class StatusLogic {
         .eq('user_id', userId)
 
       if (error) {
-        console.error(`Error deleting ${type}:`, error)
+        console.error(`Error deleting ${transactionType}:`, error)
         return {
           success: false,
-          message: `Failed to delete ${type}: ${error.message}`
+          message: `Failed to delete ${transactionType}: ${error.message}`
         }
       }
 
       return {
         success: true,
-        message: `${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`
+        message: `${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)} deleted successfully`
       }
     } catch (error) {
-      console.error(`Error deleting ${type}:`, error)
+      console.error(`Error deleting ${transactionType}:`, error)
       return {
         success: false,
-        message: `Failed to delete ${type}`
+        message: `Failed to delete ${transactionType}`
       }
     }
   }
-
-  /**
-   * Handle transaction action with proper error handling and toast notifications
-   */
-  static async handleTransactionAction(
-    transactionId: string,
-    action: string,
-    type: 'invoice' | 'expense',
-    userId: string,
-    currentStatus?: string
-  ): Promise<StatusUpdateResult> {
-    let result: StatusUpdateResult
-
-    switch (action) {
-      case 'delete':
-        result = await this.deleteTransaction(transactionId, type, userId)
-        break
-
-      case 'mark_paid':
-        if (type === 'invoice') {
-          result = await this.updateInvoiceStatus(transactionId, 'paid', userId)
-        } else {
-          result = { success: false, message: 'Cannot mark expense as paid' }
-        }
-        break
-
-      case 'mark_pending':
-        if (type === 'invoice') {
-          result = await this.updateInvoiceStatus(transactionId, 'pending', userId)
-        } else {
-          result = { success: false, message: 'Cannot mark expense as pending' }
-        }
-        break
-
-      case 'mark_draft':
-        if (type === 'invoice') {
-          result = await this.updateInvoiceStatus(transactionId, 'draft', userId)
-        } else {
-          result = { success: false, message: 'Cannot mark expense as draft' }
-        }
-        break
-
-      default:
-        result = { success: false, message: 'Unknown action' }
-    }
-
-    // Show toast notification
-    if (result.success) {
-      toast.success(result.message)
-    } else {
-      toast.error(result.message)
-    }
-
-    return result
-  }
-
-  /**
-   * Get valid status for StatusButton component
-   */
-  static getValidStatus(status: string): 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' {
-    const validStatuses = ['draft', 'pending', 'paid', 'overdue', 'spent', 'expense']
-    return validStatuses.includes(status) ? status as 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' : 'draft'
-  }
-
 }

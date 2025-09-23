@@ -196,9 +196,7 @@ export default function TransactionPage() {
     const result = await StatusLogic.handleTransactionAction(
       transactionId,
       action,
-      transaction.type,
-      user.id,
-      originalStatus
+      user.id
     )
 
     // Handle result
@@ -226,9 +224,7 @@ export default function TransactionPage() {
         const result = await StatusLogic.handleTransactionAction(
           transaction.id,
           action,
-          transaction.type,
-          user.id,
-          transaction.status
+          user.id
         )
         
         if (result.success) {
