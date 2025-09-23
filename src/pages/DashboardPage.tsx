@@ -8,7 +8,7 @@ import NotificationDropdown from '../components/NotificationDropdown'
 import DesktopSettingsPanel from '../components/DesktopSettingsPanel'
 import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
-import { StatusLogic } from '../lib/statusLogic'
+// StatusLogic removed - StatusButton handles validation internally
 import { supabase } from '../lib/supabaseClient'
 import { 
   FileText, 
@@ -724,10 +724,10 @@ export default function DashboardPage() {
                     }}>
                       {transaction.type === 'income' ? '+' : '-'}{transaction.amount}
                     </p>
-                    <StatusButton 
-                      status={StatusLogic.getValidStatus(transaction.status)} 
-                      size="sm" 
-                    />
+        <StatusButton 
+          status={transaction.status} 
+          size="sm" 
+        />
                   </div>
                 </div>
               </div>

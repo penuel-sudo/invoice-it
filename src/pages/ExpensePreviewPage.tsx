@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
-import { StatusLogic } from '../lib/statusLogic'
+// StatusLogic removed - StatusButton handles validation internally
 
 const PAYMENT_METHODS = [
   { value: 'cash', label: 'Cash' },
@@ -153,11 +153,17 @@ export default function ExpensePreviewPage() {
     try {
       setDeleting(true)
 
-      const result = await StatusLogic.handleTransactionAction(
-        expense.id,
-        'delete',
-        user.id
-      )
+      // Handle delete action directly
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', expense.id)
+        .eq('user_id', user.id)
+
+      const result = {
+        success: !error,
+        message: error ? 'Failed to delete expense' : 'Expense deleted successfully'
+      }
 
       if (result.success) {
         toast.success('Expense deleted successfully')
@@ -463,7 +469,7 @@ export default function ExpensePreviewPage() {
               }}>
                 <ArrowDownRight size={28} color={brandColors.error[600]} />
               </div>
-              <StatusButton status={StatusLogic.getValidStatus(expense.status)} size="lg" />
+              <StatusButton status={expense.status} size="lg" />
             </div>
 
             {/* Description */}

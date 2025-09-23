@@ -1,12 +1,46 @@
 import { brandColors } from '../stylings'
 
+type ValidStatus = 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' | 'due'
+
 interface StatusButtonProps {
-  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense' | 'due'
+  status: string // Accept any string from database
   size?: 'sm' | 'md' | 'lg'
   className?: string
 }
 
 export default function StatusButton({ status, size = 'sm', className = '' }: StatusButtonProps) {
+  // Internal validation - handles any database status
+  const getValidStatus = (dbStatus: string): ValidStatus => {
+    // Valid statuses that this component supports
+    const validStatuses = ['draft', 'pending', 'paid', 'overdue', 'spent', 'expense', 'due'] as const
+    
+    // Check if status matches valid statuses
+    if (validStatuses.includes(dbStatus as ValidStatus)) {
+      return dbStatus as ValidStatus
+    }
+    
+    // Handle common database status variations
+    const statusMap: Record<string, ValidStatus> = {
+      'draft': 'draft',
+      'pending': 'pending', 
+      'paid': 'paid',
+      'overdue': 'overdue',
+      'spent': 'spent',
+      'expense': 'expense',
+      'due': 'due',
+      // Handle variations
+      'DRAFT': 'draft',
+      'PENDING': 'pending',
+      'PAID': 'paid',
+      'OVERDUE': 'overdue',
+      'SPENT': 'spent',
+      'EXPENSE': 'expense',
+      'DUE': 'due'
+    }
+    
+    return statusMap[dbStatus] || 'pending' // Default fallback
+  }
+
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'draft':
@@ -105,7 +139,9 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
     }
   }
 
-  const statusConfig = getStatusConfig(status)
+  // Validate the incoming status
+  const validStatus = getValidStatus(status)
+  const statusConfig = getStatusConfig(validStatus)
   const sizeConfig = getSizeConfig(size)
 
   return (

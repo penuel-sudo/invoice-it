@@ -20,14 +20,14 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
-import { StatusLogic } from '../lib/statusLogic'
+// StatusLogic removed - StatusButton handles validation internally
 import OverdueDetector from '../components/OverdueDetector'
 
 interface Transaction {
   id: string
   type: 'invoice' | 'expense'
   invoice_number?: string
-  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense'
+  status: string // Accept any status from database
   issue_date?: string
   due_date?: string
   subtotal?: number
@@ -192,12 +192,60 @@ export default function TransactionPage() {
       ))
     }
 
-    // Use the reusable StatusLogic component
-    const result = await StatusLogic.handleTransactionAction(
-      transactionId,
-      action,
-      user.id
-    )
+    // Handle transaction action directly
+    let result
+    if (action === 'delete') {
+      if (transaction.type === 'invoice') {
+        const { error } = await supabase
+          .from('invoices')
+          .delete()
+          .eq('id', transactionId)
+          .eq('user_id', user.id)
+        result = {
+          success: !error,
+          message: error ? 'Failed to delete invoice' : 'Invoice deleted successfully'
+        }
+      } else {
+        const { error } = await supabase
+          .from('expenses')
+          .delete()
+          .eq('id', transactionId)
+          .eq('user_id', user.id)
+        result = {
+          success: !error,
+          message: error ? 'Failed to delete expense' : 'Expense deleted successfully'
+        }
+      }
+    } else {
+      // Handle status updates
+      if (transaction.type === 'invoice') {
+        const { error } = await supabase
+          .from('invoices')
+          .update({ 
+            status: action === 'mark_paid' ? 'paid' : 'pending',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', transactionId)
+          .eq('user_id', user.id)
+        result = {
+          success: !error,
+          message: error ? 'Failed to update invoice status' : 'Invoice status updated successfully'
+        }
+      } else {
+        const { error } = await supabase
+          .from('expenses')
+          .update({ 
+            status: action === 'mark_paid' ? 'spent' : 'expense',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', transactionId)
+          .eq('user_id', user.id)
+        result = {
+          success: !error,
+          message: error ? 'Failed to update expense status' : 'Expense status updated successfully'
+        }
+      }
+    }
 
     // Handle result
     if (result.success) {
@@ -221,11 +269,60 @@ export default function TransactionPage() {
 
     try {
       for (const transaction of selectedTransactions) {
-        const result = await StatusLogic.handleTransactionAction(
-          transaction.id,
-          action,
-          user.id
-        )
+        // Handle bulk action directly
+        let result
+        if (action === 'delete') {
+          if (transaction.type === 'invoice') {
+            const { error } = await supabase
+              .from('invoices')
+              .delete()
+              .eq('id', transaction.id)
+              .eq('user_id', user.id)
+            result = {
+              success: !error,
+              message: error ? 'Failed to delete invoice' : 'Invoice deleted successfully'
+            }
+          } else {
+            const { error } = await supabase
+              .from('expenses')
+              .delete()
+              .eq('id', transaction.id)
+              .eq('user_id', user.id)
+            result = {
+              success: !error,
+              message: error ? 'Failed to delete expense' : 'Expense deleted successfully'
+            }
+          }
+        } else {
+          // Handle status updates
+          if (transaction.type === 'invoice') {
+            const { error } = await supabase
+              .from('invoices')
+              .update({ 
+                status: action === 'mark_paid' ? 'paid' : 'pending',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', transaction.id)
+              .eq('user_id', user.id)
+            result = {
+              success: !error,
+              message: error ? 'Failed to update invoice status' : 'Invoice status updated successfully'
+            }
+          } else {
+            const { error } = await supabase
+              .from('expenses')
+              .update({ 
+                status: action === 'mark_paid' ? 'spent' : 'expense',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', transaction.id)
+              .eq('user_id', user.id)
+            result = {
+              success: !error,
+              message: error ? 'Failed to update expense status' : 'Expense status updated successfully'
+            }
+          }
+        }
         
         if (result.success) {
           successCount++
@@ -302,8 +399,7 @@ export default function TransactionPage() {
     }
   }
 
-  // Use StatusLogic for status validation
-  const getValidStatus = StatusLogic.getValidStatus
+  // Status validation now handled by StatusButton component
 
   if (!user) return null
 
@@ -741,7 +837,7 @@ export default function TransactionPage() {
                         {formatAmount(transaction.total_amount, transaction.type)}
                       </p>
                       <StatusButton 
-                        status={getValidStatus(transaction.status)} 
+                        status={transaction.status} 
                         size="sm" 
                       />
                     </div>
