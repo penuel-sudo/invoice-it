@@ -78,23 +78,23 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
       case 'overdue':
         return {
           text: 'Overdue',
-          backgroundColor: brandColors.error[100],
-          color: brandColors.error[700],
-          borderColor: brandColors.error[200]
+          backgroundColor: '#fef2f2', // Red 50
+          color: '#dc2626', // Red 600
+          borderColor: '#fecaca' // Red 200
         }
       case 'spent':
         return {
           text: 'Spent',
-          backgroundColor: brandColors.error[100],
-          color: brandColors.error[700],
-          borderColor: brandColors.error[200]
+          backgroundColor: '#fef2f2', // Red 50
+          color: '#dc2626', // Red 600
+          borderColor: '#fecaca' // Red 200
         }
       case 'expense':
         return {
           text: 'Expense',
-          backgroundColor: brandColors.error[100],
-          color: brandColors.error[700],
-          borderColor: brandColors.error[200]
+          backgroundColor: '#fef2f2', // Red 50
+          color: '#dc2626', // Red 600
+          borderColor: '#fecaca' // Red 200
         }
       case 'due':
         return {
