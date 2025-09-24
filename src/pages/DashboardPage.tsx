@@ -198,13 +198,12 @@ export default function DashboardPage() {
 
   if (!user) { return null } // AuthWrapper handles redirection
 
-  const filteredTransactions = activeTab === 'all' 
-    ? transactions 
-    : transactions.filter(t => {
-      if (activeTab === 'invoice') return t.type === 'invoice'
-      if (activeTab === 'expenses') return t.type === 'expense'
-      return true
-    })
+  const filteredTransactions = transactions.filter(transaction => {
+    if (activeTab === 'all') return true
+    if (activeTab === 'invoice') return transaction.type === 'invoice'
+    if (activeTab === 'expenses') return transaction.type === 'expense'
+    return true
+  })
 
   return (
     <Layout 
@@ -687,7 +686,7 @@ export default function DashboardPage() {
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
-                onClick={() => navigate(`/invoice?tab=${transaction.type === 'invoice' ? 'invoice' : 'expenses'}`)}
+                onClick={() => navigate(`/invoices?tab=${transaction.type === 'invoice' ? 'invoice' : 'expenses'}`)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-1px)'
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
