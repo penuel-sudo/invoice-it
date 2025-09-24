@@ -224,12 +224,12 @@ export default function DashboardPage() {
           unreadCount={3}
         />
         
-        {/* 📊 DISPLAY PANEL - Empty with content width */}
+        {/* 📊 DISPLAY PANEL - Mock Stats */}
         <div style={{
           height: '20vh',
           minHeight: '160px',
           backgroundColor: brandColors.primary[50],
-          borderRadius: '15px',
+          borderRadius: '8px',
           border: `2px solid ${brandColors.primary[500]}`,
           padding: '1rem',
           margin: '0.5rem 1rem 0rem 1rem',
@@ -241,7 +241,78 @@ export default function DashboardPage() {
           justifyContent: 'center',
           boxSizing: 'border-box'
         }}>
+          {/* Mock Stats */}
+          <div style={{
+            display: 'flex',
+            gap: '2rem',
+            alignItems: 'center'
+          }}>
+            {/* Total */}
+            <div style={{
+              textAlign: 'center'
+            }}>
+              <p style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: brandColors.primary[700],
+                margin: '0 0 0.25rem 0'
+              }}>
+                $12,450
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: brandColors.neutral[600],
+                margin: 0
+              }}>
+                Total
+              </p>
+            </div>
 
+            {/* Paid */}
+            <div style={{
+              textAlign: 'center'
+            }}>
+              <p style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: brandColors.success[700],
+                margin: '0 0 0.25rem 0'
+              }}>
+                $8,200
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: brandColors.neutral[600],
+                margin: 0
+              }}>
+                Paid
+              </p>
+            </div>
+
+            {/* Pending */}
+            <div style={{
+              textAlign: 'center'
+            }}>
+              <p style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: brandColors.warning[700],
+                margin: '0 0 0.25rem 0'
+              }}>
+                $4,250
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: brandColors.neutral[600],
+                margin: 0
+              }}>
+                Pending
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* 🔘 QUICK ACTIONS SECTION (2 rows with shadows) - 6 buttons in 2 rows */}
