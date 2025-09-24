@@ -7,7 +7,7 @@ const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
   { id: 'invoices', label: 'Transactions', icon: FileText, path: '/invoices' },
   { id: 'clients', label: 'Clients', icon: Users, path: '/clients' },
-  { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/invoices/tab?=expenses' }
+  { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/invoices?tab=expenses' }
 ]
 
 interface SidebarProps {

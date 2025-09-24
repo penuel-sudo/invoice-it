@@ -234,7 +234,7 @@ export default function DashboardPage() {
           padding: '1rem',
           margin: '0.5rem 1rem 0rem 1rem',
           width: 'auto',
-          maxWidth: 'fit-content',
+          maxWidth: '100%',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
