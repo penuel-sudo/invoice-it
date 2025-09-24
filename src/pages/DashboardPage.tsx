@@ -34,8 +34,6 @@ export default function DashboardPage() {
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [lastLoadTime, setLastLoadTime] = useState<number>(0)
-  const [cacheKey, setCacheKey] = useState<string>('')
 
   // Helper functions from TransactionPage
   const formatAmount = (amount: number, type: string) => {
@@ -82,23 +80,13 @@ export default function DashboardPage() {
     loadProfilePicture()
   }, [user])
 
-  // Load transactions from database with smart caching like WhatsApp
-  const loadTransactions = async (forceReload: boolean = false) => {
+  // Load transactions from database
+  const loadTransactions = async () => {
     if (!user) return
-
-    // Smart caching: Only reload if forced or if it's been more than 5 minutes
-    const now = Date.now()
-    const timeSinceLastLoad = now - lastLoadTime
-    const shouldReload = forceReload || timeSinceLastLoad > 5 * 60 * 1000 // 5 minutes
-
-    if (!shouldReload && transactions.length > 0) {
-      console.log('Using cached transactions, no reload needed')
-      return
-    }
 
     try {
       setLoading(true)
-      console.log('Loading transactions for user:', user.id, forceReload ? '(forced)' : '(cached)')
+      console.log('Loading transactions for user:', user.id)
       
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
@@ -181,7 +169,6 @@ export default function DashboardPage() {
         .slice(0, 4)
       
       setTransactions(sortedTransactions)
-      setLastLoadTime(Date.now()) // Update cache timestamp
     } catch (error) {
       console.error('Error loading transactions:', error)
       setTransactions([])
@@ -192,18 +179,23 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      loadTransactions(true) // Force reload on first load
+      loadTransactions()
     }
   }, [user])
 
   if (!user) { return null } // AuthWrapper handles redirection
 
   const filteredTransactions = transactions.filter(transaction => {
+    console.log('Filtering transaction:', transaction.type, 'for activeTab:', activeTab)
     if (activeTab === 'all') return true
-    if (activeTab === 'invoice') return transaction.type === 'invoice'
-    if (activeTab === 'expenses') return transaction.type === 'expense'
+    if (activeTab === 'income') return transaction.type === 'invoice'
+    if (activeTab === 'expense') return transaction.type === 'expense'
     return true
   })
+  
+  console.log('Active tab:', activeTab)
+  console.log('Total transactions:', transactions.length)
+  console.log('Filtered transactions:', filteredTransactions.length)
 
   return (
     <Layout 
@@ -650,7 +642,10 @@ export default function DashboardPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  console.log('Tab clicked:', tab.id)
+                  setActiveTab(tab.id)
+                }}
                 style={{
                   padding: '0.75rem 1.5rem',
                   backgroundColor: activeTab === tab.id ? brandColors.primary[600] : brandColors.neutral[100],
