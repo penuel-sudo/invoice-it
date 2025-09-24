@@ -34,6 +34,8 @@ export default function DashboardPage() {
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [lastLoadTime, setLastLoadTime] = useState<number>(0)
+  const [cacheKey, setCacheKey] = useState<string>('')
 
   // Helper functions from TransactionPage
   const formatAmount = (amount: number, type: string) => {
@@ -42,7 +44,7 @@ export default function DashboardPage() {
       style: 'currency',
       currency: 'USD'
     }).format(amount)
-    return type === 'income' ? `+${formatted}` : `-${formatted}`
+    return type === 'invoice' ? `+${formatted}` : `-${formatted}`
   }
 
   const formatDate = (dateString: string) => {
@@ -80,13 +82,23 @@ export default function DashboardPage() {
     loadProfilePicture()
   }, [user])
 
-  // Load transactions from database - EXACT COPY from TransactionPage
-  const loadTransactions = async () => {
+  // Load transactions from database with smart caching like WhatsApp
+  const loadTransactions = async (forceReload: boolean = false) => {
     if (!user) return
+
+    // Smart caching: Only reload if forced or if it's been more than 5 minutes
+    const now = Date.now()
+    const timeSinceLastLoad = now - lastLoadTime
+    const shouldReload = forceReload || timeSinceLastLoad > 5 * 60 * 1000 // 5 minutes
+
+    if (!shouldReload && transactions.length > 0) {
+      console.log('Using cached transactions, no reload needed')
+      return
+    }
 
     try {
       setLoading(true)
-      console.log('Loading transactions for user:', user.id)
+      console.log('Loading transactions for user:', user.id, forceReload ? '(forced)' : '(cached)')
       
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
@@ -169,6 +181,7 @@ export default function DashboardPage() {
         .slice(0, 4)
       
       setTransactions(sortedTransactions)
+      setLastLoadTime(Date.now()) // Update cache timestamp
     } catch (error) {
       console.error('Error loading transactions:', error)
       setTransactions([])
@@ -179,7 +192,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      loadTransactions()
+      loadTransactions(true) // Force reload on first load
     }
   }, [user])
 
@@ -187,7 +200,11 @@ export default function DashboardPage() {
 
   const filteredTransactions = activeTab === 'all' 
     ? transactions 
-    : transactions.filter(t => t.type === activeTab)
+    : transactions.filter(t => {
+      if (activeTab === 'invoice') return t.type === 'invoice'
+      if (activeTab === 'expenses') return t.type === 'expense'
+      return true
+    })
 
   return (
     <Layout 
@@ -670,7 +687,7 @@ export default function DashboardPage() {
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
-                onClick={() => navigate(`/transactions?tab=${transaction.type === 'invoice' ? 'invoice' : 'expenses'}`)}
+                onClick={() => navigate(`/invoice?tab=${transaction.type === 'invoice' ? 'invoice' : 'expenses'}`)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-1px)'
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
