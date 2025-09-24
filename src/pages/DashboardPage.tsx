@@ -86,7 +86,6 @@ export default function DashboardPage() {
 
     try {
       setLoading(true)
-      console.log('Loading transactions for user:', user.id)
       
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
@@ -94,7 +93,6 @@ export default function DashboardPage() {
 
       if (error) {
         console.error('Error loading transactions:', error)
-        console.log('RPC failed, trying direct table queries...')
         
         // Fallback: Query tables directly
         const [invoicesData, expensesData] = await Promise.all([
@@ -139,11 +137,9 @@ export default function DashboardPage() {
         return
       }
 
-      console.log('Raw database response:', data)
 
       // Transform database response to match Transaction interface - EXACT COPY from TransactionPage
       const transformedTransactions: any[] = (data || []).map((dbTransaction: any) => {
-        console.log('Processing transaction:', dbTransaction.transaction_type, 'status:', dbTransaction.status)
         const isInvoice = dbTransaction.transaction_type === 'invoice'
         const isExpense = dbTransaction.transaction_type === 'expense'
 
@@ -161,7 +157,6 @@ export default function DashboardPage() {
         }
       })
 
-      console.log('Transformed transactions:', transformedTransactions)
       
       // Sort by created_at DESC (latest first) and limit to 4 items
       const sortedTransactions = transformedTransactions
@@ -186,16 +181,11 @@ export default function DashboardPage() {
   if (!user) { return null } // AuthWrapper handles redirection
 
   const filteredTransactions = transactions.filter(transaction => {
-    console.log('Filtering transaction:', transaction.type, 'for activeTab:', activeTab)
     if (activeTab === 'all') return true
     if (activeTab === 'income') return transaction.type === 'invoice'
     if (activeTab === 'expense') return transaction.type === 'expense'
     return true
   })
-  
-  console.log('Active tab:', activeTab)
-  console.log('Total transactions:', transactions.length)
-  console.log('Filtered transactions:', filteredTransactions.length)
 
   return (
     <Layout 
@@ -216,6 +206,7 @@ export default function DashboardPage() {
         onClose={() => setIsNotificationVisible(false)}
       />
       
+
       <div style={{
         paddingTop: window.innerWidth < 768 ? '60px' : '0', // Space for fixed topbar on mobile only
         paddingBottom: '4rem', // Space for bottom nav
@@ -642,10 +633,7 @@ export default function DashboardPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => {
-                  console.log('Tab clicked:', tab.id)
-                  setActiveTab(tab.id)
-                }}
+                onClick={() => setActiveTab(tab.id)}
                 style={{
                   padding: '0.75rem 1.5rem',
                   backgroundColor: activeTab === tab.id ? brandColors.primary[600] : brandColors.neutral[100],
