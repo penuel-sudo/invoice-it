@@ -658,7 +658,7 @@ export default function DashboardPage() {
             {filteredTransactions.map((transaction) => (
               <div 
                 key={transaction.id} 
-                onClick={() => navigate(`/transactions?tab=${transaction.type === 'income' ? 'invoice' : 'expense'}`)}
+                onClick={() => navigate(`/transactions?tab=${transaction.type === 'income' ? 'invoice' : 'expenses'}`)}
                 style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -703,14 +703,20 @@ export default function DashboardPage() {
                       color: brandColors.neutral[900],
                       margin: '0 0 0.125rem 0'
                     }}>
-                      {transaction.name}
+                      {transaction.type === 'income' 
+                        ? (transaction.client_name || 'Client')
+                        : (transaction.description || 'Expense')
+                      }
                     </p>
                     <p style={{
                       fontSize: '0.75rem',
                       color: brandColors.neutral[500],
                       margin: 0
                     }}>
-                      {transaction.invoice} • {transaction.date}
+                      {transaction.type === 'income' 
+                        ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
+                        : (transaction.category || 'Expense')
+                      } • {transaction.date}
                     </p>
                   </div>
                 </div>

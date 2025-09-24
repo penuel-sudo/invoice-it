@@ -41,16 +41,6 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
     return statusMap[dbStatus] || 'pending' // Default fallback
   }
 
-  // TEMPORARY DEBUG: Force styling for problematic statuses
-  const forceStatusStyling = (dbStatus: string): ValidStatus => {
-    // Force these three statuses to get their proper styling
-    if (dbStatus.toLowerCase().includes('overdue')) return 'overdue'
-    if (dbStatus.toLowerCase().includes('spent')) return 'spent' 
-    if (dbStatus.toLowerCase().includes('expense')) return 'expense'
-    
-    // For other statuses, use normal validation
-    return getValidStatus(dbStatus)
-  }
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -150,15 +140,10 @@ export default function StatusButton({ status, size = 'sm', className = '' }: St
     }
   }
 
-  // TEMPORARY DEBUG: Force styling for problematic statuses
-  const validStatus = forceStatusStyling(status)
+  // Validate the incoming status
+  const validStatus = getValidStatus(status)
   const statusConfig = getStatusConfig(validStatus)
   const sizeConfig = getSizeConfig(size)
-  
-  // DEBUG: Log what's happening inside StatusButton
-  console.log('StatusButton DEBUG - Input status:', status)
-  console.log('StatusButton DEBUG - Valid status:', validStatus)
-  console.log('StatusButton DEBUG - Status config:', statusConfig)
 
   return (
     <span
