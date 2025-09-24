@@ -267,6 +267,24 @@ export const commonStyles = {
   statusPaid: styleUtils.createStatusBadgeStyle('paid'),
   statusPending: styleUtils.createStatusBadgeStyle('pending'),
   statusOverdue: styleUtils.createStatusBadgeStyle('overdue'),
+  
+  // Custom scrollbar
+  scrollbar: {
+    '&::-webkit-scrollbar': {
+      width: '6px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: brandColors.white,
+      borderRadius: '3px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: brandColors.neutral[300],
+      borderRadius: '3px',
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      background: brandColors.neutral[400],
+    },
+  },
 }
 
 // Export everything for easy importing

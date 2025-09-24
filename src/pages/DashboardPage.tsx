@@ -10,6 +10,7 @@ import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
 // StatusLogic removed - StatusButton handles validation internally
 import { supabase } from '../lib/supabaseClient'
+import { format } from 'date-fns'
 import { 
   FileText, 
   TrendingUp, 
@@ -33,6 +34,28 @@ export default function DashboardPage() {
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Helper functions from TransactionPage
+  const formatAmount = (amount: number, type: string) => {
+    if (amount === null || amount === undefined) return '$0.00'
+    const formatted = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount)
+    return type === 'income' ? `+${formatted}` : `-${formatted}`
+  }
+
+  const formatDate = (dateString: string) => {
+    try {
+      if (!dateString) return 'No Date'
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'Invalid Date'
+      return format(date, 'MMM dd, yyyy')
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Date string:', dateString)
+      return 'Invalid Date'
+    }
+  }
 
   useEffect(() => {
     if (window.location.hash.includes('access_token')) {
@@ -653,24 +676,24 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Transaction List with Shadows */}
+          {/* Transaction List - Exact copy from TransactionPage */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {filteredTransactions.map((transaction) => (
               <div 
                 key={transaction.id} 
-                onClick={() => navigate(`/transactions?tab=${transaction.type === 'income' ? 'invoice' : 'expenses'}`)}
                 style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                backgroundColor: brandColors.white,
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1rem',
+                  backgroundColor: brandColors.white,
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                   border: `1px solid ${brandColors.neutral[100]}`,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
+                onClick={() => navigate(`/transactions?tab=${transaction.type === 'income' ? 'invoice' : 'expenses'}`)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-1px)'
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
@@ -696,6 +719,7 @@ export default function DashboardPage() {
                       <ArrowDownRight size={18} color={brandColors.error[600]} />
                     )}
                   </div>
+                  
                   <div>
                     <p style={{
                       fontSize: '0.875rem',
@@ -716,10 +740,11 @@ export default function DashboardPage() {
                       {transaction.type === 'income' 
                         ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
                         : (transaction.category || 'Expense')
-                      } • {transaction.date}
+                      } • {transaction.issue_date ? formatDate(transaction.issue_date) : 'No Date'}
                     </p>
                   </div>
                 </div>
+                
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
                     <p style={{
@@ -728,12 +753,12 @@ export default function DashboardPage() {
                       color: transaction.type === 'income' ? brandColors.success[600] : brandColors.error[600],
                       margin: 0
                     }}>
-                      {transaction.type === 'income' ? '+' : '-'}{transaction.amount}
+                      {formatAmount(transaction.total_amount, transaction.type)}
                     </p>
-        <StatusButton 
-          status={transaction.status} 
-          size="sm" 
-        />
+                    <StatusButton 
+                      status={transaction.status} 
+                      size="sm" 
+                    />
                   </div>
                 </div>
               </div>
