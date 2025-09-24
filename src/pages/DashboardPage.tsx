@@ -224,16 +224,17 @@ export default function DashboardPage() {
           unreadCount={3}
         />
         
-        {/* 📊 INVOICE STATS SECTION - Subtle brand color background with green border */}
+        {/* 📊 DISPLAY PANEL - Empty with content width */}
         <div style={{
           height: '20vh',
           minHeight: '160px',
           backgroundColor: brandColors.primary[50],
           borderRadius: '15px',
           border: `2px solid ${brandColors.primary[500]}`,
-          padding: '1rem 1rem 0.5rem 1rem',
-          margin: '0.5rem 5rem 0rem 0rem',
-          width: '100%',
+          padding: '1rem',
+          margin: '0.5rem 1rem 0rem 1rem',
+          width: 'auto',
+          maxWidth: 'fit-content',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
@@ -241,93 +242,6 @@ export default function DashboardPage() {
           boxSizing: 'border-box'
         }}>
 
-          {/* Stats Container - 3 columns */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '1rem 0.5rem',
-            backgroundColor: 'transparent',
-            gap: '0.5rem',
-            width: '100%',
-            flexShrink: 1,
-            minWidth: 0
-          }}>
-            <div style={{ 
-              textAlign: 'center', 
-              flex: 1,
-              flexShrink: 1,
-              backgroundColor: 'transparent',
-              padding: '1.5rem 0.25rem'
-            }}>
-              <p style={{
-                fontSize: '2rem',
-                fontWeight: '700',
-                color: brandColors.primary[800],
-                margin: '0 0 0.5rem 0'
-              }}>
-                35
-              </p>
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.primary[600],
-                margin: 0,
-                fontWeight: '500',
-                whiteSpace: 'nowrap'
-              }}>
-                Total Invoices
-              </p>
-            </div>
-            <div style={{ 
-              textAlign: 'center', 
-              flex: 1,
-              flexShrink: 1,
-              backgroundColor: 'transparent',
-              padding: '1.5rem 0.25rem'
-            }}>
-              <p style={{
-                fontSize: '2rem',
-                fontWeight: '700',
-                color: brandColors.primary[800],
-                margin: '0 0 0.5rem 0'
-              }}>
-                28
-              </p>
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.primary[600],
-                margin: 0,
-                fontWeight: '500',
-                whiteSpace: 'nowrap'
-              }}>
-                Paid Invoices
-              </p>
-            </div>
-            <div style={{ 
-              textAlign: 'center', 
-              flex: 1,
-              flexShrink: 1,
-              backgroundColor: 'transparent',
-              padding: '1.5rem 0.25rem'
-            }}>
-              <p style={{
-                fontSize: '2rem',
-                fontWeight: '700',
-                color: brandColors.primary[800],
-                margin: '0 0 0.5rem 0'
-              }}>
-                7
-              </p>
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.primary[600],
-                margin: 0,
-                fontWeight: '500',
-                whiteSpace: 'nowrap'
-              }}>
-                Pending Invoices
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* 🔘 QUICK ACTIONS SECTION (2 rows with shadows) - 6 buttons in 2 rows */}
