@@ -80,121 +80,98 @@ export default function DashboardPage() {
     loadProfilePicture()
   }, [user])
 
-  // Load real transaction data
+  // Load transactions from database - EXACT COPY from TransactionPage
   const loadTransactions = async () => {
     if (!user) return
 
     try {
       setLoading(true)
+      console.log('Loading transactions for user:', user.id)
       
-      // Check if there's any data in invoices or expenses tables
-      const [invoicesResult, expensesResult] = await Promise.all([
-        supabase
-          .from('invoices')
-          .select('id, created_at')
-          .eq('user_id', user.id)
-          .limit(1),
-        supabase
-          .from('expenses')
-          .select('id, created_at')
-          .eq('user_id', user.id)
-          .limit(1)
-      ])
-
-      // If no data exists in either table, don't show the transaction section
-      if ((!invoicesResult.data || invoicesResult.data.length === 0) && 
-          (!expensesResult.data || expensesResult.data.length === 0)) {
-        console.log('No data found in invoices or expenses tables')
-        setTransactions([])
-        return
-      }
-
-      console.log('Data found in tables, loading transactions...')
-      console.log('Invoices result:', invoicesResult.data?.length || 0, 'items')
-      console.log('Expenses result:', expensesResult.data?.length || 0, 'items')
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
 
       if (error) {
         console.error('Error loading transactions:', error)
-        // Don't return here, try to load data directly from tables
         console.log('RPC failed, trying direct table queries...')
         
-        // Fallback: Load data directly from tables
+        // Fallback: Query tables directly
         const [invoicesData, expensesData] = await Promise.all([
-          supabase
-            .from('invoices')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(2),
-          supabase
-            .from('expenses')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(2)
+          supabase.from('invoices').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+          supabase.from('expenses').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
         ])
-
-        const allData = [
-          ...(invoicesData.data || []).map(item => ({ ...item, type: 'invoice' })),
-          ...(expensesData.data || []).map(item => ({ ...item, type: 'expense' }))
-        ]
-
-        if (allData.length > 0) {
-          console.log('Fallback data sample:', allData[0])
-          const transformedTransactions = allData.map((item: any) => {
-            console.log('Processing item:', item)
-            return {
-            id: item.id,
-            name: item.client_name || item.description || 'Unknown',
-            type: item.type === 'invoice' ? 'income' : 'expense',
-            invoice: item.invoice_number || `#${(item.type || 'EXP').toUpperCase()}${item.id.slice(-4)}`,
-            date: new Date(item.created_at).toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric'
-            }),
-            amount: `$${parseFloat(item.total_amount || item.amount || 0).toLocaleString()}`,
-            status: item.status
-            }
-          })
-
-          const sortedTransactions = transformedTransactions
-            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 4)
-
-          setTransactions(sortedTransactions)
+        
+        if (invoicesData.error || expensesData.error) {
+          console.error('Error in fallback queries:', invoicesData.error || expensesData.error)
+          setTransactions([])
+          return
         }
+        
+        // Transform and combine data - EXACT COPY from TransactionPage
+        const transformedInvoices = (invoicesData.data || []).map(invoice => ({
+          id: invoice.id,
+          type: 'invoice' as const,
+          invoice_number: invoice.invoice_number,
+          status: invoice.status,
+          issue_date: invoice.issue_date,
+          total_amount: invoice.total_amount,
+          client_name: 'Client', // You might want to join with clients table
+          created_at: invoice.created_at
+        }))
+        
+        const transformedExpenses = (expensesData.data || []).map(expense => ({
+          id: expense.id,
+          type: 'expense' as const,
+          status: expense.status,
+          issue_date: expense.expense_date,
+          total_amount: expense.total_amount,
+          description: expense.description || 'Expense',
+          category: expense.category || 'Expense',
+          created_at: expense.created_at
+        }))
+        
+        const allTransactions = [...transformedInvoices, ...transformedExpenses]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 4) // Limit to 4 items for dashboard
+        
+        setTransactions(allTransactions)
         return
       }
 
-      if (data) {
-        // Transform the data to match the expected format
-        const transformedTransactions = data.map((item: any) => ({
-          id: item.id,
-          name: item.client_name || item.description || 'Unknown',
-          type: item.type === 'invoice' ? 'income' : 'expense',
-          invoice: item.invoice_number || item.expense_number || `#${(item.type || 'EXP').toUpperCase()}${item.id.slice(-4)}`,
-          date: new Date(item.created_at).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-          }),
-          amount: `$${parseFloat(item.total_amount || item.amount || 0).toLocaleString()}`,
-          status: item.status
-        }))
+      console.log('Raw database response:', data)
 
-        // Sort by created_at DESC and take only the latest 4
-        const sortedTransactions = transformedTransactions
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 4)
+      // Transform database response to match Transaction interface - EXACT COPY from TransactionPage
+      const transformedTransactions: any[] = (data || []).map((dbTransaction: any) => {
+        console.log('Processing transaction:', dbTransaction.transaction_type, 'status:', dbTransaction.status)
+        const isInvoice = dbTransaction.transaction_type === 'invoice'
+        const isExpense = dbTransaction.transaction_type === 'expense'
 
-        setTransactions(sortedTransactions)
-      }
+        return {
+          id: dbTransaction.id,
+          type: dbTransaction.transaction_type as 'invoice' | 'expense',
+          invoice_number: isInvoice ? dbTransaction.reference_number : undefined,
+          category: isExpense ? dbTransaction.reference_number : undefined,
+          status: dbTransaction.status,
+          issue_date: dbTransaction.transaction_date,
+          total_amount: dbTransaction.amount,
+          client_name: isInvoice ? dbTransaction.client_name : undefined,
+          description: isExpense ? dbTransaction.client_name : undefined,
+          created_at: dbTransaction.created_at
+        }
+      })
+
+      console.log('Transformed transactions:', transformedTransactions)
+      
+      // Sort by created_at DESC (latest first) and limit to 4 items
+      const sortedTransactions = transformedTransactions
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 4)
+      
+      setTransactions(sortedTransactions)
     } catch (error) {
-      console.error('Error in loadTransactions:', error)
+      console.error('Error loading transactions:', error)
+      setTransactions([])
     } finally {
       setLoading(false)
     }
@@ -676,7 +653,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Transaction List - Exact copy from TransactionPage */}
+          {/* Transaction List - EXACT COPY from TransactionPage */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {filteredTransactions.map((transaction) => (
               <div 
@@ -693,7 +670,7 @@ export default function DashboardPage() {
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
-                onClick={() => navigate(`/transactions?tab=${transaction.type === 'income' ? 'invoice' : 'expenses'}`)}
+                onClick={() => navigate(`/transactions?tab=${transaction.type === 'invoice' ? 'invoice' : 'expenses'}`)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-1px)'
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
@@ -708,12 +685,12 @@ export default function DashboardPage() {
                     width: '36px',
                     height: '36px',
                     borderRadius: '50%',
-                    backgroundColor: transaction.type === 'income' ? brandColors.success[100] : brandColors.error[100],
+                    backgroundColor: transaction.type === 'invoice' ? brandColors.success[100] : brandColors.error[100],
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    {transaction.type === 'income' ? (
+                    {transaction.type === 'invoice' ? (
                       <ArrowUpRight size={18} color={brandColors.success[600]} />
                     ) : (
                       <ArrowDownRight size={18} color={brandColors.error[600]} />
@@ -727,7 +704,7 @@ export default function DashboardPage() {
                       color: brandColors.neutral[900],
                       margin: '0 0 0.125rem 0'
                     }}>
-                      {transaction.type === 'income' 
+                      {transaction.type === 'invoice' 
                         ? (transaction.client_name || 'Client')
                         : (transaction.description || 'Expense')
                       }
@@ -737,7 +714,7 @@ export default function DashboardPage() {
                       color: brandColors.neutral[500],
                       margin: 0
                     }}>
-                      {transaction.type === 'income' 
+                      {transaction.type === 'invoice' 
                         ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
                         : (transaction.category || 'Expense')
                       } • {transaction.issue_date ? formatDate(transaction.issue_date) : 'No Date'}
@@ -750,7 +727,7 @@ export default function DashboardPage() {
                     <p style={{
                       fontSize: '0.875rem',
                       fontWeight: '600',
-                      color: transaction.type === 'income' ? brandColors.success[600] : brandColors.error[600],
+                      color: transaction.type === 'invoice' ? brandColors.success[600] : brandColors.error[600],
                       margin: 0
                     }}>
                       {formatAmount(transaction.total_amount, transaction.type)}
