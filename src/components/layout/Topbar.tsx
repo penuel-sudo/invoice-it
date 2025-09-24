@@ -69,8 +69,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
       boxSizing: 'border-box',
       width: '100%',
       flexShrink: 0,
-      zIndex: isMobile ? 40 : 'auto',
-      borderBottom: `1px solid ${brandColors.neutral[100]}`
+      zIndex: isMobile ? 40 : 'auto'
     }}>
       {/* Left Side - Profile */}
       <div style={{
