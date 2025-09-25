@@ -326,72 +326,82 @@ export default function InvoicePreviewPage() {
                   Bill To:
                 </div>
                 
-                {/* Client Name - Most prominent */}
+                {/* Two-column layout for client info */}
                 <div style={{
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  color: brandColors.neutral[900],
-                  marginBottom: '0.5rem'
+                  display: 'flex',
+                  gap: '2rem',
+                  alignItems: 'flex-start'
                 }}>
-                  {invoiceData.clientName}
+                  {/* Left column - Name and Company */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      fontSize: '1rem',
+                      fontWeight: '700',
+                      color: brandColors.neutral[900],
+                      marginBottom: '0.5rem'
+                    }}>
+                      {invoiceData.clientName}
+                    </div>
+                    
+                    {invoiceData.clientCompanyName && (
+                      <div style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        {invoiceData.clientCompanyName}
+                      </div>
+                    )}
+                    
+                    {/* Address - Left side */}
+                    {invoiceData.clientAddress && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        color: brandColors.neutral[600],
+                        lineHeight: '1.4'
+                      }}>
+                        <MapPin size={16} color={brandColors.neutral[500]} style={{ marginTop: '2px', flexShrink: 0 }} />
+                        <span>{invoiceData.clientAddress}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Right column - Contact details */}
+                  <div style={{ flex: 1 }}>
+                    {/* Email */}
+                    {invoiceData.clientEmail && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        color: brandColors.neutral[600],
+                        marginBottom: '0.5rem'
+                      }}>
+                        <Mail size={16} color={brandColors.neutral[500]} />
+                        {invoiceData.clientEmail}
+                      </div>
+                    )}
+                    
+                    {/* Phone */}
+                    {invoiceData.clientPhone && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        color: brandColors.neutral[600]
+                      }}>
+                        <Phone size={16} color={brandColors.neutral[500]} />
+                        {invoiceData.clientPhone}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                
-                {/* Company Name if provided */}
-                {invoiceData.clientCompanyName && (
-                  <div style={{
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[700],
-                    marginBottom: '0.25rem'
-                  }}>
-                    {invoiceData.clientCompanyName}
-                  </div>
-                )}
-                
-                {/* Email */}
-                {invoiceData.clientEmail && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
-                    marginBottom: '0.25rem'
-                  }}>
-                    <Mail size={16} color={brandColors.neutral[500]} />
-                    {invoiceData.clientEmail}
-                  </div>
-                )}
-                
-                {/* Phone */}
-                {invoiceData.clientPhone && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
-                    marginBottom: '0.25rem'
-                  }}>
-                    <Phone size={16} color={brandColors.neutral[500]} />
-                    {invoiceData.clientPhone}
-                  </div>
-                )}
-                
-                {/* Address */}
-                {invoiceData.clientAddress && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.5rem',
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
-                    lineHeight: '1.4'
-                  }}>
-                    <MapPin size={16} color={brandColors.neutral[500]} style={{ marginTop: '2px', flexShrink: 0 }} />
-                    <span>{invoiceData.clientAddress}</span>
-                  </div>
-                )}
               </div>
               
               {/* Service Items */}
