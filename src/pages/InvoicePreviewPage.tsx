@@ -4,6 +4,7 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { invoiceStorage } from '../lib/storage/invoiceStorage'
 import type { InvoiceData } from '../lib/storage/invoiceStorage'
+import { supabase } from '../lib/supabaseClient'
 import { 
   ArrowLeft, 
   Edit, 
@@ -16,6 +17,7 @@ import {
   X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import StatusButton from '../components/StatusButton'
 
 
 export default function InvoicePreviewPage() {
@@ -26,6 +28,7 @@ export default function InvoicePreviewPage() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [dbStatus, setDbStatus] = useState<string>('pending')
 
   useEffect(() => {
     if (location.state?.invoiceData) {
@@ -41,6 +44,15 @@ export default function InvoicePreviewPage() {
       }
     }
   }, [location.state, navigate])
+
+  // Set status from form data or default to pending
+  useEffect(() => {
+    if (invoiceData) {
+      // For new invoices (form data), default to pending
+      // For existing invoices, the status would come from the database
+      setDbStatus('pending')
+    }
+  }, [invoiceData])
 
   const handleEdit = () => {
     if (invoiceData) {
@@ -184,16 +196,10 @@ export default function InvoicePreviewPage() {
                   Payment - {invoiceData.invoiceNumber}
                 </div>
                 
-                <div style={{
-                  backgroundColor: brandColors.warning[100],
-                  color: brandColors.warning[700],
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '20px',
-                  fontSize: '0.75rem',
-                  fontWeight: '500'
-                }}>
-                  Pending
-                </div>
+                <StatusButton 
+                  status={dbStatus} 
+                  size="sm" 
+                />
               </div>
 
               {/* Total Amount - Prominently Displayed */}
@@ -204,8 +210,8 @@ export default function InvoicePreviewPage() {
                 <div style={{
                   fontSize: '3rem',
                   fontWeight: '700',
-                  color: brandColors.neutral[900],
-                  marginBottom: '0.5rem'
+                  color: brandColors.primary[600], // Bold brand green
+                  marginBottom: '0.5rem',
                 }}>
                   ${invoiceData.grandTotal.toFixed(2)}
                 </div>
@@ -300,32 +306,75 @@ export default function InvoicePreviewPage() {
                 Invoice Details
               </h3>
               
-              {/* Client Info */}
+              {/* Client Info - Enhanced */}
               <div style={{
                 marginBottom: window.innerWidth < 768 ? '2rem' : '1.5rem',
-                paddingBottom: window.innerWidth < 768 ? '1.5rem' : '1rem',
-                borderBottom: `1px solid ${brandColors.neutral[200]}`
+                padding: '1rem',
+                backgroundColor: brandColors.primary[25], // Very light brand green background
+                borderRadius: '8px',
+                border: `1px solid ${brandColors.primary[100]}`
               }}>
                 <div style={{
                   fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
-                  marginBottom: '0.25rem'
+                  color: brandColors.primary[700],
+                  marginBottom: '0.5rem',
+                  fontWeight: '600'
                 }}>
                   Bill To:
                 </div>
+                
+                {/* Client Name - Most prominent */}
                 <div style={{
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: brandColors.neutral[900]
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  color: brandColors.neutral[900],
+                  marginBottom: '0.5rem'
                 }}>
                   {invoiceData.clientName}
                 </div>
+                
+                {/* Company Name if provided */}
+                {invoiceData.clientCompanyName && (
+                  <div style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.25rem'
+                  }}>
+                    {invoiceData.clientCompanyName}
+                  </div>
+                )}
+                
+                {/* Email */}
                 {invoiceData.clientEmail && (
                   <div style={{
                     fontSize: '0.875rem',
-                    color: brandColors.neutral[600]
+                    color: brandColors.neutral[600],
+                    marginBottom: '0.25rem'
                   }}>
-                    {invoiceData.clientEmail}
+                    📧 {invoiceData.clientEmail}
+                  </div>
+                )}
+                
+                {/* Phone */}
+                {invoiceData.clientPhone && (
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[600],
+                    marginBottom: '0.25rem'
+                  }}>
+                    📞 {invoiceData.clientPhone}
+                  </div>
+                )}
+                
+                {/* Address */}
+                {invoiceData.clientAddress && (
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[600],
+                    lineHeight: '1.4'
+                  }}>
+                    📍 {invoiceData.clientAddress}
                   </div>
                 )}
               </div>
@@ -479,9 +528,17 @@ export default function InvoicePreviewPage() {
               }}>
                 <div style={{
                   fontSize: '0.75rem',
-                  color: brandColors.neutral[400]
+                  color: brandColors.neutral[400],
+                  marginBottom: '0.25rem'
                 }}>
-                  Created by InvoiceIt
+                  Generated by InvoiceIt
+                </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  color: brandColors.neutral[300],
+                  fontStyle: 'italic'
+                }}>
+                  Thanks for doing business with us
                 </div>
               </div>
             </div>
