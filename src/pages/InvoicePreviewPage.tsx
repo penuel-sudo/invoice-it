@@ -65,9 +65,58 @@ export default function InvoicePreviewPage() {
     }
   }
 
-  const handleDownload = () => {
-    // TODO: Implement PDF download
-    toast.success('PDF download will be implemented in Phase 1 final step!')
+  const handleDownload = async () => {
+    if (!invoiceData || !user) {
+      toast.error('Invoice data not available')
+      return
+    }
+
+    try {
+      // Show loading state
+      toast.loading('Generating PDF...', { id: 'pdf-generation' })
+      
+      // Prepare data for API
+      const requestData = {
+        invoiceData,
+        userData: {
+          name: user.user_metadata?.full_name || 'Your Business',
+          email: user.email
+        }
+      }
+      
+      // Call serverless function
+      const response = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      // Get PDF blob
+      const blob = await response.blob()
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `invoice-${invoiceData.invoiceNumber}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      // Success feedback
+      toast.success('PDF downloaded successfully!', { id: 'pdf-generation' })
+      
+    } catch (error) {
+      console.error('PDF download error:', error)
+      toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-generation' })
+    }
   }
 
   const handleSend = () => {
