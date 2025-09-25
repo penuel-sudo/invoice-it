@@ -6,9 +6,7 @@
     }
   ],
   "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node"
-    }
+    "api/**/*.js": {}
   },
   "headers": [
     {
