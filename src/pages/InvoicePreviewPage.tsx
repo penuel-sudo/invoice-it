@@ -78,8 +78,10 @@ export default function InvoicePreviewPage() {
       // Prepare data for API
       const requestData = {
         invoiceData,
-        userData: {
-          name: user.user_metadata?.full_name || 'Your Business',
+        user: {
+          user_metadata: {
+            full_name: user.user_metadata?.full_name || 'Your Business'
+          },
           email: user.email
         }
       }
