@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/generate-pdf.ts": {
-      "runtime": "nodejs18.x"
+      "runtime": "@vercel/node@3.0.7"
     }
   },
   "headers": [
