@@ -326,7 +326,7 @@ export default function InvoicePreviewPage() {
                   Bill To:
                 </div>
                 
-                {/* Two-column layout for client info */}
+                {/* Three-column layout for client info */}
                 <div style={{
                   display: 'flex',
                   gap: '2rem',
@@ -347,30 +347,14 @@ export default function InvoicePreviewPage() {
                       <div style={{
                         fontSize: '0.875rem',
                         fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
+                        color: brandColors.neutral[700]
                       }}>
                         {invoiceData.clientCompanyName}
                       </div>
                     )}
-                    
-                    {/* Address - Left side */}
-                    {invoiceData.clientAddress && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.5rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[600],
-                        lineHeight: '1.4'
-                      }}>
-                        <MapPin size={16} color={brandColors.neutral[500]} style={{ marginTop: '2px', flexShrink: 0 }} />
-                        <span>{invoiceData.clientAddress}</span>
-                      </div>
-                    )}
                   </div>
                   
-                  {/* Right column - Contact details */}
+                  {/* Middle column - Contact details */}
                   <div style={{ flex: 1 }}>
                     {/* Email */}
                     {invoiceData.clientEmail && (
@@ -398,6 +382,23 @@ export default function InvoicePreviewPage() {
                       }}>
                         <Phone size={16} color={brandColors.neutral[500]} />
                         {invoiceData.clientPhone}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Right column - Address */}
+                  <div style={{ flex: 1 }}>
+                    {invoiceData.clientAddress && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        color: brandColors.neutral[600],
+                        lineHeight: '1.4'
+                      }}>
+                        <MapPin size={16} color={brandColors.neutral[500]} style={{ marginTop: '2px', flexShrink: 0 }} />
+                        <span>{invoiceData.clientAddress}</span>
                       </div>
                     )}
                   </div>
