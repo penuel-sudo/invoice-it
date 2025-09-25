@@ -14,7 +14,10 @@ import {
   FileText,
   Copy,
   Check,
-  X
+  X,
+  Mail,
+  Phone,
+  MapPin
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import StatusButton from '../components/StatusButton'
@@ -348,33 +351,45 @@ export default function InvoicePreviewPage() {
                 {/* Email */}
                 {invoiceData.clientEmail && (
                   <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[600],
                     marginBottom: '0.25rem'
                   }}>
-                    📧 {invoiceData.clientEmail}
+                    <Mail size={16} color={brandColors.neutral[500]} />
+                    {invoiceData.clientEmail}
                   </div>
                 )}
                 
                 {/* Phone */}
                 {invoiceData.clientPhone && (
                   <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[600],
                     marginBottom: '0.25rem'
                   }}>
-                    📞 {invoiceData.clientPhone}
+                    <Phone size={16} color={brandColors.neutral[500]} />
+                    {invoiceData.clientPhone}
                   </div>
                 )}
                 
                 {/* Address */}
                 {invoiceData.clientAddress && (
                   <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[600],
                     lineHeight: '1.4'
                   }}>
-                    📍 {invoiceData.clientAddress}
+                    <MapPin size={16} color={brandColors.neutral[500]} style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <span>{invoiceData.clientAddress}</span>
                   </div>
                 )}
               </div>
