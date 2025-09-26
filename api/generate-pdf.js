@@ -23,10 +23,7 @@ export default async function handler(req, res) {
       })
     )
     
-    const initialBuffer = await pdfDoc.toBuffer()
-    
-    // Force the buffer into a standard Node Buffer (helps compatibility)
-    const pdfBuffer = Buffer.from(initialBuffer)
+    const pdfBuffer = await pdfDoc.toBuffer()
 
     console.log('PDF generated successfully')
 
@@ -35,8 +32,8 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoiceData.invoiceNumber}.pdf"`)
 
-    // Send PDF Buffer (now a standard Node.js Buffer)
-    res.send(pdfBuffer)
+    // Send PDF Buffer directly (pdfDoc.toBuffer() already returns a Buffer)
+    res.end(pdfBuffer)
   } catch (error) {
     console.error('Error generating PDF:', error)
     res.status(500).json({ 
