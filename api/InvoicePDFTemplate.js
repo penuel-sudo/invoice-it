@@ -288,139 +288,110 @@ const getUserInitials = (user) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase()
 }
 
-// PDF Template Component
+// PDF Template Component using React.createElement
 const InvoicePDFTemplate = ({ data }) => {
   const { invoiceData, user } = data
   
-  return (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Invoice Details</Text>
-        </View>
+  return React.createElement(Document, null,
+    React.createElement(Page, { size: "A4", style: styles.page },
+      // Header
+      React.createElement(View, { style: styles.header },
+        React.createElement(Text, { style: styles.title }, "Invoice Details")
+      ),
 
-        {/* Invoice Details */}
-        <View style={styles.invoiceDetails}>
-          <View style={styles.invoiceInfo}>
-            <Text style={styles.invoiceNumber}>Payment - {invoiceData.invoiceNumber}</Text>
-            <Text style={styles.invoiceDate}>
-              {formatDate(invoiceData.invoiceDate)} • Due: {formatDate(invoiceData.dueDate)}
-            </Text>
-          </View>
-          <View style={styles.statusContainer}>
-            <Text style={styles.statusLabel}>Status:</Text>
-            <View style={[styles.statusButton, styles.statusPending]}>
-              <Text>Pending</Text>
-            </View>
-          </View>
-        </View>
+      // Invoice Details
+      React.createElement(View, { style: styles.invoiceDetails },
+        React.createElement(View, { style: styles.invoiceInfo },
+          React.createElement(Text, { style: styles.invoiceNumber }, `Payment - ${invoiceData.invoiceNumber}`),
+          React.createElement(Text, { style: styles.invoiceDate },
+            `${formatDate(invoiceData.invoiceDate)} • Due: ${formatDate(invoiceData.dueDate)}`
+          )
+        ),
+        React.createElement(View, { style: styles.statusContainer },
+          React.createElement(Text, { style: styles.statusLabel }, "Status:"),
+          React.createElement(View, { style: [styles.statusButton, styles.statusPending] },
+            React.createElement(Text, null, "Pending")
+          )
+        )
+      ),
 
-        {/* Total Amount */}
-        <View style={styles.totalAmount}>
-          <Text style={styles.totalAmountText}>
-            {formatAmount(invoiceData.grandTotal)}
-          </Text>
-        </View>
+      // Total Amount
+      React.createElement(View, { style: styles.totalAmount },
+        React.createElement(Text, { style: styles.totalAmountText },
+          formatAmount(invoiceData.grandTotal)
+        )
+      ),
 
-        {/* Issuer Info */}
-        <View style={styles.issuerSection}>
-          <View style={styles.issuerAvatar}>
-            <Text style={styles.issuerInitials}>{getUserInitials(user)}</Text>
-          </View>
-          <View style={styles.issuerInfo}>
-            <Text style={styles.issuerName}>
-              {user?.user_metadata?.full_name || user?.name || 'Your Name'}
-            </Text>
-            <Text style={styles.issuerEmail}>
-              {user?.email || 'your.email@example.com'}
-            </Text>
-          </View>
-        </View>
+      // Issuer Info
+      React.createElement(View, { style: styles.issuerSection },
+        React.createElement(View, { style: styles.issuerAvatar },
+          React.createElement(Text, { style: styles.issuerInitials }, getUserInitials(user))
+        ),
+        React.createElement(View, { style: styles.issuerInfo },
+          React.createElement(Text, { style: styles.issuerName },
+            user?.user_metadata?.full_name || user?.name || 'Your Name'
+          ),
+          React.createElement(Text, { style: styles.issuerEmail },
+            user?.email || 'your.email@example.com'
+          )
+        )
+      ),
 
-        {/* Client Info */}
-        <View style={styles.clientSection}>
-          <Text style={styles.clientHeader}>Bill To:</Text>
-          <View style={styles.clientLayout}>
-            {/* Left Column - Name and Company */}
-            <View style={styles.clientLeft}>
-              <Text style={styles.clientName}>{invoiceData.clientName}</Text>
-              {invoiceData.clientCompanyName && (
-                <Text style={styles.clientCompany}>{invoiceData.clientCompanyName}</Text>
-              )}
-            </View>
-            
-            {/* Middle Column - Contact */}
-            <View style={styles.clientMiddle}>
-              {invoiceData.clientEmail && (
-                <View style={styles.clientContact}>
-                  <Text>📧 {invoiceData.clientEmail}</Text>
-                </View>
-              )}
-              {invoiceData.clientPhone && (
-                <View style={styles.clientContact}>
-                  <Text>📞 {invoiceData.clientPhone}</Text>
-                </View>
-              )}
-            </View>
-            
-            {/* Right Column - Address */}
-            <View style={styles.clientRight}>
-              {invoiceData.clientAddress && (
-                <View style={styles.clientAddress}>
-                  <Text>📍 {invoiceData.clientAddress}</Text>
-                </View>
-              )}
-            </View>
-          </View>
-        </View>
+      // Client Info
+      React.createElement(View, { style: styles.clientSection },
+        React.createElement(Text, { style: styles.clientHeader }, "Bill To:"),
+        React.createElement(View, { style: styles.clientLayout },
+          // Left Column - Name and Company
+          React.createElement(View, { style: styles.clientLeft },
+            React.createElement(Text, { style: styles.clientName }, invoiceData.clientName),
+            invoiceData.clientCompanyName && React.createElement(Text, { style: styles.clientCompany }, invoiceData.clientCompanyName)
+          )
+        )
+      ),
 
-        {/* Service Items */}
-        <View style={styles.itemsSection}>
-          <Text style={styles.itemsHeader}>Service Items:</Text>
-          {invoiceData.items.map((item, index) => (
-            <View key={item.id || index} style={styles.itemRow}>
-              <Text style={styles.itemDescription}>
-                {item.quantity} {item.description}
-              </Text>
-              <Text style={styles.itemPrice}>
-                {formatAmount(item.lineTotal)}
-              </Text>
-            </View>
-          ))}
-        </View>
+      // Service Items
+      React.createElement(View, { style: styles.itemsSection },
+        React.createElement(Text, { style: styles.itemsHeader }, "Service Items:"),
+        ...invoiceData.items.map((item, index) =>
+          React.createElement(View, { key: item.id || index, style: styles.itemRow },
+            React.createElement(Text, { style: styles.itemDescription },
+              `${item.quantity} ${item.description}`
+            ),
+            React.createElement(Text, { style: styles.itemPrice },
+              formatAmount(item.lineTotal)
+            )
+          )
+        )
+      ),
 
-        {/* Totals */}
-        <View style={styles.totalsSection}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Subtotal:</Text>
-            <Text style={styles.totalValue}>{formatAmount(invoiceData.subtotal)}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Tax:</Text>
-            <Text style={styles.totalValue}>{formatAmount(invoiceData.taxTotal)}</Text>
-          </View>
-          <View style={styles.grandTotalRow}>
-            <Text style={styles.grandTotalLabel}>Total:</Text>
-            <Text style={styles.grandTotalValue}>{formatAmount(invoiceData.grandTotal)}</Text>
-          </View>
-        </View>
+      // Totals
+      React.createElement(View, { style: styles.totalsSection },
+        React.createElement(View, { style: styles.totalRow },
+          React.createElement(Text, { style: styles.totalLabel }, "Subtotal:"),
+          React.createElement(Text, { style: styles.totalValue }, formatAmount(invoiceData.subtotal))
+        ),
+        React.createElement(View, { style: styles.totalRow },
+          React.createElement(Text, { style: styles.totalLabel }, "Tax:"),
+          React.createElement(Text, { style: styles.totalValue }, formatAmount(invoiceData.taxTotal))
+        ),
+        React.createElement(View, { style: styles.grandTotalRow },
+          React.createElement(Text, { style: styles.grandTotalLabel }, "Total:"),
+          React.createElement(Text, { style: styles.grandTotalValue }, formatAmount(invoiceData.grandTotal))
+        )
+      ),
 
-        {/* Notes */}
-        {invoiceData.notes && (
-          <View style={styles.notesSection}>
-            <Text style={styles.notesLabel}>Notes:</Text>
-            <Text style={styles.notesText}>{invoiceData.notes}</Text>
-          </View>
-        )}
+      // Notes
+      invoiceData.notes && React.createElement(View, { style: styles.notesSection },
+        React.createElement(Text, { style: styles.notesLabel }, "Notes:"),
+        React.createElement(Text, { style: styles.notesText }, invoiceData.notes)
+      ),
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Generated by InvoiceIt</Text>
-          <Text style={styles.footerSubtext}>Thanks for doing business with us</Text>
-        </View>
-      </Page>
-    </Document>
+      // Footer
+      React.createElement(View, { style: styles.footer },
+        React.createElement(Text, { style: styles.footerText }, "Generated by InvoiceIt"),
+        React.createElement(Text, { style: styles.footerSubtext }, "Thanks for doing business with us")
+      )
+    )
   )
 }
 
