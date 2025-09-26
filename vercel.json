@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "api/**/*.cjs": {
+    "api/generate-pdf.cjs": {
       "maxDuration": 30
     }
   },
