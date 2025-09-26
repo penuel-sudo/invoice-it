@@ -1,7 +1,7 @@
 import { pdf } from '@react-pdf/renderer'
 import InvoicePDFTemplate from './InvoicePDFTemplate.js'
 import React from 'react'
-import { Buffer } from 'buffer' // Import Buffer just in case, though it's usually global
+import { Buffer } from 'buffer' 
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -24,22 +24,18 @@ export default async function handler(req, res) {
       })
     )
     
-    // 2. AWAIT the conversion to get the raw data object
-    const initialBuffer = await pdfDoc.toBuffer() 
-    
-    // 3. *** THE DEFINITIVE FIX ***
-    // Create a NEW, native Node.js Buffer from the initial object. 
-    // This forces the environment to recognize it as a standard binary object.
-    const pdfBuffer = Buffer.from(initialBuffer) 
+    // 2. Await the buffer and immediately force conversion to a native Node.js Buffer
+    // This removes the intermediate variable confusion
+    const pdfBuffer = Buffer.from(await pdfDoc.toBuffer()) 
 
     console.log('PDF generated successfully')
 
-    // 4. Set status and headers explicitly
+    // 3. Set status and headers explicitly
     res.status(200)
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoiceData.invoiceNumber}.pdf"`)
 
-    // 5. Send the raw Buffer data using res.end()
+    // 4. Send the raw Buffer data using res.end()
     res.end(pdfBuffer) 
 
   } catch (error) {
