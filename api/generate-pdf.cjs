@@ -1,5 +1,5 @@
 const { pdf } = require('@react-pdf/renderer');
-const InvoicePDFTemplate = require('./InvoicePDFTemplate');
+const InvoicePDFTemplate = require('./InvoicePDFTemplate.cjs');
 const React = require('react');
 
 module.exports = async (req, res) => {

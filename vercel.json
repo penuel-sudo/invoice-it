@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "api/**/*.js": {
+    "api/**/*.cjs": {
       "maxDuration": 30
     }
   },
