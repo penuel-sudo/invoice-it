@@ -27,11 +27,12 @@ export default async function handler(req, res) {
 
     console.log('PDF generated successfully')
 
-    // Set response headers
+    // Set status and headers explicitly
+    res.status(200)
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoiceData.invoiceNumber}.pdf"`)
 
-    // Send PDF
+    // Send PDF Buffer (explicit status helps Vercel handle it correctly)
     res.send(pdfBuffer)
   } catch (error) {
     console.error('Error generating PDF:', error)
