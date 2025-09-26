@@ -1,6 +1,8 @@
+// api/generate-pdf.js
+
 import { pdf } from '@react-pdf/renderer'
 import InvoicePDFTemplate from './InvoicePDFTemplate.js'
-import React from 'react' // Keep the .js extension for the template file
+import React from 'react'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,31 +18,30 @@ export default async function handler(req, res) {
 
     console.log('Generating PDF for invoice:', invoiceData.invoiceNumber)
 
-    // 1. Create the PDF Document instance
     const pdfDoc = pdf(
       React.createElement(InvoicePDFTemplate, { 
         data: { invoiceData, user } 
       })
     )
     
-    // 2. AWAIT the asynchronous conversion to get the raw Buffer data
-    const pdfBuffer = await pdfDoc.toBuffer()
-    
+    // ----------------------------------------------------
+    // *** CRITICAL FIX: Explicitly create a native Buffer ***
+    const initialBuffer = await pdfDoc.toBuffer() 
+    const pdfBuffer = Buffer.from(initialBuffer) // <-- GUARANTEES a standard Node.js Buffer
+    // ----------------------------------------------------
+
     console.log('PDF generated successfully')
 
-    // 3. Set status and headers explicitly
+    // Set status and headers explicitly
     res.status(200)
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoiceData.invoiceNumber}.pdf"`)
 
-    // 4. *** THE FINAL FIX ***
-    // Use res.end() to write the raw Buffer data to the response stream
-    // This bypasses the Vercel helper function that incorrectly throws ERR_INVALID_ARG_TYPE.
+    // Use res.end() to send the raw Buffer (as established in previous step)
     res.end(pdfBuffer) 
 
   } catch (error) {
     console.error('Error generating PDF:', error)
-    // Send back a proper JSON error response
     res.status(500).json({ 
       error: 'Failed to generate PDF on server',
       details: error.message
