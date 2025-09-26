@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "api/**/*.js": {
+    "api/generate-pdf.js": {
       "maxDuration": 30
     }
   },

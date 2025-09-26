@@ -184,7 +184,7 @@ export default function InvoicePreviewPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: brandColors.neutral[50],
+      backgroundColor: brandColors.primary[25], // Light green background
       width: '100%',
       maxWidth: '100vw',
       overflow: 'hidden'
@@ -264,7 +264,7 @@ export default function InvoicePreviewPage() {
                 <div style={{
                   fontSize: '3rem',
                   fontWeight: '700',
-                  color: brandColors.primary[600], // Bold brand green
+                  color: brandColors.neutral[900], // Deep black
                   marginBottom: '0.5rem',
                 }}>
                   ${invoiceData.grandTotal.toFixed(2)}
@@ -277,9 +277,7 @@ export default function InvoicePreviewPage() {
                 alignItems: 'center',
                 gap: window.innerWidth < 768 ? '1.25rem' : '1rem',
                 marginBottom: '2rem',
-                padding: window.innerWidth < 768 ? '1.5rem' : '1rem',
-                backgroundColor: brandColors.neutral[50],
-                borderRadius: '12px'
+                padding: window.innerWidth < 768 ? '1.5rem' : '1rem'
               }}>
                 <div style={{
                   width: '48px',
@@ -333,10 +331,7 @@ export default function InvoicePreviewPage() {
                     fontWeight: '600',
                     color: brandColors.neutral[900]
                   }}>
-                    {new Date(invoiceData.dueDate).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
+                    {Math.ceil((new Date(invoiceData.dueDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
                   </div>
                 </div>
               </div>
@@ -377,82 +372,26 @@ export default function InvoicePreviewPage() {
                   Bill To:
                 </div>
                 
-                {/* Three-column layout for client info */}
-                <div style={{
-                  display: 'flex',
-                  gap: '2rem',
-                  alignItems: 'flex-start'
-                }}>
-                  {/* Left column - Name and Company */}
-                  <div style={{ flex: 1 }}>
+                {/* Simplified client info */}
+                <div>
+                  <div style={{
+                    fontSize: '1rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[900],
+                    marginBottom: '0.5rem'
+                  }}>
+                    {invoiceData.clientName}
+                  </div>
+                  
+                  {invoiceData.clientCompanyName && (
                     <div style={{
-                      fontSize: '1rem',
-                      fontWeight: '700',
-                      color: brandColors.neutral[900],
-                      marginBottom: '0.5rem'
-                    }}>
-                      {invoiceData.clientName}
-                    </div>
-                    
-                    {invoiceData.clientCompanyName && (
-                      <div style={{
-                        fontSize: '0.875rem',
+                      fontSize: '0.875rem',
                         fontWeight: '500',
                         color: brandColors.neutral[700]
                       }}>
                         {invoiceData.clientCompanyName}
                       </div>
                     )}
-                  </div>
-                  
-                  {/* Middle column - Contact details */}
-                  <div style={{ flex: 1 }}>
-                    {/* Email */}
-                    {invoiceData.clientEmail && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[600],
-                        marginBottom: '0.5rem'
-                      }}>
-                        <Mail size={16} color={brandColors.neutral[500]} />
-                        {invoiceData.clientEmail}
-                      </div>
-                    )}
-                    
-                    {/* Phone */}
-                    {invoiceData.clientPhone && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[600]
-                      }}>
-                        <Phone size={16} color={brandColors.neutral[500]} />
-                        {invoiceData.clientPhone}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Right column - Address */}
-                  <div style={{ flex: 1 }}>
-                    {invoiceData.clientAddress && (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.5rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[600],
-                        lineHeight: '1.4'
-                      }}>
-                        <MapPin size={16} color={brandColors.neutral[500]} style={{ marginTop: '2px', flexShrink: 0 }} />
-                        <span>{invoiceData.clientAddress}</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
               
@@ -491,8 +430,8 @@ export default function InvoicePreviewPage() {
               
               {/* Separator Line */}
               <div style={{
-                borderTop: `1px solid ${brandColors.neutral[200]}`,
-                margin: '1rem 0'
+                borderTop: `2px solid ${brandColors.primary[200]}`,
+                margin: '2rem 0 1.5rem 0'
               }}></div>
               
               {/* Totals Section */}
