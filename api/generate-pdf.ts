@@ -1,5 +1,5 @@
 import { pdf } from '@react-pdf/renderer'
-import InvoicePDFTemplate from './InvoicePDFTemplate'
+import InvoicePDFTemplate from './InvoicePDFTemplate.js'
 import React from 'react'
 
 export default async function handler(req: any, res: any) {

@@ -1,11 +1,5 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
-import {
-    Phone,
-    MapPin,
-    Mail
-} from 'lucide-react'
-import type { InvoiceData } from '../lib/storage/invoiceStorage'
 
 // Create styles
 const styles = StyleSheet.create({
@@ -78,7 +72,7 @@ const styles = StyleSheet.create({
   totalAmountText: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#059669', // Brand green
+    color: '#059669',
     marginBottom: 5,
   },
   issuerSection: {
@@ -272,38 +266,32 @@ const styles = StyleSheet.create({
   },
 })
 
-interface InvoicePDFTemplateProps {
-  invoiceData: InvoiceData
-  user: {
-    user_metadata?: {
-      full_name?: string
-    }
-    email?: string
+// Helper functions
+const formatDate = (dateString) => {
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  } catch {
+    return dateString
   }
 }
 
-const InvoicePDFTemplate: React.FC<InvoicePDFTemplateProps> = ({ invoiceData, user }) => {
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-    } catch {
-      return dateString
-    }
-  }
+const formatAmount = (amount) => {
+  return `$${amount.toFixed(2)}`
+}
 
-  const formatAmount = (amount: number) => {
-    return `$${amount.toFixed(2)}`
-  }
+const getUserInitials = (user) => {
+  const name = user?.user_metadata?.full_name || user?.name || 'User'
+  return name.split(' ').map(n => n[0]).join('').toUpperCase()
+}
 
-  const getUserInitials = () => {
-    const name = user.user_metadata?.full_name || 'User'
-    return name.split(' ').map(n => n[0]).join('').toUpperCase()
-  }
-
+// PDF Template Component
+const InvoicePDFTemplate = ({ data }) => {
+  const { invoiceData, user } = data
+  
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -338,14 +326,14 @@ const InvoicePDFTemplate: React.FC<InvoicePDFTemplateProps> = ({ invoiceData, us
         {/* Issuer Info */}
         <View style={styles.issuerSection}>
           <View style={styles.issuerAvatar}>
-            <Text style={styles.issuerInitials}>{getUserInitials()}</Text>
+            <Text style={styles.issuerInitials}>{getUserInitials(user)}</Text>
           </View>
           <View style={styles.issuerInfo}>
             <Text style={styles.issuerName}>
-              {user.user_metadata?.full_name || 'Your Name'}
+              {user?.user_metadata?.full_name || user?.name || 'Your Name'}
             </Text>
             <Text style={styles.issuerEmail}>
-              {user.email || 'your.email@example.com'}
+              {user?.email || 'your.email@example.com'}
             </Text>
           </View>
         </View>
@@ -391,7 +379,7 @@ const InvoicePDFTemplate: React.FC<InvoicePDFTemplateProps> = ({ invoiceData, us
         <View style={styles.itemsSection}>
           <Text style={styles.itemsHeader}>Service Items:</Text>
           {invoiceData.items.map((item, index) => (
-            <View key={item.id} style={styles.itemRow}>
+            <View key={item.id || index} style={styles.itemRow}>
               <Text style={styles.itemDescription}>
                 {item.quantity} {item.description}
               </Text>
@@ -436,5 +424,4 @@ const InvoicePDFTemplate: React.FC<InvoicePDFTemplateProps> = ({ invoiceData, us
   )
 }
 
-export { InvoicePDFTemplate }
 export default InvoicePDFTemplate
