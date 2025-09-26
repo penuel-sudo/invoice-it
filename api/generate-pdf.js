@@ -2,7 +2,7 @@ import { pdf } from '@react-pdf/renderer'
 import InvoicePDFTemplate from './InvoicePDFTemplate.js'
 import React from 'react'
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -20,7 +20,7 @@ export default async function handler(req: any, res: any) {
     const pdfDoc = pdf(
       React.createElement(InvoicePDFTemplate, { 
         data: { invoiceData, user } 
-      }) as any
+      })
     )
     
     const pdfBuffer = await pdfDoc.toBuffer()
@@ -37,7 +37,7 @@ export default async function handler(req: any, res: any) {
     console.error('Error generating PDF:', error)
     res.status(500).json({ 
       error: 'Failed to generate PDF',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error.message
     })
   }
 }
