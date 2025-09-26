@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "api/generate-pdf.cjs": {
+    "api/generate-pdf.ts": {
       "maxDuration": 30
     }
   },
