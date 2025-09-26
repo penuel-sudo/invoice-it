@@ -23,7 +23,10 @@ export default async function handler(req, res) {
       })
     )
     
-    const pdfBuffer = await pdfDoc.toBuffer()
+    const initialBuffer = await pdfDoc.toBuffer()
+    
+    // Force the buffer into a standard Node Buffer (helps compatibility)
+    const pdfBuffer = Buffer.from(initialBuffer)
 
     console.log('PDF generated successfully')
 
@@ -32,7 +35,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoiceData.invoiceNumber}.pdf"`)
 
-    // Send PDF Buffer (explicit status helps Vercel handle it correctly)
+    // Send PDF Buffer (now a standard Node.js Buffer)
     res.send(pdfBuffer)
   } catch (error) {
     console.error('Error generating PDF:', error)
