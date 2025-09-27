@@ -496,8 +496,8 @@ export default function InvoicePreviewPage() {
             onClick={handleSend}
             style={{
               padding: '0.75rem 1rem',
-              backgroundColor: brandColors.neutral[600],
-              color: brandColors.white,
+              backgroundColor: brandColors.primary[100],
+              color: brandColors.primary[700],
               border: 'none',
               borderRadius: '12px',
               fontSize: '0.875rem',
@@ -514,8 +514,8 @@ export default function InvoicePreviewPage() {
             onClick={handleShare}
             style={{
               padding: '0.75rem 1rem',
-              backgroundColor: brandColors.neutral[600],
-              color: brandColors.white,
+              backgroundColor: brandColors.primary[200],
+              color: brandColors.primary[800],
               border: 'none',
               borderRadius: '12px',
               fontSize: '0.875rem',
