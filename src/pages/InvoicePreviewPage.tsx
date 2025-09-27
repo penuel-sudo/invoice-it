@@ -220,19 +220,30 @@ export default function InvoicePreviewPage() {
           boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
           position: 'relative'
         }}>
-          {/* Payment Badge */}
+          {/* Payment Badge and Status */}
           <div style={{
             position: 'absolute',
             top: '1rem',
             left: '1rem',
-            backgroundColor: brandColors.primary[100],
-            color: brandColors.primary[700],
-            padding: '0.25rem 0.75rem',
-            borderRadius: '12px',
-            fontSize: '0.75rem',
-            fontWeight: '600'
+            right: '1rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
-            Payment - {invoiceData.invoiceNumber}
+            <div style={{
+              backgroundColor: brandColors.primary[100],
+              color: brandColors.primary[700],
+              padding: '0.25rem 0.75rem',
+              borderRadius: '12px',
+              fontSize: '0.75rem',
+              fontWeight: '600'
+            }}>
+              Payment - {invoiceData.invoiceNumber}
+            </div>
+            <StatusButton 
+              status={dbStatus} 
+              size="sm" 
+            />
           </div>
 
           {/* Amount */}
@@ -341,17 +352,36 @@ export default function InvoicePreviewPage() {
                 </div>
               ))}
               
+              {/* Subtotal and Tax Section (only show if tax exists) */}
               {invoiceData.taxTotal > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.75rem', color: brandColors.neutral[600] }}>
-                    Tax
-                  </span>
-                  <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
-                    ${invoiceData.taxTotal.toFixed(2)}
-                  </span>
-                </div>
+                <>
+                  <div style={{
+                    borderTop: `1px solid ${brandColors.neutral[200]}`,
+                    paddingTop: '0.5rem',
+                    marginTop: '0.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}>
+                    <span style={{ fontSize: '0.75rem', color: brandColors.neutral[600] }}>
+                      Subtotal
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
+                      ${invoiceData.subtotal.toFixed(2)}
+                    </span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.75rem', color: brandColors.neutral[600] }}>
+                      Tax
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
+                      ${invoiceData.taxTotal.toFixed(2)}
+                    </span>
+                  </div>
+                </>
               )}
               
+              {/* Total Section (separate from subtotal/tax) */}
               <div style={{
                 borderTop: `1px solid ${brandColors.neutral[200]}`,
                 paddingTop: '0.5rem',
