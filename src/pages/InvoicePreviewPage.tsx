@@ -453,21 +453,22 @@ export default function InvoicePreviewPage() {
         {/* Action Buttons */}
         <div style={{
           display: 'flex',
-          gap: '1rem',
+          gap: '0.75rem',
           justifyContent: 'center'
         }}>
           <button
             onClick={handleEdit}
             style={{
-              padding: '0.875rem 2rem',
+              padding: '0.75rem 1rem',
               backgroundColor: 'transparent',
               color: brandColors.primary[600],
               border: `2px solid ${brandColors.primary[200]}`,
               borderRadius: '12px',
-              fontSize: '1rem',
+              fontSize: '0.875rem',
               fontWeight: '600',
               cursor: 'pointer',
-              minWidth: '120px'
+              flex: 1,
+              maxWidth: '100px'
             }}
           >
             Edit
@@ -476,18 +477,55 @@ export default function InvoicePreviewPage() {
           <button
             onClick={handleDownload}
             style={{
-              padding: '0.875rem 2rem',
+              padding: '0.75rem 1rem',
               backgroundColor: brandColors.primary[600],
               color: brandColors.white,
               border: 'none',
               borderRadius: '12px',
-              fontSize: '1rem',
+              fontSize: '0.875rem',
               fontWeight: '600',
               cursor: 'pointer',
-              minWidth: '120px'
+              flex: 1,
+              maxWidth: '100px'
             }}
           >
-            Download PDF
+            PDF
+          </button>
+          
+          <button
+            onClick={handleSend}
+            style={{
+              padding: '0.75rem 1rem',
+              backgroundColor: brandColors.neutral[600],
+              color: brandColors.white,
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              flex: 1,
+              maxWidth: '100px'
+            }}
+          >
+            Send
+          </button>
+          
+          <button
+            onClick={handleShare}
+            style={{
+              padding: '0.75rem 1rem',
+              backgroundColor: brandColors.neutral[600],
+              color: brandColors.white,
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              flex: 1,
+              maxWidth: '100px'
+            }}
+          >
+            Share
           </button>
         </div>
 
