@@ -532,7 +532,7 @@ export default function TransactionPage() {
                         height: '16px',
                         border: `2px solid ${brandColors.primary[600]}`,
                         borderRadius: '3px',
-                        backgroundColor: brandColors.primary[600],
+                        backgroundColor: brandColors.neutral[600],
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'

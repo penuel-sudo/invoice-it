@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { invoiceStorage } from '../lib/storage/invoiceStorage'
 import type { InvoiceFormData, InvoiceItem } from '../lib/storage/invoiceStorage'
 import { supabase } from '../lib/supabaseClient'
+import { getInvoiceFromUrl } from '../lib/urlUtils'
 import { 
   ArrowLeft, 
   Save, 
@@ -26,17 +27,71 @@ export default function InvoiceCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   
-  // Initialize form data from location state or localStorage
-  const getInitialFormData = (): InvoiceFormData => {
-    if (location.state?.invoiceData) {
-      return location.state.invoiceData
+  const [formData, setFormData] = useState<InvoiceFormData>(invoiceStorage.getDraftWithFallback())
+  const [loading, setLoading] = useState(false)
+  
+  // Load invoice data from URL parameter or state
+  useEffect(() => {
+    const loadInvoiceData = async () => {
+      // First check URL parameter for invoice number
+      const invoiceNumber = getInvoiceFromUrl(searchParams)
+      
+      if (invoiceNumber) {
+        setLoading(true)
+        try {
+          // Load invoice from database using invoice number
+          const { data, error } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('invoice_number', invoiceNumber)
+            .eq('user_id', user?.id)
+            .single()
+
+          if (error) {
+            console.error('Error loading invoice:', error)
+            toast.error('Invoice not found')
+            navigate('/invoices')
+            return
+          }
+
+          if (data) {
+            // Convert database transaction to InvoiceFormData format
+            const invoiceFormData: InvoiceFormData = {
+              clientName: data.client_name || '',
+              clientEmail: data.client_email || '',
+              clientAddress: data.client_address || '',
+              clientPhone: data.client_phone || '',
+              clientCompanyName: data.client_company_name || '',
+              invoiceNumber: data.invoice_number,
+              invoiceDate: data.issue_date,
+              dueDate: data.due_date,
+              items: data.items || [],
+              notes: data.notes || '',
+              subtotal: data.subtotal || 0,
+              taxTotal: data.tax_amount || 0,
+              grandTotal: data.total_amount || 0
+            }
+            setFormData(invoiceFormData)
+          }
+        } catch (error) {
+          console.error('Error loading invoice:', error)
+          toast.error('Error loading invoice')
+          navigate('/invoices')
+        } finally {
+          setLoading(false)
+        }
+      } else if (location.state?.invoiceData) {
+        // Fallback to state data
+        setFormData(location.state.invoiceData)
+      }
     }
-    
-    return invoiceStorage.getDraftWithFallback()
-  }
-  
-  const [formData, setFormData] = useState<InvoiceFormData>(getInitialFormData())
+
+    if (user) {
+      loadInvoiceData()
+    }
+  }, [searchParams, location.state, navigate, user])
 
   const [isSaving, setIsSaving] = useState(false)
 
