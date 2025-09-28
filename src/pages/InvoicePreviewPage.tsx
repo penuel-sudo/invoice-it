@@ -28,7 +28,7 @@ export default function InvoicePreviewPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
   const [showSharePopup, setShowSharePopup] = useState(false)
@@ -89,11 +89,19 @@ export default function InvoicePreviewPage() {
       } else if (location.state?.invoiceData) {
         // Fallback to state data
         setInvoiceData(location.state.invoiceData)
+        // Update URL to include invoice number
+        if (location.state.invoiceData.invoiceNumber) {
+          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber })
+        }
       } else {
         // Try to get data from localStorage
         const savedData = invoiceStorage.getDraft()
         if (savedData) {
           setInvoiceData(savedData)
+          // Update URL to include invoice number
+          if (savedData.invoiceNumber) {
+            setSearchParams({ invoice: savedData.invoiceNumber })
+          }
         } else {
           // If no data, redirect back to create page
           navigate('/invoice/new')
@@ -114,6 +122,13 @@ export default function InvoicePreviewPage() {
       setDbStatus('pending')
     }
   }, [invoiceData])
+
+  // Update URL when invoice data changes
+  useEffect(() => {
+    if (invoiceData?.invoiceNumber) {
+      setSearchParams({ invoice: invoiceData.invoiceNumber })
+    }
+  }, [invoiceData?.invoiceNumber, setSearchParams])
 
   const handleEdit = () => {
     if (invoiceData) {

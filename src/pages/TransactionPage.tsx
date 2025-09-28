@@ -920,6 +920,43 @@ export default function TransactionPage() {
                               View Details
                             </button>
                             
+                            {/* Edit */}
+                            <button
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                if (transaction.type === 'invoice') {
+                                  navigate(`/invoice/new?invoice=${transaction.invoice_number}`)
+                                } else {
+                                  navigate(`/expense/edit`, { state: { expenseId: transaction.id } })
+                                }
+                                setShowTransactionDropdown(null)
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '0.875rem 1rem',
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '0.875rem',
+                                fontWeight: '500',
+                                color: brandColors.neutral[800],
+                                transition: 'background-color 0.2s ease',
+                                textAlign: 'left'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent'
+                              }}
+                            >
+                              <Edit size={16} color={brandColors.neutral[600]} />
+                              Edit Invoice
+                            </button>
+                            
                             {/* Status Actions for Invoices */}
                             {transaction.type === 'invoice' && (
                               <>

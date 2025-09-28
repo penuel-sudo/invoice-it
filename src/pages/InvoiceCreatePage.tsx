@@ -27,7 +27,7 @@ export default function InvoiceCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   
   const [formData, setFormData] = useState<InvoiceFormData>(invoiceStorage.getDraftWithFallback())
   const [loading, setLoading] = useState(false)
@@ -85,6 +85,15 @@ export default function InvoiceCreatePage() {
       } else if (location.state?.invoiceData) {
         // Fallback to state data
         setFormData(location.state.invoiceData)
+        // Update URL to include invoice number
+        if (location.state.invoiceData.invoiceNumber) {
+          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber })
+        }
+      } else {
+        // Update URL with current invoice number if available
+        if (formData.invoiceNumber) {
+          setSearchParams({ invoice: formData.invoiceNumber })
+        }
       }
     }
 
@@ -113,6 +122,13 @@ export default function InvoiceCreatePage() {
   useEffect(() => {
     invoiceStorage.saveDraftDebounced(formData)
   }, [formData])
+
+  // Update URL when invoice number changes
+  useEffect(() => {
+    if (formData.invoiceNumber) {
+      setSearchParams({ invoice: formData.invoiceNumber })
+    }
+  }, [formData.invoiceNumber, setSearchParams])
 
   const addItem = () => {
     const newItem: InvoiceItem = {
