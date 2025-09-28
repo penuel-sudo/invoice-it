@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { invoiceStorage } from '../lib/storage/invoiceStorage'
 import type { InvoiceData } from '../lib/storage/invoiceStorage'
 import { supabase } from '../lib/supabaseClient'
+import { getInvoiceFromUrl } from '../lib/urlUtils'
 import { 
   ArrowLeft, 
   Edit, 
@@ -27,26 +28,83 @@ export default function InvoicePreviewPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
   const [showSharePopup, setShowSharePopup] = useState(false)
   const [copied, setCopied] = useState(false)
   const [dbStatus, setDbStatus] = useState<string>('pending')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (location.state?.invoiceData) {
-      setInvoiceData(location.state.invoiceData)
-    } else {
-      // Try to get data from localStorage
-      const savedData = invoiceStorage.getDraft()
-      if (savedData) {
-        setInvoiceData(savedData)
+    const loadInvoiceData = async () => {
+      // First check URL parameter for invoice number
+      const invoiceNumber = getInvoiceFromUrl(searchParams)
+      
+      if (invoiceNumber) {
+        setLoading(true)
+        try {
+          // Load invoice from database using invoice number
+          const { data, error } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('invoice_number', invoiceNumber)
+            .eq('user_id', user?.id)
+            .single()
+
+          if (error) {
+            console.error('Error loading invoice:', error)
+            toast.error('Invoice not found')
+            navigate('/invoices')
+            return
+          }
+
+          if (data) {
+            // Convert database transaction to InvoiceData format
+            const invoiceData: InvoiceData = {
+              invoiceNumber: data.invoice_number,
+              invoiceDate: data.issue_date,
+              dueDate: data.due_date,
+              clientName: data.client_name || '',
+              clientCompanyName: data.client_company_name || '',
+              clientEmail: data.client_email || '',
+              clientPhone: data.client_phone || '',
+              clientAddress: data.client_address || '',
+              items: data.items || [],
+              subtotal: data.subtotal || 0,
+              taxTotal: data.tax_amount || 0,
+              grandTotal: data.total_amount || 0,
+              notes: data.notes || ''
+            }
+            setInvoiceData(invoiceData)
+            setDbStatus(data.status || 'pending')
+          }
+        } catch (error) {
+          console.error('Error loading invoice:', error)
+          toast.error('Error loading invoice')
+          navigate('/invoices')
+        } finally {
+          setLoading(false)
+        }
+      } else if (location.state?.invoiceData) {
+        // Fallback to state data
+        setInvoiceData(location.state.invoiceData)
       } else {
-        // If no data, redirect back to create page
-        navigate('/invoice/new')
+        // Try to get data from localStorage
+        const savedData = invoiceStorage.getDraft()
+        if (savedData) {
+          setInvoiceData(savedData)
+        } else {
+          // If no data, redirect back to create page
+          navigate('/invoice/new')
+        }
       }
     }
-  }, [location.state, navigate])
+
+    if (user) {
+      loadInvoiceData()
+    }
+  }, [searchParams, location.state, navigate, user])
 
   // Set status from form data or default to pending
   useEffect(() => {
@@ -149,7 +207,7 @@ export default function InvoicePreviewPage() {
     setCopied(false)
   }
 
-  if (!user || !invoiceData) { 
+  if (!user || loading) { 
     return (
       <div style={{
         display: 'flex',
@@ -175,6 +233,38 @@ export default function InvoicePreviewPage() {
             color: brandColors.neutral[600]
           }}>
             Please wait while we load your invoice preview.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!invoiceData) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: brandColors.white
+      }}>
+        <div style={{
+          textAlign: 'center',
+          padding: '2rem'
+        }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            marginBottom: '0.5rem'
+          }}>
+            Invoice Not Found
+          </h2>
+          <p style={{
+            fontSize: '0.875rem',
+            color: brandColors.neutral[600]
+          }}>
+            The requested invoice could not be found.
           </p>
         </div>
       </div>

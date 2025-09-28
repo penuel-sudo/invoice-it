@@ -867,19 +867,18 @@ export default function TransactionPage() {
                           <MoreVertical size={18} color={brandColors.neutral[600]} />
                         </button>
                         
-                        {/* WhatsApp-style Dropdown Menu - Positioned to the left */}
+                        {/* Dropdown Menu - Positioned below the three-dot icon */}
                         {showTransactionDropdown === transaction.id && (
                           <div style={{
                             position: 'absolute',
-                            top: '50%',
-                            right: '100%',
-                            transform: 'translateY(-50%)',
-                            marginRight: '0.5rem',
+                            top: '100%',
+                            right: '0',
+                            marginTop: '0.5rem',
                             backgroundColor: brandColors.white,
                             border: `1px solid ${brandColors.neutral[200]}`,
                             borderRadius: '12px',
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                            zIndex: 100,
+                            zIndex: 1000,
                             width: '160px',
                             padding: '0.5rem 0',
                             overflow: 'hidden'
@@ -889,7 +888,7 @@ export default function TransactionPage() {
                               onMouseDown={(e) => {
                                 e.preventDefault()
                                 if (transaction.type === 'invoice') {
-                                  navigate(`/invoice/preview`, { state: { transactionId: transaction.id } })
+                                  navigate(`/invoice/preview?invoice=${transaction.invoice_number}`)
                                 } else {
                                   navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
                                 }
