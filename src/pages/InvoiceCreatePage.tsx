@@ -50,9 +50,29 @@ export default function InvoiceCreatePage() {
             .single()
 
           if (error) {
-            console.error('Error loading invoice:', error)
-            toast.error('Invoice not found')
-            navigate('/invoices')
+            console.error('Error loading invoice from database:', error)
+            console.log('Invoice not found in database, checking localStorage and state...')
+            
+            // Check localStorage for this invoice number
+            const savedData = invoiceStorage.getDraft()
+            if (savedData && savedData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in localStorage')
+              setFormData(savedData)
+              setLoading(false)
+              return
+            }
+            
+            // Check state data
+            if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in state')
+              setFormData(location.state.invoiceData)
+              setLoading(false)
+              return
+            }
+            
+            // If not found anywhere, redirect to new invoice
+            console.log('Invoice not found anywhere, creating new invoice')
+            navigate('/invoice/new')
             return
           }
 

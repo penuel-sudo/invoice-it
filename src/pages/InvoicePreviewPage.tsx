@@ -8,20 +8,27 @@ import { supabase } from '../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../lib/urlUtils'
 import { 
   ArrowLeft, 
-  Edit, 
-  Download,
-  Send,
-  Share2,
   FileText,
-  Copy,
-  Check,
-  X,
   Mail,
   Phone,
-  MapPin
+  MapPin,
+  Calendar,
+  Clock,
+  DollarSign,
+  Plus,
+  Minus,
+  Trash2,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Loader2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import StatusButton from '../components/StatusButton'
+import SendButton from '../components/buttons/SendButton'
+import EditButton from '../components/buttons/EditButton'
+import DownloadButton from '../components/buttons/DownloadButton'
+import ShareButton from '../components/buttons/ShareButton'
 
 
 export default function InvoicePreviewPage() {
@@ -31,8 +38,6 @@ export default function InvoicePreviewPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
-  const [showSharePopup, setShowSharePopup] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [dbStatus, setDbStatus] = useState<string>('pending')
   const [loading, setLoading] = useState(false)
 
@@ -53,7 +58,28 @@ export default function InvoicePreviewPage() {
             .single()
 
           if (error) {
-            console.error('Error loading invoice:', error)
+            console.error('Error loading invoice from database:', error)
+            console.log('Invoice not found in database, checking localStorage and state...')
+            
+            // Check localStorage for this invoice number
+            const savedData = invoiceStorage.getDraft()
+            if (savedData && savedData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in localStorage')
+              setInvoiceData(savedData)
+              setLoading(false)
+              return
+            }
+            
+            // Check state data
+            if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in state')
+              setInvoiceData(location.state.invoiceData)
+              setLoading(false)
+              return
+            }
+            
+            // If not found anywhere, show error
+            console.log('Invoice not found anywhere')
             toast.error('Invoice not found')
             navigate('/invoices')
             return
@@ -136,90 +162,6 @@ export default function InvoicePreviewPage() {
         state: { invoiceData } 
       })
     }
-  }
-
-  const handleDownload = async () => {
-    if (!invoiceData || !user) {
-      toast.error('Invoice data not available')
-      return
-    }
-
-    try {
-      // Show loading state
-      toast.loading('Generating PDF...', { id: 'pdf-generation' })
-      
-      // Prepare data for API
-      const requestData = {
-        invoiceData,
-        user: {
-          user_metadata: {
-            full_name: user.user_metadata?.full_name || 'Your Business'
-          },
-          email: user.email
-        }
-      }
-      
-      // Call serverless function
-      const response = await fetch('/api/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      // Get PDF blob
-      const blob = await response.blob()
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `invoice-${invoiceData.invoiceNumber}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      
-      // Success feedback
-      toast.success('PDF downloaded successfully!', { id: 'pdf-generation' })
-      
-    } catch (error) {
-      console.error('PDF download error:', error)
-      toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-generation' })
-    }
-  }
-
-  const handleSend = () => {
-    // TODO: Implement email sending
-    toast('Email sending will be available in Phase 2!', {
-      icon: 'ℹ️',
-    })
-  }
-
-  const handleShare = () => {
-    setShowSharePopup(true)
-  }
-
-  const handleCopyLink = async () => {
-    const invoiceLink = `${window.location.origin}/invoice/preview?invoice=${invoiceData?.invoiceNumber}`
-    try {
-      await navigator.clipboard.writeText(invoiceLink)
-      setCopied(true)
-      toast.success('Link copied to clipboard!')
-      setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      toast.error('Failed to copy link')
-    }
-  }
-
-  const handleCloseSharePopup = () => {
-    setShowSharePopup(false)
-    setCopied(false)
   }
 
   if (!user || loading) { 
@@ -561,228 +503,34 @@ export default function InvoicePreviewPage() {
           gap: '0.75rem',
           justifyContent: 'center'
         }}>
-          <button
-            onClick={handleEdit}
-            style={{
-              padding: '0.75rem 1rem',
-              backgroundColor: 'transparent',
-              color: brandColors.primary[600],
-              border: `2px solid ${brandColors.primary[200]}`,
-              borderRadius: '12px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              flex: 1,
-              maxWidth: '100px'
-            }}
-          >
-            Edit
-          </button>
+          <EditButton 
+            onEdit={handleEdit}
+            size="md"
+            variant="secondary"
+          />
           
-          <button
-            onClick={handleDownload}
-            style={{
-              padding: '0.75rem 1rem',
-              backgroundColor: brandColors.primary[600],
-              color: brandColors.white,
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              flex: 1,
-              maxWidth: '100px'
-            }}
-          >
-            PDF
-          </button>
+          <DownloadButton 
+            invoiceData={invoiceData}
+            user={user}
+            size="md"
+            variant="primary"
+          />
           
-          <button
-            onClick={handleSend}
-            style={{
-              padding: '0.75rem 1rem',
-              backgroundColor: brandColors.primary[100],
-              color: brandColors.primary[700],
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              flex: 1,
-              maxWidth: '100px'
-            }}
-          >
-            Send
-          </button>
+          <SendButton 
+            invoiceData={invoiceData}
+            size="md"
+            variant="secondary"
+          />
           
-          <button
-            onClick={handleShare}
-            style={{
-              padding: '0.75rem 1rem',
-              backgroundColor: brandColors.primary[200],
-              color: brandColors.primary[800],
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              flex: 1,
-              maxWidth: '100px'
-            }}
-          >
-            Share
-          </button>
+          <ShareButton 
+            invoiceData={invoiceData}
+            size="md"
+            variant="secondary"
+          />
         </div>
 
       </div>
 
-      {/* Share Popup */}
-      {showSharePopup && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '1rem'
-        }}>
-          <div style={{
-            backgroundColor: brandColors.white,
-            borderRadius: '16px',
-            padding: '2rem',
-            maxWidth: '400px',
-            width: '100%',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)'
-          }}>
-            {/* Header */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.5rem'
-            }}>
-              <h3 style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
-                margin: 0
-              }}>
-                Share Invoice
-              </h3>
-              <button
-                onClick={handleCloseSharePopup}
-                style={{
-                  padding: '0.5rem',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <X size={20} color={brandColors.neutral[600]} />
-              </button>
-            </div>
-
-            {/* Link Input */}
-            <div style={{
-              marginBottom: '1.5rem'
-            }}>
-              <label style={{
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: brandColors.neutral[700],
-                marginBottom: '0.5rem',
-                display: 'block'
-              }}>
-                Invoice Link
-              </label>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem',
-                backgroundColor: brandColors.neutral[50],
-                border: `1px solid ${brandColors.neutral[200]}`,
-                borderRadius: '8px'
-              }}>
-                <input
-                  type="text"
-                  value={`${window.location.origin}/invoice/preview?invoice=${invoiceData?.invoiceNumber}`}
-                  readOnly
-                  style={{
-                    flex: 1,
-                    border: 'none',
-                    backgroundColor: 'transparent',
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
-                    outline: 'none'
-                  }}
-                />
-                <button
-                  onClick={handleCopyLink}
-                  style={{
-                    padding: '0.5rem',
-                    backgroundColor: copied ? brandColors.success[100] : brandColors.primary[100],
-                    color: copied ? brandColors.success[600] : brandColors.primary[600],
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {copied ? <Check size={16} /> : <Copy size={16} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Share Button */}
-            <button
-              onClick={() => {
-                // TODO: Implement platform sharing
-                toast('Platform sharing will be available in Phase 2!', {
-                  icon: 'ℹ️',
-                })
-              }}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                backgroundColor: brandColors.primary[600],
-                color: brandColors.white,
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = brandColors.primary[700]
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = brandColors.primary[600]
-              }}
-            >
-              <Share2 size={16} />
-              Share to Platforms
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
