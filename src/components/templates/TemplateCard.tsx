@@ -11,6 +11,7 @@ interface TemplateCardProps {
     color: string
     features: string[]
     preview: string
+    PreviewComponent?: React.ComponentType<any>
   }
   onView?: (templateId: string) => void
   onEdit?: (templateId: string) => void
@@ -25,6 +26,7 @@ export default function TemplateCard({
 }: TemplateCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const IconComponent = template.icon
+  const PreviewComponent = template.PreviewComponent
 
   return (
     <div
@@ -40,6 +42,8 @@ export default function TemplateCard({
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
+        maxWidth: '400px', // Fixed width to prevent full width expansion
+        width: '100%',
         ...style
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -55,17 +59,30 @@ export default function TemplateCard({
         alignItems: 'center',
         justifyContent: 'center',
         border: `2px dashed ${brandColors.neutral[200]}`,
-        position: 'relative'
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{
-          textAlign: 'center',
-          color: brandColors.neutral[500]
-        }}>
-          <IconComponent size={48} style={{ marginBottom: '0.5rem' }} />
-          <p style={{ fontSize: '0.875rem', margin: 0 }}>
-            {template.preview}
-          </p>
-        </div>
+        {PreviewComponent ? (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            transform: 'scale(0.3)',
+            transformOrigin: 'top left',
+            pointerEvents: 'none'
+          }}>
+            <PreviewComponent />
+          </div>
+        ) : (
+          <div style={{
+            textAlign: 'center',
+            color: brandColors.neutral[500]
+          }}>
+            <IconComponent size={48} style={{ marginBottom: '0.5rem' }} />
+            <p style={{ fontSize: '0.875rem', margin: 0 }}>
+              {template.preview}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Template Info */}

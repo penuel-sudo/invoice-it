@@ -13,7 +13,7 @@ export default function TemplateGalleryPage() {
   const templates = [
     {
       id: 'default',
-      name: 'Clean & Minimal',
+      name: 'Default Template',
       description: 'Simple, professional design perfect for any business. Clean layout with modern typography and intuitive user experience.',
       icon: FileText,
       color: brandColors.primary[600],
