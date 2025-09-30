@@ -421,67 +421,64 @@ export default function TransactionPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.5rem 2rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)',
+          padding: '1rem 2rem',
+          backgroundColor: 'white',
           borderBottom: `1px solid ${brandColors.neutral[200]}`,
           position: 'sticky',
           top: 0,
-          zIndex: 10,
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          zIndex: 10
         }}>
-          <button
-            onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.75rem',
-              backgroundColor: brandColors.neutral[100],
-              border: 'none',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.neutral[200]
-              e.currentTarget.style.transform = 'translateY(-1px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.neutral[100]
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
-          >
-            <ArrowLeft size={20} color={brandColors.neutral[600]} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button
+              onClick={() => navigate('/dashboard')}
+              style={{
+                padding: '0.5rem',
+                backgroundColor: brandColors.neutral[100],
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: brandColors.neutral[600],
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+            
+            <h1 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: brandColors.neutral[900],
+              margin: 0
+            }}>
+              {bulkMode ? `${selectedItems.size} selected` : 'Transactions'}
+            </h1>
+          </div>
           
-          <h1 style={{
-            fontSize: '1.5rem',
-            fontWeight: '700',
-            color: brandColors.neutral[900],
-            margin: 0,
-            letterSpacing: '-0.025em'
-          }}>
-            {bulkMode ? `${selectedItems.size} selected` : 'Transaction'}
-          </h1>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {bulkMode ? (
               <button
                 onClick={exitBulkMode}
                 style={{
-                  padding: '0.5rem',
-                  backgroundColor: 'transparent',
-                  border: 'none',
+                  padding: '0.5rem 0.75rem',
+                  backgroundColor: brandColors.neutral[100],
+                  border: `1px solid ${brandColors.neutral[300]}`,
                   borderRadius: '8px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  gap: '0.5rem',
+                  color: brandColors.neutral[700],
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
                 }}
               >
-                <X size={20} color={brandColors.neutral[600]} />
+                <X size={16} />
+                Cancel
               </button>
             ) : (
               <div ref={topbarDropdownRef} style={{ position: 'relative' }}>
@@ -489,67 +486,66 @@ export default function TransactionPage() {
                   onClick={() => setShowTopbarDropdown(!showTopbarDropdown)}
                   style={{
                     padding: '0.5rem',
-                    backgroundColor: 'transparent',
-                    border: 'none',
+                    backgroundColor: brandColors.neutral[100],
+                    border: `1px solid ${brandColors.neutral[300]}`,
                     borderRadius: '8px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    gap: '0.5rem',
+                    color: brandColors.neutral[700],
+                    fontSize: '0.875rem',
+                    fontWeight: '500'
                   }}
                 >
-                  <MoreVertical size={20} color={brandColors.neutral[600]} />
+                  <MoreVertical size={16} />
                 </button>
                 
-                {/* Topbar Dropdown - WhatsApp Style */}
+                {/* Topbar Dropdown - Normal Dropdown */}
                 {showTopbarDropdown && (
                   <div style={{
-                    width: '100%',
-                    padding: '0.875rem 1rem',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[800],
-                    transition: 'background-color 0.2s ease',
-                    textAlign: 'left'
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '0.25rem',
+                    backgroundColor: 'white',
+                    border: `1px solid ${brandColors.neutral[200]}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    zIndex: 50,
+                    minWidth: '180px'
                   }}>
-                    <button
-                      onMouseDown={(e) => {
-                        e.preventDefault()
-                        enterBulkMode()
-                        setShowTopbarDropdown(false)
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '0.875rem 1rem',
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[800],
-                        transition: 'background-color 0.2s ease',
-                        textAlign: 'left'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                      }}
-                    >
-                      <CheckSquare size={20}/>
-
-                      Select Multiple
-                    </button>
+                    <div style={{ padding: '0.25rem' }}>
+                      <button
+                        onClick={() => {
+                          enterBulkMode()
+                          setShowTopbarDropdown(false)
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem 0.75rem',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          color: brandColors.neutral[700]
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent'
+                        }}
+                      >
+                        <CheckSquare size={16} />
+                        Select Multiple
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -800,14 +796,12 @@ export default function TransactionPage() {
                 onMouseEnter={(e) => {
                   if (!bulkMode) {
                     e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
                     e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.12)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!bulkMode) {
                     e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
-                    e.currentTarget.style.transform = 'translateY(0)'
                     e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)'
                   }
                 }}
