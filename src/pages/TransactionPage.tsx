@@ -10,6 +10,7 @@ import {
   MoreVertical, 
   Eye, 
   Edit, 
+  Send,
   Trash2, 
   Check,
   CheckSquare,
@@ -42,6 +43,7 @@ interface Transaction {
   is_tax_deductible?: boolean
   receipt_url?: string
   receipt_filename?: string
+  template?: string // Template used for the invoice
   created_at: string
   updated_at?: string
 }
@@ -138,6 +140,7 @@ export default function TransactionPage() {
           is_tax_deductible: isExpense ? dbTransaction.is_tax_deductible : undefined,
           receipt_url: isExpense ? dbTransaction.receipt_url : undefined,
           receipt_filename: isExpense ? dbTransaction.receipt_filename : undefined,
+          template: isInvoice ? dbTransaction.template : undefined, // Template for invoices
           created_at: dbTransaction.created_at,
           updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
         }
@@ -489,9 +492,10 @@ export default function TransactionPage() {
                 {showTopbarDropdown && (
                   <div style={{
                     position: 'absolute',
-                    right: '100%',
-                    top: '100%',
-                    marginRight: '0.5rem',
+                    left: '100%',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    marginLeft: '0.5rem',
                     backgroundColor: brandColors.white,
                     border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '12px',
@@ -529,18 +533,8 @@ export default function TransactionPage() {
                         e.currentTarget.style.backgroundColor = 'transparent'
                       }}
                     >
-                      <div style={{
-                        width: '16px',
-                        height: '16px',
-                        border: `2px solid ${brandColors.primary[600]}`,
-                        borderRadius: '3px',
-                        backgroundColor: brandColors.neutral[600],
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <Check size={10} color={brandColors.white} />
-                      </div>
+                      <CheckSquare size={20}/>
+
                       Select Multiple
                     </button>
                   </div>
@@ -910,7 +904,8 @@ export default function TransactionPage() {
                               onMouseDown={(e) => {
                                 e.preventDefault()
                                 if (transaction.type === 'invoice') {
-                                  navigate(`/invoice/preview?invoice=${transaction.invoice_number}`)
+                                  const template = transaction.template || 'default'
+                                  navigate(`/invoice/preview/${template}?invoice=${transaction.invoice_number}`)
                                 } else {
                                   navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
                                 }
@@ -947,9 +942,9 @@ export default function TransactionPage() {
                               onMouseDown={(e) => {
                                 e.preventDefault()
                                 if (transaction.type === 'invoice') {
-                                  navigate(`/invoice/new?invoice=${transaction.invoice_number}`)
+                                  toast.success('Send functionality coming soon!')
                                 } else {
-                                  navigate(`/expense/edit`, { state: { expenseId: transaction.id } })
+                                  toast.success('Send functionality coming soon!')
                                 }
                                 setShowTransactionDropdown(null)
                               }}
@@ -975,8 +970,8 @@ export default function TransactionPage() {
                                 e.currentTarget.style.backgroundColor = 'transparent'
                               }}
                             >
-                              <Edit size={16} color={brandColors.neutral[600]} />
-                              Edit Invoice
+                              <Send size={16} color={brandColors.primary[600]} />
+                              Send Invoice
                             </button>
                             
                             {/* Status Actions for Invoices */}
