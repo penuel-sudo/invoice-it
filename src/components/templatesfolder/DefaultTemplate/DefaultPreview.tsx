@@ -38,8 +38,9 @@ export default function InvoicePreviewPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
-  const [dbStatus, setDbStatus] = useState<string>('pending')
+  const [dbStatus, setDbStatus] = useState<string>('draft')
   const [loading, setLoading] = useState(false)
+  const [isFromDatabase, setIsFromDatabase] = useState(false)
 
   useEffect(() => {
     const loadInvoiceData = async () => {
@@ -80,6 +81,7 @@ export default function InvoicePreviewPage() {
             if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in state (create → preview flow)')
               setInvoiceData(location.state.invoiceData)
+              setIsFromDatabase(false)
               setLoading(false)
               return
             }
@@ -89,6 +91,7 @@ export default function InvoicePreviewPage() {
             if (savedData && savedData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in localStorage')
               setInvoiceData(savedData)
+              setIsFromDatabase(false)
               setLoading(false)
               return
             }
@@ -125,7 +128,8 @@ export default function InvoicePreviewPage() {
               notes: invoiceData.notes || ''
             }
             setInvoiceData(transformedData)
-            setDbStatus(invoiceData.status || 'pending')
+            setDbStatus(invoiceData.status || 'draft')
+            setIsFromDatabase(true)
           }
         } catch (error) {
           console.error('Error loading invoice:', error)
@@ -137,6 +141,7 @@ export default function InvoicePreviewPage() {
       } else if (location.state?.invoiceData) {
         // Fallback to state data
         setInvoiceData(location.state.invoiceData)
+        setIsFromDatabase(false)
         // Update URL to include invoice number
         if (location.state.invoiceData.invoiceNumber) {
           setSearchParams({ invoice: location.state.invoiceData.invoiceNumber })
@@ -146,6 +151,7 @@ export default function InvoicePreviewPage() {
         const savedData = invoiceStorage.getDraft()
         if (savedData) {
           setInvoiceData(savedData)
+          setIsFromDatabase(false)
           // Update URL to include invoice number
           if (savedData.invoiceNumber) {
             setSearchParams({ invoice: savedData.invoiceNumber })
@@ -162,14 +168,18 @@ export default function InvoicePreviewPage() {
     }
   }, [searchParams, location.state, navigate, user])
 
-  // Set status from form data or default to pending
+  // Set status based on data source
   useEffect(() => {
     if (invoiceData) {
-      // For new invoices (form data), default to pending
-      // For existing invoices, the status would come from the database
-      setDbStatus('pending')
+      if (isFromDatabase) {
+        // Status already set from database in loadInvoiceData
+        // Don't override it
+      } else {
+        // For new invoices (form data), default to draft
+        setDbStatus('draft')
+      }
     }
-  }, [invoiceData])
+  }, [invoiceData, isFromDatabase])
 
   // Update URL when invoice data changes
   useEffect(() => {
@@ -411,11 +421,27 @@ export default function InvoicePreviewPage() {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {invoiceData.items.map((item, index) => (
-                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.75rem', color: brandColors.neutral[600] }}>
+                <div key={item.id} style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: '0.5rem'
+                }}>
+                  <span style={{ 
+                    fontSize: '0.75rem', 
+                    color: brandColors.neutral[600],
+                    flex: 1,
+                    wordBreak: 'break-word',
+                    lineHeight: '1.4'
+                  }}>
                     {item.quantity} {item.description}
                   </span>
-                  <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
+                  <span style={{ 
+                    fontSize: '0.75rem', 
+                    color: brandColors.neutral[900],
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap'
+                  }}>
                     ${item.lineTotal.toFixed(2)}
                   </span>
                 </div>
@@ -525,11 +551,14 @@ export default function InvoicePreviewPage() {
           gap: '0.75rem',
           justifyContent: 'center'
         }}>
-          <EditButton 
-            onEdit={handleEdit}
-            size="md"
-            variant="secondary"
-          />
+          {/* Only show Edit button for CREATE mode (not from database) */}
+          {!isFromDatabase && (
+            <EditButton 
+              onEdit={handleEdit}
+              size="md"
+              variant="secondary"
+            />
+          )}
           
           <DownloadButton 
             invoiceData={invoiceData}
