@@ -760,7 +760,7 @@ export default function TransactionPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {filteredTransactions.map((transaction) => (
+              {filteredTransactions.map((transaction, index) => (
                 <div key={transaction.id} style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -774,7 +774,7 @@ export default function TransactionPage() {
                   backdropFilter: 'blur(10px)',
                   transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
                   position: 'relative',
-                  zIndex: 1
+                  zIndex: showTransactionDropdown === transaction.id ? 1000 : index + 1
                 }}
                 onClick={() => bulkMode ? toggleSelection(transaction.id) : undefined}
                 onMouseDown={(e) => {
