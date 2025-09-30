@@ -553,11 +553,11 @@ export default function InvoicePreviewPage() {
         }}>
           {/* Only show Edit button for CREATE mode (not from database) */}
           {!isFromDatabase && (
-            <EditButton 
-              onEdit={handleEdit}
-              size="md"
-              variant="secondary"
-            />
+          <EditButton 
+            onEdit={handleEdit}
+            size="md"
+            variant="secondary"
+          />
           )}
           
           <DownloadButton 
