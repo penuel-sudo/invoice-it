@@ -49,15 +49,31 @@ export default function InvoicePreviewPage() {
       if (invoiceNumber) {
         setLoading(true)
         try {
-          // Load invoice from database using invoice number
-          const { data, error } = await supabase
-            .from('transactions')
-            .select('*')
+          // Load invoice from database using invoice number with proper joins
+          const { data: invoiceData, error: invoiceError } = await supabase
+            .from('invoices')
+            .select(`
+              *,
+              clients (
+                name,
+                email,
+                address,
+                phone,
+                company_name
+              ),
+              invoice_items (
+                description,
+                quantity,
+                unit_price,
+                tax_rate,
+                line_total
+              )
+            `)
             .eq('invoice_number', invoiceNumber)
             .eq('user_id', user?.id)
             .single()
 
-          if (error) {
+          if (invoiceError) {
             console.error('Error loading invoice from database:', error)
             console.log('Invoice not found in database, checking localStorage and state...')
             
@@ -85,25 +101,32 @@ export default function InvoicePreviewPage() {
             return
           }
 
-          if (data) {
-            // Convert database transaction to InvoiceData format
-            const invoiceData: InvoiceData = {
-              invoiceNumber: data.invoice_number,
-              invoiceDate: data.issue_date,
-              dueDate: data.due_date,
-              clientName: data.client_name || '',
-              clientCompanyName: data.client_company_name || '',
-              clientEmail: data.client_email || '',
-              clientPhone: data.client_phone || '',
-              clientAddress: data.client_address || '',
-              items: data.items || [],
-              subtotal: data.subtotal || 0,
-              taxTotal: data.tax_amount || 0,
-              grandTotal: data.total_amount || 0,
-              notes: data.notes || ''
+          if (invoiceData) {
+            // Convert database invoice to InvoiceData format
+            const transformedData: InvoiceData = {
+              invoiceNumber: invoiceData.invoice_number,
+              invoiceDate: invoiceData.issue_date,
+              dueDate: invoiceData.due_date,
+              clientName: invoiceData.clients?.name || '',
+              clientCompanyName: invoiceData.clients?.company_name || '',
+              clientEmail: invoiceData.clients?.email || '',
+              clientPhone: invoiceData.clients?.phone || '',
+              clientAddress: invoiceData.clients?.address || '',
+              items: invoiceData.invoice_items?.map(item => ({
+                id: Date.now().toString(), // Generate ID for form compatibility
+                description: item.description,
+                quantity: item.quantity,
+                unitPrice: item.unit_price,
+                taxRate: item.tax_rate,
+                lineTotal: item.line_total
+              })) || [],
+              subtotal: invoiceData.subtotal || 0,
+              taxTotal: invoiceData.tax_amount || 0,
+              grandTotal: invoiceData.total_amount || 0,
+              notes: invoiceData.notes || ''
             }
-            setInvoiceData(invoiceData)
-            setDbStatus(data.status || 'pending')
+            setInvoiceData(transformedData)
+            setDbStatus(invoiceData.status || 'pending')
           }
         } catch (error) {
           console.error('Error loading invoice:', error)
