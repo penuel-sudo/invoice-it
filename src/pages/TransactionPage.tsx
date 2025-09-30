@@ -736,8 +736,7 @@ export default function TransactionPage() {
                   borderRadius: '12px',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                   border: `1px solid ${brandColors.neutral[100]}`,
-                  cursor: bulkMode ? 'pointer' : 'pointer',
-                  transition: 'all 0.2s ease'
+                  cursor: bulkMode ? 'pointer' : 'pointer'
                 }}
                 onClick={() => bulkMode ? toggleSelection(transaction.id) : undefined}
                 onMouseDown={(e) => {
@@ -756,14 +755,12 @@ export default function TransactionPage() {
                 }}
                 onMouseEnter={(e) => {
                   if (!bulkMode) {
-                    e.currentTarget.style.transform = 'translateY(-1px)'
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)'
+                    e.currentTarget.style.backgroundColor = brandColors.neutral[50]
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!bulkMode) {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
+                    e.currentTarget.style.backgroundColor = brandColors.white
                   }
                 }}
                 >
