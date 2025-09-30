@@ -257,7 +257,29 @@ export default function InvoiceCreatePage() {
           subtotal: formData.subtotal,
           tax_amount: formData.taxTotal,
           total_amount: formData.grandTotal,
-          status: 'draft'
+          status: 'draft',
+          template: 'default',
+          template_data: {
+            layout: 'clean',
+            colors: {
+              primary: '#16a34a',
+              secondary: '#6b7280'
+            },
+            fonts: {
+              heading: 'Inter',
+              body: 'Inter'
+            }
+          },
+          template_settings: {
+            userPreferences: {
+              defaultTaxRate: formData.taxTotal,
+              currency: 'USD',
+              dateFormat: 'MM/DD/YYYY'
+            },
+            branding: {
+              companyName: 'Your Business'
+            }
+          }
         })
         .select()
         .single()

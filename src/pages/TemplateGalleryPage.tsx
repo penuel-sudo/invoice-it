@@ -26,11 +26,11 @@ export default function TemplateGalleryPage() {
   ]
 
   const handleViewTemplate = (templateId: string) => {
-    navigate(`/invoice/preview?template=${templateId}&sample=true`)
+    navigate(`/invoice/preview/${templateId}?sample=true`)
   }
 
   const handleEditTemplate = (templateId: string) => {
-    navigate(`/invoice/create?template=${templateId}`)
+    navigate(`/invoice/create/${templateId}`)
   }
 
   return (

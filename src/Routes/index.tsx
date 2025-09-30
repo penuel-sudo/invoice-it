@@ -2,8 +2,8 @@ import { createBrowserRouter } from 'react-router-dom'
 import OnboardingPage from '../pages/OnboardingPage'
 import AuthPage from '../pages/AuthPage'
 import DashboardPage from '../pages/DashboardPage'
-// import InvoiceCreatePage from '../pages/InvoiceCreatePage'
-// import InvoicePreviewPage from '../pages/InvoicePreviewPage'
+import InvoiceCreatePage from '../pages/InvoiceCreatePage'
+import InvoicePreviewPage from '../pages/InvoicePreviewPage'
 import TransactionPage from '../pages/TransactionPage'
 import ExpenseCreatePage from '../pages/ExpenseCreatePage'
 import ExpensePreviewPage from '../pages/ExpensePreviewPage'
@@ -34,22 +34,22 @@ export const router = createBrowserRouter([
       </AuthWrapper>
     )
   },
-  // {
-  //   path: '/invoice/new',
-  //   element: (
-  //     <AuthWrapper requireAuth={true}>
-  //       <InvoiceCreatePage />
-  //     </AuthWrapper>
-  //   )
-  // },
-  // {
-  //   path: '/invoice/preview',
-  //   element: (
-  //     <AuthWrapper requireAuth={true}>
-  //       <InvoicePreviewPage />
-  //     </AuthWrapper>
-  //   )
-  // },
+  {
+    path: '/invoice/create/:template',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <InvoiceCreatePage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/invoice/preview/:template',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <InvoicePreviewPage />
+      </AuthWrapper>
+    )
+  },
   {
     path: '/invoices',
     element: (
