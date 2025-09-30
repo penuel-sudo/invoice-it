@@ -12,6 +12,7 @@ import {
   Edit, 
   Trash2, 
   Check,
+  CheckSquare,
   X,
   ArrowUpRight,
   ArrowDownRight,
@@ -875,12 +876,18 @@ export default function TransactionPage() {
                                 const spaceBelow = viewportHeight - rect.bottom
                                 const spaceAbove = rect.top
                                 
-                                // If not enough space below but enough space above, position upwards
-                                if (spaceBelow < 200 && spaceAbove > 200) {
+                                // Only reposition upward if not enough space below AND enough space above
+                                if (spaceBelow < 300 && spaceAbove > 300) {
                                   el.style.top = 'auto'
                                   el.style.bottom = '100%'
                                   el.style.marginTop = '0'
                                   el.style.marginBottom = '0.5rem'
+                                } else {
+                                  // Default downward positioning
+                                  el.style.top = '100%'
+                                  el.style.bottom = 'auto'
+                                  el.style.marginTop = '0.5rem'
+                                  el.style.marginBottom = '0'
                                 }
                               }
                             }}
@@ -896,8 +903,7 @@ export default function TransactionPage() {
                               zIndex: 1000,
                               width: '160px',
                               padding: '0.5rem 0',
-                              overflow: 'hidden',
-                              maxHeight: '200px'
+                              overflow: 'hidden'
                             }}>
                             {/* View */}
                             <button
@@ -1005,18 +1011,7 @@ export default function TransactionPage() {
                                       e.currentTarget.style.backgroundColor = 'transparent'
                                     }}
                                   >
-                                    <div style={{
-                                      width: '16px',
-                                      height: '16px',
-                                      border: `2px solid ${brandColors.success[600]}`,
-                                      borderRadius: '3px',
-                                      backgroundColor: 'transparent',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center'
-                                    }}>
-                                      <Check size={10} color={brandColors.success[600]} />
-                                    </div>
+                                    <CheckSquare size={16} color={brandColors.success[600]} />
                                     Mark as Paid
                                   </button>
                                 )}
@@ -1050,18 +1045,7 @@ export default function TransactionPage() {
                                       e.currentTarget.style.backgroundColor = 'transparent'
                                     }}
                                   >
-                                    <div style={{
-                                      width: '16px',
-                                      height: '16px',
-                                      border: `2px solid ${brandColors.warning[600]}`,
-                                      borderRadius: '3px',
-                                      backgroundColor: 'transparent',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center'
-                                    }}>
-                                      <Check size={10} color={brandColors.warning[600]} />
-                                    </div>
+                                    <CheckSquare size={16} color={brandColors.warning[600]} />
                                     Mark as Pending
                                   </button>
                                 )}
