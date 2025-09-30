@@ -72,7 +72,7 @@ export default function InvoiceCreatePage() {
             
             // If not found anywhere, redirect to new invoice
             console.log('Invoice not found anywhere, creating new invoice')
-            navigate('/invoice/new')
+            navigate('/invoice/create/default')
             return
           }
 
@@ -339,7 +339,7 @@ export default function InvoiceCreatePage() {
     }
 
     // Navigate to preview with form data
-    navigate('/invoice/preview', { 
+    navigate('/invoice/preview/default', { 
       state: { invoiceData: formData } 
     })
   }

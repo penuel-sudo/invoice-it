@@ -130,7 +130,7 @@ export default function InvoicePreviewPage() {
           }
         } else {
           // If no data, redirect back to create page
-          navigate('/invoice/new')
+          navigate('/invoice/create/default')
         }
       }
     }
@@ -158,7 +158,7 @@ export default function InvoicePreviewPage() {
 
   const handleEdit = () => {
     if (invoiceData) {
-      navigate('/invoice/new', { 
+      navigate('/invoice/create/default', { 
         state: { invoiceData } 
       })
     }
