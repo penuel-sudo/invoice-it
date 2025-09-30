@@ -488,8 +488,9 @@ export default function TransactionPage() {
                 {showTopbarDropdown && (
                   <div style={{
                     position: 'absolute',
-                    right: 0,
+                    right: '100%',
                     top: '100%',
+                    marginRight: '0.5rem',
                     backgroundColor: brandColors.white,
                     border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '12px',
@@ -771,13 +772,13 @@ export default function TransactionPage() {
                         height: '20px',
                         border: `2px solid ${selectedItems.has(transaction.id) ? brandColors.primary[600] : brandColors.neutral[300]}`,
                         borderRadius: '4px',
-                        backgroundColor: selectedItems.has(transaction.id) ? brandColors.primary[600] : 'transparent',
+                        backgroundColor: brandColors.white,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
                         {selectedItems.has(transaction.id) && (
-                          <Check size={12} color={brandColors.white} />
+                          <Check size={12} color={brandColors.primary[600]} />
                         )}
                       </div>
                     )}
@@ -864,22 +865,40 @@ export default function TransactionPage() {
                           <MoreVertical size={18} color={brandColors.neutral[600]} />
                         </button>
                         
-                        {/* Dropdown Menu - Positioned below the three-dot icon */}
+                        {/* Dropdown Menu - Dynamic positioning */}
                         {showTransactionDropdown === transaction.id && (
-                          <div style={{
-                            position: 'absolute',
-                            top: '100%',
-                            right: '0',
-                            marginTop: '0.5rem',
-                            backgroundColor: brandColors.white,
-                            border: `1px solid ${brandColors.neutral[200]}`,
-                            borderRadius: '12px',
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                            zIndex: 1000,
-                            width: '160px',
-                            padding: '0.5rem 0',
-                            overflow: 'hidden'
-                          }}>
+                          <div 
+                            ref={(el) => {
+                              if (el) {
+                                const rect = el.getBoundingClientRect()
+                                const viewportHeight = window.innerHeight
+                                const spaceBelow = viewportHeight - rect.bottom
+                                const spaceAbove = rect.top
+                                
+                                // If not enough space below but enough space above, position upwards
+                                if (spaceBelow < 200 && spaceAbove > 200) {
+                                  el.style.top = 'auto'
+                                  el.style.bottom = '100%'
+                                  el.style.marginTop = '0'
+                                  el.style.marginBottom = '0.5rem'
+                                }
+                              }
+                            }}
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              right: '0',
+                              marginTop: '0.5rem',
+                              backgroundColor: brandColors.white,
+                              border: `1px solid ${brandColors.neutral[200]}`,
+                              borderRadius: '12px',
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                              zIndex: 1000,
+                              width: '160px',
+                              padding: '0.5rem 0',
+                              overflow: 'hidden',
+                              maxHeight: '200px'
+                            }}>
                             {/* View */}
                             <button
                               onMouseDown={(e) => {
@@ -986,7 +1005,18 @@ export default function TransactionPage() {
                                       e.currentTarget.style.backgroundColor = 'transparent'
                                     }}
                                   >
-                                    <Check size={16} color={brandColors.success[600]} />
+                                    <div style={{
+                                      width: '16px',
+                                      height: '16px',
+                                      border: `2px solid ${brandColors.success[600]}`,
+                                      borderRadius: '3px',
+                                      backgroundColor: 'transparent',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}>
+                                      <Check size={10} color={brandColors.success[600]} />
+                                    </div>
                                     Mark as Paid
                                   </button>
                                 )}
@@ -1020,7 +1050,18 @@ export default function TransactionPage() {
                                       e.currentTarget.style.backgroundColor = 'transparent'
                                     }}
                                   >
-                                    <Check size={16} color={brandColors.warning[600]} />
+                                    <div style={{
+                                      width: '16px',
+                                      height: '16px',
+                                      border: `2px solid ${brandColors.warning[600]}`,
+                                      borderRadius: '3px',
+                                      backgroundColor: 'transparent',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}>
+                                      <Check size={10} color={brandColors.warning[600]} />
+                                    </div>
                                     Mark as Pending
                                   </button>
                                 )}
