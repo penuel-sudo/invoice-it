@@ -772,7 +772,9 @@ export default function TransactionPage() {
                   border: `1px solid ${brandColors.neutral[200]}`,
                   cursor: bulkMode ? 'pointer' : 'pointer',
                   backdropFilter: 'blur(10px)',
-                  transition: 'background-color 0.2s ease, box-shadow 0.2s ease'
+                  transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                  position: 'relative',
+                  zIndex: 1
                 }}
                 onClick={() => bulkMode ? toggleSelection(transaction.id) : undefined}
                 onMouseDown={(e) => {
@@ -936,7 +938,7 @@ export default function TransactionPage() {
                             border: `1px solid ${brandColors.neutral[200]}`,
                             borderRadius: '12px',
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                              zIndex: 1000,
+                              zIndex: 10000,
                             width: '160px',
                             padding: '0.5rem 0',
                             overflow: 'hidden'
