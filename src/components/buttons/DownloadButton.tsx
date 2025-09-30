@@ -2,10 +2,14 @@ import React from 'react'
 import { Download } from 'lucide-react'
 import { brandColors } from '../../stylings'
 import toast from 'react-hot-toast'
+import { pdf } from '@react-pdf/renderer'
+import { getPDFTemplate } from '../../lib/templateRegistry'
+import type { InvoiceData } from '../../lib/storage/invoiceStorage'
 
 interface DownloadButtonProps {
-  invoiceData: any
+  invoiceData: InvoiceData
   user: any
+  template?: string
   onDownload?: () => void
   style?: React.CSSProperties
   size?: 'sm' | 'md' | 'lg'
@@ -15,6 +19,7 @@ interface DownloadButtonProps {
 export default function DownloadButton({ 
   invoiceData, 
   user,
+  template = 'default',
   onDownload,
   style,
   size = 'md',
@@ -30,53 +35,33 @@ export default function DownloadButton({
       // Show loading state
       toast.loading('Generating PDF...', { id: 'pdf-generation' })
       
-      // Prepare data for API
-      const requestData = {
-        invoiceData,
-        user: {
-          user_metadata: {
-            full_name: user.user_metadata?.full_name || 'Your Business'
-          },
-          email: user.email
-        }
-      }
+      // Get the correct PDF template based on template name
+      const PDFTemplate = getPDFTemplate(template)
       
-      // Call serverless function
-      const response = await fetch('/api/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      // Get PDF blob
-      const blob = await response.blob()
+      // Generate PDF blob using client-side rendering
+      const blob = await pdf(<PDFTemplate invoiceData={invoiceData} />).toBlob()
       
       // Create download link
-      const url = window.URL.createObjectURL(blob)
+      const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
       link.download = `invoice-${invoiceData.invoiceNumber}.pdf`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      URL.revokeObjectURL(url)
       
       // Success feedback
       toast.success('PDF downloaded successfully!', { id: 'pdf-generation' })
       
+      // Call optional callback
+      if (onDownload) {
+        onDownload()
+      }
+      
     } catch (error) {
       console.error('PDF download error:', error)
       toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-generation' })
-    }
-
-    if (onDownload) {
-      onDownload()
     }
   }
 

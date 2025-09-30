@@ -551,6 +551,7 @@ export default function InvoicePreviewPage() {
           <DownloadButton 
             invoiceData={invoiceData}
             user={user}
+            template="default"
             size="md"
             variant="primary"
           />
