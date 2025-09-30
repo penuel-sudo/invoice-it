@@ -5,7 +5,6 @@ import { brandColors } from '../stylings'
 import { Layout as LayoutComponent } from '../components/layout'
 import { TemplateGallery, TemplateGrid, TemplateCard } from '../components/templates'
 import DefaultCreate from '../components/templatesfolder/DefaultTemplate/DefaultCreate'
-import DefaultPreview from '../components/templatesfolder/DefaultTemplate/DefaultPreview'
 import DefaultPreviewStatic from '../components/templatesfolder/DefaultTemplate/DefaultPreviewStatic'
 
 export default function TemplateGalleryPage() {
