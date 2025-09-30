@@ -453,7 +453,9 @@ export default function TransactionPage() {
               fontSize: '1.25rem',
               fontWeight: '600',
               color: brandColors.neutral[900],
-              margin: 0
+              margin: 0,
+              textAlign: 'center',
+              flex: 1
             }}>
               {bulkMode ? `${selectedItems.size} selected` : 'Transactions'}
             </h1>
@@ -680,14 +682,12 @@ export default function TransactionPage() {
                   onMouseEnter={(e) => {
                     if (activeTab !== tab.id) {
                       e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
-                      e.currentTarget.style.transform = 'translateY(-2px)'
                       e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (activeTab !== tab.id) {
                       e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
-                      e.currentTarget.style.transform = 'translateY(0)'
                       e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
                     }
                   }}
@@ -751,11 +751,9 @@ export default function TransactionPage() {
                   transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)'
                   e.currentTarget.style.boxShadow = '0 6px 20px rgba(22, 163, 74, 0.4)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)'
                 }}
               >
