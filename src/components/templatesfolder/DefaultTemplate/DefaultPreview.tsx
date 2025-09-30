@@ -421,27 +421,15 @@ export default function InvoicePreviewPage() {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {invoiceData.items.map((item, index) => (
-                <div key={item.id} style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: '0.5rem'
-                }}>
+                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ 
                     fontSize: '0.75rem', 
                     color: brandColors.neutral[600],
-                    flex: 1,
-                    wordBreak: 'break-word',
-                    lineHeight: '1.4'
+                    wordBreak: 'break-word'
                   }}>
                     {item.quantity} {item.description}
                   </span>
-                  <span style={{ 
-                    fontSize: '0.75rem', 
-                    color: brandColors.neutral[900],
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap'
-                  }}>
+                  <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
                     ${item.lineTotal.toFixed(2)}
                   </span>
                 </div>

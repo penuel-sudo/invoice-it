@@ -421,7 +421,7 @@ export default function TransactionPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1rem 2rem',
+          padding: window.innerWidth < 768 ? '1rem' : '1rem 2rem',
           backgroundColor: 'white',
           borderBottom: `1px solid ${brandColors.neutral[200]}`,
           position: 'sticky',
@@ -449,7 +449,7 @@ export default function TransactionPage() {
           </button>
           
           <h1 style={{
-            fontSize: '1.25rem',
+            fontSize: window.innerWidth < 768 ? '1.125rem' : '1.25rem',
             fontWeight: '600',
             color: brandColors.neutral[900],
             margin: 0,
@@ -556,26 +556,28 @@ export default function TransactionPage() {
         {/* Bulk Actions - Replace Tab Navigation */}
         {bulkMode && (
           <div style={{
-            padding: '1.5rem 1rem 0.5rem 1rem'
+            padding: window.innerWidth < 768 ? '1rem 0.5rem 0.5rem 0.5rem' : '1.5rem 1rem 0.5rem 1rem'
           }}>
             <div style={{
               display: 'flex',
-              gap: '0.75rem',
-              marginBottom: '1rem'
+              gap: window.innerWidth < 768 ? '0.5rem' : '0.75rem',
+              marginBottom: '1rem',
+              flexDirection: window.innerWidth < 768 ? 'column' : 'row'
             }}>
               <button
                 onClick={() => handleBulkAction('mark_paid')}
                 style={{
-                  padding: '0.75rem 1.5rem',
+                  padding: window.innerWidth < 768 ? '1rem 1.5rem' : '0.75rem 1.5rem',
                   backgroundColor: 'transparent',
                   color: brandColors.primary[600],
                   border: `1px solid ${brandColors.primary[600]}`,
-                  borderRadius: '20px',
-                  fontSize: '0.875rem',
+                  borderRadius: window.innerWidth < 768 ? '12px' : '20px',
+                  fontSize: window.innerWidth < 768 ? '0.9rem' : '0.875rem',
                   fontWeight: '500',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  flex: 1
+                  flex: 1,
+                  minHeight: window.innerWidth < 768 ? '48px' : 'auto'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = brandColors.primary[50]
@@ -589,16 +591,17 @@ export default function TransactionPage() {
               <button
                 onClick={() => handleBulkAction('mark_pending')}
                 style={{
-                  padding: '0.75rem 1.5rem',
+                  padding: window.innerWidth < 768 ? '1rem 1.5rem' : '0.75rem 1.5rem',
                   backgroundColor: 'transparent',
                   color: brandColors.primary[600],
                   border: `1px solid ${brandColors.primary[600]}`,
-                  borderRadius: '20px',
-                  fontSize: '0.875rem',
+                  borderRadius: window.innerWidth < 768 ? '12px' : '20px',
+                  fontSize: window.innerWidth < 768 ? '0.9rem' : '0.875rem',
                   fontWeight: '500',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  flex: 1
+                  flex: 1,
+                  minHeight: window.innerWidth < 768 ? '48px' : 'auto'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = brandColors.primary[50]
@@ -612,16 +615,17 @@ export default function TransactionPage() {
               <button
                 onClick={() => handleBulkAction('delete')}
                 style={{
-                  padding: '0.75rem 1.5rem',
+                  padding: window.innerWidth < 768 ? '1rem 1.5rem' : '0.75rem 1.5rem',
                   backgroundColor: 'transparent',
                   color: brandColors.primary[600],
                   border: `1px solid ${brandColors.primary[600]}`,
-                  borderRadius: '20px',
-                  fontSize: '0.875rem',
+                  borderRadius: window.innerWidth < 768 ? '12px' : '20px',
+                  fontSize: window.innerWidth < 768 ? '0.9rem' : '0.875rem',
                   fontWeight: '500',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  flex: 1
+                  flex: 1,
+                  minHeight: window.innerWidth < 768 ? '48px' : 'auto'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = brandColors.primary[50]
@@ -639,7 +643,7 @@ export default function TransactionPage() {
         {/* Tab Navigation - Only show when not in bulk mode */}
         {!bulkMode && (
           <div style={{
-            padding: '2rem 2rem 1rem 2rem'
+            padding: window.innerWidth < 768 ? '1rem' : '2rem 2rem 1rem 2rem'
           }}>
             {/* Overdue Detector */}
             {user && (
@@ -652,8 +656,9 @@ export default function TransactionPage() {
             )}
             <div style={{
               display: 'flex',
-              gap: '0.75rem',
-              marginBottom: '1rem'
+              gap: window.innerWidth < 768 ? '0.5rem' : '0.75rem',
+              marginBottom: '1rem',
+              flexDirection: window.innerWidth < 768 ? 'column' : 'row'
             }}>
               {[
                 { id: 'all', label: 'All' },
@@ -664,18 +669,19 @@ export default function TransactionPage() {
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
                   style={{
-                    padding: '1rem 2rem',
+                    padding: window.innerWidth < 768 ? '0.875rem 1rem' : '1rem 2rem',
                     backgroundColor: activeTab === tab.id ? brandColors.primary[600] : 'rgba(255, 255, 255, 0.8)',
                     color: activeTab === tab.id ? brandColors.white : brandColors.neutral[700],
                     border: 'none',
-                    borderRadius: '16px',
-                    fontSize: '0.875rem',
+                    borderRadius: window.innerWidth < 768 ? '12px' : '16px',
+                    fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem',
                     fontWeight: '600',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     flex: 1,
                     boxShadow: activeTab === tab.id ? '0 4px 12px rgba(22, 163, 74, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    backdropFilter: 'blur(10px)'
+                    backdropFilter: 'blur(10px)',
+                    minHeight: window.innerWidth < 768 ? '44px' : 'auto'
                   }}
                   onMouseEnter={(e) => {
                     if (activeTab !== tab.id) {
@@ -699,7 +705,9 @@ export default function TransactionPage() {
 
         {/* Transaction List */}
         <div style={{
-          padding: bulkMode ? '0 2rem 2rem 2rem' : '0 2rem 2rem 2rem'
+          padding: window.innerWidth < 768 
+            ? (bulkMode ? '0 1rem 1rem 1rem' : '0 1rem 1rem 1rem')
+            : (bulkMode ? '0 2rem 2rem 2rem' : '0 2rem 2rem 2rem')
         }}>
           {loading ? (
             <div style={{
@@ -759,22 +767,27 @@ export default function TransactionPage() {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: window.innerWidth < 768 ? '0.75rem' : '1rem' 
+            }}>
               {filteredTransactions.map((transaction, index) => (
                 <div key={transaction.id} style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '1rem',
+                  padding: window.innerWidth < 768 ? '0.875rem' : '1rem',
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '16px',
+                  borderRadius: window.innerWidth < 768 ? '12px' : '16px',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                   border: `1px solid ${brandColors.neutral[200]}`,
                   cursor: bulkMode ? 'pointer' : 'pointer',
                   backdropFilter: 'blur(10px)',
                   transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
                   position: 'relative',
-                  zIndex: showTransactionDropdown === transaction.id ? 1000 : index + 1
+                  zIndex: showTransactionDropdown === transaction.id ? 1000 : index + 1,
+                  minHeight: window.innerWidth < 768 ? '60px' : 'auto'
                 }}
                 onClick={() => bulkMode ? toggleSelection(transaction.id) : undefined}
                 onMouseDown={(e) => {
@@ -804,46 +817,56 @@ export default function TransactionPage() {
                   }
                 }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: window.innerWidth < 768 ? '0.5rem' : '0.75rem',
+                    flex: 1,
+                    minWidth: 0
+                  }}>
                     {bulkMode && (
                       <div style={{
-                        width: '20px',
-                        height: '20px',
+                        width: window.innerWidth < 768 ? '24px' : '20px',
+                        height: window.innerWidth < 768 ? '24px' : '20px',
                         border: `2px solid ${selectedItems.has(transaction.id) ? brandColors.primary[600] : brandColors.neutral[300]}`,
                         borderRadius: '4px',
                         backgroundColor: brandColors.white,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}>
                         {selectedItems.has(transaction.id) && (
-                          <Check size={12} color={brandColors.primary[600]} />
+                          <Check size={window.innerWidth < 768 ? 14 : 12} color={brandColors.primary[600]} />
                         )}
                       </div>
                     )}
                     
                     <div style={{
-                      width: '36px',
-                      height: '36px',
+                      width: window.innerWidth < 768 ? '40px' : '36px',
+                      height: window.innerWidth < 768 ? '40px' : '36px',
                       borderRadius: '50%',
                       backgroundColor: transaction.type === 'invoice' ? brandColors.success[100] : brandColors.error[100],
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      flexShrink: 0
                     }}>
                       {transaction.type === 'invoice' ? (
-                        <ArrowUpRight size={18} color={brandColors.success[600]} />
+                        <ArrowUpRight size={window.innerWidth < 768 ? 20 : 18} color={brandColors.success[600]} />
                       ) : (
-                        <ArrowDownRight size={18} color={brandColors.error[600]} />
+                        <ArrowDownRight size={window.innerWidth < 768 ? 20 : 18} color={brandColors.error[600]} />
                       )}
                     </div>
                     
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{
-                        fontSize: '0.875rem',
+                        fontSize: window.innerWidth < 768 ? '0.9rem' : '0.875rem',
                         fontWeight: '600',
                         color: brandColors.neutral[900],
-                        margin: '0 0 0.125rem 0'
+                        margin: '0 0 0.125rem 0',
+                        wordBreak: 'break-word',
+                        lineHeight: '1.3'
                       }}>
                         {transaction.type === 'invoice' 
                           ? (transaction.client_name || 'Client')
@@ -851,9 +874,11 @@ export default function TransactionPage() {
                         }
                       </p>
                       <p style={{
-                        fontSize: '0.75rem',
+                        fontSize: window.innerWidth < 768 ? '0.8rem' : '0.75rem',
                         color: brandColors.neutral[500],
-                        margin: 0
+                        margin: 0,
+                        wordBreak: 'break-word',
+                        lineHeight: '1.3'
                       }}>
                         {transaction.type === 'invoice' 
                           ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
@@ -863,13 +888,24 @@ export default function TransactionPage() {
                     </div>
                   </div>
                   
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: window.innerWidth < 768 ? '0.25rem' : '0.5rem',
+                    flexShrink: 0
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'flex-end', 
+                      gap: window.innerWidth < 768 ? '0.125rem' : '0.25rem' 
+                    }}>
                       <p style={{
-                        fontSize: '0.875rem',
+                        fontSize: window.innerWidth < 768 ? '0.9rem' : '0.875rem',
                         fontWeight: '600',
                         color: transaction.type === 'invoice' ? brandColors.success[600] : brandColors.error[600],
-                        margin: 0
+                        margin: 0,
+                        whiteSpace: 'nowrap'
                       }}>
                         {formatAmount(transaction.total_amount, transaction.type)}
                       </p>
@@ -884,7 +920,7 @@ export default function TransactionPage() {
                         <button 
                           onClick={() => setShowTransactionDropdown(showTransactionDropdown === transaction.id ? null : transaction.id)}
                           style={{
-                            padding: '0.5rem',
+                            padding: window.innerWidth < 768 ? '0.75rem' : '0.5rem',
                             backgroundColor: 'transparent',
                             border: 'none',
                             cursor: 'pointer',
@@ -892,7 +928,9 @@ export default function TransactionPage() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            transition: 'background-color 0.2s ease'
+                            transition: 'background-color 0.2s ease',
+                            minWidth: window.innerWidth < 768 ? '44px' : 'auto',
+                            minHeight: window.innerWidth < 768 ? '44px' : 'auto'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = brandColors.neutral[100]
