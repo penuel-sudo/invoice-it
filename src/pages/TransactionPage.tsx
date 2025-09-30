@@ -428,38 +428,36 @@ export default function TransactionPage() {
           top: 0,
           zIndex: 10
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                padding: '0.5rem',
-                backgroundColor: brandColors.neutral[100],
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: brandColors.neutral[600],
-                fontSize: '0.875rem',
-                fontWeight: '500'
-              }}
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-            
-            <h1 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              margin: 0,
-              textAlign: 'center',
-              flex: 1
-            }}>
-              {bulkMode ? `${selectedItems.size} selected` : 'Transactions'}
-            </h1>
-          </div>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: brandColors.neutral[100],
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              color: brandColors.neutral[600],
+              fontSize: '0.875rem',
+              fontWeight: '500'
+            }}
+          >
+            <ArrowLeft size={16} />
+            Back
+          </button>
+          
+          <h1 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            margin: 0,
+            textAlign: 'center',
+            flex: 1
+          }}>
+            {bulkMode ? `${selectedItems.size} selected` : 'Transactions'}
+          </h1>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {bulkMode ? (
@@ -518,35 +516,35 @@ export default function TransactionPage() {
                     minWidth: '180px'
                   }}>
                     <div style={{ padding: '0.25rem' }}>
-                      <button
+                    <button
                         onClick={() => {
-                          enterBulkMode()
-                          setShowTopbarDropdown(false)
-                        }}
-                        style={{
-                          width: '100%',
+                        enterBulkMode()
+                        setShowTopbarDropdown(false)
+                      }}
+                      style={{
+                        width: '100%',
                           padding: '0.5rem 0.75rem',
-                          backgroundColor: 'transparent',
-                          border: 'none',
+                        backgroundColor: 'transparent',
+                        border: 'none',
                           borderRadius: '6px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
                           gap: '0.5rem',
-                          fontSize: '0.875rem',
-                          fontWeight: '500',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
                           color: brandColors.neutral[700]
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent'
-                        }}
-                      >
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }}
+                    >
                         <CheckSquare size={16} />
-                        Select Multiple
-                      </button>
+                      Select Multiple
+                    </button>
                     </div>
                   </div>
                 )}
@@ -774,7 +772,7 @@ export default function TransactionPage() {
                   border: `1px solid ${brandColors.neutral[200]}`,
                   cursor: bulkMode ? 'pointer' : 'pointer',
                   backdropFilter: 'blur(10px)',
-                  transition: 'all 0.3s ease'
+                  transition: 'background-color 0.2s ease, box-shadow 0.2s ease'
                 }}
                 onClick={() => bulkMode ? toggleSelection(transaction.id) : undefined}
                 onMouseDown={(e) => {
@@ -930,19 +928,19 @@ export default function TransactionPage() {
                               }
                             }}
                             style={{
-                              position: 'absolute',
+                            position: 'absolute',
                               top: '100%',
                               right: '0',
                               marginTop: '0.5rem',
-                              backgroundColor: brandColors.white,
-                              border: `1px solid ${brandColors.neutral[200]}`,
-                              borderRadius: '12px',
-                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                            backgroundColor: brandColors.white,
+                            border: `1px solid ${brandColors.neutral[200]}`,
+                            borderRadius: '12px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                               zIndex: 1000,
-                              width: '160px',
-                              padding: '0.5rem 0',
-                              overflow: 'hidden'
-                            }}>
+                            width: '160px',
+                            padding: '0.5rem 0',
+                            overflow: 'hidden'
+                          }}>
                             {/* View */}
                             <button
                               onMouseDown={(e) => {
