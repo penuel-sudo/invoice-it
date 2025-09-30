@@ -765,7 +765,7 @@ export default function TransactionPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '1.5rem',
+                  padding: '1rem',
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   borderRadius: '16px',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
