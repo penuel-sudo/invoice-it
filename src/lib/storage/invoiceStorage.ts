@@ -24,6 +24,16 @@ export interface InvoiceItem {
   lineTotal: number
 }
 
+export interface PaymentDetails {
+  bankName?: string
+  accountNumber?: string
+  accountName?: string
+  routingNumber?: string
+  swiftCode?: string
+  paypalEmail?: string
+  instructions?: string
+}
+
 export interface InvoiceFormData {
   clientName: string
   clientEmail: string
@@ -38,6 +48,9 @@ export interface InvoiceFormData {
   subtotal: number
   taxTotal: number
   grandTotal: number
+  currency?: string
+  currencySymbol?: string
+  paymentDetails?: PaymentDetails
 }
 
 // Alias for preview page compatibility
@@ -175,7 +188,10 @@ export const invoiceStorage = {
       notes: '',
       subtotal: 0,
       taxTotal: 0,
-      grandTotal: 0
+      grandTotal: 0,
+      currency: 'USD',
+      currencySymbol: '$',
+      paymentDetails: undefined
     }
   }
 }

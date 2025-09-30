@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChevronDown, User, CreditCard, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { getUserProfilePictureUrl, getUserDisplayName, getUserInitial } from '../lib/profilePicture'
-import SettingsPanel from './SettingsPanel'
 import NotificationDropdown from './NotificationDropdown'
 import toast from 'react-hot-toast'
 
@@ -21,9 +21,9 @@ export default function ProfileDropdown({
   onSettingsOpen
 }: ProfileDropdownProps) {
   const { user, signOut } = useAuth()
+  const navigate = useNavigate()
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSettingsVisible, setIsSettingsVisible] = useState(false)
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
 
   // Load profile picture when component mounts or user changes
@@ -318,13 +318,7 @@ export default function ProfileDropdown({
         </DropdownMenuItem>
         
         <DropdownMenuItem 
-          onClick={() => {
-            if ((variant === 'sidebar' || variant === 'topbar') && onSettingsOpen) {
-              onSettingsOpen()
-            } else {
-              setIsSettingsVisible(true)
-            }
-          }}
+          onClick={() => navigate('/settings')}
           style={{
             padding: '0.75rem',
             borderRadius: '6px',
@@ -359,21 +353,11 @@ export default function ProfileDropdown({
       </DropdownMenuContent>
     </DropdownMenu>
 
-    {/* Settings Panel - Only show for header variant (mobile) */}
-    {variant === 'header' && (
-      <>
-        <SettingsPanel 
-          isVisible={isSettingsVisible} 
-          onClose={() => setIsSettingsVisible(false)}
-          onNotificationClick={() => setIsNotificationVisible(true)}
-        />
-        
-        <NotificationDropdown 
-          isVisible={isNotificationVisible} 
-          onClose={() => setIsNotificationVisible(false)} 
-        />
-      </>
-    )}
+    {/* Notification Dropdown */}
+    <NotificationDropdown 
+      isVisible={isNotificationVisible}
+      onClose={() => setIsNotificationVisible(false)}
+    />
   </>
   )
 }

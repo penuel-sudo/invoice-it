@@ -10,6 +10,7 @@ import ExpensePreviewPage from '../pages/ExpensePreviewPage'
 import TemplateGalleryPage from '../pages/TemplateGalleryPage'
 import ResetPasswordPage from '../pages/reset-password'
 import ProfilePage from '../pages/ProfilePage'
+import SettingsPage from '../pages/SettingsPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import AuthWrapper from '../components/AuthWrapper'
 
@@ -87,6 +88,14 @@ export const router = createBrowserRouter([
     element: (
       <AuthWrapper requireAuth={true}>
         <ProfilePage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/settings',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <SettingsPage />
       </AuthWrapper>
     )
   },

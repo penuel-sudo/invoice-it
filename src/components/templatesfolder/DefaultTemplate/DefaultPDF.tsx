@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import type { InvoiceData } from '../../../lib/storage/invoiceStorage'
+import { getCurrencySymbol } from '../../../lib/currencyUtils'
 
 // PDF-specific styles matching the preview layout
 const styles = StyleSheet.create({
@@ -37,15 +38,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 10,
     fontWeight: 'bold'
-  },
-  statusBadge: {
-    backgroundColor: '#fef3c7', // warning background
-    color: '#d97706',
-    padding: '4 12',
-    borderRadius: 12,
-    fontSize: 9,
-    fontWeight: 'bold',
-    textTransform: 'uppercase'
   },
   amountSection: {
     marginTop: 20,
@@ -118,7 +110,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: 12
+    marginBottom: 12,
+    textAlign: 'center'
   },
   itemRow: {
     flexDirection: 'row',
@@ -178,7 +171,8 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     color: '#374151',
-    marginBottom: 8
+    marginBottom: 8,
+    textAlign: 'center'
   },
   notesText: {
     fontSize: 10,
@@ -200,6 +194,23 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: '#d1d5db',
     fontStyle: 'italic'
+  },
+  paymentSection: {
+    borderTop: '1px solid #e5e7eb',
+    marginTop: 12,
+    paddingTop: 12
+  },
+  paymentTitle: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#374151',
+    marginBottom: 8
+  },
+  paymentText: {
+    fontSize: 9,
+    color: '#6b7280',
+    lineHeight: 1.6,
+    marginBottom: 3
   }
 })
 
@@ -227,26 +238,26 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
     return `${days} days`
   }
 
+  // Get currency symbol
+  const currencySymbol = invoiceData.currencySymbol || getCurrencySymbol(invoiceData.currency || 'USD')
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.container}>
           {/* Invoice Preview Card */}
           <View style={styles.card}>
-            {/* Header Badge and Status */}
+            {/* Header Badge */}
             <View style={styles.headerBadge}>
               <View style={styles.badge}>
                 <Text>Payment - {invoiceData.invoiceNumber}</Text>
-              </View>
-              <View style={styles.statusBadge}>
-                <Text>PENDING</Text>
               </View>
             </View>
 
             {/* Amount */}
             <View style={styles.amountSection}>
               <Text style={styles.amount}>
-                ${invoiceData.grandTotal.toFixed(2)}
+                {currencySymbol}{invoiceData.grandTotal.toFixed(2)}
               </Text>
             </View>
 
@@ -288,7 +299,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                     {item.quantity} {item.description}
                   </Text>
                   <Text style={styles.itemPrice}>
-                    ${item.lineTotal.toFixed(2)}
+                    {currencySymbol}{item.lineTotal.toFixed(2)}
                   </Text>
                 </View>
               ))}
@@ -300,13 +311,13 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Subtotal</Text>
                     <Text style={styles.totalValue}>
-                      ${invoiceData.subtotal.toFixed(2)}
+                      {currencySymbol}{invoiceData.subtotal.toFixed(2)}
                     </Text>
                   </View>
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Tax</Text>
                     <Text style={styles.totalValue}>
-                      ${invoiceData.taxTotal.toFixed(2)}
+                      {currencySymbol}{invoiceData.taxTotal.toFixed(2)}
                     </Text>
                   </View>
                 </>
@@ -317,7 +328,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
               <View style={styles.grandTotalRow}>
                 <Text style={styles.grandTotalLabel}>TOTAL</Text>
                 <Text style={styles.grandTotalValue}>
-                  ${invoiceData.grandTotal.toFixed(2)}
+                  {currencySymbol}{invoiceData.grandTotal.toFixed(2)}
                 </Text>
               </View>
 
@@ -326,6 +337,36 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                 <View style={styles.notesSection}>
                   <Text style={styles.notesTitle}>Notes:</Text>
                   <Text style={styles.notesText}>{invoiceData.notes}</Text>
+                </View>
+              )}
+
+              {/* Payment Details Section */}
+              {invoiceData.paymentDetails && (
+                <View style={styles.paymentSection}>
+                  <Text style={styles.paymentTitle}>Payment Information:</Text>
+                  {invoiceData.paymentDetails.bankName && (
+                    <Text style={styles.paymentText}>Bank: {invoiceData.paymentDetails.bankName}</Text>
+                  )}
+                  {invoiceData.paymentDetails.accountName && (
+                    <Text style={styles.paymentText}>Account Name: {invoiceData.paymentDetails.accountName}</Text>
+                  )}
+                  {invoiceData.paymentDetails.accountNumber && (
+                    <Text style={styles.paymentText}>Account: {invoiceData.paymentDetails.accountNumber}</Text>
+                  )}
+                  {invoiceData.paymentDetails.routingNumber && (
+                    <Text style={styles.paymentText}>Routing: {invoiceData.paymentDetails.routingNumber}</Text>
+                  )}
+                  {invoiceData.paymentDetails.swiftCode && (
+                    <Text style={styles.paymentText}>SWIFT: {invoiceData.paymentDetails.swiftCode}</Text>
+                  )}
+                  {invoiceData.paymentDetails.paypalEmail && (
+                    <Text style={styles.paymentText}>PayPal: {invoiceData.paymentDetails.paypalEmail}</Text>
+                  )}
+                  {invoiceData.paymentDetails.instructions && (
+                    <Text style={[styles.paymentText, { marginTop: 6, fontStyle: 'italic' }]}>
+                      {invoiceData.paymentDetails.instructions}
+                    </Text>
+                  )}
                 </View>
               )}
 

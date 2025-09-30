@@ -1,8 +1,6 @@
 import { Home, FileText, Plus, BarChart3, Menu } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
 import { brandColors } from '../../stylings'
-import SettingsPanel from '../SettingsPanel'
 import NotificationDropdown from '../NotificationDropdown'
 
 const navigationItems = [
@@ -20,13 +18,11 @@ interface BottomNavProps {
 export default function BottomNav({ isNotificationVisible = false, onNotificationToggle }: BottomNavProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const [isSettingsVisible, setIsSettingsVisible] = useState(false)
 
   const handleNavigation = (path: string) => {
     if (path === '/menu') {
-      setIsSettingsVisible(!isSettingsVisible)
+      navigate('/settings')
     } else {
-      setIsSettingsVisible(false)
       navigate(path)
     }
   }
@@ -37,13 +33,6 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
       <NotificationDropdown 
         isVisible={isNotificationVisible} 
         onClose={() => onNotificationToggle?.()} 
-      />
-      
-      {/* Settings Panel */}
-      <SettingsPanel 
-        isVisible={isSettingsVisible} 
-        onClose={() => setIsSettingsVisible(false)}
-        onNotificationClick={() => onNotificationToggle?.()}
       />
       
       <nav style={{

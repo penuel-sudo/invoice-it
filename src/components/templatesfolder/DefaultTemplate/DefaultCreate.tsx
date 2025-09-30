@@ -4,9 +4,10 @@ import { useAuth } from '../../../lib/useAuth'
 import { brandColors } from '../../../stylings'
 import { Layout } from '../../layout'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
-import type { InvoiceFormData, InvoiceItem } from '../../../lib/storage/invoiceStorage'
+import type { InvoiceFormData, InvoiceItem, PaymentDetails } from '../../../lib/storage/invoiceStorage'
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
+import { CURRENCIES, getCurrencySymbol } from '../../../lib/currencyUtils'
 import { 
   ArrowLeft, 
   Save, 
@@ -18,7 +19,8 @@ import {
   Mail,
   MapPin,
   FileText,
-  DollarSign
+  DollarSign,
+  CreditCard
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -31,6 +33,11 @@ export default function InvoiceCreatePage() {
   
   const [formData, setFormData] = useState<InvoiceFormData>(invoiceStorage.getDraftWithFallback())
   const [loading, setLoading] = useState(false)
+  const [userDefaults, setUserDefaults] = useState<{ currency: string; currencySymbol: string; paymentDetails: PaymentDetails | null }>({
+    currency: 'USD',
+    currencySymbol: '$',
+    paymentDetails: null
+  })
   
   // Load invoice data from URL parameter or state
   useEffect(() => {
@@ -123,6 +130,51 @@ export default function InvoiceCreatePage() {
   }, [searchParams, location.state, navigate, user])
 
   const [isSaving, setIsSaving] = useState(false)
+
+  // Load user's default currency and payment details
+  useEffect(() => {
+    const loadUserDefaults = async () => {
+      if (!user) return
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('currency_code, default_payment_details')
+          .eq('id', user.id)
+          .single()
+
+        if (error) {
+          console.error('Error loading user defaults:', error)
+          return
+        }
+
+        if (data) {
+          const currencyCode = data.currency_code || 'USD'
+          const currencySymbol = getCurrencySymbol(currencyCode)
+          
+          setUserDefaults({
+            currency: currencyCode,
+            currencySymbol: currencySymbol,
+            paymentDetails: data.default_payment_details
+          })
+
+          // Set form data with user defaults if this is a new invoice
+          if (!formData.currency) {
+            setFormData(prev => ({
+              ...prev,
+              currency: currencyCode,
+              currencySymbol: currencySymbol,
+              paymentDetails: data.default_payment_details
+            }))
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user defaults:', error)
+      }
+    }
+
+    loadUserDefaults()
+  }, [user])
 
   // Calculate totals whenever items change
   useEffect(() => {
@@ -259,6 +311,8 @@ export default function InvoiceCreatePage() {
           total_amount: formData.grandTotal,
           status: 'draft',
           template: 'default',
+          currency_code: formData.currency || 'USD',
+          payment_details: formData.paymentDetails || null,
           template_data: {
             layout: 'clean',
             colors: {
@@ -273,7 +327,8 @@ export default function InvoiceCreatePage() {
           template_settings: {
             userPreferences: {
               defaultTaxRate: formData.taxTotal,
-              currency: 'USD',
+              currency: formData.currency || 'USD',
+              currencySymbol: formData.currencySymbol || '$',
               dateFormat: 'MM/DD/YYYY'
             },
             branding: {
@@ -939,6 +994,233 @@ export default function InvoiceCreatePage() {
             />
           </div>
 
+          {/* Currency Card */}
+          <div style={{
+            backgroundColor: brandColors.white,
+            borderRadius: '16px',
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1rem'
+            }}>
+              <DollarSign size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Currency
+              </h2>
+            </div>
+
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: brandColors.neutral[700],
+                marginBottom: '0.5rem'
+              }}>
+                Invoice Currency
+              </label>
+              <select
+                value={formData.currency || 'USD'}
+                onChange={(e) => {
+                  const selectedCurrency = CURRENCIES.find(c => c.code === e.target.value)
+                  setFormData(prev => ({
+                    ...prev,
+                    currency: e.target.value,
+                    currencySymbol: selectedCurrency?.symbol || '$'
+                  }))
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: `1px solid ${brandColors.neutral[200]}`,
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  backgroundColor: brandColors.white,
+                  color: brandColors.neutral[900],
+                  cursor: 'pointer'
+                }}
+              >
+                {CURRENCIES.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.symbol} {currency.code} - {currency.name}
+                  </option>
+                ))}
+              </select>
+              <p style={{
+                fontSize: '0.75rem',
+                color: brandColors.neutral[500],
+                marginTop: '0.5rem'
+              }}>
+                Default: {userDefaults.currencySymbol} {userDefaults.currency}
+              </p>
+            </div>
+          </div>
+
+          {/* Payment Details Card */}
+          <div style={{
+            backgroundColor: brandColors.white,
+            borderRadius: '16px',
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1rem'
+            }}>
+              <CreditCard size={20} color={brandColors.primary[600]} />
+              <h2 style={{
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: brandColors.neutral[900],
+                margin: 0
+              }}>
+                Payment Information (Optional)
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (formData.paymentDetails) {
+                  setFormData(prev => ({ ...prev, paymentDetails: undefined }))
+                } else {
+                  setFormData(prev => ({ ...prev, paymentDetails: userDefaults.paymentDetails || {} }))
+                }
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: formData.paymentDetails ? brandColors.error[100] : brandColors.primary[100],
+                color: formData.paymentDetails ? brandColors.error[600] : brandColors.primary[600],
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                marginBottom: formData.paymentDetails ? '1rem' : 0
+              }}
+            >
+              {formData.paymentDetails ? 'Remove Payment Details' : 'Add Payment Details'}
+            </button>
+
+            {formData.paymentDetails && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[600],
+                    marginBottom: '0.25rem'
+                  }}>
+                    Bank Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.paymentDetails.bankName || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      paymentDetails: { ...prev.paymentDetails, bankName: e.target.value }
+                    }))}
+                    placeholder="e.g., Chase Bank"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '6px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[600],
+                    marginBottom: '0.25rem'
+                  }}>
+                    Account Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.paymentDetails.accountName || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      paymentDetails: { ...prev.paymentDetails, accountName: e.target.value }
+                    }))}
+                    placeholder="e.g., Your Business LLC"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '6px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[600],
+                    marginBottom: '0.25rem'
+                  }}>
+                    Account Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.paymentDetails.accountNumber || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      paymentDetails: { ...prev.paymentDetails, accountNumber: e.target.value }
+                    }))}
+                    placeholder="e.g., **** **** 1234"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '6px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
+
+                <p style={{
+                  fontSize: '0.7rem',
+                  color: brandColors.neutral[500],
+                  margin: 0,
+                  fontStyle: 'italic'
+                }}>
+                  Using default payment details from settings. You can modify them for this invoice.
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Summary Card */}
           <div style={{
             backgroundColor: brandColors.white,
@@ -974,7 +1256,7 @@ export default function InvoiceCreatePage() {
                   fontWeight: '500',
                   color: brandColors.neutral[900]
                 }}>
-                  ${formData.subtotal.toFixed(2)}
+                  {formData.currencySymbol || '$'}{formData.subtotal.toFixed(2)}
                 </span>
               </div>
               
@@ -994,7 +1276,7 @@ export default function InvoiceCreatePage() {
                   fontWeight: '500',
                   color: brandColors.neutral[900]
                 }}>
-                  ${formData.taxTotal.toFixed(2)}
+                  {formData.currencySymbol || '$'}{formData.taxTotal.toFixed(2)}
                 </span>
               </div>
               
@@ -1017,7 +1299,7 @@ export default function InvoiceCreatePage() {
                   fontWeight: '700',
                   color: brandColors.primary[600]
                 }}>
-                  ${formData.grandTotal.toFixed(2)}
+                  {formData.currencySymbol || '$'}{formData.grandTotal.toFixed(2)}
                 </span>
               </div>
             </div>

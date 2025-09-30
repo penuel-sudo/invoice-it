@@ -5,7 +5,6 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { getUserDisplayName, getUserProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
 import NotificationDropdown from '../components/NotificationDropdown'
-import DesktopSettingsPanel from '../components/DesktopSettingsPanel'
 import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
 // StatusLogic removed - StatusButton handles validation internally
@@ -30,7 +29,6 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
-  const [isSettingsVisible, setIsSettingsVisible] = useState(false)
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -191,14 +189,8 @@ export default function DashboardPage() {
     <Layout 
       isNotificationVisible={isNotificationVisible}
       onNotificationToggle={() => setIsNotificationVisible(!isNotificationVisible)}
-      onSettingsOpen={() => setIsSettingsVisible(true)}
+      onSettingsOpen={() => navigate('/settings')}
     >
-      {/* Desktop Settings Panel */}
-      <DesktopSettingsPanel
-        isVisible={isSettingsVisible}
-        onClose={() => setIsSettingsVisible(false)}
-        onNotificationClick={() => setIsNotificationVisible(true)}
-      />
       
       {/* Notification Dropdown */}
       <NotificationDropdown
@@ -220,7 +212,7 @@ export default function DashboardPage() {
         {/* Topbar - Above display panel */}
         <Topbar 
           onNotificationClick={() => setIsNotificationVisible(!isNotificationVisible)}
-          onSettingsOpen={() => setIsSettingsVisible(true)}
+          onSettingsOpen={() => navigate('/settings')}
           unreadCount={3}
         />
         

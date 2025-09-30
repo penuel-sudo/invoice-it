@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { pdf } from '@react-pdf/renderer'
 import { getPDFTemplate } from '../../lib/templateRegistry'
 import type { InvoiceData } from '../../lib/storage/invoiceStorage'
+import { supabase } from '../../lib/supabaseClient'
 
 interface DownloadButtonProps {
   invoiceData: InvoiceData
@@ -34,6 +35,27 @@ export default function DownloadButton({
     try {
       // Show loading state
       toast.loading('Generating PDF...', { id: 'pdf-generation' })
+      
+      // Update invoice status to 'pending' if it's not already pending (for saved invoices)
+      // Query to find if this invoice exists in the database
+      const { data: existingInvoice } = await supabase
+        .from('invoices')
+        .select('id, status')
+        .eq('invoice_number', invoiceData.invoiceNumber)
+        .eq('user_id', user.id)
+        .single()
+      
+      // If invoice exists and status is 'draft', update to 'pending'
+      if (existingInvoice && existingInvoice.status === 'draft') {
+        await supabase
+          .from('invoices')
+          .update({ 
+            status: 'pending',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingInvoice.id)
+          .eq('user_id', user.id)
+      }
       
       // Get the correct PDF template based on template name
       const PDFTemplate = getPDFTemplate(template)

@@ -6,6 +6,7 @@ import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import type { InvoiceData } from '../../../lib/storage/invoiceStorage'
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
+import { getCurrencySymbol } from '../../../lib/currencyUtils'
 import { 
   ArrowLeft, 
   FileText,
@@ -105,6 +106,7 @@ export default function InvoicePreviewPage() {
 
           if (invoiceData) {
             // Convert database invoice to InvoiceData format
+            const currencyCode = invoiceData.currency_code || 'USD'
             const transformedData: InvoiceData = {
               invoiceNumber: invoiceData.invoice_number,
               invoiceDate: invoiceData.issue_date,
@@ -125,7 +127,10 @@ export default function InvoicePreviewPage() {
               subtotal: invoiceData.subtotal || 0,
               taxTotal: invoiceData.tax_amount || 0,
               grandTotal: invoiceData.total_amount || 0,
-              notes: invoiceData.notes || ''
+              notes: invoiceData.notes || '',
+              currency: currencyCode,
+              currencySymbol: getCurrencySymbol(currencyCode),
+              paymentDetails: invoiceData.payment_details || undefined
             }
             setInvoiceData(transformedData)
             setDbStatus(invoiceData.status || 'draft')
@@ -336,7 +341,7 @@ export default function InvoicePreviewPage() {
               color: brandColors.neutral[900],
               margin: '0 0 0.5rem 0'
             }}>
-              ${invoiceData.grandTotal.toFixed(2)}
+              {invoiceData.currencySymbol || '$'}{invoiceData.grandTotal.toFixed(2)}
             </h1>
           </div>
 
@@ -430,7 +435,7 @@ export default function InvoicePreviewPage() {
                     {item.quantity} {item.description}
                   </span>
                   <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
-                    ${item.lineTotal.toFixed(2)}
+                    {invoiceData.currencySymbol || '$'}{item.lineTotal.toFixed(2)}
                   </span>
                 </div>
               ))}
@@ -449,7 +454,7 @@ export default function InvoicePreviewPage() {
                       Subtotal
                     </span>
                     <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
-                      ${invoiceData.subtotal.toFixed(2)}
+                      {invoiceData.currencySymbol || '$'}{invoiceData.subtotal.toFixed(2)}
                     </span>
                   </div>
                   
@@ -458,7 +463,7 @@ export default function InvoicePreviewPage() {
                       Tax
                     </span>
                     <span style={{ fontSize: '0.75rem', color: brandColors.neutral[900] }}>
-                      ${invoiceData.taxTotal.toFixed(2)}
+                      {invoiceData.currencySymbol || '$'}{invoiceData.taxTotal.toFixed(2)}
                     </span>
                   </div>
                 </>
@@ -476,7 +481,7 @@ export default function InvoicePreviewPage() {
                   TOTAL
                 </span>
                 <span style={{ fontSize: '0.75rem', fontWeight: '600', color: brandColors.neutral[900] }}>
-                  ${invoiceData.grandTotal.toFixed(2)}
+                  {invoiceData.currencySymbol || '$'}{invoiceData.grandTotal.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -503,6 +508,53 @@ export default function InvoicePreviewPage() {
                   whiteSpace: 'pre-line'
                 }}>
                   {invoiceData.notes}
+                </div>
+              </div>
+            )}
+
+            {/* Payment Details Section */}
+            {invoiceData.paymentDetails && (
+              <div style={{
+                borderTop: `1px solid ${brandColors.neutral[200]}`,
+                margin: '1rem 0 0 0',
+                paddingTop: '0.75rem'
+              }}>
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[700],
+                  marginBottom: '0.5rem'
+                }}>
+                  Payment Information:
+                </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  color: brandColors.neutral[600],
+                  lineHeight: '1.6'
+                }}>
+                  {invoiceData.paymentDetails.bankName && (
+                    <div>Bank: {invoiceData.paymentDetails.bankName}</div>
+                  )}
+                  {invoiceData.paymentDetails.accountName && (
+                    <div>Account Name: {invoiceData.paymentDetails.accountName}</div>
+                  )}
+                  {invoiceData.paymentDetails.accountNumber && (
+                    <div>Account: {invoiceData.paymentDetails.accountNumber}</div>
+                  )}
+                  {invoiceData.paymentDetails.routingNumber && (
+                    <div>Routing: {invoiceData.paymentDetails.routingNumber}</div>
+                  )}
+                  {invoiceData.paymentDetails.swiftCode && (
+                    <div>SWIFT: {invoiceData.paymentDetails.swiftCode}</div>
+                  )}
+                  {invoiceData.paymentDetails.paypalEmail && (
+                    <div>PayPal: {invoiceData.paymentDetails.paypalEmail}</div>
+                  )}
+                  {invoiceData.paymentDetails.instructions && (
+                    <div style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
+                      {invoiceData.paymentDetails.instructions}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
