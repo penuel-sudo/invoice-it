@@ -75,6 +75,36 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      // Check user's notification preferences
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('notification_preferences')
+        .eq('id', user.id)
+        .single()
+
+      const prefs = profileData?.notification_preferences || { enabled: true, push_enabled: true }
+
+      // If notifications are disabled globally, don't create
+      if (!prefs.enabled) {
+        console.log('Notifications disabled for user')
+        return
+      }
+
+      // Check specific notification type preferences
+      const notifTypeMapping: Record<string, string> = {
+        'Invoice Sent': 'invoice_sent',
+        'Payment Received': 'payment_received',
+        'Payment Overdue': 'payment_overdue',
+        'Invoice Created': 'invoice_created',
+        'Status Changed': 'status_changed'
+      }
+
+      const notifType = notifTypeMapping[notification.title]
+      if (notifType && prefs[notifType] === false) {
+        console.log(`Notification type ${notifType} disabled for user`)
+        return
+      }
+
       const { data, error } = await supabase
         .from('notifications')
         .insert({
@@ -99,8 +129,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       setNotifications(prev => [data, ...prev])
       setUnreadCount(prev => prev + 1)
 
-      // Show browser notification if permission granted
-      if (Notification.permission === 'granted') {
+      // Show browser notification if permission granted AND push enabled
+      if (prefs.push_enabled && Notification.permission === 'granted') {
         new Notification(notification.title, {
           body: notification.message,
           icon: '/logo_web_app_128x128.png',

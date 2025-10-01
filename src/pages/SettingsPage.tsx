@@ -17,7 +17,19 @@ import {
 import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
 import PaymentMethodManager from '../components/PaymentMethodManager'
+import NotificationSettings from '../components/NotificationSettings'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
+
+interface NotificationPreferences {
+  enabled: boolean
+  push_enabled: boolean
+  email_enabled: boolean
+  invoice_sent: boolean
+  payment_received: boolean
+  payment_overdue: boolean
+  invoice_created: boolean
+  status_changed: boolean
+}
 
 interface ProfileData {
   full_name: string
@@ -30,6 +42,7 @@ interface ProfileData {
   phone_prefix: string
   currency_code: string
   payment_methods: PaymentMethod[]
+  notification_preferences: NotificationPreferences
 }
 
 const CURRENCIES = [
@@ -70,7 +83,17 @@ export default function SettingsPage() {
     country_name: '',
     phone_prefix: '',
     currency_code: 'USD',
-    payment_methods: []
+    payment_methods: [],
+    notification_preferences: {
+      enabled: true,
+      push_enabled: true,
+      email_enabled: true,
+      invoice_sent: true,
+      payment_received: true,
+      payment_overdue: true,
+      invoice_created: true,
+      status_changed: true
+    }
   })
 
 
@@ -108,7 +131,17 @@ export default function SettingsPage() {
           country_name: data.country_name || '',
           phone_prefix: data.phone_prefix || '',
           currency_code: data.currency_code || 'USD',
-          payment_methods: data.payment_methods || []
+          payment_methods: data.payment_methods || [],
+          notification_preferences: data.notification_preferences || {
+            enabled: true,
+            push_enabled: true,
+            email_enabled: true,
+            invoice_sent: true,
+            payment_received: true,
+            payment_overdue: true,
+            invoice_created: true,
+            status_changed: true
+          }
         })
       }
     } catch (error) {
@@ -206,27 +239,40 @@ export default function SettingsPage() {
     if (!user) return
 
     try {
-      setSaving(true)
       const { error } = await supabase
         .from('profiles')
-        .update({
-          payment_methods: methods,
-          updated_at: new Date().toISOString()
-        })
+        .update({ payment_methods: methods })
         .eq('id', user.id)
 
       if (error) {
         console.error('Error saving payment methods:', error)
         toast.error('Failed to save payment methods')
-        return
       }
-
-      toast.success('Payment methods updated successfully!')
     } catch (error) {
       console.error('Error saving payment methods:', error)
       toast.error('Failed to save payment methods')
-    } finally {
-      setSaving(false)
+    }
+  }
+
+  const saveNotificationPreferences = async (preferences: NotificationPreferences) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ notification_preferences: preferences })
+        .eq('id', user.id)
+
+      if (error) {
+        console.error('Error saving notification preferences:', error)
+        toast.error('Failed to save notification preferences')
+        return
+      }
+
+      toast.success('Notification preferences saved')
+    } catch (error) {
+      console.error('Error saving notification preferences:', error)
+      toast.error('Failed to save notification preferences')
     }
   }
 
@@ -709,23 +755,13 @@ export default function SettingsPage() {
 
               {/* Notifications Tab */}
               {activeTab === 'notifications' && (
-                <div>
-                  <h2 style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '600',
-                    color: brandColors.neutral[900],
-                    marginBottom: '0.5rem'
-                  }}>
-                    Notification Settings
-                  </h2>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
-                    marginBottom: '2rem'
-                  }}>
-                    Coming soon! Manage your notification preferences.
-                  </p>
-                </div>
+                <NotificationSettings
+                  preferences={profileData.notification_preferences}
+                  onChange={(newPrefs) => {
+                    setProfileData(prev => ({ ...prev, notification_preferences: newPrefs }))
+                    saveNotificationPreferences(newPrefs)
+                  }}
+                />
               )}
 
               {/* Appearance Tab */}
