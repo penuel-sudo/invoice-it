@@ -1,13 +1,13 @@
-import { Home, FileText, Plus, BarChart3, Menu } from 'lucide-react'
+import { Home, FileText, Layout, Plus, Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { brandColors } from '../../stylings'
 import NotificationDropdown from '../NotificationDropdown'
 
 const navigationItems = [
-  { id: 'Home', icon: Home, path: '/dashboard' },
-  { id: 'Transaction', icon: FileText, path: '/invoices' },
-  { id: 'Reports', icon: BarChart3, path: '/reports' },
-  { id: 'Menu', icon: Menu, path: '/menu' }
+  { id: 'Home', label: 'Home', icon: Home, path: '/dashboard' },
+  { id: 'Invoices', label: 'Invoices', icon: FileText, path: '/invoices?tab=invoices' },
+  { id: 'Templates', label: 'Templates', icon: Layout, path: '/templates' },
+  { id: 'Settings', label: 'Settings', icon: Settings, path: '/settings' }
 ]
 
 interface BottomNavProps {
@@ -18,14 +18,6 @@ interface BottomNavProps {
 export default function BottomNav({ isNotificationVisible = false, onNotificationToggle }: BottomNavProps) {
   const location = useLocation()
   const navigate = useNavigate()
-
-  const handleNavigation = (path: string) => {
-    if (path === '/menu') {
-      navigate('/settings')
-    } else {
-      navigate(path)
-    }
-  }
 
   return (
     <>
@@ -40,160 +32,104 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: brandColors.white,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
         borderTop: `1px solid ${brandColors.neutral[200]}`,
-        borderTopLeftRadius: '25px',
-        borderTopRightRadius: '25px',
-        borderBottomLeftRadius: '25px',
-        borderBottomRightRadius: '25px',
-        padding: '0.75rem 1.5rem 1rem 1.5rem',
+        padding: '0.5rem 1rem 0.75rem 1rem',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
+        gap: '0.5rem',
         zIndex: 50,
-        boxShadow: '0 -4px 12px 0 rgb(0 0 0 / 0.1)'
+        boxShadow: '0 -2px 20px rgba(0, 0, 0, 0.08)'
       }}>
-        {/* Left Section: Home */}
-        <button
-          onClick={() => handleNavigation('/dashboard')}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            padding: '0.5rem',
-            backgroundColor: 'transparent',
-            color: location.pathname === '/dashboard' ? brandColors.primary[600] : brandColors.neutral[500],
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: '500',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <Home size={24} />
-          <span style={{
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
-            Home
-          </span>
-        </button>
-
-        {/* Left Center Section: Transaction */}
+        {navigationItems.map((item) => {
+          const Icon = item.icon
+          // Handle both regular paths and paths with query params
+          const itemPath = item.path.split('?')[0]
+          const isActive = location.pathname === itemPath || 
+                          (item.id === 'Invoices' && location.pathname === '/invoices')
+          
+          return (
             <button
-          onClick={() => handleNavigation('/invoices')}
+              key={item.id}
+              onClick={() => navigate(item.path)}
               style={{
+                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '0.25rem',
-                padding: '0.5rem',
+                padding: '0.5rem 0.25rem',
                 backgroundColor: 'transparent',
-            color: location.pathname === '/invoices' ? brandColors.primary[600] : brandColors.neutral[500],
+                color: isActive ? brandColors.primary[600] : brandColors.neutral[400],
                 border: 'none',
-                borderRadius: '8px',
                 cursor: 'pointer',
-                fontSize: '10px',
-                fontWeight: '500',
-            transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                position: 'relative'
               }}
             >
-          <FileText size={24} />
+              <Icon 
+                size={22} 
+                strokeWidth={isActive ? 2.5 : 2}
+                style={{
+                  transition: 'all 0.2s ease'
+                }}
+              />
               <span style={{
-                fontSize: '11px',
-                fontWeight: '500'
+                fontSize: '10px',
+                fontWeight: isActive ? '600' : '500',
+                transition: 'all 0.2s ease'
               }}>
-            Transaction
+                {item.label}
               </span>
+              {isActive && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-0.5rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '4px',
+                  height: '4px',
+                  borderRadius: '50%',
+                  backgroundColor: brandColors.primary[600]
+                }} />
+              )}
             </button>
+          )
+        })}
 
         {/* Center Section: Create Button */}
         <button
           onClick={() => navigate('/invoice/new')}
           style={{
+            flex: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '0.75rem 1rem',
-            backgroundColor: 'transparent',
-            color: brandColors.primary[600],
-            border: `2px solid ${brandColors.primary[600]}`,
-            borderRadius: '12px',
+            width: '56px',
+            height: '56px',
+            marginTop: '-2rem',
+            backgroundColor: brandColors.primary[600],
+            color: brandColors.white,
+            border: `4px solid ${brandColors.white}`,
+            borderRadius: '50%',
             cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: '500',
-            transition: 'all 0.2s ease',
-            minWidth: '48px',
-            minHeight: '48px'
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+            position: 'relative'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.primary[600]
-            e.currentTarget.style.color = brandColors.white
+            e.currentTarget.style.transform = 'scale(1.05)'
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = brandColors.primary[600]
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.15)'
           }}
         >
-          <Plus size={28} />
-        </button>
-
-        {/* Right Center Section: Reports */}
-        <button
-          onClick={() => handleNavigation('/reports')}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            padding: '0.5rem',
-            backgroundColor: 'transparent',
-            color: location.pathname === '/reports' ? brandColors.primary[600] : brandColors.neutral[500],
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: '500',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <BarChart3 size={24} />
-          <span style={{
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
-            Reports
-          </span>
-        </button>
-
-        {/* Right Section: Menu */}
-        <button
-          onClick={() => handleNavigation('/menu')}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.25rem',
-            padding: '0.5rem',
-            backgroundColor: 'transparent',
-            color: (location.pathname === '/menu' || isSettingsVisible) ? brandColors.primary[600] : brandColors.neutral[500],
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: '500',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <Menu size={24} />
-          <span style={{
-            fontSize: '11px',
-            fontWeight: '500'
-          }}>
-            Menu
-          </span>
+          <Plus size={28} strokeWidth={2.5} />
         </button>
       </nav>
     </>
