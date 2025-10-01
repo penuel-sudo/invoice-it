@@ -319,7 +319,7 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div style={{
-          maxWidth: '600px',
+          maxWidth: window.innerWidth < 768 ? '600px' : '1000px',
           margin: '0 auto',
           padding: window.innerWidth < 768 ? '1rem' : '2rem'
         }}>
@@ -385,7 +385,11 @@ export default function SettingsPage() {
                     Profile Information
                   </h2>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ 
+                    display: 'grid',
+                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr',
+                    gap: '1.5rem'
+                  }}>
                     {/* Full Name */}
                     <div>
                       <label style={{
@@ -438,8 +442,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Email (Read Only) */}
-                    <div>
+                    {/* Email (Read Only) - Full Width */}
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -465,8 +469,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Country & Phone */}
-                    <div>
+                    {/* Country & Phone - Full Width */}
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -486,8 +490,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Address */}
-                    <div>
+                    {/* Address - Full Width */}
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -513,11 +517,12 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Save Button */}
+                    {/* Save Button - Full Width */}
                     <button
                       onClick={handleSaveProfile}
                       disabled={saving}
                       style={{
+                        gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1',
                         padding: '0.875rem 1.5rem',
                         backgroundColor: brandColors.primary[600],
                         color: 'white',
@@ -679,7 +684,11 @@ export default function SettingsPage() {
                     Set default payment information that will appear on your invoices. You can customize this per invoice.
                   </p>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ 
+                    display: 'grid',
+                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr',
+                    gap: '1.5rem'
+                  }}>
                     {/* Bank Name */}
                     <div>
                       <label style={{
@@ -758,9 +767,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      {/* Routing Number */}
-                      <div>
+                    {/* Routing Number */}
+                    <div>
                         <label style={{
                           display: 'block',
                           fontSize: '0.875rem',
@@ -806,14 +814,13 @@ export default function SettingsPage() {
                             padding: '0.75rem',
                             border: `1px solid ${brandColors.neutral[300]}`,
                             borderRadius: '8px',
-                            fontSize: '0.875rem'
-                          }}
-                        />
-                      </div>
+                          fontSize: '0.875rem'
+                        }}
+                      />
                     </div>
 
-                    {/* PayPal Email */}
-                    <div>
+                    {/* PayPal Email - Full Width */}
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -838,8 +845,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Payment Instructions */}
-                    <div>
+                    {/* Payment Instructions - Full Width */}
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -865,11 +872,12 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Save Button */}
+                    {/* Save Button - Full Width */}
                     <button
                       onClick={handleSavePaymentDetails}
                       disabled={saving}
                       style={{
+                        gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1',
                         padding: '0.875rem 1.5rem',
                         backgroundColor: brandColors.primary[600],
                         color: 'white',
