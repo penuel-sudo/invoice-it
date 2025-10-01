@@ -43,9 +43,9 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         zIndex: 50,
         boxShadow: '0 -2px 20px rgba(0, 0, 0, 0.08)'
       }}>
-        {navigationItems.map((item) => {
+        {/* Left Items (Home & Invoices) */}
+        {navigationItems.slice(0, 2).map((item) => {
           const Icon = item.icon
-          // Handle both regular paths and paths with query params
           const itemPath = item.path.split('?')[0]
           const isActive = location.pathname === itemPath || 
                           (item.id === 'Invoices' && location.pathname === '/invoices')
@@ -100,7 +100,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
           )
         })}
 
-        {/* Center Section: Create Button */}
+        {/* Center Section: Create Button (FAB) */}
         <button
           onClick={() => navigate('/invoice/new')}
           style={{
@@ -131,6 +131,62 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         >
           <Plus size={28} strokeWidth={2.5} />
         </button>
+
+        {/* Right Items (Templates & Settings) */}
+        {navigationItems.slice(2).map((item) => {
+          const Icon = item.icon
+          const itemPath = item.path.split('?')[0]
+          const isActive = location.pathname === itemPath
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.25rem',
+                padding: '0.5rem 0.25rem',
+                backgroundColor: 'transparent',
+                color: isActive ? brandColors.primary[600] : brandColors.neutral[400],
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                position: 'relative'
+              }}
+            >
+              <Icon 
+                size={22} 
+                strokeWidth={isActive ? 2.5 : 2}
+                style={{
+                  transition: 'all 0.2s ease'
+                }}
+              />
+              <span style={{
+                fontSize: '10px',
+                fontWeight: isActive ? '600' : '500',
+                transition: 'all 0.2s ease'
+              }}>
+                {item.label}
+              </span>
+              {isActive && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-0.5rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '4px',
+                  height: '4px',
+                  borderRadius: '50%',
+                  backgroundColor: brandColors.primary[600]
+                }} />
+              )}
+            </button>
+          )
+        })}
       </nav>
     </>
   )

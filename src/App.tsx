@@ -1,9 +1,14 @@
 import { RouterProvider } from 'react-router-dom'
 import { router } from './Routes'
+import { NotificationProvider } from './contexts/NotificationContext'
+import { Toaster } from 'react-hot-toast'
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <NotificationProvider>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </NotificationProvider>
   )
 }
 

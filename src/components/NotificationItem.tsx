@@ -1,16 +1,18 @@
 import { brandColors } from '../stylings'
 import StatusButton from './StatusButton'
+import { Trash2 } from 'lucide-react'
 
 interface NotificationItemProps {
-  id: number
+  id: string
   type: string
   title: string
   message: string
   time: string
   icon: any
-  status?: 'paid' | 'due' | 'pending' | 'spent' | 'income' | 'expense'
+  status?: 'paid' | 'pending' | 'overdue' | 'draft' | 'cancelled'
   isRead?: boolean
   onClick?: () => void
+  onDelete?: (id: string) => void
 }
 
 export default function NotificationItem({ 
@@ -22,7 +24,8 @@ export default function NotificationItem({
   icon: Icon, 
   status, 
   isRead = false,
-  onClick 
+  onClick,
+  onDelete 
 }: NotificationItemProps) {
   const getNotificationColor = (type: string) => {
     switch (type) {
@@ -94,6 +97,41 @@ export default function NotificationItem({
           borderRadius: '50%',
           border: `2px solid ${brandColors.white}`
         }} />
+      )}
+
+      {/* Delete button */}
+      {onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(id)
+          }}
+          style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            padding: '0.25rem',
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: 0.5,
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '1'
+            e.currentTarget.style.backgroundColor = brandColors.error[50]
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '0.5'
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          <Trash2 size={14} color={brandColors.error[500]} />
+        </button>
       )}
 
       <div style={{

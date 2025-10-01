@@ -213,7 +213,6 @@ export default function DashboardPage() {
         <Topbar 
           onNotificationClick={() => setIsNotificationVisible(!isNotificationVisible)}
           onSettingsOpen={() => navigate('/settings')}
-          unreadCount={3}
         />
         
         {/* 📊 DISPLAY PANEL - Mock Stats */}

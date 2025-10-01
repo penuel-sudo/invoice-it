@@ -4,14 +4,15 @@ import { useAuth } from '../../lib/useAuth'
 import { brandColors } from '../../stylings'
 import { getUserDisplayName, getUserProfilePictureUrl, getUserInitial } from '../../lib/profilePicture'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { useNotification } from '../../contexts/NotificationContext'
 
 interface TopbarProps {
   onNotificationClick: () => void
   onSettingsOpen?: () => void
-  unreadCount?: number
 }
 
-export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCount = 3 }: TopbarProps) {
+export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarProps) {
+  const { unreadCount } = useNotification()
   const { user } = useAuth()
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -61,7 +62,9 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
       left: isMobile ? 0 : 'auto',
       right: isMobile ? 0 : 'auto',
       height: '60px',
-      backgroundColor: brandColors.white,
+      backgroundColor: isMobile ? 'rgba(255, 255, 255, 0.85)' : brandColors.white,
+      backdropFilter: isMobile ? 'blur(12px)' : 'none',
+      WebkitBackdropFilter: isMobile ? 'blur(12px)' : 'none',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -69,7 +72,8 @@ export default function Topbar({ onNotificationClick, onSettingsOpen, unreadCoun
       boxSizing: 'border-box',
       width: '100%',
       flexShrink: 0,
-      zIndex: isMobile ? 40 : 'auto'
+      zIndex: isMobile ? 40 : 'auto',
+      borderBottom: isMobile ? `1px solid rgba(0, 0, 0, 0.05)` : 'none'
     }}>
       {/* Left Side - Profile */}
       <div style={{
