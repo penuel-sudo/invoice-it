@@ -21,7 +21,14 @@ import {
   MoreVertical,
   ArrowUpRight,
   ArrowDownRight,
-  Receipt
+  Receipt,
+  BarChart3,
+  PieChart,
+  Calendar,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  FileText as FileTextIcon
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -35,6 +42,7 @@ export default function DashboardPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
+  const [autoSlideInterval, setAutoSlideInterval] = useState<NodeJS.Timeout | null>(null)
   const [stats, setStats] = useState({
     total: 0,
     paid: 0,
@@ -54,6 +62,22 @@ export default function DashboardPage() {
     setTouchEnd(e.targetTouches[0].clientX)
   }
 
+  // Auto-slide functionality
+  const startAutoSlide = () => {
+    if (autoSlideInterval) clearInterval(autoSlideInterval)
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % 3)
+    }, 180000) // 3 minutes (180 seconds)
+    setAutoSlideInterval(interval)
+  }
+
+  const stopAutoSlide = () => {
+    if (autoSlideInterval) {
+      clearInterval(autoSlideInterval)
+      setAutoSlideInterval(null)
+    }
+  }
+
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return
     
@@ -70,6 +94,9 @@ export default function DashboardPage() {
 
     setTouchStart(0)
     setTouchEnd(0)
+    
+    // Restart auto-slide after user interaction
+    setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
   }
 
   // Helper functions from TransactionPage
@@ -249,6 +276,12 @@ export default function DashboardPage() {
     if (user) {
       calculateStats()
       loadTransactions()
+      startAutoSlide() // Start auto-sliding when component mounts
+    }
+    
+    // Cleanup auto-slide on unmount
+    return () => {
+      stopAutoSlide()
     }
   }, [user])
 
@@ -322,9 +355,14 @@ export default function DashboardPage() {
                   color: brandColors.neutral[600],
                   margin: '0 0 1.5rem 0',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
                 }}>
-                  📄 Invoice Overview
+                  <FileTextIcon size={16} color={brandColors.primary[600]} />
+                  Invoice Overview
                 </h3>
                 <div style={{
                   display: 'flex',
@@ -370,7 +408,8 @@ export default function DashboardPage() {
                         color: brandColors.neutral[500],
                         margin: 0
                       }}>
-                        ✅ Paid
+                        <CheckCircle size={12} color={brandColors.success[600]} style={{ marginRight: '0.25rem' }} />
+                        Paid
                       </p>
                     </div>
                     <div style={{ textAlign: 'center' }}>
@@ -387,7 +426,8 @@ export default function DashboardPage() {
                         color: brandColors.neutral[500],
                         margin: 0
                       }}>
-                        ⏳ Pending
+                        <Clock size={12} color={brandColors.warning[600]} style={{ marginRight: '0.25rem' }} />
+                        Pending
                       </p>
                     </div>
                   </div>
@@ -404,9 +444,14 @@ export default function DashboardPage() {
                   color: brandColors.neutral[600],
                   margin: '0 0 1.5rem 0',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
                 }}>
-                  📊 Status Breakdown
+                  <BarChart3 size={16} color={brandColors.primary[600]} />
+                  Status Breakdown
                 </h3>
                 <div style={{
                   display: 'flex',
@@ -421,7 +466,8 @@ export default function DashboardPage() {
                     backgroundColor: brandColors.success[50],
                     borderRadius: '10px'
                   }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700] }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700], display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle size={14} color={brandColors.success[600]} />
                       Paid
                     </span>
                     <span style={{ fontSize: '1.25rem', fontWeight: '700', color: brandColors.success[600] }}>
@@ -436,7 +482,8 @@ export default function DashboardPage() {
                     backgroundColor: brandColors.warning[50],
                     borderRadius: '10px'
                   }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700] }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700], display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Clock size={14} color={brandColors.warning[600]} />
                       Pending
                     </span>
                     <span style={{ fontSize: '1.25rem', fontWeight: '700', color: brandColors.warning[600] }}>
@@ -451,7 +498,8 @@ export default function DashboardPage() {
                     backgroundColor: brandColors.error[50],
                     borderRadius: '10px'
                   }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700] }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700], display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <AlertTriangle size={14} color={brandColors.error[600]} />
                       Overdue
                     </span>
                     <span style={{ fontSize: '1.25rem', fontWeight: '700', color: brandColors.error[600] }}>
@@ -466,7 +514,8 @@ export default function DashboardPage() {
                     backgroundColor: brandColors.neutral[50],
                     borderRadius: '10px'
                   }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700] }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: brandColors.neutral[700], display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <FileTextIcon size={14} color={brandColors.neutral[600]} />
                       Draft
                     </span>
                     <span style={{ fontSize: '1.25rem', fontWeight: '700', color: brandColors.neutral[600] }}>
@@ -486,9 +535,14 @@ export default function DashboardPage() {
                   color: brandColors.neutral[600],
                   margin: '0 0 1.5rem 0',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
                 }}>
-                  📅 This Month
+                  <Calendar size={16} color={brandColors.primary[600]} />
+                  This Month
                 </h3>
                 <div style={{
                   display: 'flex',
@@ -553,7 +607,11 @@ export default function DashboardPage() {
             {[0, 1, 2].map((index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
+                onClick={() => {
+                  setCurrentSlide(index)
+                  stopAutoSlide()
+                  setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
+                }}
                 style={{
                   width: currentSlide === index ? '24px' : '8px',
                   height: '8px',
