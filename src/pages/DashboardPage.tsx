@@ -67,7 +67,7 @@ export default function DashboardPage() {
     if (autoSlideInterval) clearInterval(autoSlideInterval)
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % 3)
-    }, 180000) // 3 minutes (180 seconds)
+    }, 120000) // 2 minutes (120 seconds)
     setAutoSlideInterval(interval)
   }
 
@@ -356,12 +356,8 @@ export default function DashboardPage() {
                   margin: '0 0 1.5rem 0',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem'
+                  textAlign: 'left'
                 }}>
-                  <FileTextIcon size={16} color={brandColors.primary[600]} />
                   Invoice Overview
                 </h3>
                 <div style={{
@@ -406,9 +402,13 @@ export default function DashboardPage() {
                       <p style={{
                         fontSize: '0.75rem',
                         color: brandColors.neutral[500],
-                        margin: 0
+                        margin: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.25rem'
                       }}>
-                        <CheckCircle size={12} color={brandColors.success[600]} style={{ marginRight: '0.25rem' }} />
+                        <CheckCircle size={12} color={brandColors.success[600]} />
                         Paid
                       </p>
                     </div>
@@ -424,9 +424,13 @@ export default function DashboardPage() {
                       <p style={{
                         fontSize: '0.75rem',
                         color: brandColors.neutral[500],
-                        margin: 0
+                        margin: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.25rem'
                       }}>
-                        <Clock size={12} color={brandColors.warning[600]} style={{ marginRight: '0.25rem' }} />
+                        <Clock size={12} color={brandColors.warning[600]} />
                         Pending
                       </p>
                     </div>
