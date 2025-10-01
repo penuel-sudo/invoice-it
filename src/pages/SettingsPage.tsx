@@ -514,7 +514,8 @@ export default function SettingsPage() {
                           padding: '0.75rem',
                           border: `1px solid ${brandColors.neutral[300]}`,
                           borderRadius: '8px',
-                          fontSize: '0.875rem'
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
                         }}
                       />
                     </div>
@@ -540,7 +541,8 @@ export default function SettingsPage() {
                           padding: '0.75rem',
                           border: `1px solid ${brandColors.neutral[300]}`,
                           borderRadius: '8px',
-                          fontSize: '0.875rem'
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
                         }}
                       />
                     </div>
@@ -567,7 +569,8 @@ export default function SettingsPage() {
                           borderRadius: '8px',
                           fontSize: '0.875rem',
                           backgroundColor: brandColors.neutral[50],
-                          cursor: 'not-allowed'
+                          cursor: 'not-allowed',
+                          boxSizing: 'border-box'
                         }}
                       />
                     </div>
@@ -615,7 +618,9 @@ export default function SettingsPage() {
                           border: `1px solid ${brandColors.neutral[300]}`,
                           borderRadius: '8px',
                           fontSize: '0.875rem',
-                          resize: 'vertical'
+                          resize: 'vertical',
+                          boxSizing: 'border-box',
+                          fontFamily: 'inherit'
                         }}
                       />
                     </div>
