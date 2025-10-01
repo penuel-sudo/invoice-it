@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
-import { brandColors, typographyPresets } from '../stylings'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { brandColors,  } from '../stylings'
 import { ChevronDown, Search, Phone } from 'lucide-react'
 import countries from 'country-list'
-import { parsePhoneNumber, isValidPhoneNumber, getCountryCallingCode } from 'libphonenumber-js'
-import { getCountryInfo, getCountryFlag, getCountryFlagEmoji, detectUserCountry } from '../lib/countryUtils'
+import {  isValidPhoneNumber,  } from 'libphonenumber-js'
+import { getCountryInfo, getCountryFlag, getCountryFlagEmoji,  } from '../lib/countryUtils'
 
 interface CountryData {
   code: string
@@ -36,64 +36,60 @@ interface CountryPhoneSelectorProps {
 }
 
 export default function CountryPhoneSelector({
-  value = { countryCode: '', phoneNumber: '' },
+  value = { countryCode: 'US', phoneNumber: '' },
   onChange,
-  placeholder = 'Enter phone number',
+  placeholder = '9175551234',
   disabled = false,
   error,
   required = false,
-  autoDetectCountry = true
+  autoDetectCountry = false
 }: CountryPhoneSelectorProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [phoneNumber, setPhoneNumber] = useState(value.phoneNumber)
   const [isValid, setIsValid] = useState(false)
-  const [validationError, setValidationError] = useState('')
+  const [showError, setShowError] = useState(false)
   
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Generate countries data with phone codes
-  const countriesData: CountryData[] = countries.getData().map(country => {
-    const countryInfo = getCountryInfo(country.code)
-    return {
-      code: country.code,
-      name: country.name,
-      phoneCode: countryInfo?.phoneCode || '',
-      flag: getCountryFlag(country.code),
-      flagEmoji: getCountryFlagEmoji(country.code)
-    }
-  }).filter(country => country.phoneCode && country.phoneCode.length > 0) // Only include countries with valid phone codes
+  // Memoize countries data for performance
+  const countriesData = useMemo<CountryData[]>(() => 
+    countries.getData().map(country => {
+      const countryInfo = getCountryInfo(country.code)
+      return {
+        code: country.code,
+        name: country.name,
+        phoneCode: countryInfo?.phoneCode || '',
+        flag: getCountryFlag(country.code),
+        flagEmoji: getCountryFlagEmoji(country.code)
+      }
+    }).filter(country => country.phoneCode && country.phoneCode.length > 0),
+    []
+  )
 
-  // Auto-detect user's country on mount
+  // Default to US on mount if no country selected
   useEffect(() => {
-    if (autoDetectCountry && !value.countryCode) {
-      try {
-        const detectedCountryCode = detectUserCountry()
-        if (typeof detectedCountryCode === 'string') {
-          const detectedCountry = countriesData.find(c => c.code === detectedCountryCode)
-          if (detectedCountry) {
-            setSelectedCountry(detectedCountry)
-            const countryInfo = getCountryInfo(detectedCountryCode)
-            onChange({
-              countryCode: detectedCountry.code,
-              phoneNumber: phoneNumber,
-              isValid: false,
-              countryName: countryInfo?.name,
-              phonePrefix: countryInfo?.phoneCode,
-              languageCode: countryInfo?.language,
-              currencyCode: countryInfo?.currency,
-              timezone: countryInfo?.timezone
-            })
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to detect user country:', error)
+    if (!selectedCountry) {
+      const usCountry = countriesData.find(c => c.code === 'US')
+      if (usCountry) {
+        setSelectedCountry(usCountry)
+        const countryInfo = getCountryInfo('US')
+        onChange({
+          countryCode: 'US',
+          phoneNumber: phoneNumber,
+          isValid: false,
+          countryName: countryInfo?.name,
+          phonePrefix: countryInfo?.phoneCode,
+          languageCode: countryInfo?.language,
+          currencyCode: countryInfo?.currency,
+          timezone: countryInfo?.timezone
+        })
       }
     }
-  }, [autoDetectCountry, value.countryCode])
+  }, [])
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -124,20 +120,12 @@ export default function CountryPhoneSelector({
         const fullNumber = `+${selectedCountry.phoneCode}${phoneNumber}`
         const isValidNumber = isValidPhoneNumber(fullNumber)
         setIsValid(isValidNumber)
-        
-        if (phoneNumber && !isValidNumber) {
-          setValidationError('Invalid phone number format')
-        } else {
-          setValidationError('')
-        }
       } catch (error) {
         console.warn('Phone validation error:', error)
         setIsValid(false)
-        setValidationError('Invalid phone number format')
       }
     } else {
       setIsValid(false)
-      setValidationError('')
     }
 
     // Notify parent component
@@ -202,40 +190,49 @@ export default function CountryPhoneSelector({
   }
 
 
-  const filteredCountries = countriesData.filter(country =>
-    country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    country.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    country.phoneCode.includes(searchQuery)
+  // Memoize filtered countries for performance
+  const filteredCountries = useMemo(() => 
+    countriesData.filter(country =>
+      country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      country.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      country.phoneCode.includes(searchQuery)
+    ),
+    [searchQuery, countriesData]
   )
 
-  const handleCountrySelect = (country: CountryData) => {
+  // Memoize event handlers for performance
+  const handleCountrySelect = useCallback((country: CountryData) => {
     setSelectedCountry(country)
     setIsDropdownOpen(false)
     setSearchQuery('')
     
-    // Immediately notify parent with new country info
     const countryInfo = getCountryInfo(country.code)
     onChange({
       countryCode: country.code,
       phoneNumber: phoneNumber,
-      isValid: false, // Will be updated by validation effect
+      isValid: false,
       countryName: countryInfo?.name,
       phonePrefix: countryInfo?.phoneCode,
       languageCode: countryInfo?.language,
       currencyCode: countryInfo?.currency,
       timezone: countryInfo?.timezone
     })
-  }
+  }, [phoneNumber, onChange])
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '') // Remove non-digits
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '')
+    
+    // Remove leading zero (international format)
+    if (value.startsWith('0')) {
+      value = value.substring(1)
+    }
+    
     setPhoneNumber(value)
-  }
+  }, [])
 
-  const getDisplayError = () => {
-    if (error) return error
-    if (validationError) return validationError
-    return ''
+  const getFormattedPhoneNumber = () => {
+    if (!selectedCountry || !phoneNumber) return phoneNumber
+    return `+${selectedCountry.phoneCode} ${phoneNumber}`
   }
 
   return (
@@ -245,7 +242,7 @@ export default function CountryPhoneSelector({
       <div style={{
         display: 'flex',
         width: '100%',
-        border: `1px solid ${error || validationError ? brandColors.error[300] : brandColors.neutral[300]}`,
+        border: `1px solid ${error ? brandColors.error[300] : brandColors.neutral[300]}`,
         borderRadius: '50px',
         backgroundColor: disabled ? brandColors.neutral[50] : brandColors.white,
         transition: 'all 0.2s ease',
@@ -462,26 +459,36 @@ export default function CountryPhoneSelector({
           )}
         </div>
 
-        {/* Phone Input */}
-        <div style={{ flex: 1, position: 'relative' }}>
+        {/* Phone Input with Prefix */}
+        <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+          {selectedCountry && (
+            <span style={{
+              paddingLeft: '0.75rem',
+              fontSize: '1rem',
+              color: brandColors.neutral[600],
+              fontWeight: '500'
+            }}>
+              +{selectedCountry.phoneCode}
+            </span>
+          )}
           <input
             type="tel"
             value={phoneNumber}
             onChange={handlePhoneChange}
+            onBlur={() => setShowError(true)}
+            onFocus={() => setShowError(false)}
             placeholder={placeholder}
             disabled={disabled}
             style={{
-              width: '100%',
-              padding: '0.875rem 3.5rem 0.875rem 0.75rem',
+              flex: 1,
+              padding: '0.875rem 3rem 0.875rem 0.5rem',
               border: 'none',
               outline: 'none',
               backgroundColor: 'transparent',
               fontSize: '1rem',
               color: brandColors.neutral[900],
               borderRadius: '0 50px 50px 0',
-              // Ensure text doesn't overlap with phone icon on small screens
               boxSizing: 'border-box',
-              // Add minimum width to prevent overlap on very small screens
               minWidth: '120px'
             }}
           />
@@ -494,40 +501,31 @@ export default function CountryPhoneSelector({
               top: '50%',
               transform: 'translateY(-50%)',
               opacity: phoneNumber ? 0.3 : 1,
-              // Ensure icon doesn't interfere with text on small screens
               pointerEvents: 'none'
             }}
           />
         </div>
       </div>
 
-      {/* Error Message */}
-      {getDisplayError() && (
+      {/* Simple Error Message - Only show on blur and if invalid */}
+      {error && (
         <div style={{
           marginTop: '0.5rem',
           color: brandColors.error[600],
-          fontSize: '0.875rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.25rem'
+          fontSize: '0.8125rem'
         }}>
-          <span>⚠️</span>
-          {getDisplayError()}
+          {error}
         </div>
       )}
-
-      {/* Validation Status */}
-      {phoneNumber && selectedCountry && (
+      
+      {/* Validation hint - Only show if user has typed and blurred */}
+      {showError && phoneNumber && !isValid && !error && (
         <div style={{
           marginTop: '0.5rem',
-          fontSize: '0.75rem',
-          color: isValid ? brandColors.success[600] : brandColors.neutral[500],
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.25rem'
+          color: brandColors.neutral[500],
+          fontSize: '0.8125rem'
         }}>
-          <span>{isValid ? '✅' : '⏳'}</span>
-          {isValid ? 'Valid phone number' : 'Enter a valid phone number'}
+          Please enter a valid phone number
         </div>
       )}
     </div>

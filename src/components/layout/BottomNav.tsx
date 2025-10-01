@@ -41,7 +41,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         justifyContent: 'space-around',
         gap: '0.5rem',
         zIndex: 50,
-        boxShadow: '0 -2px 20px rgba(0, 0, 0, 0.08)'
+        boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.05)'
       }}>
         {/* Left Items (Home & Invoices) */}
         {navigationItems.slice(0, 2).map((item) => {
@@ -104,12 +104,14 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         <button
           onClick={() => navigate('/invoice/new')}
           style={{
-            flex: 0,
+            flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             width: '56px',
             height: '56px',
+            minWidth: '56px',
+            minHeight: '56px',
             marginTop: '-2rem',
             backgroundColor: brandColors.primary[600],
             color: brandColors.white,
@@ -117,16 +119,16 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
             borderRadius: '50%',
             cursor: 'pointer',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
             position: 'relative'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'scale(1.05)'
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2)'
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'scale(1)'
-            e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.15)'
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
           }}
         >
           <Plus size={28} strokeWidth={2.5} />
