@@ -57,14 +57,6 @@ const CURRENCIES = [
   { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
 ]
 
-const PAYMENT_METHOD_TYPES = [
-  { value: 'bank_local_us', label: 'Bank Transfer (US)', icon: '🏦' },
-  { value: 'bank_local_ng', label: 'Bank Transfer (Nigeria)', icon: '🏦' },
-  { value: 'bank_international', label: 'International Wire Transfer', icon: '🌍' },
-  { value: 'paypal', label: 'PayPal', icon: '💳' },
-  { value: 'crypto', label: 'Cryptocurrency', icon: '₿' },
-  { value: 'other', label: 'Other Payment Method', icon: '📝' },
-]
 
 export default function SettingsPage() {
   const { user } = useAuth()
@@ -72,6 +64,63 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'profile' | 'currency' | 'payment' | 'notifications' | 'appearance'>('profile')
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  // Responsive state management
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Responsive styling constants
+  const styles = {
+    header: {
+      padding: isMobile ? '0.875rem 1rem' : '1rem 2rem',
+      fontSize: isMobile ? '1.125rem' : '1.5rem'
+    },
+    container: {
+      maxWidth: isMobile ? '100%' : '1000px',
+      padding: isMobile ? '0.875rem' : '2rem'
+    },
+    card: {
+      borderRadius: isMobile ? '12px' : '20px',
+      padding: isMobile ? '1.25rem' : '2rem'
+    },
+    tab: {
+      padding: isMobile ? '0.625rem 1rem' : '0.875rem 1.5rem',
+      fontSize: isMobile ? '0.75rem' : '0.875rem',
+      iconSize: isMobile ? 14 : 18
+    },
+    input: {
+      padding: isMobile ? '0.625rem 0.875rem' : '0.75rem 1rem',
+      fontSize: isMobile ? '0.875rem' : '1rem',
+      borderRadius: isMobile ? '8px' : '10px'
+    },
+    label: {
+      fontSize: isMobile ? '0.8125rem' : '0.875rem',
+      marginBottom: isMobile ? '0.375rem' : '0.5rem'
+    },
+    sectionTitle: {
+      fontSize: isMobile ? '1rem' : '1.25rem',
+      marginBottom: isMobile ? '0.375rem' : '0.5rem'
+    },
+    description: {
+      fontSize: isMobile ? '0.8125rem' : '0.875rem',
+      marginBottom: isMobile ? '1.25rem' : '1.5rem'
+    },
+    button: {
+      padding: isMobile ? '0.75rem 1.25rem' : '0.875rem 1.5rem',
+      fontSize: isMobile ? '0.875rem' : '1rem'
+    },
+    grid: {
+      gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+      gap: isMobile ? '1.125rem' : '1.5rem'
+    }
+  }
 
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
