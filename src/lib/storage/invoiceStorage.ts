@@ -24,6 +24,68 @@ export interface InvoiceItem {
   lineTotal: number
 }
 
+export type PaymentMethodType = 
+  | 'bank_local_us'
+  | 'bank_local_ng'
+  | 'bank_international'
+  | 'paypal'
+  | 'crypto'
+  | 'other'
+
+export interface BankLocalUSDetails {
+  bankName: string
+  accountName: string
+  accountNumber: string
+  routingNumber: string
+  accountType: 'checking' | 'savings'
+}
+
+export interface BankLocalNGDetails {
+  bankName: string
+  accountName: string
+  accountNumber: string
+  bankCode: string
+}
+
+export interface BankInternationalDetails {
+  bankName: string
+  accountName: string
+  iban: string
+  swiftCode: string
+  bankAddress: string
+  bankCity: string
+  bankCountry: string
+}
+
+export interface PayPalDetails {
+  email: string
+}
+
+export interface CryptoDetails {
+  walletAddress: string
+  network: string // BTC, ETH, USDT, etc.
+  qrCode?: string
+}
+
+export interface OtherPaymentDetails {
+  instructions: string
+}
+
+export interface PaymentMethod {
+  id: string
+  type: PaymentMethodType
+  label: string
+  isDefault: boolean
+  details: 
+    | BankLocalUSDetails
+    | BankLocalNGDetails
+    | BankInternationalDetails
+    | PayPalDetails
+    | CryptoDetails
+    | OtherPaymentDetails
+}
+
+// Legacy support for old payment details
 export interface PaymentDetails {
   bankName?: string
   accountNumber?: string
@@ -50,7 +112,9 @@ export interface InvoiceFormData {
   grandTotal: number
   currency?: string
   currencySymbol?: string
-  paymentDetails?: PaymentDetails
+  paymentDetails?: PaymentDetails // Legacy support
+  paymentMethods?: PaymentMethod[] // New: Array of payment methods
+  selectedPaymentMethodIds?: string[] // Which methods to show on this invoice
 }
 
 // Alias for preview page compatibility

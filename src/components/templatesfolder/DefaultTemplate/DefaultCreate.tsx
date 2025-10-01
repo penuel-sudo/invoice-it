@@ -4,7 +4,7 @@ import { useAuth } from '../../../lib/useAuth'
 import { brandColors } from '../../../stylings'
 import { Layout } from '../../layout'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
-import type { InvoiceFormData, InvoiceItem, PaymentDetails } from '../../../lib/storage/invoiceStorage'
+import type { InvoiceFormData, InvoiceItem, PaymentDetails, PaymentMethod } from '../../../lib/storage/invoiceStorage'
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
 import { CURRENCIES, getCurrencySymbol } from '../../../lib/currencyUtils'
@@ -24,6 +24,14 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+const PAYMENT_METHOD_TYPES = [
+  { value: 'bank_local_us', label: 'Bank Transfer (US)' },
+  { value: 'bank_local_ng', label: 'Bank Transfer (Nigeria)' },
+  { value: 'bank_international', label: 'International Wire' },
+  { value: 'paypal', label: 'PayPal' },
+  { value: 'crypto', label: 'Cryptocurrency' },
+  { value: 'other', label: 'Other' },
+]
 
 export default function InvoiceCreatePage() {
   const { user } = useAuth()
@@ -33,10 +41,14 @@ export default function InvoiceCreatePage() {
   
   const [formData, setFormData] = useState<InvoiceFormData>(invoiceStorage.getDraftWithFallback())
   const [loading, setLoading] = useState(false)
-  const [userDefaults, setUserDefaults] = useState<{ currency: string; currencySymbol: string; paymentDetails: PaymentDetails | null }>({
+  const [userDefaults, setUserDefaults] = useState<{ 
+    currency: string
+    currencySymbol: string
+    paymentMethods: PaymentMethod[]
+  }>({
     currency: 'USD',
     currencySymbol: '$',
-    paymentDetails: null
+    paymentMethods: []
   })
   
   // Load invoice data from URL parameter or state
@@ -139,7 +151,7 @@ export default function InvoiceCreatePage() {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('currency_code, default_payment_details')
+          .select('currency_code, payment_methods')
           .eq('id', user.id)
           .single()
 
@@ -151,11 +163,12 @@ export default function InvoiceCreatePage() {
         if (data) {
           const currencyCode = data.currency_code || 'USD'
           const currencySymbol = getCurrencySymbol(currencyCode)
+          const paymentMethods = data.payment_methods || []
           
           setUserDefaults({
             currency: currencyCode,
             currencySymbol: currencySymbol,
-            paymentDetails: data.default_payment_details
+            paymentMethods: paymentMethods
           })
 
           // Set form data with user defaults if this is a new invoice
@@ -164,7 +177,8 @@ export default function InvoiceCreatePage() {
               ...prev,
               currency: currencyCode,
               currencySymbol: currencySymbol,
-              paymentDetails: data.default_payment_details
+              paymentMethods: paymentMethods,
+              selectedPaymentMethodIds: paymentMethods.map((m: PaymentMethod) => m.id) // Select all by default
             }))
           }
         }
@@ -297,7 +311,7 @@ export default function InvoiceCreatePage() {
       }
 
       // Step 2: Save invoice to database
-      const { data: invoice, error: invoiceError } = await supabase
+      const { data: invoice, error: invoiceError} = await supabase
         .from('invoices')
         .insert({
           user_id: user.id,
@@ -313,6 +327,8 @@ export default function InvoiceCreatePage() {
           template: 'default',
           currency_code: formData.currency || 'USD',
           payment_details: formData.paymentDetails || null,
+          payment_methods: formData.paymentMethods || null,
+          selected_payment_method_ids: formData.selectedPaymentMethodIds || null,
           template_data: {
             layout: 'clean',
             colors: {
@@ -1067,159 +1083,122 @@ export default function InvoiceCreatePage() {
             </div>
           </div>
 
-          {/* Payment Details Card */}
-          <div style={{
-            backgroundColor: brandColors.white,
-            borderRadius: '16px',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
-          }}>
+          {/* Payment Methods Card */}
+          {userDefaults.paymentMethods.length > 0 && (
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '1rem'
+              backgroundColor: brandColors.white,
+              borderRadius: '16px',
+              padding: '1.5rem',
+              marginBottom: '1.5rem',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${brandColors.neutral[100]}`
             }}>
-              <CreditCard size={20} color={brandColors.primary[600]} />
-              <h2 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
-                margin: 0
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '1rem'
               }}>
-                Payment Information (Optional)
-              </h2>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (formData.paymentDetails) {
-                  setFormData(prev => ({ ...prev, paymentDetails: undefined }))
-                } else {
-                  setFormData(prev => ({ ...prev, paymentDetails: userDefaults.paymentDetails || {} }))
-                }
-              }}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: formData.paymentDetails ? brandColors.error[100] : brandColors.primary[100],
-                color: formData.paymentDetails ? brandColors.error[600] : brandColors.primary[600],
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                marginBottom: formData.paymentDetails ? '1rem' : 0
-              }}
-            >
-              {formData.paymentDetails ? 'Remove Payment Details' : 'Add Payment Details'}
-            </button>
-
-            {formData.paymentDetails && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[600],
-                    marginBottom: '0.25rem'
-                  }}>
-                    Bank Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.paymentDetails.bankName || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      paymentDetails: { ...prev.paymentDetails, bankName: e.target.value }
-                    }))}
-                    placeholder="e.g., Chase Bank"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: `1px solid ${brandColors.neutral[200]}`,
-                      borderRadius: '6px',
-                      fontSize: '0.875rem',
-                      backgroundColor: brandColors.white,
-                      color: brandColors.neutral[900]
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[600],
-                    marginBottom: '0.25rem'
-                  }}>
-                    Account Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.paymentDetails.accountName || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      paymentDetails: { ...prev.paymentDetails, accountName: e.target.value }
-                    }))}
-                    placeholder="e.g., Your Business LLC"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: `1px solid ${brandColors.neutral[200]}`,
-                      borderRadius: '6px',
-                      fontSize: '0.875rem',
-                      backgroundColor: brandColors.white,
-                      color: brandColors.neutral[900]
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: '500',
-                    color: brandColors.neutral[600],
-                    marginBottom: '0.25rem'
-                  }}>
-                    Account Number
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.paymentDetails.accountNumber || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      paymentDetails: { ...prev.paymentDetails, accountNumber: e.target.value }
-                    }))}
-                    placeholder="e.g., **** **** 1234"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: `1px solid ${brandColors.neutral[200]}`,
-                      borderRadius: '6px',
-                      fontSize: '0.875rem',
-                      backgroundColor: brandColors.white,
-                      color: brandColors.neutral[900]
-                    }}
-                  />
-                </div>
-
-                <p style={{
-                  fontSize: '0.7rem',
-                  color: brandColors.neutral[500],
-                  margin: 0,
-                  fontStyle: 'italic'
+                <CreditCard size={20} color={brandColors.primary[600]} />
+                <h2 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0
                 }}>
-                  Using default payment details from settings. You can modify them for this invoice.
-                </p>
+                  Payment Methods (Optional)
+                </h2>
               </div>
-            )}
-          </div>
+
+              <p style={{
+                fontSize: '0.75rem',
+                color: brandColors.neutral[600],
+                marginBottom: '1rem'
+              }}>
+                Select which payment methods to show on this invoice:
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {userDefaults.paymentMethods.map((method) => (
+                  <label
+                    key={method.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem',
+                      backgroundColor: formData.selectedPaymentMethodIds?.includes(method.id) 
+                        ? brandColors.primary[50] 
+                        : brandColors.neutral[50],
+                      borderRadius: '8px',
+                      border: `1px solid ${
+                        formData.selectedPaymentMethodIds?.includes(method.id)
+                          ? brandColors.primary[200]
+                          : brandColors.neutral[200]
+                      }`,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.selectedPaymentMethodIds?.includes(method.id) || false}
+                      onChange={(e) => {
+                        const currentIds = formData.selectedPaymentMethodIds || []
+                        const newIds = e.target.checked
+                          ? [...currentIds, method.id]
+                          : currentIds.filter(id => id !== method.id)
+                        setFormData(prev => ({ ...prev, selectedPaymentMethodIds: newIds }))
+                      }}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        color: brandColors.neutral[900],
+                        marginBottom: '0.125rem'
+                      }}>
+                        {method.label}
+                        {method.isDefault && (
+                          <span style={{
+                            marginLeft: '0.5rem',
+                            fontSize: '0.7rem',
+                            backgroundColor: brandColors.primary[100],
+                            color: brandColors.primary[700],
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '6px',
+                            fontWeight: '600'
+                          }}>
+                            DEFAULT
+                          </span>
+                        )}
+                      </div>
+                      <div style={{
+                        fontSize: '0.7rem',
+                        color: brandColors.neutral[500]
+                      }}>
+                        {PAYMENT_METHOD_TYPES.find(t => t.value === method.type)?.label}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <p style={{
+                fontSize: '0.7rem',
+                color: brandColors.neutral[500],
+                marginTop: '1rem',
+                fontStyle: 'italic'
+              }}>
+                Clients will see the selected payment methods on the invoice. You can manage payment methods in Settings.
+              </p>
+            </div>
+          )}
 
           {/* Summary Card */}
           <div style={{

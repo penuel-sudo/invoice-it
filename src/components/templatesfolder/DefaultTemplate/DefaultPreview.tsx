@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../../lib/useAuth'
 import { brandColors } from '../../../stylings'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
-import type { InvoiceData } from '../../../lib/storage/invoiceStorage'
+import type { InvoiceData, PaymentMethod } from '../../../lib/storage/invoiceStorage'
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
 import { getCurrencySymbol } from '../../../lib/currencyUtils'
@@ -130,7 +130,9 @@ export default function InvoicePreviewPage() {
               notes: invoiceData.notes || '',
               currency: currencyCode,
               currencySymbol: getCurrencySymbol(currencyCode),
-              paymentDetails: invoiceData.payment_details || undefined
+              paymentDetails: invoiceData.payment_details || undefined,
+              paymentMethods: invoiceData.payment_methods || [],
+              selectedPaymentMethodIds: invoiceData.selected_payment_method_ids || []
             }
             setInvoiceData(transformedData)
             setDbStatus(invoiceData.status || 'draft')
@@ -512,8 +514,8 @@ export default function InvoicePreviewPage() {
               </div>
             )}
 
-            {/* Payment Details Section */}
-            {invoiceData.paymentDetails && (
+            {/* Payment Methods Section */}
+            {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && (
               <div style={{
                 borderTop: `1px solid ${brandColors.neutral[200]}`,
                 margin: '1rem 0 0 0',
@@ -523,39 +525,70 @@ export default function InvoicePreviewPage() {
                   fontSize: '0.75rem',
                   fontWeight: '600',
                   color: brandColors.neutral[700],
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.75rem'
                 }}>
-                  Payment Information:
+                  Payment Methods:
                 </div>
-                <div style={{
-                  fontSize: '0.7rem',
-                  color: brandColors.neutral[600],
-                  lineHeight: '1.6'
-                }}>
-                  {invoiceData.paymentDetails.bankName && (
-                    <div>Bank: {invoiceData.paymentDetails.bankName}</div>
-                  )}
-                  {invoiceData.paymentDetails.accountName && (
-                    <div>Account Name: {invoiceData.paymentDetails.accountName}</div>
-                  )}
-                  {invoiceData.paymentDetails.accountNumber && (
-                    <div>Account: {invoiceData.paymentDetails.accountNumber}</div>
-                  )}
-                  {invoiceData.paymentDetails.routingNumber && (
-                    <div>Routing: {invoiceData.paymentDetails.routingNumber}</div>
-                  )}
-                  {invoiceData.paymentDetails.swiftCode && (
-                    <div>SWIFT: {invoiceData.paymentDetails.swiftCode}</div>
-                  )}
-                  {invoiceData.paymentDetails.paypalEmail && (
-                    <div>PayPal: {invoiceData.paymentDetails.paypalEmail}</div>
-                  )}
-                  {invoiceData.paymentDetails.instructions && (
-                    <div style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
-                      {invoiceData.paymentDetails.instructions}
-                    </div>
-                  )}
-                </div>
+                {invoiceData.paymentMethods
+                  .filter(method => invoiceData.selectedPaymentMethodIds?.includes(method.id))
+                  .map((method) => {
+                    const details = method.details as any
+                    return (
+                      <div
+                        key={method.id}
+                        style={{
+                          fontSize: '0.7rem',
+                          color: brandColors.neutral[600],
+                          lineHeight: '1.6',
+                          marginBottom: '0.75rem',
+                          padding: '0.5rem',
+                          backgroundColor: brandColors.neutral[50],
+                          borderRadius: '6px'
+                        }}
+                      >
+                        <div style={{ fontWeight: '600', color: brandColors.neutral[800], marginBottom: '0.25rem' }}>
+                          {method.label}
+                        </div>
+                        {method.type === 'bank_local_us' && (
+                          <>
+                            <div>Bank: {details.bankName}</div>
+                            <div>Account: {details.accountName} ({details.accountType})</div>
+                            <div>Acct #: {details.accountNumber}</div>
+                            <div>Routing: {details.routingNumber}</div>
+                          </>
+                        )}
+                        {method.type === 'bank_local_ng' && (
+                          <>
+                            <div>Bank: {details.bankName}</div>
+                            <div>Account Name: {details.accountName}</div>
+                            <div>Account #: {details.accountNumber}</div>
+                            <div>Bank Code: {details.bankCode}</div>
+                          </>
+                        )}
+                        {method.type === 'bank_international' && (
+                          <>
+                            <div>Bank: {details.bankName}</div>
+                            <div>Beneficiary: {details.accountName}</div>
+                            <div>IBAN: {details.iban}</div>
+                            <div>SWIFT: {details.swiftCode}</div>
+                            <div>Address: {details.bankAddress}, {details.bankCity}, {details.bankCountry}</div>
+                          </>
+                        )}
+                        {method.type === 'paypal' && (
+                          <div>Email: {details.email}</div>
+                        )}
+                        {method.type === 'crypto' && (
+                          <>
+                            <div>Network: {details.network}</div>
+                            <div style={{ wordBreak: 'break-all' }}>Address: {details.walletAddress}</div>
+                          </>
+                        )}
+                        {method.type === 'other' && (
+                          <div>{details.instructions}</div>
+                        )}
+                      </div>
+                    )
+                  })}
               </div>
             )}
             

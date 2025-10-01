@@ -340,33 +340,59 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                 </View>
               )}
 
-              {/* Payment Details Section */}
-              {invoiceData.paymentDetails && (
+              {/* Payment Methods Section */}
+              {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && (
                 <View style={styles.paymentSection}>
-                  <Text style={styles.paymentTitle}>Payment Information:</Text>
-                  {invoiceData.paymentDetails.bankName && (
-                    <Text style={styles.paymentText}>Bank: {invoiceData.paymentDetails.bankName}</Text>
-                  )}
-                  {invoiceData.paymentDetails.accountName && (
-                    <Text style={styles.paymentText}>Account Name: {invoiceData.paymentDetails.accountName}</Text>
-                  )}
-                  {invoiceData.paymentDetails.accountNumber && (
-                    <Text style={styles.paymentText}>Account: {invoiceData.paymentDetails.accountNumber}</Text>
-                  )}
-                  {invoiceData.paymentDetails.routingNumber && (
-                    <Text style={styles.paymentText}>Routing: {invoiceData.paymentDetails.routingNumber}</Text>
-                  )}
-                  {invoiceData.paymentDetails.swiftCode && (
-                    <Text style={styles.paymentText}>SWIFT: {invoiceData.paymentDetails.swiftCode}</Text>
-                  )}
-                  {invoiceData.paymentDetails.paypalEmail && (
-                    <Text style={styles.paymentText}>PayPal: {invoiceData.paymentDetails.paypalEmail}</Text>
-                  )}
-                  {invoiceData.paymentDetails.instructions && (
-                    <Text style={[styles.paymentText, { marginTop: 6, fontStyle: 'italic' }]}>
-                      {invoiceData.paymentDetails.instructions}
-                    </Text>
-                  )}
+                  <Text style={styles.paymentTitle}>Payment Methods:</Text>
+                  {invoiceData.paymentMethods
+                    .filter(method => invoiceData.selectedPaymentMethodIds?.includes(method.id))
+                    .map((method, index) => {
+                      const details = method.details as any
+                      return (
+                        <View key={index} style={{ marginBottom: 8, marginTop: index > 0 ? 8 : 0 }}>
+                          <Text style={[styles.paymentText, { fontWeight: 'bold', marginBottom: 4 }]}>
+                            {method.label}:
+                          </Text>
+                          {method.type === 'bank_local_us' && (
+                            <>
+                              <Text style={styles.paymentText}>Bank: {details.bankName}</Text>
+                              <Text style={styles.paymentText}>Account: {details.accountName} ({details.accountType})</Text>
+                              <Text style={styles.paymentText}>Acct #: {details.accountNumber}</Text>
+                              <Text style={styles.paymentText}>Routing: {details.routingNumber}</Text>
+                            </>
+                          )}
+                          {method.type === 'bank_local_ng' && (
+                            <>
+                              <Text style={styles.paymentText}>Bank: {details.bankName}</Text>
+                              <Text style={styles.paymentText}>Account Name: {details.accountName}</Text>
+                              <Text style={styles.paymentText}>Account #: {details.accountNumber}</Text>
+                              <Text style={styles.paymentText}>Bank Code: {details.bankCode}</Text>
+                            </>
+                          )}
+                          {method.type === 'bank_international' && (
+                            <>
+                              <Text style={styles.paymentText}>Bank: {details.bankName}</Text>
+                              <Text style={styles.paymentText}>Beneficiary: {details.accountName}</Text>
+                              <Text style={styles.paymentText}>IBAN: {details.iban}</Text>
+                              <Text style={styles.paymentText}>SWIFT: {details.swiftCode}</Text>
+                              <Text style={styles.paymentText}>Address: {details.bankAddress}, {details.bankCity}, {details.bankCountry}</Text>
+                            </>
+                          )}
+                          {method.type === 'paypal' && (
+                            <Text style={styles.paymentText}>Email: {details.email}</Text>
+                          )}
+                          {method.type === 'crypto' && (
+                            <>
+                              <Text style={styles.paymentText}>Network: {details.network}</Text>
+                              <Text style={styles.paymentText}>Address: {details.walletAddress}</Text>
+                            </>
+                          )}
+                          {method.type === 'other' && (
+                            <Text style={styles.paymentText}>{details.instructions}</Text>
+                          )}
+                        </View>
+                      )
+                    })}
                 </View>
               )}
 

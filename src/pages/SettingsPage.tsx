@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
+import PaymentMethodManager from '../components/PaymentMethodManager'
+import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
 
 interface ProfileData {
   full_name: string
@@ -27,17 +29,7 @@ interface ProfileData {
   country_name: string
   phone_prefix: string
   currency_code: string
-  default_payment_details: PaymentDetails | null
-}
-
-interface PaymentDetails {
-  bankName?: string
-  accountNumber?: string
-  accountName?: string
-  routingNumber?: string
-  swiftCode?: string
-  paypalEmail?: string
-  instructions?: string
+  payment_methods: PaymentMethod[]
 }
 
 const CURRENCIES = [
@@ -50,6 +42,15 @@ const CURRENCIES = [
   { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
   { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
   { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+]
+
+const PAYMENT_METHOD_TYPES = [
+  { value: 'bank_local_us', label: 'Bank Transfer (US)', icon: '🏦' },
+  { value: 'bank_local_ng', label: 'Bank Transfer (Nigeria)', icon: '🏦' },
+  { value: 'bank_international', label: 'International Wire Transfer', icon: '🌍' },
+  { value: 'paypal', label: 'PayPal', icon: '💳' },
+  { value: 'crypto', label: 'Cryptocurrency', icon: '₿' },
+  { value: 'other', label: 'Other Payment Method', icon: '📝' },
 ]
 
 export default function SettingsPage() {
@@ -69,18 +70,9 @@ export default function SettingsPage() {
     country_name: '',
     phone_prefix: '',
     currency_code: 'USD',
-    default_payment_details: null
+    payment_methods: []
   })
 
-  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
-    bankName: '',
-    accountNumber: '',
-    accountName: '',
-    routingNumber: '',
-    swiftCode: '',
-    paypalEmail: '',
-    instructions: ''
-  })
 
   useEffect(() => {
     if (user) {
@@ -116,13 +108,8 @@ export default function SettingsPage() {
           country_name: data.country_name || '',
           phone_prefix: data.phone_prefix || '',
           currency_code: data.currency_code || 'USD',
-          default_payment_details: data.default_payment_details || null
+          payment_methods: data.payment_methods || []
         })
-
-        // Load payment details if exists
-        if (data.default_payment_details) {
-          setPaymentDetails(data.default_payment_details)
-        }
       }
     } catch (error) {
       console.error('Error loading profile:', error)
@@ -194,7 +181,28 @@ export default function SettingsPage() {
     }
   }
 
-  const handleSavePaymentDetails = async () => {
+  const handleAddPaymentMethod = (method: PaymentMethod) => {
+    const updatedMethods = [...profileData.payment_methods, method]
+    setProfileData(prev => ({ ...prev, payment_methods: updatedMethods }))
+    savePaymentMethodsToDb(updatedMethods)
+  }
+
+  const handleDeletePaymentMethod = async (methodId: string) => {
+    const updatedMethods = profileData.payment_methods.filter(m => m.id !== methodId)
+    setProfileData(prev => ({ ...prev, payment_methods: updatedMethods }))
+    await savePaymentMethodsToDb(updatedMethods)
+  }
+
+  const handleSetDefaultMethod = async (methodId: string) => {
+    const updatedMethods = profileData.payment_methods.map(m => ({
+      ...m,
+      isDefault: m.id === methodId
+    }))
+    setProfileData(prev => ({ ...prev, payment_methods: updatedMethods }))
+    await savePaymentMethodsToDb(updatedMethods)
+  }
+
+  const savePaymentMethodsToDb = async (methods: PaymentMethod[]) => {
     if (!user) return
 
     try {
@@ -202,21 +210,21 @@ export default function SettingsPage() {
       const { error } = await supabase
         .from('profiles')
         .update({
-          default_payment_details: paymentDetails,
+          payment_methods: methods,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id)
 
       if (error) {
-        console.error('Error saving payment details:', error)
-        toast.error('Failed to save payment details')
+        console.error('Error saving payment methods:', error)
+        toast.error('Failed to save payment methods')
         return
       }
 
-      toast.success('Payment details updated successfully!')
+      toast.success('Payment methods updated successfully!')
     } catch (error) {
-      console.error('Error saving payment details:', error)
-      toast.error('Failed to save payment details')
+      console.error('Error saving payment methods:', error)
+      toast.error('Failed to save payment methods')
     } finally {
       setSaving(false)
     }
@@ -666,7 +674,7 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {/* Payment Details Tab */}
+              {/* Payment Methods Tab */}
               {activeTab === 'payment' && (
                 <div>
                   <h2 style={{
@@ -675,238 +683,27 @@ export default function SettingsPage() {
                     color: brandColors.neutral[900],
                     marginBottom: '0.5rem'
                   }}>
-                    Payment Details
+                    Payment Methods
                   </h2>
                   <p style={{
                     fontSize: '0.875rem',
                     color: brandColors.neutral[600],
                     marginBottom: '2rem'
                   }}>
-                    Set default payment information that will appear on your invoices. You can customize this per invoice.
+                    Add payment methods that will appear on your invoices. Clients can use any of these methods to pay you.
                   </p>
 
-                  <div style={{ 
-                    display: 'grid',
-                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr',
-                    gap: '1.5rem'
-                  }}>
-                    {/* Bank Name */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
-                      }}>
-                        Bank Name
-                      </label>
-                      <input
-                        type="text"
-                        value={paymentDetails.bankName}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, bankName: e.target.value })}
-                        placeholder="e.g., Chase Bank"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-
-                    {/* Account Name */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
-                      }}>
-                        Account Name
-                      </label>
-                      <input
-                        type="text"
-                        value={paymentDetails.accountName}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, accountName: e.target.value })}
-                        placeholder="e.g., Your Business LLC"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-
-                    {/* Account Number - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
-                      }}>
-                        Account Number
-                      </label>
-                      <input
-                        type="text"
-                        value={paymentDetails.accountNumber}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, accountNumber: e.target.value })}
-                        placeholder="e.g., **** **** 1234"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-
-                    {/* Routing Number */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
-                      }}>
-                        Routing Number (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        value={paymentDetails.routingNumber}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, routingNumber: e.target.value })}
-                        placeholder="e.g., 123456789"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-
-                    {/* SWIFT Code */}
-                    <div>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
-                      }}>
-                        SWIFT/BIC Code (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        value={paymentDetails.swiftCode}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, swiftCode: e.target.value })}
-                        placeholder="e.g., CHASUS33"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-
-                    {/* PayPal Email - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
-                      }}>
-                        PayPal Email (Optional)
-                      </label>
-                      <input
-                        type="email"
-                        value={paymentDetails.paypalEmail}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, paypalEmail: e.target.value })}
-                        placeholder="e.g., payments@yourbusiness.com"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-
-                    {/* Payment Instructions - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: brandColors.neutral[700],
-                        marginBottom: '0.5rem'
-                      }}>
-                        Payment Instructions (Optional)
-                      </label>
-                      <textarea
-                        value={paymentDetails.instructions}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, instructions: e.target.value })}
-                        placeholder="e.g., Please reference invoice number in payment description"
-                        rows={3}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: `1px solid ${brandColors.neutral[300]}`,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem',
-                          resize: 'vertical'
-                        }}
-                      />
-                    </div>
-
-                    {/* Save Button - Full Width */}
-                    <button
-                      onClick={handleSavePaymentDetails}
-                      disabled={saving}
-                      style={{
-                        gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1',
-                        padding: '0.875rem 1.5rem',
-                        backgroundColor: brandColors.primary[600],
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '0.875rem',
-                        fontWeight: '600',
-                        cursor: saving ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        opacity: saving ? 0.6 : 1
-                      }}
-                    >
-                      {saving ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save size={16} />
-                          Save Payment Details
-                        </>
-                      )}
-                    </button>
-                  </div>
+                  <PaymentMethodManager
+                    paymentMethods={profileData.payment_methods}
+                    onAdd={handleAddPaymentMethod}
+                    onDelete={handleDeletePaymentMethod}
+                    onSetDefault={handleSetDefaultMethod}
+                    onUpdate={(method) => {
+                      const updated = profileData.payment_methods.map(m => m.id === method.id ? method : m)
+                      setProfileData(prev => ({ ...prev, payment_methods: updated }))
+                      savePaymentMethodsToDb(updated)
+                    }}
+                  />
                 </div>
               )}
 
