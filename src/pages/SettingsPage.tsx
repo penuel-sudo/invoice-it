@@ -16,12 +16,6 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Label } from '../components/ui/label'
-import { Textarea } from '../components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 
 interface ProfileData {
   full_name: string
@@ -397,43 +391,95 @@ export default function SettingsPage() {
                     gap: '1.5rem'
                   }}>
                     {/* Full Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="full_name">Full Name</Label>
-                      <Input
-                        id="full_name"
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Full Name
+                      </label>
+                      <input
                         type="text"
                         value={profileData.full_name}
                         onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
                         placeholder="Enter your full name"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* Company Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="company_name">Company Name</Label>
-                      <Input
-                        id="company_name"
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Company Name
+                      </label>
+                      <input
                         type="text"
                         value={profileData.company_name}
                         onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
                         placeholder="Enter your company name"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* Email (Read Only) - Full Width */}
-                    <div className="space-y-2" style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Email
+                      </label>
+                      <input
                         type="email"
                         value={profileData.email}
                         disabled
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          backgroundColor: brandColors.neutral[50],
+                          cursor: 'not-allowed'
+                        }}
                       />
                     </div>
 
                     {/* Country & Phone - Full Width */}
-                    <div className="space-y-2" style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Label>Country & Phone Number</Label>
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Country & Phone Number
+                      </label>
                       <CountryPhoneSelector
                         value={{
                           countryCode: profileData.country_code,
@@ -445,37 +491,65 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Address - Full Width */}
-                    <div className="space-y-2" style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Label htmlFor="address">Address</Label>
-                      <Textarea
-                        id="address"
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Address
+                      </label>
+                      <textarea
                         value={profileData.address}
                         onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
                         placeholder="Enter your business address"
                         rows={3}
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          resize: 'vertical'
+                        }}
                       />
                     </div>
 
                     {/* Save Button - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Button
-                        onClick={handleSaveProfile}
-                        disabled={saving}
-                        className="w-full"
-                      >
-                        {saving ? (
-                          <>
-                            <Loader2 size={16} className="animate-spin mr-2" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <Save size={16} className="mr-2" />
-                            Save Profile
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                      style={{
+                        gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1',
+                        padding: '0.875rem 1.5rem',
+                        backgroundColor: brandColors.primary[600],
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        opacity: saving ? 0.6 : 1
+                      }}
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} />
+                          Save Profile
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               )}
@@ -501,23 +575,34 @@ export default function SettingsPage() {
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {/* Currency Selector */}
-                    <div className="space-y-2">
-                      <Label htmlFor="currency">Default Currency</Label>
-                      <Select
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Default Currency
+                      </label>
+                      <select
                         value={profileData.currency_code}
-                        onValueChange={(value) => setProfileData({ ...profileData, currency_code: value })}
+                        onChange={(e) => setProfileData({ ...profileData, currency_code: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          cursor: 'pointer'
+                        }}
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select currency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CURRENCIES.map((currency) => (
-                            <SelectItem key={currency.code} value={currency.code}>
-                              {currency.symbol} {currency.code} - {currency.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        {CURRENCIES.map((currency) => (
+                          <option key={currency.code} value={currency.code}>
+                            {currency.symbol} {currency.code} - {currency.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     {/* Preview */}
@@ -545,23 +630,38 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Save Button */}
-                    <Button
+                    <button
                       onClick={handleSaveCurrency}
                       disabled={saving}
-                      className="w-full"
+                      style={{
+                        padding: '0.875rem 1.5rem',
+                        backgroundColor: brandColors.primary[600],
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        opacity: saving ? 0.6 : 1,
+                        width: '100%'
+                      }}
                     >
                       {saving ? (
                         <>
-                          <Loader2 size={16} className="animate-spin mr-2" />
+                          <Loader2 size={16} className="animate-spin" />
                           Saving...
                         </>
                       ) : (
                         <>
-                          <Save size={16} className="mr-2" />
+                          <Save size={16} />
                           Save Currency
                         </>
                       )}
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}
@@ -591,109 +691,221 @@ export default function SettingsPage() {
                     gap: '1.5rem'
                   }}>
                     {/* Bank Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="bank_name">Bank Name</Label>
-                      <Input
-                        id="bank_name"
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Bank Name
+                      </label>
+                      <input
                         type="text"
                         value={paymentDetails.bankName}
                         onChange={(e) => setPaymentDetails({ ...paymentDetails, bankName: e.target.value })}
                         placeholder="e.g., Chase Bank"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* Account Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="account_name">Account Name</Label>
-                      <Input
-                        id="account_name"
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Account Name
+                      </label>
+                      <input
                         type="text"
                         value={paymentDetails.accountName}
                         onChange={(e) => setPaymentDetails({ ...paymentDetails, accountName: e.target.value })}
                         placeholder="e.g., Your Business LLC"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* Account Number - Full Width */}
-                    <div className="space-y-2" style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Label htmlFor="account_number">Account Number</Label>
-                      <Input
-                        id="account_number"
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Account Number
+                      </label>
+                      <input
                         type="text"
                         value={paymentDetails.accountNumber}
                         onChange={(e) => setPaymentDetails({ ...paymentDetails, accountNumber: e.target.value })}
                         placeholder="e.g., **** **** 1234"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* Routing Number */}
-                    <div className="space-y-2">
-                      <Label htmlFor="routing">Routing Number (Optional)</Label>
-                      <Input
-                        id="routing"
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Routing Number (Optional)
+                      </label>
+                      <input
                         type="text"
                         value={paymentDetails.routingNumber}
                         onChange={(e) => setPaymentDetails({ ...paymentDetails, routingNumber: e.target.value })}
                         placeholder="e.g., 123456789"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* SWIFT Code */}
-                    <div className="space-y-2">
-                      <Label htmlFor="swift">SWIFT/BIC Code (Optional)</Label>
-                      <Input
-                        id="swift"
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        SWIFT/BIC Code (Optional)
+                      </label>
+                      <input
                         type="text"
                         value={paymentDetails.swiftCode}
                         onChange={(e) => setPaymentDetails({ ...paymentDetails, swiftCode: e.target.value })}
                         placeholder="e.g., CHASUS33"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* PayPal Email - Full Width */}
-                    <div className="space-y-2" style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Label htmlFor="paypal">PayPal Email (Optional)</Label>
-                      <Input
-                        id="paypal"
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        PayPal Email (Optional)
+                      </label>
+                      <input
                         type="email"
                         value={paymentDetails.paypalEmail}
                         onChange={(e) => setPaymentDetails({ ...paymentDetails, paypalEmail: e.target.value })}
                         placeholder="e.g., payments@yourbusiness.com"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem'
+                        }}
                       />
                     </div>
 
                     {/* Payment Instructions - Full Width */}
-                    <div className="space-y-2" style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Label htmlFor="instructions">Payment Instructions (Optional)</Label>
-                      <Textarea
-                        id="instructions"
+                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Payment Instructions (Optional)
+                      </label>
+                      <textarea
                         value={paymentDetails.instructions}
                         onChange={(e) => setPaymentDetails({ ...paymentDetails, instructions: e.target.value })}
                         placeholder="e.g., Please reference invoice number in payment description"
                         rows={3}
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          resize: 'vertical'
+                        }}
                       />
                     </div>
 
                     {/* Save Button - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
-                      <Button
-                        onClick={handleSavePaymentDetails}
-                        disabled={saving}
-                        className="w-full"
-                      >
-                        {saving ? (
-                          <>
-                            <Loader2 size={16} className="animate-spin mr-2" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <Save size={16} className="mr-2" />
-                            Save Payment Details
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <button
+                      onClick={handleSavePaymentDetails}
+                      disabled={saving}
+                      style={{
+                        gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1',
+                        padding: '0.875rem 1.5rem',
+                        backgroundColor: brandColors.primary[600],
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        opacity: saving ? 0.6 : 1
+                      }}
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} />
+                          Save Payment Details
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               )}
