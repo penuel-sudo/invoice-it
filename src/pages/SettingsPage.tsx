@@ -277,7 +277,7 @@ export default function SettingsPage() {
         <div style={{
           backgroundColor: 'white',
           borderBottom: `1px solid ${brandColors.neutral[200]}`,
-          padding: '1rem 2rem',
+          padding: window.innerWidth < 768 ? '1rem' : '1rem 2rem',
           position: 'sticky',
           top: 0,
           zIndex: 10
@@ -285,7 +285,7 @@ export default function SettingsPage() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem',
+            justifyContent: 'space-between',
             maxWidth: '1200px',
             margin: '0 auto'
           }}>
@@ -304,81 +304,75 @@ export default function SettingsPage() {
               <ArrowLeft size={20} color={brandColors.neutral[600]} />
             </button>
             <h1 style={{
-              fontSize: '1.5rem',
+              fontSize: window.innerWidth < 768 ? '1.25rem' : '1.5rem',
               fontWeight: '600',
               color: brandColors.neutral[900],
-              margin: 0
+              margin: 0,
+              textAlign: 'center',
+              flex: 1
             }}>
               Settings
             </h1>
+            <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
           </div>
         </div>
 
         {/* Content */}
         <div style={{
-          maxWidth: '1200px',
+          maxWidth: '600px',
           margin: '0 auto',
-          padding: '2rem',
-          display: 'flex',
-          gap: '2rem'
+          padding: window.innerWidth < 768 ? '1rem' : '2rem'
         }}>
-          {/* Sidebar Tabs */}
+          {/* Tab Navigation - Horizontal Scroll on Mobile */}
           <div style={{
-            width: '250px',
-            flexShrink: 0
+            display: 'flex',
+            gap: '0.5rem',
+            marginBottom: '1.5rem',
+            overflowX: 'auto',
+            paddingBottom: '0.5rem',
+            scrollbarWidth: 'none', // Firefox
+            msOverflowStyle: 'none' // IE/Edge
           }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '0.5rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-            }}>
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                const isActive = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    style={{
-                      width: '100%',
-                      padding: '0.875rem 1rem',
-                      backgroundColor: isActive ? brandColors.primary[50] : 'transparent',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      marginBottom: '0.25rem',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <Icon 
-                      size={20} 
-                      color={isActive ? brandColors.primary[600] : brandColors.neutral[600]} 
-                    />
-                    <span style={{
-                      fontSize: '0.875rem',
-                      fontWeight: isActive ? '600' : '500',
-                      color: isActive ? brandColors.primary[600] : brandColors.neutral[700]
-                    }}>
-                      {tab.label}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  style={{
+                    padding: window.innerWidth < 768 ? '0.75rem 1.25rem' : '0.875rem 1.5rem',
+                    backgroundColor: isActive ? brandColors.primary[600] : 'white',
+                    color: isActive ? 'white' : brandColors.neutral[700],
+                    border: `1px solid ${isActive ? brandColors.primary[600] : brandColors.neutral[200]}`,
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem',
+                    fontWeight: isActive ? '600' : '500',
+                    transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    boxShadow: isActive ? '0 2px 8px rgba(22, 163, 74, 0.2)' : '0 1px 3px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  <Icon size={window.innerWidth < 768 ? 16 : 18} />
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
           </div>
 
-          {/* Main Content */}
-          <div style={{ flex: 1 }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '2rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-            }}>
+          {/* Main Content Card */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: window.innerWidth < 768 ? '16px' : '20px',
+            padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
+          }}>
               {/* Profile Tab */}
               {activeTab === 'profile' && (
                 <div>
@@ -950,7 +944,6 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
-        </div>
       </div>
     </Layout>
   )
