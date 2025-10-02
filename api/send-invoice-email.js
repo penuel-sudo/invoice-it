@@ -100,10 +100,12 @@ export default async function handler(req, res) {
               margin-bottom: 24px;
             }
             .button-group {
-              display: flex;
+              display: flex !important;
               gap: 12px;
-              justify-content: space-between;
+              justify-content: space-between !important;
               align-items: center;
+              width: 100%;
+              margin-top: 16px;
             }
             .btn {
               padding: 8px 16px;
@@ -115,17 +117,20 @@ export default async function handler(req, res) {
               transition: all 0.2s;
               display: inline-flex;
               align-items: center;
+              justify-content: center;
               gap: 6px;
+              flex: 1;
+              text-align: center;
             }
             .btn-primary {
-              background: #16a34a;
-              color: white;
-              border: none;
+              background: #16a34a !important;
+              color: white !important;
+              border: none !important;
             }
             .btn-secondary {
-              background: transparent;
-              color: #16a34a;
-              border: 1px solid #bbf7d0;
+              background: transparent !important;
+              color: #16a34a !important;
+              border: 1px solid #bbf7d0 !important;
             }
             .btn:hover {
               transform: translateY(-1px);
