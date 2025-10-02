@@ -100,10 +100,6 @@ export default async function handler(req, res) {
               margin-bottom: 24px;
             }
             .button-group {
-              display: flex !important;
-              gap: 12px;
-              justify-content: space-between !important;
-              align-items: center;
               width: 100%;
               margin-top: 16px;
             }
@@ -115,12 +111,10 @@ export default async function handler(req, res) {
               font-size: 14px;
               cursor: pointer;
               transition: all 0.2s;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              gap: 6px;
-              flex: 1;
+              display: inline-block;
               text-align: center;
+              width: 100%;
+              box-sizing: border-box;
             }
             .btn-primary {
               background: #16a34a !important;
@@ -194,17 +188,21 @@ export default async function handler(req, res) {
             </div>
 
             <!-- Action Buttons -->
-            <div class="button-group">
-              <!-- View Invoice Button (Secondary) -->
-              <a href="#" class="btn btn-secondary">
-                View Invoice
-              </a>
-
-              <!-- Pay Now Button (Primary) -->
-              <a href="#" class="btn btn-primary">
-                Pay Now
-              </a>
-            </div>
+            <table class="button-group" cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td width="48%" align="left">
+                  <a href="#" class="btn btn-secondary">
+                    View Invoice
+                  </a>
+                </td>
+                <td width="4%">&nbsp;</td>
+                <td width="48%" align="right">
+                  <a href="#" class="btn btn-primary">
+                    Pay Now
+                  </a>
+                </td>
+              </tr>
+            </table>
 
           </div>
 
