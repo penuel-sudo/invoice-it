@@ -5,7 +5,7 @@ import NotificationDropdown from '../NotificationDropdown'
 
 const navigationItems = [
   { id: 'Home', label: 'Home', icon: Home, path: '/dashboard' },
-  { id: 'Invoices', label: 'Invoices', icon: FileText, path: '/invoices?tab=invoices' },
+  { id: 'Invoices', label: 'Invoices', icon: FileText, path: '/invoices?tab=invoice' },
   { id: 'Templates', label: 'Templates', icon: Layout, path: '/templates' },
   { id: 'Settings', label: 'Settings', icon: Settings, path: '/settings' }
 ]

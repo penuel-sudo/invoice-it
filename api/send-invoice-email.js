@@ -24,21 +24,23 @@ export default async function handler(req, res) {
       invoiceData: !!invoiceData,
       userData: !!userData,
       clientName: !!clientName,
+      greetingMessage: !!greetingMessage,
+      businessName: !!businessName,
       toValue: to,
-      clientNameValue: clientName
+      clientNameValue: clientName,
+      greetingMessageValue: greetingMessage,
+      businessNameValue: businessName
     })
 
     // Validate required fields
-    if (!to || !invoiceData || !userData || !clientName) {
+    if (!to || !invoiceData) {
       const missing = []
       if (!to) missing.push('to')
       if (!invoiceData) missing.push('invoiceData')
-      if (!userData) missing.push('userData')
-      if (!clientName) missing.push('clientName')
       
       return res.status(400).json({ 
         error: `Missing required fields: ${missing.join(', ')}`,
-        received: { to: !!to, invoiceData: !!invoiceData, userData: !!userData, clientName: !!clientName }
+        received: { to: !!to, invoiceData: !!invoiceData }
       })
     }
 
@@ -162,7 +164,7 @@ export default async function handler(req, res) {
         <body>
           <!-- Greeting Message -->
           <div class="greeting">
-            ${greetingMessage || `Hi ${clientName},`}
+            ${greetingMessage || `Hi ${clientName || 'Client'},`}
           </div>
 
           <!-- Small Focused Card -->

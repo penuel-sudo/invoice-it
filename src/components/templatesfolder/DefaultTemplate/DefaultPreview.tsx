@@ -26,14 +26,10 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 // Lazy load heavy button components
-import { lazy, Suspense } from 'react'
-
-const StatusButton = lazy(() => import('../../StatusButton'))
-const SendButton = lazy(() => import('../../buttons/SendButton'))
-const EditButton = lazy(() => import('../../buttons/EditButton'))
-
-// DownloadButton with heavy PDF dependencies - load separately
-const DownloadButton = lazy(() => import('../../buttons/DownloadButton'))
+import StatusButton from '../../StatusButton'
+import SendButton from '../../buttons/SendButton'
+import EditButton from '../../buttons/EditButton'
+import DownloadButton from '../../buttons/DownloadButton'
 
 
 export default function InvoicePreviewPage() {
@@ -628,32 +624,29 @@ export default function InvoicePreviewPage() {
           gap: '0.75rem',
           justifyContent: 'center'
         }}>
-          <Suspense fallback={<div style={{ padding: '12px', color: '#666' }}>Loading buttons...</div>}>
-            {/* Only show Edit button for CREATE mode (not from database) */}
-            {!isFromDatabase && (
-            <EditButton 
-              onEdit={handleEdit}
-              size="md"
-              variant="secondary"
-            />
-            )}
-            
-            <DownloadButton 
-              invoiceData={invoiceData}
-              user={user}
-              template="default"
-              size="md"
-              variant="primary"
-            />
-            
-            <SendButton 
-              invoiceData={invoiceData}
-              userData={user}
-              size="md"
-              variant="secondary"
-            />
-            
-          </Suspense>
+          {/* Only show Edit button for CREATE mode (not from database) */}
+          {!isFromDatabase && (
+          <EditButton 
+            onEdit={handleEdit}
+            size="md"
+            variant="secondary"
+          />
+          )}
+          
+          <DownloadButton 
+            invoiceData={invoiceData}
+            user={user}
+            template="default"
+            size="md"
+            variant="primary"
+          />
+          
+          <SendButton 
+            invoiceData={invoiceData}
+            userData={user}
+            size="md"
+            variant="secondary"
+          />
         </div>
 
       </div>

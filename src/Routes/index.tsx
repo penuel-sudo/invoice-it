@@ -1,15 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
 import AuthWrapper from '../components/AuthWrapper'
 
-// Only lazy load the HEAVIEST pages
-const DashboardPage = lazy(() => import('../pages/DashboardPage'))
-const TransactionPage = lazy(() => import('../pages/TransactionPage'))
-const SettingsPage = lazy(() => import('../pages/SettingsPage'))
-
-// Import others normally (they're small)
+// Import all pages normally to avoid dynamic import issues
 import OnboardingPage from '../pages/OnboardingPage'
 import AuthPage from '../pages/AuthPage'
+import DashboardPage from '../pages/DashboardPage'
+import TransactionPage from '../pages/TransactionPage'
 import InvoiceCreatePage from '../pages/InvoiceCreatePage'
 import InvoicePreviewPage from '../pages/InvoicePreviewPage'
 import ExpenseCreatePage from '../pages/ExpenseCreatePage'
@@ -17,21 +13,9 @@ import ExpensePreviewPage from '../pages/ExpensePreviewPage'
 import TemplateGalleryPage from '../pages/TemplateGalleryPage'
 import ResetPasswordPage from '../pages/reset-password'
 import ProfilePage from '../pages/ProfilePage'
+import SettingsPage from '../pages/SettingsPage'
 import NotFoundPage from '../pages/NotFoundPage'
 
-// Loading component
-const LoadingFallback = () => (
-  <div style={{ 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    height: '100vh',
-    fontSize: '18px',
-    color: '#666'
-  }}>
-    Loading...
-  </div>
-)
 
 export const router = createBrowserRouter([
   {
@@ -42,9 +26,7 @@ export const router = createBrowserRouter([
     path: '/dashboard',
     element: (
       <AuthWrapper requireAuth={true}>
-        <Suspense fallback={<LoadingFallback />}>
-          <DashboardPage />
-        </Suspense>
+        <DashboardPage />
       </AuthWrapper>
     )
   },
@@ -76,9 +58,7 @@ export const router = createBrowserRouter([
     path: '/invoices',
     element: (
       <AuthWrapper requireAuth={true}>
-        <Suspense fallback={<LoadingFallback />}>
-          <TransactionPage />
-        </Suspense>
+        <TransactionPage />
       </AuthWrapper>
     )
   },
@@ -118,9 +98,7 @@ export const router = createBrowserRouter([
     path: '/settings',
     element: (
       <AuthWrapper requireAuth={true}>
-        <Suspense fallback={<LoadingFallback />}>
-          <SettingsPage />
-        </Suspense>
+        <SettingsPage />
       </AuthWrapper>
     )
   },

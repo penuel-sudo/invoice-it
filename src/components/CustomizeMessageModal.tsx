@@ -29,25 +29,15 @@ export default function CustomizeMessageModal({
   const [clientName, setClientName] = useState(defaultClientName)
 
   const handleSend = () => {
-    if (!greetingMessage.trim()) {
-      toast.error('Please enter a greeting message')
-      return
-    }
-
-    if (!businessName.trim()) {
-      toast.error('Please enter your business name')
-      return
-    }
-
-    if (!clientName.trim()) {
-      toast.error('Please enter the client name')
-      return
-    }
+    // Use default values if fields are empty
+    const finalGreetingMessage = greetingMessage.trim() || `Hi ${defaultClientName || 'Client'}, here's your invoice for the work completed by ${defaultBusinessName || 'our business'}.`
+    const finalBusinessName = businessName.trim() || defaultBusinessName || 'Your Business'
+    const finalClientName = clientName.trim() || defaultClientName || 'Client'
 
     onSend({
-      greetingMessage: greetingMessage.trim(),
-      businessName: businessName.trim(),
-      clientName: clientName.trim()
+      greetingMessage: finalGreetingMessage,
+      businessName: finalBusinessName,
+      clientName: finalClientName
     })
   }
 
@@ -81,7 +71,7 @@ export default function CustomizeMessageModal({
         maxWidth: '500px',
         width: '100%',
         maxHeight: '80vh',
-        overflowY: 'auto',
+        overflowY: 'hidden',
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
       }}>
         {/* Header */}
@@ -127,7 +117,7 @@ export default function CustomizeMessageModal({
               color: brandColors.neutral[700],
               marginBottom: '6px'
             }}>
-              Business Name
+              Business Name <span style={{ color: brandColors.neutral[500], fontWeight: '400' }}>(optional)</span>
             </label>
             <input
               type="text"
@@ -162,7 +152,7 @@ export default function CustomizeMessageModal({
               color: brandColors.neutral[700],
               marginBottom: '6px'
             }}>
-              Client Name
+              Client Name <span style={{ color: brandColors.neutral[500], fontWeight: '400' }}>(optional)</span>
             </label>
             <input
               type="text"
@@ -197,7 +187,7 @@ export default function CustomizeMessageModal({
               color: brandColors.neutral[700],
               marginBottom: '6px'
             }}>
-              Greeting Message
+              Greeting Message <span style={{ color: brandColors.neutral[500], fontWeight: '400' }}>(optional)</span>
             </label>
             <textarea
               value={greetingMessage}

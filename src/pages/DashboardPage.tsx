@@ -707,7 +707,7 @@ export default function DashboardPage() {
 
             {/* View Invoices */}
             <button
-              onClick={() => navigate('/invoices?tab=invoices')}
+              onClick={() => navigate('/invoices?tab=invoice')}
               style={{
                 display: 'flex',
                 flexDirection: 'column',

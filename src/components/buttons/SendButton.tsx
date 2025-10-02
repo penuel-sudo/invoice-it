@@ -60,8 +60,8 @@ export default function SendButton({
           invoiceData: invoiceData || {},
           userData: userData || { fullName: 'Business Owner', businessName: 'Your Business' },
           clientName: messageData.clientName || invoiceData?.clientName || 'Client',
-          greetingMessage: messageData.greetingMessage,
-          businessName: messageData.businessName
+          greetingMessage: messageData.greetingMessage || null,
+          businessName: messageData.businessName || null
         })
       })
 
