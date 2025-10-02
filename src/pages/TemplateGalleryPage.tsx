@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, X } from 'lucide-react'
 import { brandColors } from '../stylings'
 import { Layout as LayoutComponent } from '../components/layout'
 import { TemplateGallery, TemplateGrid, TemplateCard } from '../components/templates'
-import DefaultCreate from '../components/templatesfolder/DefaultTemplate/DefaultCreate'
-import DefaultPreviewStatic from '../components/templatesfolder/DefaultTemplate/DefaultPreviewStatic'
+
+// Dynamic imports for heavy template components
+const DefaultCreate = lazy(() => import('../components/templatesfolder/DefaultTemplate/DefaultCreate'))
+const DefaultPreviewStatic = lazy(() => import('../components/templatesfolder/DefaultTemplate/DefaultPreviewStatic'))
 
 export default function TemplateGalleryPage() {
   const navigate = useNavigate()
@@ -132,7 +134,20 @@ export default function TemplateGalleryPage() {
               overflow: 'auto'
             }}>
               {previewOverlay.template?.PreviewComponent && (
-                <previewOverlay.template.PreviewComponent />
+                <Suspense fallback={
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    height: '400px',
+                    fontSize: '16px',
+                    color: '#666'
+                  }}>
+                    Loading preview...
+                  </div>
+                }>
+                  <previewOverlay.template.PreviewComponent />
+                </Suspense>
               )}
             </div>
           </div>

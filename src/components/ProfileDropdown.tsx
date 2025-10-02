@@ -354,10 +354,10 @@ export default function ProfileDropdown({
     </DropdownMenu>
 
     {/* Notification Dropdown */}
-    <NotificationDropdown 
-      isVisible={isNotificationVisible}
-      onClose={() => setIsNotificationVisible(false)}
-    />
+        <NotificationDropdown 
+          isVisible={isNotificationVisible} 
+          onClose={() => setIsNotificationVisible(false)} 
+        />
   </>
   )
 }
