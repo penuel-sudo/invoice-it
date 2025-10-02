@@ -153,7 +153,7 @@ export default async function handler(req, res) {
 
             <div class="invoice-header">
               <div class="invoice-number">Invoice #${invoiceData.invoiceNumber}</div>
-              <div class="invoice-amount">$${invoiceData.total.toFixed(2)}</div>
+              <div class="invoice-amount">$${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}</div>
               <div style="font-size: 16px; opacity: 0.9;">
                 Due: ${new Date(invoiceData.dueDate).toLocaleDateString()}
               </div>
@@ -178,7 +178,7 @@ export default async function handler(req, res) {
     const { data, error } = await resend.emails.send({
       from: `${userData.businessName || userData.fullName} <noreply@resend.dev>`,
       to: [to],
-      subject: `Invoice #${invoiceData.invoiceNumber} - $${invoiceData.total.toFixed(2)}`,
+      subject: `Invoice #${invoiceData.invoiceNumber} - $${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}`,
       html: emailHtml,
       // attachments: [
       //   {
