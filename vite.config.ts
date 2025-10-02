@@ -28,27 +28,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Split the HEAVIEST libraries first
+          // Only split the HEAVIEST libraries to avoid conflicts
           if (id.includes('@react-pdf') || id.includes('react-pdf')) {
             return 'react-pdf' // Separate chunk for PDF library
-          }
-          if (id.includes('DefaultPreview')) {
-            return 'default-preview'
-          }
-          if (id.includes('DefaultCreate')) {
-            return 'default-create'
-          }
-          if (id.includes('DashboardPage')) {
-            return 'dashboard-page'
-          }
-          if (id.includes('TransactionPage')) {
-            return 'transaction-page'
-          }
-          if (id.includes('SettingsPage')) {
-            return 'settings-page'
-          }
-          if (id.includes('lucide-react')) {
-            return 'lucide-icons'
           }
           if (id.includes('@supabase')) {
             return 'supabase'
@@ -56,10 +38,7 @@ export default defineConfig({
           if (id.includes('framer-motion')) {
             return 'framer-motion'
           }
-          if (id.includes('date-fns')) {
-            return 'date-utils'
-          }
-          // Keep everything else in main bundle
+          // Keep lucide-react and other smaller libs in main bundle
           return undefined
         },
         // Optimized file naming
@@ -98,14 +77,11 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom',
-      'react-hot-toast'
+      'react-hot-toast',
+      'lucide-react' // Include lucide-react to fix forwardRef error
     ],
     exclude: [
-      '@radix-ui/react-use-layout-effect',
-      'lucide-react', // Exclude - too heavy for main bundle
-      '@supabase/supabase-js', // Exclude - will be in separate chunk
-      'framer-motion', // Exclude - will be in separate chunk
-      'date-fns' // Exclude - will be in separate chunk
+      '@radix-ui/react-use-layout-effect'
     ]
   },
   
