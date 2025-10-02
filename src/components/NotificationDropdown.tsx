@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { brandColors } from '../stylings'
 import NotificationItem from './NotificationItem'
 import { 
@@ -18,6 +18,7 @@ interface NotificationDropdownProps {
 
 export default function NotificationDropdown({ isVisible, onClose }: NotificationDropdownProps) {
   const [isMobile, setIsMobile] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotification()
 
   useEffect(() => {
@@ -30,6 +31,23 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
     
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose()
+      }
+    }
+
+    if (isVisible) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isVisible, onClose])
 
   // Get icon based on notification type
   const getNotificationIcon = (type: string) => {
@@ -65,6 +83,7 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
         `}
       </style>
       <div
+        ref={dropdownRef}
         className="notification-dropdown"
         style={{
         position: 'fixed',
@@ -78,7 +97,7 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         zIndex: 50,
         transition: 'top 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        maxHeight: '60vh',
+        maxHeight: '80vh',
         overflowY: 'auto',
         scrollbarWidth: 'none', // Firefox
         msOverflowStyle: 'none', // IE/Edge

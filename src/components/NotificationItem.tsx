@@ -99,40 +99,6 @@ export default function NotificationItem({
         }} />
       )}
 
-      {/* Delete button */}
-      {onDelete && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete(id)
-          }}
-          style={{
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            padding: '0.25rem',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.5,
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1'
-            e.currentTarget.style.backgroundColor = brandColors.error[50]
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0.5'
-            e.currentTarget.style.backgroundColor = 'transparent'
-          }}
-        >
-          <Trash2 size={14} color={brandColors.error[500]} />
-        </button>
-      )}
 
       <div style={{
         width: '32px',
@@ -173,13 +139,52 @@ export default function NotificationItem({
         }}>
           {message}
         </p>
-        <p style={{
-          fontSize: '0.625rem',
-          color: brandColors.neutral[400],
-          margin: 0
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.5rem'
         }}>
-          {time}
-        </p>
+          <p style={{
+            fontSize: '0.625rem',
+            color: brandColors.neutral[400],
+            margin: 0
+          }}>
+            {time}
+          </p>
+          
+          {/* Delete button */}
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(id)
+              }}
+              style={{
+                padding: '0.25rem',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0.5,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1'
+                e.currentTarget.style.backgroundColor = brandColors.error[50]
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.5'
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <Trash2 size={14} color={brandColors.error[500]} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
