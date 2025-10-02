@@ -222,11 +222,6 @@ export default function CountryPhoneSelector({
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '')
     
-    // Remove leading zero (international format)
-    if (value.startsWith('0')) {
-      value = value.substring(1)
-    }
-    
     setPhoneNumber(value)
   }, [])
 
