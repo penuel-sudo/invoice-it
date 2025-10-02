@@ -102,7 +102,7 @@ export default async function handler(req, res) {
             .button-group {
               display: flex;
               gap: 12px;
-              justify-content: flex-end;
+              justify-content: space-between;
               align-items: center;
             }
             .btn {
@@ -192,7 +192,7 @@ export default async function handler(req, res) {
             <div class="button-group">
               <!-- View Invoice Button (Secondary) -->
               <a href="#" class="btn btn-secondary">
-                👁️ View Invoice
+                View Invoice
               </a>
 
               <!-- Pay Now Button (Primary) -->
@@ -201,10 +201,6 @@ export default async function handler(req, res) {
               </a>
             </div>
 
-            <!-- Professional Text -->
-            <div class="view-text">
-              View invoice details below
-            </div>
           </div>
 
           <!-- Business Footer -->

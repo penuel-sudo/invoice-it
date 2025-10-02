@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { brandColors } from '../stylings'
 import toast from 'react-hot-toast'
+import { supabase } from '../lib/supabaseClient'
 
 interface CustomizeMessageModalProps {
   isVisible: boolean
@@ -27,6 +28,34 @@ export default function CustomizeMessageModal({
   const [greetingMessage, setGreetingMessage] = useState('')
   const [businessName, setBusinessName] = useState(defaultBusinessName)
   const [clientName, setClientName] = useState(defaultClientName)
+  const [userCompanyName, setUserCompanyName] = useState('')
+
+  // Fetch user's company name from database
+  useEffect(() => {
+    const fetchUserCompanyName = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('company_name')
+            .eq('id', user.id)
+            .single()
+          
+          if (profile?.company_name) {
+            setUserCompanyName(profile.company_name)
+            setBusinessName(profile.company_name)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching company name:', error)
+      }
+    }
+
+    if (isVisible) {
+      fetchUserCompanyName()
+    }
+  }, [isVisible])
 
   const handleSend = () => {
     // Use default values if fields are empty
@@ -51,7 +80,19 @@ export default function CustomizeMessageModal({
   if (!isVisible) return null
 
   return (
-    <div style={{
+    <>
+      <style>
+        {`
+          .customize-modal::-webkit-scrollbar {
+            display: none;
+          }
+          .customize-modal {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+          }
+        `}
+      </style>
+      <div style={{
       position: 'fixed',
       top: 0,
       left: 0,
@@ -64,14 +105,16 @@ export default function CustomizeMessageModal({
       zIndex: 1000,
       padding: '20px'
     }}>
-      <div style={{
+      <div 
+        className="customize-modal"
+        style={{
         backgroundColor: 'white',
         borderRadius: '16px',
         padding: '24px',
         maxWidth: '500px',
         width: '100%',
         maxHeight: '80vh',
-        overflowY: 'hidden',
+        overflowY: 'auto',
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
       }}>
         {/* Header */}
@@ -277,5 +320,6 @@ export default function CustomizeMessageModal({
         </div>
       </div>
     </div>
+    </>
   )
 }
