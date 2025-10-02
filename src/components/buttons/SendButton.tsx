@@ -40,6 +40,14 @@ export default function SendButton({
   const sendInvoiceEmail = async (email: string) => {
     setIsLoading(true)
     
+    // Debug logging
+    console.log('Sending email with data:', {
+      to: email,
+      invoiceData: invoiceData,
+      userData: userData,
+      clientName: invoiceData?.clientName || invoiceData?.client?.name || 'Client'
+    })
+    
     try {
       const response = await fetch('/api/send-invoice-email', {
         method: 'POST',
@@ -48,9 +56,9 @@ export default function SendButton({
         },
         body: JSON.stringify({
           to: email,
-          invoiceData,
-          userData,
-          clientName: invoiceData.clientName || 'Client'
+          invoiceData: invoiceData || {},
+          userData: userData || {},
+          clientName: invoiceData?.clientName || invoiceData?.client?.name || 'Client'
         })
       })
 

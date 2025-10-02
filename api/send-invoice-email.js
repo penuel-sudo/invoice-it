@@ -16,10 +16,27 @@ export default async function handler(req, res) {
       clientName 
     } = req.body
 
+    // Debug logging
+    console.log('Received data:', {
+      to: !!to,
+      invoiceData: !!invoiceData,
+      userData: !!userData,
+      clientName: !!clientName,
+      toValue: to,
+      clientNameValue: clientName
+    })
+
     // Validate required fields
     if (!to || !invoiceData || !userData || !clientName) {
+      const missing = []
+      if (!to) missing.push('to')
+      if (!invoiceData) missing.push('invoiceData')
+      if (!userData) missing.push('userData')
+      if (!clientName) missing.push('clientName')
+      
       return res.status(400).json({ 
-        error: 'Missing required fields: to, invoiceData, userData, clientName' 
+        error: `Missing required fields: ${missing.join(', ')}`,
+        received: { to: !!to, invoiceData: !!invoiceData, userData: !!userData, clientName: !!clientName }
       })
     }
 
