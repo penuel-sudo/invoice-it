@@ -31,7 +31,6 @@ import { lazy, Suspense } from 'react'
 const StatusButton = lazy(() => import('../../StatusButton'))
 const SendButton = lazy(() => import('../../buttons/SendButton'))
 const EditButton = lazy(() => import('../../buttons/EditButton'))
-const ShareButton = lazy(() => import('../../buttons/ShareButton'))
 
 // DownloadButton with heavy PDF dependencies - load separately
 const DownloadButton = lazy(() => import('../../buttons/DownloadButton'))
@@ -654,11 +653,6 @@ export default function InvoicePreviewPage() {
               variant="secondary"
             />
             
-            <ShareButton 
-              invoiceData={invoiceData}
-              size="md"
-              variant="secondary"
-            />
           </Suspense>
         </div>
 

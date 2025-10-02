@@ -13,7 +13,9 @@ export default async function handler(req, res) {
       to, 
       invoiceData, 
       userData, 
-      clientName 
+      clientName,
+      greetingMessage,
+      businessName
     } = req.body
 
     // Debug logging
@@ -43,7 +45,7 @@ export default async function handler(req, res) {
     // Generate PDF (you'll need to implement this)
     // const pdfBuffer = await generateInvoicePDF(invoiceData)
 
-    // Create email template
+    // Create clean, minimal email template
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -61,78 +63,90 @@ export default async function handler(req, res) {
               padding: 20px;
               background-color: #f8fafc;
             }
-            .email-card {
-              background: white;
-              border-radius: 12px;
-              padding: 32px;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-              border: 1px solid #e2e8f0;
-            }
             .greeting {
-              font-size: 18px;
+              font-size: 16px;
               color: #1a202c;
               margin-bottom: 24px;
+              line-height: 1.5;
             }
-            .invoice-header {
-              background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-              color: white;
+            .invoice-card {
+              background: white;
+              border-radius: 12px;
               padding: 24px;
-              border-radius: 8px;
-              margin: 24px 0;
-              text-align: center;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+              border: 1px solid #e2e8f0;
+              max-width: 400px;
+              margin: 0 auto;
             }
             .invoice-number {
-              font-size: 24px;
-              font-weight: bold;
-              margin-bottom: 8px;
+              font-size: 14px;
+              color: #64748b;
+              margin-bottom: 16px;
+              font-weight: 500;
             }
             .invoice-amount {
               font-size: 32px;
               font-weight: bold;
-              margin: 16px 0;
+              color: #16a34a;
+              margin-bottom: 16px;
+              text-align: center;
+            }
+            .due-date {
+              font-size: 14px;
+              color: #64748b;
+              text-align: center;
+              margin-bottom: 24px;
             }
             .button-group {
               display: flex;
-              gap: 16px;
-              margin: 32px 0;
-              flex-wrap: wrap;
+              gap: 12px;
+              justify-content: flex-end;
+              align-items: center;
             }
             .btn {
-              display: inline-block;
-              padding: 12px 24px;
+              padding: 8px 16px;
               border-radius: 8px;
               text-decoration: none;
-              font-weight: 600;
-              text-align: center;
+              font-weight: 500;
+              font-size: 14px;
+              cursor: pointer;
               transition: all 0.2s;
-              flex: 1;
-              min-width: 140px;
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
             }
             .btn-primary {
               background: #16a34a;
               color: white;
+              border: none;
             }
             .btn-secondary {
-              background: #ffffff;
+              background: transparent;
               color: #16a34a;
-              border: 2px solid #16a34a;
+              border: 1px solid #bbf7d0;
             }
             .btn:hover {
               transform: translateY(-1px);
-              box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
             }
             .btn-primary:hover {
               background: #15803d;
             }
             .btn-secondary:hover {
               background: #f0fdf4;
+              border-color: #86efac;
+            }
+            .view-text {
+              font-size: 12px;
+              color: #64748b;
+              text-align: center;
+              margin-top: 16px;
+              font-style: italic;
             }
             .footer {
               margin-top: 32px;
-              padding-top: 24px;
-              border-top: 1px solid #e2e8f0;
-              color: #64748b;
+              text-align: center;
               font-size: 14px;
+              color: #64748b;
             }
             @media (max-width: 600px) {
               .button-group {
@@ -140,35 +154,60 @@ export default async function handler(req, res) {
               }
               .btn {
                 width: 100%;
+                justify-content: center;
               }
             }
           </style>
         </head>
         <body>
-          <div class="email-card">
-            <div class="greeting">
-              Hi ${clientName},<br><br>
-              Please find your invoice from ${userData.businessName || userData.fullName} attached below.
+          <!-- Greeting Message -->
+          <div class="greeting">
+            ${greetingMessage || `Hi ${clientName},`}
+          </div>
+
+          <!-- Small Focused Card -->
+          <div class="invoice-card">
+            <!-- Top-left: Invoice Number -->
+            <div class="invoice-number">
+              Payment #${invoiceData.invoiceNumber}
             </div>
 
-            <div class="invoice-header">
-              <div class="invoice-number">Invoice #${invoiceData.invoiceNumber}</div>
-              <div class="invoice-amount">$${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}</div>
-              <div style="font-size: 16px; opacity: 0.9;">
-                Due: ${new Date(invoiceData.dueDate).toLocaleDateString()}
-              </div>
+            <!-- Prominent: Total Amount -->
+            <div class="invoice-amount">
+              $${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}
             </div>
 
+            <!-- Due Date -->
+            <div class="due-date">
+              Due: ${new Date(invoiceData.dueDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </div>
+
+            <!-- Action Buttons -->
             <div class="button-group">
-              <a href="#" class="btn btn-primary">Pay Now</a>
-              <a href="#" class="btn btn-secondary">Download PDF</a>
+              <!-- View Invoice Button (Secondary) -->
+              <a href="#" class="btn btn-secondary">
+                👁️ View Invoice
+              </a>
+
+              <!-- Pay Now Button (Primary) -->
+              <a href="#" class="btn btn-primary">
+                Pay Now
+              </a>
             </div>
 
-            <div class="footer">
-              <p>Thank you for your business!</p>
-              <p>If you have any questions, please don't hesitate to contact us.</p>
-              <p><strong>${userData.businessName || userData.fullName}</strong></p>
+            <!-- Professional Text -->
+            <div class="view-text">
+              View invoice details below
             </div>
+          </div>
+
+          <!-- Business Footer -->
+          <div class="footer">
+            <strong>${businessName || userData?.businessName || userData?.fullName || 'Your Business'}</strong> - Thank you for your business
           </div>
         </body>
       </html>
@@ -176,7 +215,7 @@ export default async function handler(req, res) {
 
     // Send email
     const { data, error } = await resend.emails.send({
-      from: `${userData.businessName || userData.fullName} <noreply@resend.dev>`,
+      from: `${businessName || userData?.businessName || userData?.fullName || 'Your Business'} <noreply@resend.dev>`,
       to: [to],
       subject: `Invoice #${invoiceData.invoiceNumber} - $${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}`,
       html: emailHtml,

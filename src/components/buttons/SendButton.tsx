@@ -4,6 +4,7 @@ import { brandColors } from '../../stylings'
 import toast from 'react-hot-toast'
 import { useNotification } from '../../contexts/NotificationContext'
 import { supabase } from '../../lib/supabaseClient'
+import CustomizeMessageModal from '../CustomizeMessageModal'
 
 interface SendButtonProps {
   invoiceData: any
@@ -22,22 +23,22 @@ export default function SendButton({
   size = 'md',
   variant = 'primary'
 }: SendButtonProps) {
-  const [showEmailModal, setShowEmailModal] = useState(false)
-  const [clientEmail, setClientEmail] = useState('')
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { addNotification } = useNotification()
 
   const handleSend = async () => {
     // Check if client email exists
     if (!invoiceData.clientEmail) {
-      setShowEmailModal(true)
+      toast.error('Client email is required to send invoice')
       return
     }
 
-    await sendInvoiceEmail(invoiceData.clientEmail)
+    // Show customize message modal
+    setShowCustomizeModal(true)
   }
 
-  const sendInvoiceEmail = async (email: string) => {
+  const sendInvoiceEmail = async (email: string, messageData: any) => {
     setIsLoading(true)
     
     // Debug logging
@@ -45,7 +46,7 @@ export default function SendButton({
       to: email,
       invoiceData: invoiceData,
       userData: userData,
-      clientName: invoiceData?.clientName || invoiceData?.client?.name || 'Client'
+      messageData: messageData
     })
     
     try {
@@ -58,7 +59,9 @@ export default function SendButton({
           to: email,
           invoiceData: invoiceData || {},
           userData: userData || { fullName: 'Business Owner', businessName: 'Your Business' },
-          clientName: invoiceData?.clientName || invoiceData?.client?.name || 'Client'
+          clientName: messageData.clientName || invoiceData?.clientName || 'Client',
+          greetingMessage: messageData.greetingMessage,
+          businessName: messageData.businessName
         })
       })
 
@@ -117,19 +120,9 @@ export default function SendButton({
     }
   }
 
-  const handleEmailSubmit = () => {
-    if (!clientEmail.trim()) {
-      toast.error('Please enter a valid email address')
-      return
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
-      toast.error('Please enter a valid email address')
-      return
-    }
-
-    setShowEmailModal(false)
-    sendInvoiceEmail(clientEmail)
+  const handleCustomizeSubmit = (messageData: any) => {
+    setShowCustomizeModal(false)
+    sendInvoiceEmail(invoiceData.clientEmail, messageData)
   }
 
   const getSizeStyles = () => {
@@ -232,97 +225,14 @@ export default function SendButton({
         {size !== 'sm' && <span>{isLoading ? 'Sending...' : 'Send'}</span>}
       </button>
 
-      {/* Email Input Modal */}
-      {showEmailModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '400px',
-            width: '90%',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              color: brandColors.neutral[900],
-              marginBottom: '16px'
-            }}>
-              Enter Client Email
-            </h3>
-            <p style={{
-              color: brandColors.neutral[600],
-              marginBottom: '24px',
-              fontSize: '14px'
-            }}>
-              The client's email address is required to send the invoice.
-            </p>
-            <input
-              type="email"
-              placeholder="client@example.com"
-              value={clientEmail}
-              onChange={(e) => setClientEmail(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '8px',
-                fontSize: '16px',
-                marginBottom: '24px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-              onKeyPress={(e) => e.key === 'Enter' && handleEmailSubmit()}
-            />
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end'
-            }}>
-              <button
-                onClick={() => setShowEmailModal(false)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: brandColors.neutral[100],
-                  color: brandColors.neutral[700],
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEmailSubmit}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: brandColors.primary[600],
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
-              >
-                Send Invoice
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Customize Message Modal */}
+      <CustomizeMessageModal
+        isVisible={showCustomizeModal}
+        onClose={() => setShowCustomizeModal(false)}
+        onSend={handleCustomizeSubmit}
+        defaultBusinessName={userData?.businessName || userData?.fullName || ''}
+        defaultClientName={invoiceData?.clientName || invoiceData?.client?.name || ''}
+      />
     </>
   )
 }
