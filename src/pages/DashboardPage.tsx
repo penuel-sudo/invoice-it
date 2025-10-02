@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
@@ -34,7 +34,8 @@ import {
 export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('all')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<any[]>([])
@@ -67,7 +68,7 @@ export default function DashboardPage() {
     if (autoSlideInterval) clearInterval(autoSlideInterval)
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % 3)
-    }, 60000) // 1 minute (60 seconds)
+    }, 40000) // 40 seconds
     setAutoSlideInterval(interval)
   }
 
@@ -271,6 +272,17 @@ export default function DashboardPage() {
       setLoading(false)
     }
   }
+
+  // Update URL when tab changes
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams(searchParams)
+    if (activeTab === 'all') {
+      newSearchParams.delete('tab')
+    } else {
+      newSearchParams.set('tab', activeTab)
+    }
+    setSearchParams(newSearchParams)
+  }, [activeTab, searchParams, setSearchParams])
 
   useEffect(() => {
     if (user) {

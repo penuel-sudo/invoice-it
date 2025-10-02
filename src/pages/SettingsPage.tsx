@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
@@ -61,9 +61,12 @@ const CURRENCIES = [
 export default function SettingsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'profile' | 'currency' | 'payment' | 'notifications' | 'appearance'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'currency' | 'payment' | 'notifications' | 'appearance'>(
+    (searchParams.get('tab') as any) || 'profile'
+  )
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   // Responsive state management
@@ -75,6 +78,17 @@ export default function SettingsPage() {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  // Update URL when tab changes
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams(searchParams)
+    if (activeTab === 'profile') {
+      newSearchParams.delete('tab')
+    } else {
+      newSearchParams.set('tab', activeTab)
+    }
+    setSearchParams(newSearchParams)
+  }, [activeTab, searchParams, setSearchParams])
 
   // Responsive styling constants
   const styles = {

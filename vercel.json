@@ -8,6 +8,9 @@
   "functions": {
     "api/generate-pdf.js": {
       "maxDuration": 30
+    },
+    "api/send-invoice-email.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
