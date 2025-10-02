@@ -643,6 +643,7 @@ export default function InvoicePreviewPage() {
           
           <SendButton 
             invoiceData={invoiceData}
+            userData={user}
             size="md"
             variant="secondary"
           />

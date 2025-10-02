@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabaseClient'
 
 interface SendButtonProps {
   invoiceData: any
-  userData: any
+  userData?: any
   onSend?: () => void
   style?: React.CSSProperties
   size?: 'sm' | 'md' | 'lg'
@@ -57,7 +57,7 @@ export default function SendButton({
         body: JSON.stringify({
           to: email,
           invoiceData: invoiceData || {},
-          userData: userData || {},
+          userData: userData || { fullName: 'Business Owner', businessName: 'Your Business' },
           clientName: invoiceData?.clientName || invoiceData?.client?.name || 'Client'
         })
       })
