@@ -13,8 +13,7 @@ import {
   Palette,
   Save,
   Loader2,
-  Camera,
-  Edit
+  Pencil
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
@@ -576,7 +575,7 @@ export default function SettingsPage() {
                       alignItems: 'center',
                       gap: '1rem'
                     }}>
-                      {/* Avatar with hover edit icon */}
+                      {/* Custom Avatar with hover pencil effect - Settings specific */}
                       <div style={{
                         position: 'relative',
                         cursor: 'pointer',
@@ -584,42 +583,43 @@ export default function SettingsPage() {
                         overflow: 'hidden'
                       }}
                       onMouseEnter={(e) => {
-                        const editIcon = e.currentTarget.querySelector('.edit-icon')
-                        if (editIcon) {
-                          (editIcon as HTMLElement).style.opacity = '1'
+                        const pencilIcon = e.currentTarget.querySelector('.pencil-icon')
+                        if (pencilIcon) {
+                          (pencilIcon as HTMLElement).style.opacity = '1'
                         }
                       }}
                       onMouseLeave={(e) => {
-                        const editIcon = e.currentTarget.querySelector('.edit-icon')
-                        if (editIcon) {
-                          (editIcon as HTMLElement).style.opacity = '0'
+                        const pencilIcon = e.currentTarget.querySelector('.pencil-icon')
+                        if (pencilIcon) {
+                          (pencilIcon as HTMLElement).style.opacity = '0'
                         }
                       }}
                       onClick={() => fileInputRef.current?.click()}
                       >
                         <Avatar style={{
-                          width: '80px',
-                          height: '80px',
+                          width: '100px',
+                          height: '100px',
                           border: `3px solid ${brandColors.white}`,
-                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          flexShrink: 0
                         }}>
                           <AvatarImage 
                             src={profilePictureUrl || user?.user_metadata?.avatar_url} 
-                            alt="Profile" 
+                            alt={user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'} 
                           />
                           <AvatarFallback style={{
                             backgroundColor: brandColors.primary[100],
                             color: brandColors.primary[700],
-                            fontSize: '1.5rem',
+                            fontSize: '2rem',
                             fontWeight: '600'
                           }}>
                             {getUserInitial(user)}
                           </AvatarFallback>
                         </Avatar>
                         
-                        {/* Hover edit icon */}
+                        {/* Hover pencil icon - Settings specific */}
                         <div 
-                          className="edit-icon"
+                          className="pencil-icon"
                           style={{
                             position: 'absolute',
                             top: '50%',
@@ -627,8 +627,8 @@ export default function SettingsPage() {
                             transform: 'translate(-50%, -50%)',
                             backgroundColor: 'rgba(0, 0, 0, 0.7)',
                             borderRadius: '50%',
-                            width: '32px',
-                            height: '32px',
+                            width: '40px',
+                            height: '40px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -637,13 +637,13 @@ export default function SettingsPage() {
                             pointerEvents: 'none'
                           }}
                         >
-                          <Edit size={16} color="white" />
+                          <Pencil size={20} color="white" />
                         </div>
                       </div>
                       
                       <div style={{ flex: 1 }}>
                         <h4 style={{
-                          fontSize: '1rem',
+                          fontSize: '1.125rem',
                           fontWeight: '600',
                           color: brandColors.neutral[900],
                           margin: '0 0 0.25rem 0'
@@ -653,55 +653,24 @@ export default function SettingsPage() {
                         <p style={{
                           fontSize: '0.875rem',
                           color: brandColors.neutral[600],
-                          margin: '0 0 0.75rem 0'
+                          margin: '0 0 0.5rem 0'
                         }}>
-                          Click to upload a new profile picture
+                          {user?.email}
                         </p>
-                        
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            style={{
-                              padding: '0.5rem 1rem',
-                              backgroundColor: brandColors.primary[600],
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '6px',
-                              fontSize: '0.875rem',
-                              fontWeight: '500',
-                              cursor: isUploading ? 'not-allowed' : 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              opacity: isUploading ? 0.6 : 1
-                            }}
-                          >
-                            <Camera size={16} />
-                            {isUploading ? 'Uploading...' : 'Upload'}
-                          </button>
-                          
-                          {profilePictureUrl && (
-                            <button
-                              onClick={handleDeleteProfilePicture}
-                              style={{
-                                padding: '0.5rem 1rem',
-                                backgroundColor: brandColors.error[600],
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '0.875rem',
-                                fontWeight: '500',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                              }}
-                            >
-                              Remove
-                            </button>
-                          )}
-                        </div>
+                        <p style={{
+                          fontSize: '0.75rem',
+                          color: brandColors.neutral[500],
+                          margin: '0 0 0.5rem 0'
+                        }}>
+                          Click the avatar to change your profile picture
+                        </p>
+                        <p style={{
+                          fontSize: '0.6875rem',
+                          color: brandColors.neutral[400],
+                          margin: 0
+                        }}>
+                          Your profile picture will be used as your logo on invoices
+                        </p>
                       </div>
                     </div>
                     
