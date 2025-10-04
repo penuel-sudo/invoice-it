@@ -723,9 +723,9 @@ export default function SettingsPage() {
                   </div>
 
                   <div style={{ 
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                    gap: isMobile ? '1rem' : '1.5rem'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem'
                   }}>
                     {/* Full Name */}
                     <div>
@@ -787,8 +787,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Email (Read Only) - Full Width */}
-                    <div style={{ gridColumn: isMobile ? 'auto' : '1 / -1' }}>
+                    {/* Email (Read Only) */}
+                    <div>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -815,8 +815,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Country & Phone - Full Width */}
-                    <div style={{ gridColumn: isMobile ? 'auto' : '1 / -1' }}>
+                    {/* Country & Phone */}
+                    <div>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -836,8 +836,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Address - Full Width */}
-                    <div style={{ gridColumn: isMobile ? 'auto' : '1 / -1' }}>
+                    {/* Address */}
+                    <div>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -865,12 +865,11 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    {/* Save Button - Full Width */}
+                    {/* Save Button */}
                     <button
                       onClick={handleSaveProfile}
                       disabled={saving || !hasChanges}
                       style={{
-                        gridColumn: isMobile ? 'auto' : '1 / -1',
                         padding: '0.875rem 1.5rem',
                         backgroundColor: hasChanges ? brandColors.primary[600] : brandColors.neutral[300],
                         color: 'white',
