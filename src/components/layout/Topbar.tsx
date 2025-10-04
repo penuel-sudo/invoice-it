@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Bell } from 'lucide-react'
 import { useAuth } from '../../lib/useAuth'
 import { brandColors } from '../../stylings'
-import { getUserDisplayName, getUserProfilePictureUrl, getUserInitial } from '../../lib/profilePicture'
+import { getUserDisplayName, getProfilePictureUrl, getUserInitial } from '../../lib/profilePicture'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { useNotification } from '../../contexts/NotificationContext'
 
@@ -22,7 +22,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
     const loadProfilePicture = async () => {
       if (user) {
         try {
-          const url = await getUserProfilePictureUrl(user)
+          const url = await getProfilePictureUrl(user.id)
           setProfilePictureUrl(url)
         } catch (error) {
           console.error('Error loading profile picture:', error)
@@ -33,27 +33,6 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
     }
 
     loadProfilePicture()
-
-    // Listen for profile picture updates
-    const handleProfilePictureUpdate = (event: CustomEvent) => {
-      // Use the URL from the event if available, otherwise fetch from storage
-      if (event.detail) {
-        setProfilePictureUrl(event.detail)
-      } else if (user) {
-        // Fallback: fetch from storage
-        getUserProfilePictureUrl(user).then(url => {
-          setProfilePictureUrl(url)
-        }).catch(error => {
-          console.error('Error refreshing profile picture:', error)
-        })
-      }
-    }
-
-    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate)
-    
-    return () => {
-      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate)
-    }
   }, [user])
 
   // Detect mobile screen size

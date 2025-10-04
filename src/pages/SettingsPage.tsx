@@ -20,7 +20,7 @@ import CountryPhoneSelector from '../components/CountryPhoneSelector'
 import PaymentMethodManager from '../components/PaymentMethodManager'
 import NotificationSettings from '../components/NotificationSettings'
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
-import { uploadProfilePicture, deleteProfilePicture, getUserProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
+import { uploadProfilePicture, deleteProfilePicture, getProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
 
 interface NotificationPreferences {
@@ -174,17 +174,6 @@ export default function SettingsPage() {
     }
   }, [user])
 
-  // Listen for profile picture updates from other components
-  useEffect(() => {
-    const handleProfilePictureUpdate = (event: CustomEvent) => {
-      setProfilePictureUrl(event.detail)
-    }
-
-    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate as EventListener)
-    return () => {
-      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate as EventListener)
-    }
-  }, [])
 
   const loadProfileData = async () => {
     if (!user) return
@@ -193,7 +182,7 @@ export default function SettingsPage() {
       setLoading(true)
       
       // Load profile picture
-      const url = await getUserProfilePictureUrl(user)
+      const url = await getProfilePictureUrl(user.id)
       setProfilePictureUrl(url)
       
       const { data, error } = await supabase
@@ -411,11 +400,6 @@ export default function SettingsPage() {
         toast.success('Profile picture updated successfully!')
         // Update profile picture immediately
         setProfilePictureUrl(result.url)
-        // Trigger a global refresh by dispatching a custom event
-        window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: result.url }))
-        // Also reload to ensure consistency
-        const url = await getUserProfilePictureUrl(user)
-        setProfilePictureUrl(url)
       } else {
         toast.error(result.error || 'Failed to upload image')
       }

@@ -5,7 +5,7 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { getUserProfilePictureUrl, getUserDisplayName, getUserInitial } from '../lib/profilePicture'
+import { getProfilePictureUrl, getUserDisplayName, getUserInitial } from '../lib/profilePicture'
 import NotificationDropdown from './NotificationDropdown'
 import toast from 'react-hot-toast'
 
@@ -31,7 +31,7 @@ export default function ProfileDropdown({
     const loadProfilePicture = async () => {
       if (user) {
         try {
-          const url = await getUserProfilePictureUrl(user)
+          const url = await getProfilePictureUrl(user.id)
           setProfilePictureUrl(url)
         } catch (error) {
           console.error('Error loading profile picture:', error)
@@ -42,27 +42,6 @@ export default function ProfileDropdown({
     }
 
     loadProfilePicture()
-
-    // Listen for profile picture updates
-    const handleProfilePictureUpdate = (event: CustomEvent) => {
-      // Use the URL from the event if available, otherwise fetch from storage
-      if (event.detail) {
-        setProfilePictureUrl(event.detail)
-      } else if (user) {
-        // Fallback: fetch from storage
-        getUserProfilePictureUrl(user).then(url => {
-          setProfilePictureUrl(url)
-        }).catch(error => {
-          console.error('Error refreshing profile picture:', error)
-        })
-      }
-    }
-
-    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate)
-    
-    return () => {
-      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate)
-    }
   }, [user])
 
   const handleSignOut = async () => {

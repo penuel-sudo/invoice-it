@@ -47,16 +47,23 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
       return { success: false, error: error.message }
     }
 
-    // Get public URL with cache-busting
+    // Get public URL
     const { data: urlData } = supabase.storage
       .from('profile-pictures')
       .getPublicUrl(filePath)
 
-    // Add cache-busting parameter to ensure fresh image
-    const url = new URL(urlData.publicUrl)
-    url.searchParams.set('t', Date.now().toString())
+    // Update the profiles table with the image URL
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ image_url: urlData.publicUrl })
+      .eq('id', userId)
+
+    if (updateError) {
+      console.error('Error updating profile image URL:', updateError)
+      return { success: false, error: 'Failed to update profile' }
+    }
     
-    return { success: true, url: url.toString() }
+    return { success: true, url: urlData.publicUrl }
   } catch (error) {
     console.error('Upload error:', error)
     return { success: false, error: 'Failed to upload image' }
