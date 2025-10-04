@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
@@ -12,12 +12,16 @@ import {
   Bell,
   Palette,
   Save,
-  Loader2
+  Loader2,
+  Camera,
+  Edit
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
 import PaymentMethodManager from '../components/PaymentMethodManager'
 import NotificationSettings from '../components/NotificationSettings'
+import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
+import { uploadProfilePicture, deleteProfilePicture, getUserProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
 
 interface NotificationPreferences {
@@ -68,6 +72,9 @@ export default function SettingsPage() {
     (searchParams.get('tab') as any) || 'profile'
   )
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Responsive state management
   useEffect(() => {
@@ -171,6 +178,11 @@ export default function SettingsPage() {
 
     try {
       setLoading(true)
+      
+      // Load profile picture
+      const url = await getUserProfilePictureUrl(user)
+      setProfilePictureUrl(url)
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -360,6 +372,46 @@ export default function SettingsPage() {
     }))
   }
 
+  const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !user) return
+
+    setIsUploading(true)
+    try {
+      const result = await uploadProfilePicture({ file, userId: user.id })
+      
+      if (result.success) {
+        toast.success('Profile picture updated successfully!')
+        // Reload the profile picture
+        const url = await getUserProfilePictureUrl(user)
+        setProfilePictureUrl(url)
+      } else {
+        toast.error(result.error || 'Failed to upload image')
+      }
+    } catch (error) {
+      toast.error('Failed to upload image')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleDeleteProfilePicture = async () => {
+    if (!user) return
+
+    try {
+      const result = await deleteProfilePicture(user.id)
+      
+      if (result.success) {
+        toast.success('Profile picture removed successfully!')
+        setProfilePictureUrl(null)
+      } else {
+        toast.error(result.error || 'Failed to remove image')
+      }
+    } catch (error) {
+      toast.error('Failed to remove image')
+    }
+  }
+
   if (!user || loading) {
     return (
       <Layout hideBottomNav={true}>
@@ -501,6 +553,167 @@ export default function SettingsPage() {
                   }}>
                     Profile Information
                   </h2>
+
+                  {/* Profile Picture Section */}
+                  <div style={{
+                    marginBottom: '2rem',
+                    padding: '1.5rem',
+                    backgroundColor: brandColors.neutral[50],
+                    borderRadius: '12px',
+                    border: `1px solid ${brandColors.neutral[200]}`
+                  }}>
+                    <h3 style={{
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      color: brandColors.neutral[900],
+                      marginBottom: '1rem'
+                    }}>
+                      Profile Picture
+                    </h3>
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem'
+                    }}>
+                      {/* Avatar with hover edit icon */}
+                      <div style={{
+                        position: 'relative',
+                        cursor: 'pointer',
+                        borderRadius: '50%',
+                        overflow: 'hidden'
+                      }}
+                      onMouseEnter={(e) => {
+                        const editIcon = e.currentTarget.querySelector('.edit-icon')
+                        if (editIcon) {
+                          (editIcon as HTMLElement).style.opacity = '1'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const editIcon = e.currentTarget.querySelector('.edit-icon')
+                        if (editIcon) {
+                          (editIcon as HTMLElement).style.opacity = '0'
+                        }
+                      }}
+                      onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Avatar style={{
+                          width: '80px',
+                          height: '80px',
+                          border: `3px solid ${brandColors.white}`,
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                        }}>
+                          <AvatarImage 
+                            src={profilePictureUrl || user?.user_metadata?.avatar_url} 
+                            alt="Profile" 
+                          />
+                          <AvatarFallback style={{
+                            backgroundColor: brandColors.primary[100],
+                            color: brandColors.primary[700],
+                            fontSize: '1.5rem',
+                            fontWeight: '600'
+                          }}>
+                            {getUserInitial(user)}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        {/* Hover edit icon */}
+                        <div 
+                          className="edit-icon"
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            opacity: 0,
+                            transition: 'opacity 0.2s ease',
+                            pointerEvents: 'none'
+                          }}
+                        >
+                          <Edit size={16} color="white" />
+                        </div>
+                      </div>
+                      
+                      <div style={{ flex: 1 }}>
+                        <h4 style={{
+                          fontSize: '1rem',
+                          fontWeight: '600',
+                          color: brandColors.neutral[900],
+                          margin: '0 0 0.25rem 0'
+                        }}>
+                          {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                        </h4>
+                        <p style={{
+                          fontSize: '0.875rem',
+                          color: brandColors.neutral[600],
+                          margin: '0 0 0.75rem 0'
+                        }}>
+                          Click to upload a new profile picture
+                        </p>
+                        
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                            style={{
+                              padding: '0.5rem 1rem',
+                              backgroundColor: brandColors.primary[600],
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '0.875rem',
+                              fontWeight: '500',
+                              cursor: isUploading ? 'not-allowed' : 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              opacity: isUploading ? 0.6 : 1
+                            }}
+                          >
+                            <Camera size={16} />
+                            {isUploading ? 'Uploading...' : 'Upload'}
+                          </button>
+                          
+                          {profilePictureUrl && (
+                            <button
+                              onClick={handleDeleteProfilePicture}
+                              style={{
+                                padding: '0.5rem 1rem',
+                                backgroundColor: brandColors.error[600],
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '0.875rem',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                              }}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePictureUpload}
+                      style={{ display: 'none' }}
+                    />
+                  </div>
 
                   <div style={{ 
                     display: 'grid',

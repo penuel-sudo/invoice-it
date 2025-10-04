@@ -235,7 +235,9 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
     const dueDate = new Date(invoiceData.dueDate)
     const today = new Date()
     const days = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-    return `${days} days`
+    // Stop countdown at 0 - don't show negative days
+    const displayDays = Math.max(0, days)
+    return `${displayDays} days`
   }
 
   // Get currency symbol

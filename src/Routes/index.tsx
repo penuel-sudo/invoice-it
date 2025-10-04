@@ -14,6 +14,7 @@ import TemplateGalleryPage from '../pages/TemplateGalleryPage'
 import ResetPasswordPage from '../pages/reset-password'
 import ProfilePage from '../pages/ProfilePage'
 import SettingsPage from '../pages/SettingsPage'
+import ClientPage from '../pages/ClientPage'
 import NotFoundPage from '../pages/NotFoundPage'
 
 
@@ -99,6 +100,14 @@ export const router = createBrowserRouter([
     element: (
       <AuthWrapper requireAuth={true}>
         <SettingsPage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/clients',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <ClientPage />
       </AuthWrapper>
     )
   },

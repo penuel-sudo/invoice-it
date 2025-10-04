@@ -184,7 +184,7 @@ export default function DefaultPreviewStatic() {
                 fontWeight: '600',
                 color: brandColors.neutral[900]
               }}>
-                {Math.ceil((new Date(mockInvoiceData.dueDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
+                {Math.max(0, Math.ceil((new Date(mockInvoiceData.dueDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days
               </div>
             </div>
           </div>
