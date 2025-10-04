@@ -105,6 +105,19 @@ export default function InvoicePreviewPage() {
           }
 
           if (invoiceData) {
+            // Load payment methods from profiles table
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('payment_methods')
+              .eq('id', user?.id)
+              .single()
+
+            const allPaymentMethods = profileData?.payment_methods || []
+            const selectedIds = invoiceData.selected_payment_method_ids || []
+            const selectedPaymentMethods = allPaymentMethods.filter(method => 
+              selectedIds.includes(method.id)
+            )
+
             // Convert database invoice to InvoiceData format
             const currencyCode = invoiceData.currency_code || 'USD'
             const transformedData: InvoiceData = {
@@ -131,8 +144,8 @@ export default function InvoicePreviewPage() {
               currency: currencyCode,
               currencySymbol: getCurrencySymbol(currencyCode),
               paymentDetails: invoiceData.payment_details || undefined,
-              paymentMethods: invoiceData.payment_methods || [],
-              selectedPaymentMethodIds: invoiceData.selected_payment_method_ids || []
+              paymentMethods: selectedPaymentMethods,
+              selectedPaymentMethodIds: selectedIds
             }
             setInvoiceData(transformedData)
             setDbStatus(invoiceData.status || 'draft')
@@ -157,12 +170,7 @@ export default function InvoicePreviewPage() {
         // Try to get data from localStorage
         const savedData = invoiceStorage.getDraft()
         if (savedData) {
-          console.log('🔍 Preview - Loaded from localStorage:', {
-            paymentMethods: savedData.paymentMethods?.length || 0,
-            selectedPaymentMethodIds: savedData.selectedPaymentMethodIds?.length || 0,
-            selectedIds: savedData.selectedPaymentMethodIds,
-            methodIds: savedData.paymentMethods?.map(m => m.id) || []
-          })
+          // For localStorage data: payment methods are already filtered
           setInvoiceData(savedData)
           setIsFromDatabase(false)
           // Update URL to include invoice number
@@ -515,7 +523,7 @@ export default function InvoicePreviewPage() {
             )}
 
             {/* Payment Methods Section */}
-            {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && invoiceData.selectedPaymentMethodIds && invoiceData.selectedPaymentMethodIds.length > 0 && (
+            {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && (
               <div style={{
                 borderTop: `1px solid ${brandColors.neutral[200]}`,
                 margin: '1rem 0 0 0',
@@ -529,9 +537,7 @@ export default function InvoicePreviewPage() {
                 }}>
                   Payment Methods:
                 </div>
-                {invoiceData.paymentMethods
-                  .filter(method => invoiceData.selectedPaymentMethodIds?.includes(method.id))
-                  .map((method) => {
+                {invoiceData.paymentMethods.map((method) => {
                     const details = method.details as any
                     return (
                       <div

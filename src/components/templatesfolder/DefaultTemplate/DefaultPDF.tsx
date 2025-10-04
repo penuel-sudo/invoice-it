@@ -343,12 +343,10 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
               )}
 
               {/* Payment Methods Section */}
-              {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && invoiceData.selectedPaymentMethodIds && invoiceData.selectedPaymentMethodIds.length > 0 && (
+              {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && (
                 <View style={styles.paymentSection}>
                   <Text style={styles.paymentTitle}>Payment Methods:</Text>
-                  {invoiceData.paymentMethods
-                    .filter(method => invoiceData.selectedPaymentMethodIds?.includes(method.id))
-                    .map((method, index) => {
+                  {invoiceData.paymentMethods.map((method, index) => {
                       const details = method.details as any
                       return (
                         <View key={index} style={{ marginBottom: 8, marginTop: index > 0 ? 8 : 0 }}>

@@ -50,6 +50,9 @@ export default function InvoiceCreatePage() {
     currencySymbol: '$',
     paymentMethods: []
   })
+
+  // Store all payment methods from profiles for localStorage operations
+  const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethod[]>([])
   
   // Load invoice data from URL parameter or state
   useEffect(() => {
@@ -165,18 +168,14 @@ export default function InvoiceCreatePage() {
           const currencySymbol = getCurrencySymbol(currencyCode)
           const paymentMethods = data.payment_methods || []
           
-          console.log('🔍 Create - Loading user defaults:', {
-            data: data,
-            paymentMethods: paymentMethods,
-            paymentMethodsLength: paymentMethods.length,
-            paymentMethodIds: paymentMethods.map(m => m.id)
-          })
-          
           setUserDefaults({
             currency: currencyCode,
             currencySymbol: currencySymbol,
             paymentMethods: paymentMethods
           })
+
+          // Store all payment methods for localStorage operations
+          setAllPaymentMethods(paymentMethods)
 
           // Set form data with user defaults if this is a new invoice
           if (!formData.currency) {
@@ -213,24 +212,18 @@ export default function InvoiceCreatePage() {
 
   // Auto-save form data to localStorage
   useEffect(() => {
-    // Create a copy of formData with only selected payment methods
-    const filteredMethods = formData.paymentMethods?.filter(method => 
+    // For localStorage: include selected payment methods from allPaymentMethods
+    const selectedPaymentMethods = allPaymentMethods.filter(method => 
       formData.selectedPaymentMethodIds?.includes(method.id)
-    ) || []
-    
-    console.log('🔍 Create - Filtering payment methods:', {
-      allMethods: formData.paymentMethods?.length || 0,
-      selectedIds: formData.selectedPaymentMethodIds,
-      filteredMethods: filteredMethods.length,
-      filteredMethodIds: filteredMethods.map(m => m.id)
-    })
+    )
     
     const dataToSave = {
       ...formData,
-      paymentMethods: filteredMethods
+      paymentMethods: selectedPaymentMethods
     }
+    
     invoiceStorage.saveDraftDebounced(dataToSave)
-  }, [formData])
+  }, [formData, allPaymentMethods])
 
   // Update URL when invoice number changes
   useEffect(() => {
@@ -350,9 +343,6 @@ export default function InvoiceCreatePage() {
           template: 'default',
           currency_code: formData.currency || 'USD',
           payment_details: formData.paymentDetails || null,
-          payment_methods: formData.paymentMethods?.filter(method => 
-            formData.selectedPaymentMethodIds?.includes(method.id)
-          ) || null,
           selected_payment_method_ids: formData.selectedPaymentMethodIds || null,
           template_data: {
             layout: 'clean',
@@ -1109,14 +1099,7 @@ export default function InvoiceCreatePage() {
           </div>
 
           {/* Payment Methods Card */}
-          {(() => {
-            console.log('🔍 Create - Payment methods section check:', {
-              userDefaultsPaymentMethods: userDefaults.paymentMethods,
-              length: userDefaults.paymentMethods.length,
-              shouldShow: userDefaults.paymentMethods.length > 0
-            })
-            return userDefaults.paymentMethods.length > 0
-          })() && (
+          {userDefaults.paymentMethods.length > 0 && (
             <div style={{
               backgroundColor: brandColors.white,
               borderRadius: '16px',
