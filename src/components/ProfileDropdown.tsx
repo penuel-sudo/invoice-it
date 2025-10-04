@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronDown, User, CreditCard, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { getUserDisplayName, getUserInitial } from '../lib/profilePicture'
+import { getUserDisplayName } from '../lib/profilePicture'
+import ProfilePicture from './ProfilePicture'
 import NotificationDropdown from './NotificationDropdown'
 import toast from 'react-hot-toast'
 
@@ -33,19 +33,7 @@ export default function ProfileDropdown({
     }
   }
 
-  const getInitials = (name?: string, email?: string) => {
-    if (name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    }
-    if (email) {
-      return email.slice(0, 2).toUpperCase()
-    }
-    return 'U'
-  }
-
   const displayName = getUserDisplayName(user)
-  const userEmail = user?.email || ''
-  const userInitials = getInitials(displayName, userEmail)
 
   // Define styles based on variant
   const containerStyle = variant === 'sidebar' ? {
@@ -115,16 +103,11 @@ export default function ProfileDropdown({
           }}
         >
           {/* Profile Picture */}
-          <Avatar style={avatarStyle}>
-            <AvatarFallback style={{
-              backgroundColor: brandColors.primary[100],
-              color: brandColors.primary[700],
-              fontSize: variant === 'sidebar' ? '14px' : '12px',
-              fontWeight: '600'
-            }}>
-              {userInitials}
-            </AvatarFallback>
-          </Avatar>
+          <ProfilePicture 
+            size={variant === 'sidebar' ? 'md' : 'sm'} 
+            showBorder={variant === 'topbar'}
+            style={avatarStyle}
+          />
 
           {/* Profile Info (sidebar and topbar variants) */}
           {(variant === 'sidebar' || variant === 'topbar') && (
@@ -208,16 +191,7 @@ export default function ProfileDropdown({
             gap: '0.75rem',
             marginBottom: '0.25rem'
           }}>
-            <Avatar style={{ width: '32px', height: '32px' }}>
-              <AvatarFallback style={{
-                backgroundColor: brandColors.primary[100],
-                color: brandColors.primary[700],
-                fontSize: '12px',
-                fontWeight: '600'
-              }}>
-                {userInitials}
-              </AvatarFallback>
-            </Avatar>
+            <ProfilePicture size="sm" />
             <div>
               <p style={{
                 fontSize: '14px',
@@ -234,7 +208,7 @@ export default function ProfileDropdown({
                 margin: 0,
                 lineHeight: '1.3'
               }}>
-                {userEmail}
+                {user?.email}
               </p>
             </div>
           </div>

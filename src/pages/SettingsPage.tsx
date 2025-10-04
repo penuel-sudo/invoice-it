@@ -19,8 +19,7 @@ import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
 import PaymentMethodManager from '../components/PaymentMethodManager'
 import NotificationSettings from '../components/NotificationSettings'
-import { Avatar, AvatarFallback } from '../components/ui/avatar'
-import { getUserInitial } from '../lib/profilePicture'
+import ProfilePictureUpload from '../components/ProfilePictureUpload'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
 
 interface NotificationPreferences {
@@ -528,7 +527,7 @@ export default function SettingsPage() {
                     Profile Information
                   </h2>
 
-                  {/* Profile Picture Section - Replicating ProfileDropdown design */}
+                  {/* Profile Picture Section */}
                   <div style={{
                     marginBottom: '2rem',
                     padding: isMobile ? '1.5rem' : '2rem',
@@ -541,70 +540,20 @@ export default function SettingsPage() {
                       alignItems: 'center',
                       gap: isMobile ? '1rem' : '1.5rem'
                     }}>
-                      {/* Large Avatar with hover pencil effect - Settings specific */}
-                      <div style={{
-                        position: 'relative',
-                        cursor: 'pointer',
-                        borderRadius: '50%',
-                        overflow: 'hidden'
-                      }}
-                      onMouseEnter={(e) => {
-                        const pencilIcon = e.currentTarget.querySelector('.pencil-icon')
-                        if (pencilIcon) {
-                          (pencilIcon as HTMLElement).style.opacity = '1'
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        const pencilIcon = e.currentTarget.querySelector('.pencil-icon')
-                        if (pencilIcon) {
-                          (pencilIcon as HTMLElement).style.opacity = '0'
-                        }
-                      }}
-                      onClick={() => {}}
-                      >
-                        <Avatar style={{
+                      {/* Profile Picture Upload Component with Pencil Effect */}
+                      <ProfilePictureUpload 
+                        size={isMobile ? 'xl' : 'xl'}
+                        showHoverEffect={true}
+                        style={{
                           width: isMobile ? '120px' : '150px',
                           height: isMobile ? '120px' : '150px',
                           border: `3px solid ${brandColors.white}`,
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                           flexShrink: 0
-                        }}>
-                          <AvatarFallback style={{
-                            backgroundColor: brandColors.primary[100],
-                            color: brandColors.primary[700],
-                            fontSize: isMobile ? '2.5rem' : '3rem',
-                            fontWeight: '600'
-                          }}>
-                            {getUserInitial(user)}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        {/* Hover pencil icon - No black background */}
-                        <div 
-                          className="pencil-icon"
-                          style={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                            borderRadius: '50%',
-                            width: isMobile ? '40px' : '50px',
-                            height: isMobile ? '40px' : '50px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            opacity: 0,
-                            transition: 'opacity 0.2s ease',
-                            pointerEvents: 'none',
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                          }}
-                        >
-                          <Pencil size={isMobile ? 18 : 22} color={brandColors.primary[600]} />
-                        </div>
-                      </div>
+                        }}
+                      />
                       
-                      {/* Profile Info - Replicating ProfileDropdown design */}
+                      {/* Profile Info */}
                       <div style={{
                         flex: 1,
                         minWidth: 0
@@ -637,18 +586,17 @@ export default function SettingsPage() {
                           color: brandColors.neutral[400],
                           margin: '0 0 0.5rem 0'
                         }}>
-                          Profile avatar with your initials
+                          Hover over the avatar to upload or change your profile picture
                         </p>
                         <p style={{
                           fontSize: isMobile ? '0.75rem' : '0.875rem',
                           color: brandColors.neutral[400],
                           margin: 0
                         }}>
-                          Your initials will be displayed on invoices
+                          Your profile picture will be used as your logo on invoices
                         </p>
                       </div>
                     </div>
-                    
                   </div>
 
                   <div style={{ 

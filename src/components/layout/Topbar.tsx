@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Bell } from 'lucide-react'
 import { useAuth } from '../../lib/useAuth'
 import { brandColors } from '../../stylings'
-import { getUserDisplayName, getUserInitial } from '../../lib/profilePicture'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { getUserDisplayName } from '../../lib/profilePicture'
+import ProfilePicture from '../ProfilePicture'
 import { useNotification } from '../../contexts/NotificationContext'
 
 interface TopbarProps {
@@ -29,7 +29,6 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
   }, [])
 
   const displayName = getUserDisplayName(user)
-  const userInitials = getUserInitial(user)
 
 
   return (
@@ -57,20 +56,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
         alignItems: 'center',
         gap: '1rem'
       }}>
-        <Avatar style={{
-          width: '40px',
-          height: '40px',
-          border: `2px solid ${brandColors.neutral[200]}`
-        }}>
-          <AvatarFallback style={{
-            backgroundColor: brandColors.primary[100],
-            color: brandColors.primary[700],
-            fontSize: '14px',
-            fontWeight: '600'
-          }}>
-            {userInitials}
-          </AvatarFallback>
-        </Avatar>
+        <ProfilePicture size="md" showBorder={true} />
         
         <div>
           <p style={{
