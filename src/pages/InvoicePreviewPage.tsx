@@ -1,8 +1,5 @@
 import { useParams, useSearchParams } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
-
-// Dynamic imports for template components - with better splitting
-const DefaultPreview = lazy(() => import('../components/templatesfolder/DefaultTemplate/DefaultPreview'))
+import DefaultPreview from '../components/templatesfolder/DefaultTemplate/DefaultPreview'
 
 export default function InvoicePreviewPage() {
   const { template } = useParams<{ template: string }>()
@@ -29,21 +26,6 @@ export default function InvoicePreviewPage() {
   // Get the appropriate template component
   const TemplateComponent = getTemplateComponent(templateName)
   
-  // Render the template component with loading fallback
-  return (
-    <Suspense fallback={
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '18px',
-        color: '#666'
-      }}>
-        Loading template...
-      </div>
-    }>
-      <TemplateComponent />
-    </Suspense>
-  )
+  // Render the template component directly
+  return <TemplateComponent />
 }
