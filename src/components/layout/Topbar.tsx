@@ -33,6 +33,27 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
     }
 
     loadProfilePicture()
+
+    // Listen for profile picture updates
+    const handleProfilePictureUpdate = (event: CustomEvent) => {
+      // Use the URL from the event if available, otherwise fetch from storage
+      if (event.detail) {
+        setProfilePictureUrl(event.detail)
+      } else if (user) {
+        // Fallback: fetch from storage
+        getUserProfilePictureUrl(user).then(url => {
+          setProfilePictureUrl(url)
+        }).catch(error => {
+          console.error('Error refreshing profile picture:', error)
+        })
+      }
+    }
+
+    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate)
+    
+    return () => {
+      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate)
+    }
   }, [user])
 
   // Detect mobile screen size

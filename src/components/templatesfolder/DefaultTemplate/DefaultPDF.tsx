@@ -48,7 +48,14 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: '#111827', // neutral[900]
-    marginBottom: 8
+    marginBottom: 8,
+    fontFamily: 'Helvetica-Bold'
+  },
+  currencySymbol: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: '#111827',
+    fontFamily: 'Helvetica-Bold'
   },
   clientSection: {
     flexDirection: 'row',
@@ -259,7 +266,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
             {/* Amount */}
             <View style={styles.amountSection}>
               <Text style={styles.amount}>
-                {currencySymbol}{invoiceData.grandTotal.toFixed(2)}
+                <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.grandTotal.toFixed(2)}
               </Text>
             </View>
 
@@ -301,7 +308,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                     {item.quantity} {item.description}
                   </Text>
                   <Text style={styles.itemPrice}>
-                    {currencySymbol}{item.lineTotal.toFixed(2)}
+                    <Text style={styles.currencySymbol}>{currencySymbol}</Text>{item.lineTotal.toFixed(2)}
                   </Text>
                 </View>
               ))}
@@ -313,13 +320,13 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Subtotal</Text>
                     <Text style={styles.totalValue}>
-                      {currencySymbol}{invoiceData.subtotal.toFixed(2)}
+                      <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.subtotal.toFixed(2)}
                     </Text>
                   </View>
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Tax</Text>
                     <Text style={styles.totalValue}>
-                      {currencySymbol}{invoiceData.taxTotal.toFixed(2)}
+                      <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.taxTotal.toFixed(2)}
                     </Text>
                   </View>
                 </>
@@ -330,7 +337,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
               <View style={styles.grandTotalRow}>
                 <Text style={styles.grandTotalLabel}>TOTAL</Text>
                 <Text style={styles.grandTotalValue}>
-                  {currencySymbol}{invoiceData.grandTotal.toFixed(2)}
+                  <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.grandTotal.toFixed(2)}
                 </Text>
               </View>
 
@@ -345,54 +352,113 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
               {/* Payment Methods Section */}
               {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && (
                 <View style={styles.paymentSection}>
-                  <Text style={styles.paymentTitle}>Payment Methods:</Text>
+                  <Text style={[styles.paymentTitle, { 
+                    textAlign: 'center', 
+                    fontSize: 12, 
+                    fontWeight: 'bold',
+                    color: '#16a34a',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    marginBottom: 12
+                  }]}>
+                    Payment Information
+                  </Text>
+                  
                   {invoiceData.paymentMethods.map((method, index) => {
                       const details = method.details as any
                       return (
-                        <View key={index} style={{ marginBottom: 8, marginTop: index > 0 ? 8 : 0 }}>
-                          <Text style={[styles.paymentText, { fontWeight: 'bold', marginBottom: 4 }]}>
-                            {method.label}:
-                          </Text>
-                          {method.type === 'bank_local_us' && (
-                            <>
-                              <Text style={styles.paymentText}>Bank: {details.bankName}</Text>
-                              <Text style={styles.paymentText}>Account: {details.accountName} ({details.accountType})</Text>
-                              <Text style={styles.paymentText}>Acct #: {details.accountNumber}</Text>
-                              <Text style={styles.paymentText}>Routing: {details.routingNumber}</Text>
-                            </>
-                          )}
-                          {method.type === 'bank_local_ng' && (
-                            <>
-                              <Text style={styles.paymentText}>Bank: {details.bankName}</Text>
-                              <Text style={styles.paymentText}>Account Name: {details.accountName}</Text>
-                              <Text style={styles.paymentText}>Account #: {details.accountNumber}</Text>
-                              <Text style={styles.paymentText}>Bank Code: {details.bankCode}</Text>
-                            </>
-                          )}
-                          {method.type === 'bank_international' && (
-                            <>
-                              <Text style={styles.paymentText}>Bank: {details.bankName}</Text>
-                              <Text style={styles.paymentText}>Beneficiary: {details.accountName}</Text>
-                              <Text style={styles.paymentText}>IBAN: {details.iban}</Text>
-                              <Text style={styles.paymentText}>SWIFT: {details.swiftCode}</Text>
-                              <Text style={styles.paymentText}>Address: {details.bankAddress}, {details.bankCity}, {details.bankCountry}</Text>
-                            </>
-                          )}
-                          {method.type === 'paypal' && (
-                            <Text style={styles.paymentText}>Email: {details.email}</Text>
-                          )}
-                          {method.type === 'crypto' && (
-                            <>
-                              <Text style={styles.paymentText}>Network: {details.network}</Text>
-                              <Text style={styles.paymentText}>Address: {details.walletAddress}</Text>
-                            </>
-                          )}
-                          {method.type === 'other' && (
-                            <Text style={styles.paymentText}>{details.instructions}</Text>
-                          )}
+                        <View key={index} style={{ 
+                          marginBottom: 12, 
+                          marginTop: index > 0 ? 12 : 0,
+                          backgroundColor: '#f0fdf4',
+                          border: '1px solid #bbf7d0',
+                          borderRadius: 8,
+                          padding: 12
+                        }}>
+                          {/* Method Header */}
+                          <View style={{ 
+                            flexDirection: 'row', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            marginBottom: 8,
+                            paddingBottom: 6,
+                            borderBottom: '1px solid #bbf7d0'
+                          }}>
+                            <Text style={{ 
+                              fontSize: 11, 
+                              fontWeight: 'bold', 
+                              color: '#166534'
+                            }}>
+                              {method.label}
+                            </Text>
+                            {method.isDefault && (
+                              <Text style={{
+                                fontSize: 8,
+                                fontWeight: 'bold',
+                                color: '#16a34a',
+                                backgroundColor: '#bbf7d0',
+                                padding: '2px 6px',
+                                borderRadius: 4,
+                                textTransform: 'uppercase'
+                              }}>
+                                Default
+                              </Text>
+                            )}
+                          </View>
+
+                          {/* Method Details */}
+                          <View>
+                            {method.type === 'bank_local_us' && (
+                              <View>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Bank:</Text> {details.bankName}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Account:</Text> {details.accountName} ({details.accountType})</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Account #:</Text> {details.accountNumber}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Routing #:</Text> {details.routingNumber}</Text>
+                              </View>
+                            )}
+                            {method.type === 'bank_local_ng' && (
+                              <View>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Bank:</Text> {details.bankName}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Account Name:</Text> {details.accountName}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Account #:</Text> {details.accountNumber}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Bank Code:</Text> {details.bankCode}</Text>
+                              </View>
+                            )}
+                            {method.type === 'bank_international' && (
+                              <View>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Bank:</Text> {details.bankName}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Beneficiary:</Text> {details.accountName}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>IBAN:</Text> {details.iban}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>SWIFT:</Text> {details.swiftCode}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Address:</Text> {details.bankAddress}, {details.bankCity}, {details.bankCountry}</Text>
+                              </View>
+                            )}
+                            {method.type === 'paypal' && (
+                              <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>PayPal Email:</Text> {details.email}</Text>
+                            )}
+                            {method.type === 'crypto' && (
+                              <View>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Network:</Text> {details.network}</Text>
+                                <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Address:</Text> {details.walletAddress}</Text>
+                              </View>
+                            )}
+                            {method.type === 'other' && (
+                              <Text style={[styles.paymentText, { fontSize: 9 }]}><Text style={{ fontWeight: 'bold' }}>Instructions:</Text> {details.instructions}</Text>
+                            )}
+                          </View>
                         </View>
                       )
                     })}
+                    
+                  <Text style={{
+                    fontSize: 8,
+                    color: '#6b7280',
+                    textAlign: 'center',
+                    fontStyle: 'italic',
+                    marginTop: 8
+                  }}>
+                    Please use any of the above payment methods to complete your payment
+                  </Text>
                 </View>
               )}
 

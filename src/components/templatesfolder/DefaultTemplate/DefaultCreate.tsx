@@ -292,17 +292,40 @@ export default function InvoiceCreatePage() {
       // Step 1: Save or find client
       let clientId: string
       
-      // Check if client already exists
-      const { data: existingClient } = await supabase
+      // Check if client already exists by name and email (more flexible matching)
+      const { data: existingClients } = await supabase
         .from('clients')
-        .select('id')
+        .select('id, name, email, address, phone, company_name')
         .eq('user_id', user.id)
         .eq('name', formData.clientName)
-        .eq('email', formData.clientEmail || '')
-        .single()
+
+      // Find exact match or update existing
+      let existingClient = existingClients?.find(client => 
+        client.name === formData.clientName && 
+        client.email === (formData.clientEmail || null)
+      )
 
       if (existingClient) {
+        // Update existing client with new data
+        const { error: updateError } = await supabase
+          .from('clients')
+          .update({
+            email: formData.clientEmail || null,
+            address: formData.clientAddress || null,
+            phone: formData.clientPhone || null,
+            company_name: formData.clientCompanyName || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingClient.id)
+
+        if (updateError) {
+          console.error('Error updating client:', updateError)
+          toast.error('Failed to update client: ' + updateError.message)
+          return
+        }
+        
         clientId = existingClient.id
+        toast.success('Client information updated')
       } else {
         // Create new client
         const { data: client, error: clientError } = await supabase
@@ -324,6 +347,7 @@ export default function InvoiceCreatePage() {
           return
         }
         clientId = client.id
+        toast.success('New client created')
       }
 
       // Step 2: Save invoice to database

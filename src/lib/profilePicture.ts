@@ -47,12 +47,16 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
       return { success: false, error: error.message }
     }
 
-    // Get public URL
+    // Get public URL with cache-busting
     const { data: urlData } = supabase.storage
       .from('profile-pictures')
       .getPublicUrl(filePath)
 
-    return { success: true, url: urlData.publicUrl }
+    // Add cache-busting parameter to ensure fresh image
+    const url = new URL(urlData.publicUrl)
+    url.searchParams.set('t', Date.now().toString())
+    
+    return { success: true, url: url.toString() }
   } catch (error) {
     console.error('Upload error:', error)
     return { success: false, error: 'Failed to upload image' }
@@ -168,7 +172,10 @@ export async function getUserProfilePictureUrl(user: any): Promise<string | null
         .from('profile-pictures')
         .getPublicUrl(`${user.id}/${files[0].name}`)
       
-      return data.publicUrl
+      // Add cache-busting parameter to ensure fresh image
+      const url = new URL(data.publicUrl)
+      url.searchParams.set('t', Date.now().toString())
+      return url.toString()
     }
 
     // Fallback to Google avatar if available

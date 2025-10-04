@@ -286,7 +286,7 @@ export default function ClientPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: window.innerWidth < 768 ? '1rem' : '1rem 2rem',
+        padding: isMobile ? '1rem' : '1rem 2rem',
         backgroundColor: 'white',
         borderBottom: `1px solid ${brandColors.neutral[200]}`,
         position: 'sticky',
@@ -310,193 +310,281 @@ export default function ClientPage() {
           }}
         >
           <ArrowLeft size={16} />
-          Back
+          {isMobile ? '' : 'Back'}
         </button>
         
         <h1 style={{
-          fontSize: window.innerWidth < 768 ? '1.125rem' : '1.25rem',
+          fontSize: isMobile ? '1.125rem' : '1.25rem',
           fontWeight: '600',
           color: brandColors.neutral[900],
           margin: 0,
           textAlign: 'center',
           flex: 1
         }}>
-          Client Management
+          {isMobile ? 'Clients' : 'Client Management'}
         </h1>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button
-            onClick={() => setShowClientForm(true)}
-            style={{
-              padding: window.innerWidth < 768 ? '0.75rem 1rem' : '0.5rem 1rem',
-              backgroundColor: brandColors.primary[600],
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <Plus size={16} />
-            Add Client
-          </button>
+          {!isMobile && (
+            <button
+              onClick={() => setShowClientForm(true)}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: brandColors.primary[600],
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <Plus size={16} />
+              Add Client
+            </button>
+          )}
         </div>
       </div>
 
       {/* Content */}
       <div style={{
-        padding: window.innerWidth < 768 ? '1rem' : '2rem 2rem 1rem 2rem'
+        padding: isMobile ? '1rem' : '2rem 2rem 1rem 2rem'
       }}>
-        {/* Statistics Cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(3, 1fr)',
-          gap: '1rem',
-          marginBottom: '2rem'
-        }}>
-          {/* Total Clients */}
+        {/* Statistics - Mobile vs Desktop */}
+        {isMobile ? (
+          /* Mobile: Simple horizontal stats bar */
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
-            padding: '1.5rem',
+            padding: '1rem',
+            marginBottom: '1.5rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <div style={{
               display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.5rem'
+              textAlign: 'center'
+            }}>
+              <div>
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '700',
+                  color: brandColors.neutral[900],
+                  marginBottom: '0.25rem'
+                }}>
+                  {totalClients}
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  fontWeight: '500'
+                }}>
+                  Total
+                </div>
+              </div>
+              <div style={{
+                width: '1px',
+                height: '30px',
+                backgroundColor: brandColors.neutral[200]
+              }}></div>
+              <div>
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '700',
+                  color: brandColors.error[600],
+                  marginBottom: '0.25rem'
+                }}>
+                  {clientsWithOverdue}
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  fontWeight: '500'
+                }}>
+                  Overdue
+                </div>
+              </div>
+              <div style={{
+                width: '1px',
+                height: '30px',
+                backgroundColor: brandColors.neutral[200]
+              }}></div>
+              <div>
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '700',
+                  color: brandColors.warning[600],
+                  marginBottom: '0.25rem'
+                }}>
+                  {totalOverdueCount}
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  fontWeight: '500'
+                }}>
+                  Count
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Desktop: Full stats cards */
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '1rem',
+            marginBottom: '2rem'
+          }}>
+            {/* Total Clients */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${brandColors.neutral[100]}`
             }}>
               <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: brandColors.primary[100],
-                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                gap: '0.75rem',
+                marginBottom: '0.5rem'
               }}>
-                <Users size={20} color={brandColors.primary[600]} />
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundColor: brandColors.primary[100],
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Users size={20} color={brandColors.primary[600]} />
+                </div>
+                <h3 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0
+                }}>
+                  Total Clients
+                </h3>
               </div>
-              <h3 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
+              <p style={{
+                fontSize: '2rem',
+                fontWeight: '700',
                 color: brandColors.neutral[900],
                 margin: 0
               }}>
-                Total Clients
-              </h3>
+                {totalClients}
+              </p>
             </div>
-            <p style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: brandColors.neutral[900],
-              margin: 0
-            }}>
-              {totalClients}
-            </p>
-          </div>
 
-          {/* Clients with Overdue */}
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
-          }}>
+            {/* Clients with Overdue */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.5rem'
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${brandColors.neutral[100]}`
             }}>
               <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: brandColors.error[100],
-                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                gap: '0.75rem',
+                marginBottom: '0.5rem'
               }}>
-                <AlertTriangle size={20} color={brandColors.error[600]} />
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundColor: brandColors.error[100],
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <AlertTriangle size={20} color={brandColors.error[600]} />
+                </div>
+                <h3 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0
+                }}>
+                  With Overdue
+                </h3>
               </div>
-              <h3 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
+              <p style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: brandColors.error[600],
                 margin: 0
               }}>
-                With Overdue
-              </h3>
+                {clientsWithOverdue}
+              </p>
             </div>
-            <p style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: brandColors.error[600],
-              margin: 0
-            }}>
-              {clientsWithOverdue}
-            </p>
-          </div>
 
-          {/* Total Overdue Count */}
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
-          }}>
+            {/* Total Overdue Count */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.5rem'
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${brandColors.neutral[100]}`
             }}>
               <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: brandColors.warning[100],
-                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                gap: '0.75rem',
+                marginBottom: '0.5rem'
               }}>
-                <DollarSign size={20} color={brandColors.warning[600]} />
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundColor: brandColors.warning[100],
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <DollarSign size={20} color={brandColors.warning[600]} />
+                </div>
+                <h3 style={{
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  margin: 0
+                }}>
+                  Total Overdue
+                </h3>
               </div>
-              <h3 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
+              <p style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: brandColors.warning[600],
                 margin: 0
               }}>
-                Total Overdue
-              </h3>
+                {totalOverdueCount}
+              </p>
             </div>
-            <p style={{
-              fontSize: '2rem',
-              fontWeight: '700',
-              color: brandColors.warning[600],
-              margin: 0
-            }}>
-              {totalOverdueCount}
-            </p>
           </div>
-        </div>
+        )}
 
         {/* Search */}
         <div style={{
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          display: 'flex',
+          gap: '0.75rem',
+          alignItems: 'center'
         }}>
           <div style={{
-            position: 'relative'
+            position: 'relative',
+            flex: 1
           }}>
             <Search 
               size={20} 
@@ -524,6 +612,40 @@ export default function ClientPage() {
               }}
             />
           </div>
+          
+          {/* Mobile Add Button */}
+          {isMobile && (
+            <button
+              onClick={() => setShowClientForm(true)}
+              style={{
+                padding: '0.75rem',
+                backgroundColor: brandColors.primary[600],
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: '48px',
+                height: '48px',
+                boxShadow: '0 2px 8px rgba(22, 163, 74, 0.2)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = brandColors.primary[700]
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = brandColors.primary[600]
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(22, 163, 74, 0.2)'
+              }}
+            >
+              <Plus size={20} />
+            </button>
+          )}
         </div>
 
         {/* Clients List */}
