@@ -51,17 +51,6 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
     const { data: urlData } = supabase.storage
       .from('profile-pictures')
       .getPublicUrl(filePath)
-
-    // Update the profiles table with the image URL
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ image_url: urlData.publicUrl })
-      .eq('id', userId)
-
-    if (updateError) {
-      console.error('Error updating profile image URL:', updateError)
-      return { success: false, error: 'Failed to update profile' }
-    }
     
     return { success: true, url: urlData.publicUrl }
   } catch (error) {

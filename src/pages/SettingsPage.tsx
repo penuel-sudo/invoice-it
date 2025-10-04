@@ -400,6 +400,8 @@ export default function SettingsPage() {
         toast.success('Profile picture updated successfully!')
         // Update profile picture immediately
         setProfilePictureUrl(result.url)
+        // Trigger refresh for other components
+        window.dispatchEvent(new CustomEvent('profilePictureChanged'))
       } else {
         toast.error(result.error || 'Failed to upload image')
       }

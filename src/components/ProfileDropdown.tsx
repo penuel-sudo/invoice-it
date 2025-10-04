@@ -42,6 +42,19 @@ export default function ProfileDropdown({
     }
 
     loadProfilePicture()
+
+    // Listen for profile picture changes
+    const handleProfilePictureChange = () => {
+      if (user) {
+        loadProfilePicture()
+      }
+    }
+
+    window.addEventListener('profilePictureChanged', handleProfilePictureChange)
+    
+    return () => {
+      window.removeEventListener('profilePictureChanged', handleProfilePictureChange)
+    }
   }, [user])
 
   const handleSignOut = async () => {
