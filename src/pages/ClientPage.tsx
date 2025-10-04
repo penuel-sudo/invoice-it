@@ -283,58 +283,78 @@ export default function ClientPage() {
     <Layout hideBottomNav={true}>
       {/* Header */}
       <div style={{
-        position: 'sticky',
-        top: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: window.innerWidth < 768 ? '1rem' : '1rem 2rem',
         backgroundColor: 'white',
         borderBottom: `1px solid ${brandColors.neutral[200]}`,
+        position: 'sticky',
+        top: 0,
         zIndex: 10
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: isMobile ? '1rem' : '2rem 2rem 1rem 2rem'
+        <button
+          onClick={() => navigate('/dashboard')}
+          style={{
+            padding: '0.5rem',
+            backgroundColor: brandColors.neutral[100],
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            color: brandColors.neutral[600],
+            fontSize: '0.875rem',
+            fontWeight: '500'
+          }}
+        >
+          <ArrowLeft size={16} />
+          Back
+        </button>
+        
+        <h1 style={{
+          fontSize: window.innerWidth < 768 ? '1.125rem' : '1.25rem',
+          fontWeight: '600',
+          color: brandColors.neutral[900],
+          margin: 0,
+          textAlign: 'center',
+          flex: 1
         }}>
+          Client Management
+        </h1>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => setShowClientForm(true)}
             style={{
-              padding: '0.5rem',
-              backgroundColor: brandColors.neutral[100],
+              padding: window.innerWidth < 768 ? '0.75rem 1rem' : '0.5rem 1rem',
+              backgroundColor: brandColors.primary[600],
+              color: 'white',
               border: 'none',
               borderRadius: '8px',
+              fontSize: '0.875rem',
+              fontWeight: '500',
               cursor: 'pointer',
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: '0.5rem'
             }}
           >
-            <ArrowLeft size={20} color={brandColors.neutral[600]} />
+            <Plus size={16} />
+            Add Client
           </button>
-          <h1 style={{
-            fontSize: isMobile ? '1.25rem' : '1.5rem',
-            fontWeight: '600',
-            color: brandColors.neutral[900],
-            margin: 0,
-            textAlign: 'center',
-              flex: 1
-          }}>
-            Client Management
-          </h1>
-          <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
         </div>
       </div>
 
       {/* Content */}
       <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: isMobile ? '1rem' : '2rem'
+        padding: window.innerWidth < 768 ? '1rem' : '2rem 2rem 1rem 2rem'
       }}>
         {/* Statistics Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+          gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(3, 1fr)',
           gap: '1rem',
           marginBottom: '2rem'
         }}>
@@ -471,16 +491,11 @@ export default function ClientPage() {
           </div>
         </div>
 
-        {/* Search and Add Client */}
+        {/* Search */}
         <div style={{
-          display: 'flex',
-          gap: '1rem',
-          marginBottom: '2rem',
-          flexDirection: isMobile ? 'column' : 'row'
+          marginBottom: '2rem'
         }}>
-          {/* Search */}
           <div style={{
-            flex: 1,
             position: 'relative'
           }}>
             <Search 
@@ -509,28 +524,6 @@ export default function ClientPage() {
               }}
             />
           </div>
-
-          {/* Add Client Button */}
-          <button
-            onClick={() => setShowClientForm(true)}
-            style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: brandColors.primary[600],
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Plus size={16} />
-            Add Client
-          </button>
         </div>
 
         {/* Clients List */}
