@@ -477,7 +477,7 @@ export default function SettingsPage() {
         <div style={{
           backgroundColor: 'white',
           borderBottom: `1px solid ${brandColors.neutral[200]}`,
-          padding: window.innerWidth < 768 ? '1rem' : '1rem 2rem',
+          padding: isMobile ? '1rem' : '1rem 2rem',
           position: 'sticky',
           top: 0,
           zIndex: 10
@@ -504,7 +504,7 @@ export default function SettingsPage() {
               <ArrowLeft size={20} color={brandColors.neutral[600]} />
             </button>
             <h1 style={{
-              fontSize: window.innerWidth < 768 ? '1.25rem' : '1.5rem',
+              fontSize: isMobile ? '1.25rem' : '1.5rem',
               fontWeight: '600',
               color: brandColors.neutral[900],
               margin: 0,
@@ -519,9 +519,11 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div style={{
-          maxWidth: window.innerWidth < 768 ? '600px' : '1000px',
+          maxWidth: isMobile ? '100%' : '1000px',
           margin: '0 auto',
-          padding: window.innerWidth < 768 ? '1rem' : '2rem'
+          padding: isMobile ? '1rem' : '2rem',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
           {/* Tab Navigation - Horizontal Scroll on Mobile */}
           <div style={{
@@ -541,7 +543,7 @@ export default function SettingsPage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   style={{
-                    padding: window.innerWidth < 768 ? '0.75rem 1.25rem' : '0.875rem 1.5rem',
+                    padding: isMobile ? '0.75rem 1.25rem' : '0.875rem 1.5rem',
                     backgroundColor: isActive ? brandColors.primary[600] : 'white',
                     color: isActive ? 'white' : brandColors.neutral[700],
                     border: `1px solid ${isActive ? brandColors.primary[600] : brandColors.neutral[200]}`,
@@ -550,7 +552,7 @@ export default function SettingsPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem',
+                    fontSize: isMobile ? '0.8rem' : '0.875rem',
                     fontWeight: isActive ? '600' : '500',
                     transition: 'all 0.2s ease',
                     whiteSpace: 'nowrap',
@@ -558,7 +560,7 @@ export default function SettingsPage() {
                     boxShadow: isActive ? '0 2px 8px rgba(22, 163, 74, 0.2)' : '0 1px 3px rgba(0, 0, 0, 0.1)'
                   }}
                 >
-                  <Icon size={window.innerWidth < 768 ? 16 : 18} />
+                  <Icon size={isMobile ? 16 : 18} />
                   <span>{tab.label}</span>
                 </button>
               )
@@ -568,8 +570,8 @@ export default function SettingsPage() {
           {/* Main Content Card */}
           <div style={{
             backgroundColor: 'white',
-            borderRadius: window.innerWidth < 768 ? '16px' : '20px',
-            padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
+            borderRadius: isMobile ? '16px' : '20px',
+            padding: isMobile ? '1.5rem' : '2rem',
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
@@ -786,7 +788,7 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Email (Read Only) - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                    <div style={{ gridColumn: isMobile ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -814,7 +816,7 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Country & Phone - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                    <div style={{ gridColumn: isMobile ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
@@ -835,7 +837,7 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Address - Full Width */}
-                    <div style={{ gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1' }}>
+                    <div style={{ gridColumn: isMobile ? 'auto' : '1 / -1' }}>
                       <label style={{
                         display: 'block',
                         fontSize: '0.875rem',
