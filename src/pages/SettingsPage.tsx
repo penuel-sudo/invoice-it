@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
@@ -19,8 +19,8 @@ import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
 import PaymentMethodManager from '../components/PaymentMethodManager'
 import NotificationSettings from '../components/NotificationSettings'
-import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
-import { uploadProfilePicture, deleteProfilePicture, getProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
+import { Avatar, AvatarFallback } from '../components/ui/avatar'
+import { getUserInitial } from '../lib/profilePicture'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
 
 interface NotificationPreferences {
@@ -71,9 +71,6 @@ export default function SettingsPage() {
     (searchParams.get('tab') as any) || 'profile'
   )
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [originalProfileData, setOriginalProfileData] = useState<ProfileData | null>(null)
 
@@ -181,9 +178,6 @@ export default function SettingsPage() {
     try {
       setLoading(true)
       
-      // Load profile picture
-      const url = await getProfilePictureUrl(user.id)
-      setProfilePictureUrl(url)
       
       const { data, error } = await supabase
         .from('profiles')
@@ -388,46 +382,7 @@ export default function SettingsPage() {
     }
   }, [profileData, originalProfileData])
 
-  const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file || !user) return
 
-    setIsUploading(true)
-    try {
-      const result = await uploadProfilePicture({ file, userId: user.id })
-      
-      if (result.success) {
-        toast.success('Profile picture updated successfully!')
-        // Update profile picture immediately
-        setProfilePictureUrl(result.url)
-        // Trigger refresh for other components
-        window.dispatchEvent(new CustomEvent('profilePictureChanged'))
-      } else {
-        toast.error(result.error || 'Failed to upload image')
-      }
-    } catch (error) {
-      toast.error('Failed to upload image')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleDeleteProfilePicture = async () => {
-    if (!user) return
-
-    try {
-      const result = await deleteProfilePicture(user.id)
-      
-      if (result.success) {
-        toast.success('Profile picture removed successfully!')
-        setProfilePictureUrl(null)
-      } else {
-        toast.error(result.error || 'Failed to remove image')
-      }
-    } catch (error) {
-      toast.error('Failed to remove image')
-    }
-  }
 
   if (!user || loading) {
     return (
@@ -605,7 +560,7 @@ export default function SettingsPage() {
                           (pencilIcon as HTMLElement).style.opacity = '0'
                         }
                       }}
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => {}}
                       >
                         <Avatar style={{
                           width: isMobile ? '120px' : '150px',
@@ -614,10 +569,6 @@ export default function SettingsPage() {
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                           flexShrink: 0
                         }}>
-                          <AvatarImage 
-                            src={profilePictureUrl || user?.user_metadata?.avatar_url} 
-                            alt={user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'} 
-                          />
                           <AvatarFallback style={{
                             backgroundColor: brandColors.primary[100],
                             color: brandColors.primary[700],
@@ -686,26 +637,18 @@ export default function SettingsPage() {
                           color: brandColors.neutral[400],
                           margin: '0 0 0.5rem 0'
                         }}>
-                          Click the avatar to change your profile picture
+                          Profile avatar with your initials
                         </p>
                         <p style={{
                           fontSize: isMobile ? '0.75rem' : '0.875rem',
                           color: brandColors.neutral[400],
                           margin: 0
                         }}>
-                          Your profile picture will be used as your logo on invoices
+                          Your initials will be displayed on invoices
                         </p>
                       </div>
                     </div>
                     
-                    {/* Hidden file input */}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePictureUpload}
-                      style={{ display: 'none' }}
-                    />
                   </div>
 
                   <div style={{ 

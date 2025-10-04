@@ -5,7 +5,7 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { getProfilePictureUrl, getUserDisplayName, getUserInitial } from '../lib/profilePicture'
+import { getUserDisplayName, getUserInitial } from '../lib/profilePicture'
 import NotificationDropdown from './NotificationDropdown'
 import toast from 'react-hot-toast'
 
@@ -22,40 +22,7 @@ export default function ProfileDropdown({
 }: ProfileDropdownProps) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
-
-  // Load profile picture when component mounts or user changes
-  useEffect(() => {
-    const loadProfilePicture = async () => {
-      if (user) {
-        try {
-          const url = await getProfilePictureUrl(user.id)
-          setProfilePictureUrl(url)
-        } catch (error) {
-          console.error('Error loading profile picture:', error)
-          setProfilePictureUrl(null)
-        }
-      }
-      setIsLoading(false)
-    }
-
-    loadProfilePicture()
-
-    // Listen for profile picture changes
-    const handleProfilePictureChange = () => {
-      if (user) {
-        loadProfilePicture()
-      }
-    }
-
-    window.addEventListener('profilePictureChanged', handleProfilePictureChange)
-    
-    return () => {
-      window.removeEventListener('profilePictureChanged', handleProfilePictureChange)
-    }
-  }, [user])
 
   const handleSignOut = async () => {
     try {
@@ -149,10 +116,6 @@ export default function ProfileDropdown({
         >
           {/* Profile Picture */}
           <Avatar style={avatarStyle}>
-            <AvatarImage 
-              src={profilePictureUrl || user?.user_metadata?.avatar_url} 
-              alt={displayName} 
-            />
             <AvatarFallback style={{
               backgroundColor: brandColors.primary[100],
               color: brandColors.primary[700],
@@ -246,10 +209,6 @@ export default function ProfileDropdown({
             marginBottom: '0.25rem'
           }}>
             <Avatar style={{ width: '32px', height: '32px' }}>
-              <AvatarImage 
-                src={profilePictureUrl || user?.user_metadata?.avatar_url} 
-                alt={displayName} 
-              />
               <AvatarFallback style={{
                 backgroundColor: brandColors.primary[100],
                 color: brandColors.primary[700],

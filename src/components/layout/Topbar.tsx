@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Bell } from 'lucide-react'
 import { useAuth } from '../../lib/useAuth'
 import { brandColors } from '../../stylings'
-import { getUserDisplayName, getProfilePictureUrl, getUserInitial } from '../../lib/profilePicture'
+import { getUserDisplayName, getUserInitial } from '../../lib/profilePicture'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { useNotification } from '../../contexts/NotificationContext'
 
@@ -14,39 +14,7 @@ interface TopbarProps {
 export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarProps) {
   const { unreadCount } = useNotification()
   const { user } = useAuth()
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const loadProfilePicture = async () => {
-      if (user) {
-        try {
-          const url = await getProfilePictureUrl(user.id)
-          setProfilePictureUrl(url)
-        } catch (error) {
-          console.error('Error loading profile picture:', error)
-          setProfilePictureUrl(null)
-        }
-      }
-      setIsLoading(false)
-    }
-
-    loadProfilePicture()
-
-    // Listen for profile picture changes
-    const handleProfilePictureChange = () => {
-      if (user) {
-        loadProfilePicture()
-      }
-    }
-
-    window.addEventListener('profilePictureChanged', handleProfilePictureChange)
-    
-    return () => {
-      window.removeEventListener('profilePictureChanged', handleProfilePictureChange)
-    }
-  }, [user])
 
   // Detect mobile screen size
   useEffect(() => {
@@ -63,10 +31,6 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
   const displayName = getUserDisplayName(user)
   const userInitials = getUserInitial(user)
 
-  // Get greeting with user name
-  const getGreeting = () => {
-    return `Hi, ${displayName}`
-  }
 
   return (
     <div style={{
@@ -98,10 +62,6 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
           height: '40px',
           border: `2px solid ${brandColors.neutral[200]}`
         }}>
-          <AvatarImage
-            src={profilePictureUrl || user?.user_metadata?.avatar_url}
-            alt={displayName}
-          />
           <AvatarFallback style={{
             backgroundColor: brandColors.primary[100],
             color: brandColors.primary[700],

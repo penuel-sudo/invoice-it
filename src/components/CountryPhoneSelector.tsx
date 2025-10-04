@@ -58,14 +58,14 @@ export default function CountryPhoneSelector({
   // Memoize countries data for performance
   const countriesData = useMemo<CountryData[]>(() => 
     countries.getData().map(country => {
-      const countryInfo = getCountryInfo(country.code)
-      return {
-        code: country.code,
-        name: country.name,
-        phoneCode: countryInfo?.phoneCode || '',
-        flag: getCountryFlag(country.code),
-        flagEmoji: getCountryFlagEmoji(country.code)
-      }
+    const countryInfo = getCountryInfo(country.code)
+    return {
+      code: country.code,
+      name: country.name,
+      phoneCode: countryInfo?.phoneCode || '',
+      flag: getCountryFlag(country.code),
+      flagEmoji: getCountryFlagEmoji(country.code)
+    }
     }).filter(country => country.phoneCode && country.phoneCode.length > 0),
     []
   )
@@ -77,18 +77,18 @@ export default function CountryPhoneSelector({
       if (usCountry) {
         setSelectedCountry(usCountry)
         const countryInfo = getCountryInfo('US')
-        onChange({
+            onChange({
           countryCode: 'US',
-          phoneNumber: phoneNumber,
-          isValid: false,
-          countryName: countryInfo?.name,
-          phonePrefix: countryInfo?.phoneCode,
-          languageCode: countryInfo?.language,
-          currencyCode: countryInfo?.currency,
-          timezone: countryInfo?.timezone
-        })
-      }
-    }
+              phoneNumber: phoneNumber,
+              isValid: false,
+              countryName: countryInfo?.name,
+              phonePrefix: countryInfo?.phoneCode,
+              languageCode: countryInfo?.language,
+              currencyCode: countryInfo?.currency,
+              timezone: countryInfo?.timezone
+            })
+          }
+        }
   }, [])
 
   // Check if mobile on mount and resize
@@ -193,9 +193,9 @@ export default function CountryPhoneSelector({
   // Memoize filtered countries for performance
   const filteredCountries = useMemo(() => 
     countriesData.filter(country =>
-      country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      country.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      country.phoneCode.includes(searchQuery)
+    country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    country.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    country.phoneCode.includes(searchQuery)
     ),
     [searchQuery, countriesData]
   )
@@ -221,7 +221,7 @@ export default function CountryPhoneSelector({
 
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '')
-    
+
     setPhoneNumber(value)
   }, [])
 
@@ -512,7 +512,7 @@ export default function CountryPhoneSelector({
           {error}
         </div>
       )}
-      
+
       {/* Validation hint - Only show if user has typed and blurred */}
       {showError && phoneNumber && !isValid && !error && (
         <div style={{

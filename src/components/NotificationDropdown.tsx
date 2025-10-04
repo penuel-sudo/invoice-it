@@ -158,8 +158,8 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
           </div>
         ) : (
           notifications.map((notification) => (
-            <NotificationItem
-              key={notification.id}
+          <NotificationItem
+            key={notification.id}
               id={notification.id}
               type={notification.type}
               title={notification.title}
@@ -168,48 +168,48 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
               icon={getNotificationIcon(notification.type)}
               status={notification.status}
               isRead={notification.is_read}
-              onClick={() => {
+            onClick={() => {
                 if (!notification.is_read) {
                   markAsRead(notification.id)
                 }
-              }}
+            }}
               onDelete={deleteNotification}
-            />
+          />
           ))
         )}
       </div>
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div style={{
-          marginTop: '1rem',
-          paddingTop: '1rem',
-          borderTop: `1px solid ${brandColors.neutral[100]}`,
-          textAlign: 'center'
-        }}>
+      <div style={{
+        marginTop: '1rem',
+        paddingTop: '1rem',
+        borderTop: `1px solid ${brandColors.neutral[100]}`,
+        textAlign: 'center'
+      }}>
           <button 
             onClick={markAllAsRead}
             style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: brandColors.primary[50],
-              color: brandColors.primary[600],
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.75rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.primary[100]
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.primary[50]
+          padding: '0.5rem 1rem',
+          backgroundColor: brandColors.primary[50],
+          color: brandColors.primary[600],
+          border: 'none',
+          borderRadius: '8px',
+          fontSize: '0.75rem',
+          fontWeight: '500',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = brandColors.primary[100]
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = brandColors.primary[50]
             }}
           >
-            Mark All as Read
-          </button>
-        </div>
+          Mark All as Read
+        </button>
+      </div>
       )}
     </div>
     </>

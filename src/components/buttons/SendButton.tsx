@@ -79,11 +79,11 @@ export default function SendButton({
           title: 'Invoice Sent',
           message: `Invoice #${invoiceData.invoiceNumber} sent to ${email}`,
           status: 'pending'
-        })
-
-        if (onSend) {
-          onSend()
-        }
+    })
+    
+    if (onSend) {
+      onSend()
+    }
       } else {
         throw new Error(result.error || 'Failed to send email')
       }
@@ -175,41 +175,41 @@ export default function SendButton({
           }
         `}
       </style>
-      <button
-        onClick={handleSend}
+    <button
+      onClick={handleSend}
         disabled={isLoading}
-        style={{
-          ...getSizeStyles(),
-          ...getVariantStyles(),
-          borderRadius: '12px',
-          fontWeight: '600',
+      style={{
+        ...getSizeStyles(),
+        ...getVariantStyles(),
+        borderRadius: '12px',
+        fontWeight: '600',
           cursor: isLoading ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.2s ease',
-          flex: 1,
-          maxWidth: '100px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'all 0.2s ease',
+        flex: 1,
+        maxWidth: '100px',
           opacity: isLoading ? 0.7 : 1,
-          ...style
-        }}
-        onMouseEnter={(e) => {
+        ...style
+      }}
+      onMouseEnter={(e) => {
           if (isLoading) return
-          if (variant === 'primary') {
-            e.currentTarget.style.backgroundColor = brandColors.primary[700]
-          } else {
-            e.currentTarget.style.backgroundColor = brandColors.primary[200]
-          }
-        }}
-        onMouseLeave={(e) => {
+        if (variant === 'primary') {
+          e.currentTarget.style.backgroundColor = brandColors.primary[700]
+        } else {
+          e.currentTarget.style.backgroundColor = brandColors.primary[200]
+        }
+      }}
+      onMouseLeave={(e) => {
           if (isLoading) return
-          if (variant === 'primary') {
-            e.currentTarget.style.backgroundColor = brandColors.primary[600]
-          } else {
-            e.currentTarget.style.backgroundColor = brandColors.primary[100]
-          }
-        }}
-      >
+        if (variant === 'primary') {
+          e.currentTarget.style.backgroundColor = brandColors.primary[600]
+        } else {
+          e.currentTarget.style.backgroundColor = brandColors.primary[100]
+        }
+      }}
+    >
         {isLoading ? (
           <div style={{ 
             width: '16px', 
@@ -220,10 +220,10 @@ export default function SendButton({
             animation: 'spin 1s linear infinite'
           }} />
         ) : (
-          <Send size={size === 'sm' ? 14 : size === 'lg' ? 18 : 16} />
+      <Send size={size === 'sm' ? 14 : size === 'lg' ? 18 : 16} />
         )}
         {size !== 'sm' && <span>{isLoading ? 'Sending...' : 'Send'}</span>}
-      </button>
+    </button>
 
       {/* Customize Message Modal */}
       <CustomizeMessageModal

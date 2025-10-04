@@ -51,21 +51,21 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
                           (item.id === 'Invoices' && location.pathname === '/invoices')
           
           return (
-            <button
+        <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              style={{
+          style={{
                 flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.25rem',
+            gap: '0.25rem',
                 padding: '0.5rem 0.25rem',
-                backgroundColor: 'transparent',
+            backgroundColor: 'transparent',
                 color: isActive ? brandColors.primary[600] : brandColors.neutral[400],
-                border: 'none',
-                cursor: 'pointer',
+            border: 'none',
+            cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 position: 'relative'
               }}
@@ -73,9 +73,9 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
               <Icon 
                 size={22} 
                 strokeWidth={isActive ? 2.5 : 2}
-                style={{
-                  transition: 'all 0.2s ease'
-                }}
+              style={{
+            transition: 'all 0.2s ease'
+              }}
               />
               <span style={{
                 fontSize: '10px',
@@ -141,21 +141,21 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
           const isActive = location.pathname === itemPath
           
           return (
-            <button
+        <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              style={{
+          style={{
                 flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.25rem',
+            gap: '0.25rem',
                 padding: '0.5rem 0.25rem',
-                backgroundColor: 'transparent',
+            backgroundColor: 'transparent',
                 color: isActive ? brandColors.primary[600] : brandColors.neutral[400],
-                border: 'none',
-                cursor: 'pointer',
+            border: 'none',
+            cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 position: 'relative'
               }}
@@ -163,17 +163,17 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
               <Icon 
                 size={22} 
                 strokeWidth={isActive ? 2.5 : 2}
-                style={{
-                  transition: 'all 0.2s ease'
-                }}
+          style={{
+            transition: 'all 0.2s ease'
+          }}
               />
-              <span style={{
+          <span style={{
                 fontSize: '10px',
                 fontWeight: isActive ? '600' : '500',
                 transition: 'all 0.2s ease'
-              }}>
+          }}>
                 {item.label}
-              </span>
+          </span>
               {isActive && (
                 <div style={{
                   position: 'absolute',
@@ -186,7 +186,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
                   backgroundColor: brandColors.primary[600]
                 }} />
               )}
-            </button>
+        </button>
           )
         })}
       </nav>

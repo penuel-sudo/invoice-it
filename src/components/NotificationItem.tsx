@@ -145,13 +145,13 @@ export default function NotificationItem({
           justifyContent: 'space-between',
           gap: '0.5rem'
         }}>
-          <p style={{
-            fontSize: '0.625rem',
-            color: brandColors.neutral[400],
-            margin: 0
-          }}>
-            {time}
-          </p>
+        <p style={{
+          fontSize: '0.625rem',
+          color: brandColors.neutral[400],
+          margin: 0
+        }}>
+          {time}
+        </p>
           
           {/* Delete button */}
           {onDelete && (

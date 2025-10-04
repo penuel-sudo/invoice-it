@@ -146,7 +146,7 @@ export default function TemplateGalleryPage() {
                     Loading preview...
                   </div>
                 }>
-                  <previewOverlay.template.PreviewComponent />
+                <previewOverlay.template.PreviewComponent />
                 </Suspense>
               )}
             </div>
