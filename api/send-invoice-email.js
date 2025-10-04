@@ -170,7 +170,7 @@ export default async function handler(req, res) {
           <div class="invoice-card">
             <!-- Top-left: Invoice Number -->
             <div class="invoice-number">
-              Payment #${invoiceData.invoiceNumber}
+              Payment ${invoiceData.invoiceNumber}
             </div>
 
             <!-- Prominent: Total Amount -->

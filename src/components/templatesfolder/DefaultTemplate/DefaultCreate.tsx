@@ -206,6 +206,11 @@ export default function InvoiceCreatePage() {
 
   // Auto-save form data to localStorage
   useEffect(() => {
+    console.log('🔍 Create - Saving form data:', {
+      paymentMethods: formData.paymentMethods?.length || 0,
+      selectedPaymentMethodIds: formData.selectedPaymentMethodIds?.length || 0,
+      selectedIds: formData.selectedPaymentMethodIds
+    })
     invoiceStorage.saveDraftDebounced(formData)
   }, [formData])
 
