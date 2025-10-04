@@ -157,6 +157,12 @@ export default function InvoicePreviewPage() {
         // Try to get data from localStorage
         const savedData = invoiceStorage.getDraft()
         if (savedData) {
+          console.log('🔍 Preview - Loaded from localStorage:', {
+            paymentMethods: savedData.paymentMethods?.length || 0,
+            selectedPaymentMethodIds: savedData.selectedPaymentMethodIds?.length || 0,
+            selectedIds: savedData.selectedPaymentMethodIds,
+            methodIds: savedData.paymentMethods?.map(m => m.id) || []
+          })
           setInvoiceData(savedData)
           setIsFromDatabase(false)
           // Update URL to include invoice number

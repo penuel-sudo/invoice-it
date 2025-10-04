@@ -207,11 +207,20 @@ export default function InvoiceCreatePage() {
   // Auto-save form data to localStorage
   useEffect(() => {
     // Create a copy of formData with only selected payment methods
+    const filteredMethods = formData.paymentMethods?.filter(method => 
+      formData.selectedPaymentMethodIds?.includes(method.id)
+    ) || []
+    
+    console.log('🔍 Create - Filtering payment methods:', {
+      allMethods: formData.paymentMethods?.length || 0,
+      selectedIds: formData.selectedPaymentMethodIds,
+      filteredMethods: filteredMethods.length,
+      filteredMethodIds: filteredMethods.map(m => m.id)
+    })
+    
     const dataToSave = {
       ...formData,
-      paymentMethods: formData.paymentMethods?.filter(method => 
-        formData.selectedPaymentMethodIds?.includes(method.id)
-      ) || []
+      paymentMethods: filteredMethods
     }
     invoiceStorage.saveDraftDebounced(dataToSave)
   }, [formData])
