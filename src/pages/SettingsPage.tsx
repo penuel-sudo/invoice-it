@@ -381,7 +381,9 @@ export default function SettingsPage() {
       
       if (result.success) {
         toast.success('Profile picture updated successfully!')
-        // Reload the profile picture
+        // Update profile picture immediately
+        setProfilePictureUrl(result.url)
+        // Also reload to ensure consistency
         const url = await getUserProfilePictureUrl(user)
         setProfilePictureUrl(url)
       } else {
@@ -553,29 +555,20 @@ export default function SettingsPage() {
                     Profile Information
                   </h2>
 
-                  {/* Profile Picture Section */}
+                  {/* Profile Picture Section - Replicating ProfileDropdown design */}
                   <div style={{
                     marginBottom: '2rem',
-                    padding: '1.5rem',
+                    padding: isMobile ? '1.5rem' : '2rem',
                     backgroundColor: brandColors.neutral[50],
                     borderRadius: '12px',
                     border: `1px solid ${brandColors.neutral[200]}`
                   }}>
-                    <h3 style={{
-                      fontSize: '1rem',
-                      fontWeight: '600',
-                      color: brandColors.neutral[900],
-                      marginBottom: '1rem'
-                    }}>
-                      Profile Picture
-                    </h3>
-                    
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '1rem'
+                      gap: isMobile ? '1rem' : '1.5rem'
                     }}>
-                      {/* Custom Avatar with hover pencil effect - Settings specific */}
+                      {/* Large Avatar with hover pencil effect - Settings specific */}
                       <div style={{
                         position: 'relative',
                         cursor: 'pointer',
@@ -597,8 +590,8 @@ export default function SettingsPage() {
                       onClick={() => fileInputRef.current?.click()}
                       >
                         <Avatar style={{
-                          width: '100px',
-                          height: '100px',
+                          width: isMobile ? '120px' : '150px',
+                          height: isMobile ? '120px' : '150px',
                           border: `3px solid ${brandColors.white}`,
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                           flexShrink: 0
@@ -610,14 +603,14 @@ export default function SettingsPage() {
                           <AvatarFallback style={{
                             backgroundColor: brandColors.primary[100],
                             color: brandColors.primary[700],
-                            fontSize: '2rem',
+                            fontSize: isMobile ? '2.5rem' : '3rem',
                             fontWeight: '600'
                           }}>
                             {getUserInitial(user)}
                           </AvatarFallback>
                         </Avatar>
                         
-                        {/* Hover pencil icon - Settings specific */}
+                        {/* Hover pencil icon - No black background */}
                         <div 
                           className="pencil-icon"
                           style={{
@@ -625,47 +618,60 @@ export default function SettingsPage() {
                             top: '50%',
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
-                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
                             borderRadius: '50%',
-                            width: '40px',
-                            height: '40px',
+                            width: isMobile ? '40px' : '50px',
+                            height: isMobile ? '40px' : '50px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             opacity: 0,
                             transition: 'opacity 0.2s ease',
-                            pointerEvents: 'none'
+                            pointerEvents: 'none',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                           }}
                         >
-                          <Pencil size={20} color="white" />
+                          <Pencil size={isMobile ? 18 : 22} color={brandColors.primary[600]} />
                         </div>
                       </div>
                       
-                      <div style={{ flex: 1 }}>
-                        <h4 style={{
-                          fontSize: '1.125rem',
+                      {/* Profile Info - Replicating ProfileDropdown design */}
+                      <div style={{
+                        flex: 1,
+                        minWidth: 0
+                      }}>
+                        <p style={{
+                          fontSize: isMobile ? '1.25rem' : '1.5rem',
                           fontWeight: '600',
                           color: brandColors.neutral[900],
-                          margin: '0 0 0.25rem 0'
+                          lineHeight: '1.4',
+                          margin: '0 0 0.5rem 0',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
                         }}>
                           {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
-                        </h4>
+                        </p>
                         <p style={{
-                          fontSize: '0.875rem',
-                          color: brandColors.neutral[600],
-                          margin: '0 0 0.5rem 0'
+                          fontSize: isMobile ? '1rem' : '1.125rem',
+                          color: brandColors.neutral[500],
+                          lineHeight: '1.2',
+                          margin: '0 0 0.75rem 0',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
                         }}>
                           {user?.email}
                         </p>
                         <p style={{
-                          fontSize: '0.75rem',
-                          color: brandColors.neutral[500],
+                          fontSize: isMobile ? '0.875rem' : '1rem',
+                          color: brandColors.neutral[400],
                           margin: '0 0 0.5rem 0'
                         }}>
                           Click the avatar to change your profile picture
                         </p>
                         <p style={{
-                          fontSize: '0.6875rem',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
                           color: brandColors.neutral[400],
                           margin: 0
                         }}>
