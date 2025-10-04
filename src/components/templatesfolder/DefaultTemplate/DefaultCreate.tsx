@@ -165,6 +165,13 @@ export default function InvoiceCreatePage() {
           const currencySymbol = getCurrencySymbol(currencyCode)
           const paymentMethods = data.payment_methods || []
           
+          console.log('🔍 Create - Loading user defaults:', {
+            data: data,
+            paymentMethods: paymentMethods,
+            paymentMethodsLength: paymentMethods.length,
+            paymentMethodIds: paymentMethods.map(m => m.id)
+          })
+          
           setUserDefaults({
             currency: currencyCode,
             currencySymbol: currencySymbol,
@@ -1102,7 +1109,14 @@ export default function InvoiceCreatePage() {
           </div>
 
           {/* Payment Methods Card */}
-          {userDefaults.paymentMethods.length > 0 && (
+          {(() => {
+            console.log('🔍 Create - Payment methods section check:', {
+              userDefaultsPaymentMethods: userDefaults.paymentMethods,
+              length: userDefaults.paymentMethods.length,
+              shouldShow: userDefaults.paymentMethods.length > 0
+            })
+            return userDefaults.paymentMethods.length > 0
+          })() && (
             <div style={{
               backgroundColor: brandColors.white,
               borderRadius: '16px',
