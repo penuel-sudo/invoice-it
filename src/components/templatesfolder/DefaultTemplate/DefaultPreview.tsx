@@ -157,11 +157,6 @@ export default function InvoicePreviewPage() {
         // Try to get data from localStorage
         const savedData = invoiceStorage.getDraft()
         if (savedData) {
-          console.log('🔍 Preview - Loaded data from localStorage:', {
-            paymentMethods: savedData.paymentMethods?.length || 0,
-            selectedPaymentMethodIds: savedData.selectedPaymentMethodIds?.length || 0,
-            selectedIds: savedData.selectedPaymentMethodIds
-          })
           setInvoiceData(savedData)
           setIsFromDatabase(false)
           // Update URL to include invoice number
@@ -229,12 +224,6 @@ export default function InvoicePreviewPage() {
           }}>
             Loading Invoice...
           </h2>
-          <p style={{
-            fontSize: '0.875rem',
-            color: brandColors.neutral[600]
-          }}>
-            Please wait while we load your invoice preview.
-          </p>
         </div>
       </div>
     )
@@ -520,37 +509,23 @@ export default function InvoicePreviewPage() {
             )}
 
             {/* Payment Methods Section */}
-            {(() => {
-              console.log('🔍 Preview - Payment methods check:', {
-                hasPaymentMethods: !!invoiceData.paymentMethods,
-                paymentMethodsLength: invoiceData.paymentMethods?.length || 0,
-                hasSelectedIds: !!invoiceData.selectedPaymentMethodIds,
-                selectedIdsLength: invoiceData.selectedPaymentMethodIds?.length || 0,
-                selectedIds: invoiceData.selectedPaymentMethodIds,
-                allMethodIds: invoiceData.paymentMethods?.map(m => m.id) || []
-              })
-              
-              const filteredMethods = invoiceData.paymentMethods?.filter(method => 
-                invoiceData.selectedPaymentMethodIds?.includes(method.id)
-              ) || []
-              
-              console.log('🔍 Preview - Filtered methods:', filteredMethods.length, filteredMethods)
-              
-              return invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && invoiceData.selectedPaymentMethodIds && invoiceData.selectedPaymentMethodIds.length > 0 && (
+            {invoiceData.paymentMethods && invoiceData.paymentMethods.length > 0 && invoiceData.selectedPaymentMethodIds && invoiceData.selectedPaymentMethodIds.length > 0 && (
+              <div style={{
+                borderTop: `1px solid ${brandColors.neutral[200]}`,
+                margin: '1rem 0 0 0',
+                paddingTop: '0.75rem'
+              }}>
                 <div style={{
-                  borderTop: `1px solid ${brandColors.neutral[200]}`,
-                  margin: '1rem 0 0 0',
-                  paddingTop: '0.75rem'
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                  color: brandColors.neutral[700],
+                  marginBottom: '0.75rem'
                 }}>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    color: brandColors.neutral[700],
-                    marginBottom: '0.75rem'
-                  }}>
-                    Payment Methods:
-                  </div>
-                  {filteredMethods.map((method) => {
+                  Payment Methods:
+                </div>
+                {invoiceData.paymentMethods
+                  .filter(method => invoiceData.selectedPaymentMethodIds?.includes(method.id))
+                  .map((method) => {
                     const details = method.details as any
                     return (
                       <div
@@ -608,9 +583,8 @@ export default function InvoicePreviewPage() {
                       </div>
                     )
                   })}
-                </div>
-              )
-            })()}
+              </div>
+            )}
             
             {/* Disclaimer */}
             <div style={{
