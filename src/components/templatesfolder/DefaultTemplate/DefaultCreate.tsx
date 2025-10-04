@@ -62,7 +62,7 @@ export default function InvoiceCreatePage() {
         try {
           // Load invoice from database using invoice number
           const { data, error } = await supabase
-            .from('transactions')
+            .from('invoices')
             .select('*')
             .eq('invoice_number', invoiceNumber)
             .eq('user_id', user?.id)
