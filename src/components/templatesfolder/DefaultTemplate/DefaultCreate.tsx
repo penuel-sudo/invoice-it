@@ -206,7 +206,14 @@ export default function InvoiceCreatePage() {
 
   // Auto-save form data to localStorage
   useEffect(() => {
-    invoiceStorage.saveDraftDebounced(formData)
+    // Create a copy of formData with only selected payment methods
+    const dataToSave = {
+      ...formData,
+      paymentMethods: formData.paymentMethods?.filter(method => 
+        formData.selectedPaymentMethodIds?.includes(method.id)
+      ) || []
+    }
+    invoiceStorage.saveDraftDebounced(dataToSave)
   }, [formData])
 
   // Update URL when invoice number changes
@@ -327,7 +334,9 @@ export default function InvoiceCreatePage() {
           template: 'default',
           currency_code: formData.currency || 'USD',
           payment_details: formData.paymentDetails || null,
-          payment_methods: formData.paymentMethods || null,
+          payment_methods: formData.paymentMethods?.filter(method => 
+            formData.selectedPaymentMethodIds?.includes(method.id)
+          ) || null,
           selected_payment_method_ids: formData.selectedPaymentMethodIds || null,
           template_data: {
             layout: 'clean',
