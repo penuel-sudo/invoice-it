@@ -74,6 +74,8 @@ export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false)
+  const [originalProfileData, setOriginalProfileData] = useState<ProfileData | null>(null)
 
   // Responsive state management
   useEffect(() => {
@@ -172,6 +174,18 @@ export default function SettingsPage() {
     }
   }, [user])
 
+  // Listen for profile picture updates from other components
+  useEffect(() => {
+    const handleProfilePictureUpdate = (event: CustomEvent) => {
+      setProfilePictureUrl(event.detail)
+    }
+
+    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate as EventListener)
+    return () => {
+      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate as EventListener)
+    }
+  }, [])
+
   const loadProfileData = async () => {
     if (!user) return
 
@@ -195,7 +209,7 @@ export default function SettingsPage() {
       }
 
       if (data) {
-        setProfileData({
+        const profileData = {
           full_name: data.full_name || '',
           company_name: data.company_name || '',
           email: data.email || user.email || '',
@@ -216,7 +230,9 @@ export default function SettingsPage() {
             invoice_created: true,
             status_changed: true
           }
-        })
+        }
+        setProfileData(profileData)
+        setOriginalProfileData(profileData)
       }
     } catch (error) {
       console.error('Error loading profile:', error)
@@ -252,6 +268,9 @@ export default function SettingsPage() {
       }
 
       toast.success('Profile updated successfully!')
+      setHasChanges(false)
+      // Update original data to reflect saved state
+      setOriginalProfileData(profileData)
     } catch (error) {
       console.error('Error saving profile:', error)
       toast.error('Failed to save profile')
@@ -369,7 +388,16 @@ export default function SettingsPage() {
       language_code: value.languageCode || '',
       timezone: value.timezone || ''
     }))
+    setHasChanges(true)
   }
+
+  // Check for changes whenever profileData changes
+  useEffect(() => {
+    if (originalProfileData) {
+      const hasChanges = JSON.stringify(profileData) !== JSON.stringify(originalProfileData)
+      setHasChanges(hasChanges)
+    }
+  }, [profileData, originalProfileData])
 
   const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -383,6 +411,8 @@ export default function SettingsPage() {
         toast.success('Profile picture updated successfully!')
         // Update profile picture immediately
         setProfilePictureUrl(result.url)
+        // Trigger a global refresh by dispatching a custom event
+        window.dispatchEvent(new CustomEvent('profilePictureUpdated', { detail: result.url }))
         // Also reload to ensure consistency
         const url = await getUserProfilePictureUrl(user)
         setProfilePictureUrl(url)
@@ -692,8 +722,8 @@ export default function SettingsPage() {
 
                   <div style={{ 
                     display: 'grid',
-                    gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr 1fr',
-                    gap: '1.5rem'
+                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                    gap: isMobile ? '1rem' : '1.5rem'
                   }}>
                     {/* Full Name */}
                     <div>
@@ -709,7 +739,10 @@ export default function SettingsPage() {
                       <input
                         type="text"
                         value={profileData.full_name}
-                        onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, full_name: e.target.value })
+                          setHasChanges(true)
+                        }}
                         placeholder="Enter your full name"
                         style={{
                           width: '100%',
@@ -736,7 +769,10 @@ export default function SettingsPage() {
                       <input
                         type="text"
                         value={profileData.company_name}
-                        onChange={(e) => setProfileData({ ...profileData, company_name: e.target.value })}
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, company_name: e.target.value })
+                          setHasChanges(true)
+                        }}
                         placeholder="Enter your company name"
                         style={{
                           width: '100%',
@@ -830,22 +866,22 @@ export default function SettingsPage() {
                     {/* Save Button - Full Width */}
                     <button
                       onClick={handleSaveProfile}
-                      disabled={saving}
+                      disabled={saving || !hasChanges}
                       style={{
-                        gridColumn: window.innerWidth < 768 ? 'auto' : '1 / -1',
+                        gridColumn: isMobile ? 'auto' : '1 / -1',
                         padding: '0.875rem 1.5rem',
-                        backgroundColor: brandColors.primary[600],
+                        backgroundColor: hasChanges ? brandColors.primary[600] : brandColors.neutral[300],
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
                         fontSize: '0.875rem',
                         fontWeight: '600',
-                        cursor: saving ? 'not-allowed' : 'pointer',
+                        cursor: (saving || !hasChanges) ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.5rem',
-                        opacity: saving ? 0.6 : 1
+                        opacity: (saving || !hasChanges) ? 0.6 : 1
                       }}
                     >
                       {saving ? (
