@@ -29,14 +29,14 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
       return { success: false, error: 'File size must be less than 5MB' }
     }
 
-    // Create file path: profile-pictures/{userId}/avatar.{extension}
+    // Create file path: profile_pictures/{userId}/avatar.{extension}
     const fileExt = file.name.split('.').pop()
     const fileName = `avatar.${fileExt}`
     const filePath = `${userId}/${fileName}`
 
     // Upload file to Supabase Storage
     const { data, error } = await supabase.storage
-      .from('profile-pictures')
+      .from('profile_pictures')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true // Replace existing file
@@ -47,12 +47,17 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
       return { success: false, error: error.message }
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('profile-pictures')
-      .getPublicUrl(filePath)
+    // Call database function to update profiles table with public URL
+    const { data: publicUrl, error: dbError } = await supabase.rpc('update_profile_picture_url', {
+      user_id: userId
+    })
+
+    if (dbError) {
+      console.error('Database update error:', dbError)
+      return { success: false, error: 'Failed to update profile' }
+    }
     
-    return { success: true, url: urlData.publicUrl }
+    return { success: true, url: publicUrl }
   } catch (error) {
     console.error('Upload error:', error)
     return { success: false, error: 'Failed to upload image' }
@@ -60,23 +65,24 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
 }
 
 /**
- * Get profile picture URL with fallback to Google avatar
+ * Get profile picture URL from profiles table
  * @param userId - The user's ID
  * @returns Promise with profile picture URL
  */
 export async function getProfilePictureUrl(userId: string): Promise<string> {
   try {
-    // Call the Supabase function to get profile picture URL
-    const { data, error } = await supabase.rpc('get_profile_picture_url', {
-      user_id: userId
-    })
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('image_url')
+      .eq('id', userId)
+      .single()
 
     if (error) {
       console.error('Error getting profile picture:', error)
       return ''
     }
 
-    return data || ''
+    return data?.image_url || ''
   } catch (error) {
     console.error('Error getting profile picture:', error)
     return ''
@@ -92,7 +98,7 @@ export async function deleteProfilePicture(userId: string): Promise<ProfilePictu
   try {
     // List files in user's folder
     const { data: files, error: listError } = await supabase.storage
-      .from('profile-pictures')
+      .from('profile_pictures')
       .list(userId)
 
     if (listError) {
@@ -105,13 +111,24 @@ export async function deleteProfilePicture(userId: string): Promise<ProfilePictu
     
     if (filePaths.length > 0) {
       const { error: deleteError } = await supabase.storage
-        .from('profile-pictures')
+        .from('profile_pictures')
         .remove(filePaths)
 
       if (deleteError) {
         console.error('Delete error:', deleteError)
         return { success: false, error: deleteError.message }
       }
+    }
+
+    // Clear image_url from profiles table
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ image_url: null })
+      .eq('id', userId)
+
+    if (updateError) {
+      console.error('Error clearing profile image URL:', updateError)
+      return { success: false, error: 'Failed to clear profile' }
     }
 
     return { success: true }
