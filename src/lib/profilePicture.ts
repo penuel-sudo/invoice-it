@@ -36,7 +36,7 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
 
     // Upload file to Supabase Storage
     const { data, error } = await supabase.storage
-      .from('profile_pictures')
+      .from('profile-pictures')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true // Replace existing file
@@ -98,7 +98,7 @@ export async function deleteProfilePicture(userId: string): Promise<ProfilePictu
   try {
     // List files in user's folder
     const { data: files, error: listError } = await supabase.storage
-      .from('profile_pictures')
+      .from('profile-pictures')
       .list(userId)
 
     if (listError) {
@@ -111,7 +111,7 @@ export async function deleteProfilePicture(userId: string): Promise<ProfilePictu
     
     if (filePaths.length > 0) {
       const { error: deleteError } = await supabase.storage
-        .from('profile_pictures')
+        .from('profile-pictures')
         .remove(filePaths)
 
       if (deleteError) {
