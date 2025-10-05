@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
@@ -6,16 +6,12 @@ import { Layout } from '../components/layout'
 import { 
   ArrowLeft, 
   User, 
-  Camera, 
-  Trash2,
   Save,
-  Building,
-  Phone,
-  MapPin,
-  Mail,
-  Upload
+  Building
 } from 'lucide-react'
-import { uploadProfilePicture, deleteProfilePicture, getUserProfilePictureUrl, getUserInitial } from '../lib/profilePicture'
+import { getUserInitial } from '../lib/profileUtils'
+import { useProfileImage } from '../hooks/useProfileImage'
+import ProfilePictureUpload from '../components/ProfilePictureUpload'
 import { supabase } from '../lib/supabaseClient'
 import toast from 'react-hot-toast'
 
@@ -29,10 +25,9 @@ interface ProfileData {
 export default function ProfilePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const fileInputRef = useRef<HTMLInputElement>(null)
   
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+  // Get profile picture using the new hook
+  const profilePictureUrl = useProfileImage(user?.id || '')
   const [isSaving, setIsSaving] = useState(false)
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
@@ -41,15 +36,11 @@ export default function ProfilePage() {
     address: ''
   })
 
-  // Load profile picture and data when component mounts
+  // Load profile data when component mounts
   useEffect(() => {
     const loadProfileData = async () => {
       if (user) {
         try {
-          // Load profile picture
-          const url = await getUserProfilePictureUrl(user)
-          setProfilePictureUrl(url)
-
           // Load profile data from database
           const { data: profile, error } = await supabase
             .from('profiles')
@@ -76,45 +67,6 @@ export default function ProfilePage() {
     loadProfileData()
   }, [user])
 
-  const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file || !user) return
-
-    setIsUploading(true)
-    try {
-      const result = await uploadProfilePicture({ file, userId: user.id })
-      
-      if (result.success) {
-        toast.success('Profile picture updated successfully!')
-        // Reload the profile picture
-        const url = await getUserProfilePictureUrl(user)
-        setProfilePictureUrl(url)
-      } else {
-        toast.error(result.error || 'Failed to upload image')
-      }
-    } catch (error) {
-      toast.error('Failed to upload image')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleDeleteProfilePicture = async () => {
-    if (!user) return
-
-    try {
-      const result = await deleteProfilePicture(user.id)
-      
-      if (result.success) {
-        toast.success('Profile picture removed successfully!')
-        setProfilePictureUrl(null)
-      } else {
-        toast.error(result.error || 'Failed to remove image')
-      }
-    } catch (error) {
-      toast.error('Failed to remove image')
-    }
-  }
 
   const handleSaveProfile = async () => {
     if (!user) return
@@ -253,40 +205,16 @@ export default function ProfilePage() {
               gap: '1rem',
               marginBottom: '1rem'
             }}>
-              {profilePictureUrl ? (
-                <img
-                  src={profilePictureUrl}
-                  alt="Profile"
-                  style={{
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: `3px solid ${brandColors.white}`,
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                  }}
-                  onError={() => {
-                    setProfilePictureUrl(null)
-                  }}
-                />
-              ) : (
-                <div style={{
+              <ProfilePictureUpload 
+                size="lg"
+                showHoverEffect={true}
+                style={{
                   width: '80px',
                   height: '80px',
-                  borderRadius: '50%',
-                  backgroundColor: brandColors.primary[200],
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '2rem',
-                  fontWeight: '600',
-                  color: brandColors.primary[800],
                   border: `3px solid ${brandColors.white}`,
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                }}>
-                  {getUserInitial(user)}
-                </div>
-              )}
+                }}
+              />
               
               <div style={{ flex: 1 }}>
                 <h3 style={{
@@ -307,61 +235,14 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div style={{
-              display: 'flex',
-              gap: '0.75rem'
+            <p style={{
+              fontSize: '0.875rem',
+              color: brandColors.neutral[600],
+              margin: 0,
+              lineHeight: '1.5'
             }}>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  padding: '0.75rem',
-                  backgroundColor: brandColors.primary[100],
-                  color: brandColors.primary[600],
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  cursor: isUploading ? 'not-allowed' : 'pointer',
-                  opacity: isUploading ? 0.6 : 1
-                }}
-              >
-                <Upload size={16} />
-                {isUploading ? 'Uploading...' : 'Upload'}
-              </button>
-              
-              {profilePictureUrl && (
-                <button
-                  onClick={handleDeleteProfilePicture}
-                  style={{
-                    padding: '0.75rem',
-                    backgroundColor: brandColors.error[100],
-                    color: brandColors.error[600],
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleProfilePictureUpload}
-              style={{ display: 'none' }}
-            />
+              Hover over the avatar to upload or change your profile picture. Your profile picture will be used as your logo on invoices.
+            </p>
           </div>
 
           {/* Personal Information Section */}
