@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
-import { getUserInitial, getProfilePictureUrl } from '../lib/profilePicture'
+import { getUserInitial } from '../lib/profileUtils'
 import { useAuth } from '../lib/useAuth'
+import { useProfileImage } from '../hooks/useProfileImage'
 
 interface ProfilePictureProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -30,42 +30,7 @@ export default function ProfilePicture({
   allowUpload = false
 }: ProfilePictureProps) {
   const { user } = useAuth()
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Load profile picture on mount
-  useEffect(() => {
-    if (user) {
-      loadProfilePicture()
-    }
-  }, [user])
-
-  // Listen for profile picture updates
-  useEffect(() => {
-    const handleProfilePictureUpdate = () => {
-      if (user) {
-        loadProfilePicture()
-      }
-    }
-
-    window.addEventListener('profilePictureChanged', handleProfilePictureUpdate)
-    return () => window.removeEventListener('profilePictureChanged', handleProfilePictureUpdate)
-  }, [user])
-
-  const loadProfilePicture = async () => {
-    if (!user) return
-
-    try {
-      setIsLoading(true)
-      const url = await getProfilePictureUrl(user.id)
-      setProfilePictureUrl(url)
-    } catch (error) {
-      console.error('Error loading profile picture:', error)
-      setProfilePictureUrl(null)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const imageUrl = useProfileImage(user?.id || '')
 
   const sizeStyles = sizeMap[size]
   const userInitials = getUserInitial(user)
@@ -93,9 +58,9 @@ export default function ProfilePicture({
       className={className}
       onClick={onClick}
     >
-      {!isLoading && profilePictureUrl && (
+      {imageUrl && (
         <AvatarImage 
-          src={profilePictureUrl} 
+          src={imageUrl} 
           alt={user?.user_metadata?.full_name || 'Profile'} 
         />
       )}

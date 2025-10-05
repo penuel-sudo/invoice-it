@@ -1,7 +1,6 @@
-import { useRef, useState, useEffect } from 'react'
-import { Pencil, Upload, X, Loader2 } from 'lucide-react'
-import { uploadProfilePicture, deleteProfilePicture, getProfilePictureUrl } from '../lib/profilePicture'
-import ProfilePicture from './ProfilePicture'
+import { useRef, useState } from 'react'
+import { Pencil, Upload, Loader2 } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
 import { brandColors } from '../stylings'
 import { useAuth } from '../lib/useAuth'
 import toast from 'react-hot-toast'
@@ -13,6 +12,13 @@ interface ProfilePictureUploadProps {
   style?: React.CSSProperties
 }
 
+const sizeMap = {
+  sm: { width: '32px', height: '32px', fontSize: '0.75rem' },
+  md: { width: '40px', height: '40px', fontSize: '0.875rem' },
+  lg: { width: '80px', height: '80px', fontSize: '1.5rem' },
+  xl: { width: '120px', height: '120px', fontSize: '2.5rem' }
+}
+
 export default function ProfilePictureUpload({ 
   size = 'lg', 
   showHoverEffect = true,
@@ -22,91 +28,32 @@ export default function ProfilePictureUpload({
   const { user } = useAuth()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isHovered, setIsHovered] = useState(false)
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
-  // Load profile picture on mount
-  useEffect(() => {
-    if (user) {
-      loadProfilePicture()
-    }
-  }, [user])
+  const uploadProfilePicture = async (file: File, userId: string) => {
+    if (!file || !userId) return
 
-  // Listen for profile picture updates
-  useEffect(() => {
-    const handleProfilePictureUpdate = () => {
-      if (user) {
-        loadProfilePicture()
-      }
-    }
+    // Create unique file path: userId + timestamp
+    const filePath = `${userId}/${Date.now()}_${file.name}`
 
-    window.addEventListener('profilePictureChanged', handleProfilePictureUpdate)
-    return () => window.removeEventListener('profilePictureChanged', handleProfilePictureUpdate)
-  }, [user])
+    const { error } = await supabase.storage
+      .from('profile-pictures')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true, // allow replacing old file
+      })
 
-  const loadProfilePicture = async () => {
-    if (!user) return
-
-    try {
-      const url = await getProfilePictureUrl(user.id)
-      setProfilePictureUrl(url)
-    } catch (error) {
-      console.error('Error loading profile picture:', error)
-      setProfilePictureUrl(null)
-    }
-  }
-
-  const uploadPicture = async (file: File) => {
-    if (!user) return
-
-    try {
-      setIsUploading(true)
-      const result = await uploadProfilePicture({ file, userId: user.id })
-      
-      if (result.success && result.url) {
-        // Set the URL immediately for UI feedback
-        setProfilePictureUrl(result.url)
-        
-        // The database trigger will update profiles.image_url automatically
-        // We'll refresh the component after a short delay to get the updated URL from DB
-        setTimeout(() => {
-          loadProfilePicture() // Reload from profiles.image_url
-          window.dispatchEvent(new CustomEvent('profilePictureChanged'))
-        }, 1500)
-        
-        return result.url
-      } else {
-        throw new Error(result.error || 'Upload failed')
-      }
-    } catch (error) {
-      console.error('Error uploading profile picture:', error)
+    if (error) {
+      console.error('Upload failed:', error.message)
       throw error
-    } finally {
-      setIsUploading(false)
     }
-  }
 
-  const deletePicture = async () => {
-    if (!user) return
-
-    try {
-      setIsUploading(true)
-      await deleteProfilePicture(user.id)
-      setProfilePictureUrl(null)
-      
-      // Dispatch event to update other components
-      window.dispatchEvent(new CustomEvent('profilePictureChanged'))
-    } catch (error) {
-      console.error('Error deleting profile picture:', error)
-      throw error
-    } finally {
-      setIsUploading(false)
-    }
+    console.log('✅ File uploaded! The DB trigger will now update profiles.image_url automatically.')
   }
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (!file) return
+    if (!file || !user) return
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -121,10 +68,16 @@ export default function ProfilePictureUpload({
     }
 
     try {
-      await uploadPicture(file)
+      setIsUploading(true)
+      await uploadProfilePicture(file, user.id)
       toast.success('Profile picture updated!')
+      
+      // Dispatch event to update other components
+      window.dispatchEvent(new CustomEvent('profilePictureChanged'))
     } catch (error) {
       toast.error('Failed to upload profile picture')
+    } finally {
+      setIsUploading(false)
     }
 
     // Reset file input
@@ -133,20 +86,13 @@ export default function ProfilePictureUpload({
     }
   }
 
-  const handleDelete = async () => {
-    try {
-      await deletePicture()
-      toast.success('Profile picture removed!')
-    } catch (error) {
-      toast.error('Failed to remove profile picture')
-    }
-  }
-
   const handleClick = () => {
     if (!isUploading) {
       fileInputRef.current?.click()
     }
   }
+
+  const sizeStyles = sizeMap[size]
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -165,18 +111,31 @@ export default function ProfilePictureUpload({
           position: 'relative',
           cursor: isUploading ? 'not-allowed' : 'pointer',
           opacity: isUploading ? 0.7 : 1,
-          transition: 'opacity 0.2s ease'
+          transition: 'opacity 0.2s ease',
+          width: sizeStyles.width,
+          height: sizeStyles.height,
+          borderRadius: '50%',
+          overflow: 'hidden',
+          ...style
         }}
         onMouseEnter={() => showHoverEffect && setIsHovered(true)}
         onMouseLeave={() => showHoverEffect && setIsHovered(false)}
         onClick={handleClick}
       >
-        <ProfilePicture 
-          size={size}
-          showBorder={true}
-          className={className}
-          style={style}
-        />
+        {/* Placeholder avatar */}
+        <div style={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: brandColors.primary[100],
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: sizeStyles.fontSize,
+          fontWeight: '600',
+          color: brandColors.primary[700]
+        }}>
+          {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+        </div>
 
         {/* Hover overlay */}
         {showHoverEffect && isHovered && !isUploading && (
@@ -193,11 +152,7 @@ export default function ProfilePictureUpload({
             justifyContent: 'center',
             transition: 'opacity 0.2s ease'
           }}>
-            {profilePictureUrl ? (
-              <Pencil size={20} color="white" />
-            ) : (
-              <Upload size={20} color="white" />
-            )}
+            <Pencil size={20} color="white" />
           </div>
         )}
 
@@ -219,44 +174,6 @@ export default function ProfilePictureUpload({
           </div>
         )}
       </div>
-
-      {/* Delete button (only show if picture exists) */}
-      {profilePictureUrl && !isUploading && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            handleDelete()
-          }}
-          style={{
-            position: 'absolute',
-            top: '-8px',
-            right: '-8px',
-            width: '24px',
-            height: '24px',
-            backgroundColor: brandColors.error[500],
-            color: 'white',
-            border: 'none',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.error[600]
-            e.currentTarget.style.transform = 'scale(1.1)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = brandColors.error[500]
-            e.currentTarget.style.transform = 'scale(1)'
-          }}
-        >
-          <X size={12} />
-        </button>
-      )}
     </div>
   )
 }

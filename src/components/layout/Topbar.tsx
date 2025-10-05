@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Bell } from 'lucide-react'
 import { useAuth } from '../../lib/useAuth'
 import { brandColors } from '../../stylings'
-import { getUserDisplayName } from '../../lib/profilePicture'
-import ProfilePicture from '../ProfilePicture'
+import ProfilePictureDisplay from '../ProfilePictureDisplay'
+import { getUserDisplayName } from '../../lib/profileUtils'
 import { useNotification } from '../../contexts/NotificationContext'
 
 interface TopbarProps {
@@ -56,7 +56,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
         alignItems: 'center',
         gap: '1rem'
       }}>
-        <ProfilePicture size="md" showBorder={true} />
+        <ProfilePictureDisplay size="md" showBorder={true} />
         
         <div>
           <p style={{
