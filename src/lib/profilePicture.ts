@@ -47,17 +47,18 @@ export async function uploadProfilePicture({ file, userId }: ProfilePictureUploa
       return { success: false, error: error.message }
     }
 
-    // Call database function to update profiles table with public URL
-    const { data: publicUrl, error: dbError } = await supabase.rpc('update_profile_picture_url', {
-      user_id: userId
-    })
-
-    if (dbError) {
-      console.error('Database update error:', dbError)
-      return { success: false, error: 'Failed to update profile' }
-    }
+    // Get public URL for immediate return
+    const { data: urlData } = supabase.storage
+      .from('profile-pictures')
+      .getPublicUrl(filePath)
     
-    return { success: true, url: publicUrl }
+    // The database trigger will automatically update profiles.image_url
+    // We just need to wait a moment for the trigger to complete
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('profilePictureChanged'))
+    }, 1000)
+    
+    return { success: true, url: urlData.publicUrl }
   } catch (error) {
     console.error('Upload error:', error)
     return { success: false, error: 'Failed to upload image' }
@@ -123,7 +124,7 @@ export async function deleteProfilePicture(userId: string): Promise<ProfilePictu
     // Clear image_url from profiles table
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ image_url: null })
+      .update({ image_url: null, updated_at: new Date().toISOString() })
       .eq('id', userId)
 
     if (updateError) {

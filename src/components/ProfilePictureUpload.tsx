@@ -64,10 +64,15 @@ export default function ProfilePictureUpload({
       const result = await uploadProfilePicture({ file, userId: user.id })
       
       if (result.success && result.url) {
+        // Set the URL immediately for UI feedback
         setProfilePictureUrl(result.url)
         
-        // Dispatch event to update other components
-        window.dispatchEvent(new CustomEvent('profilePictureChanged'))
+        // The database trigger will update profiles.image_url automatically
+        // We'll refresh the component after a short delay to get the updated URL from DB
+        setTimeout(() => {
+          loadProfilePicture() // Reload from profiles.image_url
+          window.dispatchEvent(new CustomEvent('profilePictureChanged'))
+        }, 1500)
         
         return result.url
       } else {
