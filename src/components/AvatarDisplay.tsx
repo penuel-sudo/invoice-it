@@ -70,7 +70,8 @@ export default function AvatarDisplay({
   }, [user])
 
   const sizeStyles = sizeMap[size]
-  const userInitial = user?.email?.charAt(0).toUpperCase() || 'U'
+  const userInitial = user?.user_metadata?.full_name?.charAt(0).toUpperCase() || 
+                     user?.email?.charAt(0).toUpperCase() || 'U'
 
   const avatarStyle = {
     width: sizeStyles.width,
@@ -112,7 +113,7 @@ export default function AvatarDisplay({
     <div style={avatarStyle} className={className}>
       {avatarUrl ? (
         <img
-          src={avatarUrl.startsWith('http') ? avatarUrl : `${supabase.supabaseUrl}/storage/v1/object/public/${avatarUrl}`}
+          src={avatarUrl.startsWith('http') ? avatarUrl : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${avatarUrl}`}
           alt="Avatar"
           style={{
             width: '100%',

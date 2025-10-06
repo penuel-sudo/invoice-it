@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
+import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
 import NotificationDropdown from '../components/NotificationDropdown'
 import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
@@ -36,6 +37,7 @@ export default function DashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
+  const { currency, currencySymbol } = useGlobalCurrency()
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -100,10 +102,10 @@ export default function DashboardPage() {
 
   // Helper functions from TransactionPage
   const formatAmount = (amount: number, type: string) => {
-    if (amount === null || amount === undefined) return '$0.00'
+    if (amount === null || amount === undefined) return `${currencySymbol}0.00`
     const formatted = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: currency
     }).format(amount)
     return type === 'invoice' ? `+${formatted}` : `-${formatted}`
   }
@@ -580,7 +582,7 @@ export default function DashboardPage() {
                       color: brandColors.success[600],
                       margin: '0 0 0.25rem 0'
                     }}>
-                      ${(stats.thisMonthRevenue || 0).toLocaleString()}
+                      {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
                     </p>
                     <p style={{
                       fontSize: '0.75rem',

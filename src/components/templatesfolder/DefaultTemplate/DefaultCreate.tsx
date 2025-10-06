@@ -8,6 +8,7 @@ import type { InvoiceFormData, InvoiceItem, PaymentDetails, PaymentMethod } from
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
 import { CURRENCIES, getCurrencySymbol } from '../../../lib/currencyUtils'
+import { useInvoiceCurrency } from '../../../hooks/useInvoiceCurrency'
 import { 
   ArrowLeft, 
   Save, 
@@ -41,13 +42,10 @@ export default function InvoiceCreatePage() {
   
   const [formData, setFormData] = useState<InvoiceFormData>(invoiceStorage.getDraftWithFallback())
   const [loading, setLoading] = useState(false)
+  const { currency: globalCurrency, currencySymbol: globalCurrencySymbol, setCurrency } = useInvoiceCurrency(formData.currency)
   const [userDefaults, setUserDefaults] = useState<{ 
-    currency: string
-    currencySymbol: string
     paymentMethods: PaymentMethod[]
   }>({
-    currency: 'USD',
-    currencySymbol: '$',
     paymentMethods: []
   })
 
@@ -169,8 +167,6 @@ export default function InvoiceCreatePage() {
           const paymentMethods = data.payment_methods || []
           
           setUserDefaults({
-            currency: currencyCode,
-            currencySymbol: currencySymbol,
             paymentMethods: paymentMethods
           })
 
@@ -1089,6 +1085,7 @@ export default function InvoiceCreatePage() {
                 value={formData.currency || 'USD'}
                 onChange={(e) => {
                   const selectedCurrency = CURRENCIES.find(c => c.code === e.target.value)
+                  setCurrency(e.target.value)
                   setFormData(prev => ({
                     ...prev,
                     currency: e.target.value,
@@ -1117,7 +1114,7 @@ export default function InvoiceCreatePage() {
                 color: brandColors.neutral[500],
                 marginTop: '0.5rem'
               }}>
-                Default: {userDefaults.currencySymbol} {userDefaults.currency}
+                Default: {globalCurrencySymbol} {globalCurrency}
               </p>
             </div>
           </div>

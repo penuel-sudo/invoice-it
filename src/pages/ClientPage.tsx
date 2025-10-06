@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
+import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
 import { supabase } from '../lib/supabaseClient'
 import {
   ArrowLeft,

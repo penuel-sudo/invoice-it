@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Pencil, Upload, X, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { brandColors } from '../stylings'
@@ -29,6 +29,44 @@ export default function AvatarUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isHovered, setIsHovered] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+
+  // Fetch current avatar and listen for changes
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (!user?.id) {
+        setAvatarUrl(null)
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single()
+
+        if (error) {
+          console.error('Error fetching avatar URL:', error)
+          setAvatarUrl(null)
+        } else {
+          setAvatarUrl(data?.avatar_url || null)
+        }
+      } catch (error) {
+        console.error('Error fetching avatar URL:', error)
+        setAvatarUrl(null)
+      }
+    }
+
+    fetchAvatar()
+
+    const handleAvatarChanged = () => {
+      fetchAvatar() // Re-fetch when event is dispatched
+    }
+
+    window.addEventListener('avatarChanged', handleAvatarChanged)
+    return () => window.removeEventListener('avatarChanged', handleAvatarChanged)
+  }, [user])
 
   const uploadAvatar = async (file: File) => {
     if (!user) return
@@ -85,6 +123,8 @@ export default function AvatarUpload({
   }
 
   const sizeStyles = sizeMap[size]
+  const userInitial = user?.user_metadata?.full_name?.charAt(0).toUpperCase() || 
+                     user?.email?.charAt(0).toUpperCase() || 'U'
 
   return (
     <div 
@@ -108,18 +148,36 @@ export default function AvatarUpload({
         disabled={isUploading}
       />
 
-      {/* Use AvatarDisplay component internally */}
-      <div style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: brandColors.primary[200],
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: '50%'
-      }}>
-        <Upload size={size === 'sm' ? 16 : size === 'md' ? 20 : size === 'lg' ? 30 : 40} color={brandColors.primary[600]} />
-      </div>
+      {/* Display current avatar or fallback */}
+      {avatarUrl ? (
+        <img
+          src={avatarUrl.startsWith('http') ? avatarUrl : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${avatarUrl}`}
+          alt="Avatar"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }}
+          onError={() => {
+            setAvatarUrl(null)
+          }}
+        />
+      ) : (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: brandColors.primary[200],
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          fontSize: sizeStyles.fontSize,
+          fontWeight: '600',
+          color: brandColors.primary[600]
+        }}>
+          {userInitial}
+        </div>
+      )}
 
       {isUploading && (
         <div style={{

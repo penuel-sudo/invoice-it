@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
+import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
 import { supabase } from '../lib/supabaseClient'
 import { 
   ArrowLeft, 
@@ -68,6 +69,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'currency' | 'payment' | 'notifications' | 'appearance'>(
     (searchParams.get('tab') as any) || 'profile'
   )
+  const { currency, currencySymbol } = useGlobalCurrency()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [hasChanges, setHasChanges] = useState(false)
   const [originalProfileData, setOriginalProfileData] = useState<ProfileData | null>(null)
@@ -536,16 +538,18 @@ export default function SettingsPage() {
                   }}>
                     <div style={{
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: isMobile ? '1rem' : '1.5rem'
+                      flexDirection: isMobile ? 'column' : 'row',
+                      alignItems: isMobile ? 'center' : 'flex-start',
+                      gap: isMobile ? '1rem' : '1.5rem',
+                      textAlign: isMobile ? 'center' : 'left'
                     }}>
                       {/* Avatar Upload Component */}
                       <AvatarUpload 
                         size="xl"
                         showHoverEffect={true}
                         style={{
-                          width: isMobile ? '120px' : '150px',
-                          height: isMobile ? '120px' : '150px',
+                          width: isMobile ? '100px' : '150px',
+                          height: isMobile ? '100px' : '150px',
                           border: `3px solid ${brandColors.white}`,
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                           flexShrink: 0
@@ -555,37 +559,39 @@ export default function SettingsPage() {
                       {/* Profile Info */}
                       <div style={{
                         flex: 1,
-                        minWidth: 0
+                        minWidth: 0,
+                        width: isMobile ? '100%' : 'auto'
                       }}>
-                        <p style={{
-                          fontSize: isMobile ? '1.25rem' : '1.5rem',
+                        <h3 style={{
+                          fontSize: isMobile ? '1.125rem' : '1.5rem',
                           fontWeight: '600',
                           color: brandColors.neutral[900],
                           lineHeight: '1.4',
                           margin: '0 0 0.5rem 0',
-                          whiteSpace: 'nowrap',
+                          whiteSpace: isMobile ? 'normal' : 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
                         }}>
                           {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
-                        </p>
+                        </h3>
                         <p style={{
-                          fontSize: isMobile ? '1rem' : '1.125rem',
+                          fontSize: isMobile ? '0.875rem' : '1.125rem',
                           color: brandColors.neutral[500],
                           lineHeight: '1.2',
                           margin: '0 0 0.75rem 0',
-                          whiteSpace: 'nowrap',
+                          whiteSpace: isMobile ? 'normal' : 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
                         }}>
                           {user?.email}
                         </p>
                         <p style={{
-                          fontSize: isMobile ? '0.875rem' : '1rem',
+                          fontSize: isMobile ? '0.75rem' : '0.875rem',
                           color: brandColors.neutral[400],
-                          margin: 0
+                          margin: 0,
+                          lineHeight: '1.4'
                         }}>
-                          Hover over the avatar to upload or change your profile picture
+                          Your profile picture will be used as your logo on invoices
                         </p>
                       </div>
                     </div>
