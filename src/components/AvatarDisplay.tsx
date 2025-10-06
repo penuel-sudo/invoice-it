@@ -112,7 +112,7 @@ export default function AvatarDisplay({
     <div style={avatarStyle} className={className}>
       {avatarUrl ? (
         <img
-          src={avatarUrl}
+          src={avatarUrl.startsWith('http') ? avatarUrl : `${supabase.supabaseUrl}/storage/v1/object/public/${avatarUrl}`}
           alt="Avatar"
           style={{
             width: '100%',
