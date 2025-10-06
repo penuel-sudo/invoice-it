@@ -4,22 +4,21 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { supabase } from '../lib/supabaseClient'
-import {
-  ArrowLeft,
-  User,
-  DollarSign,
-  CreditCard,
-  Bell,
-  Palette,
-  Save,
-  Loader2,
-  Pencil
+import { 
+  ArrowLeft, 
+  User, 
+  DollarSign, 
+  CreditCard, 
+  Bell, 
+  Palette, 
+  Save, 
+  Loader2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
 import PaymentMethodManager from '../components/PaymentMethodManager'
 import NotificationSettings from '../components/NotificationSettings'
-import ProfilePictureUpload from '../components/ProfilePictureUpload'
+import AvatarUpload from '../components/AvatarUpload'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
 
 interface NotificationPreferences {
@@ -540,9 +539,9 @@ export default function SettingsPage() {
                       alignItems: 'center',
                       gap: isMobile ? '1rem' : '1.5rem'
                     }}>
-                      {/* Profile Picture Upload Component with Pencil Effect */}
-                      <ProfilePictureUpload 
-                        size={isMobile ? 'xl' : 'xl'}
+                      {/* Avatar Upload Component */}
+                      <AvatarUpload 
+                        size="xl"
                         showHoverEffect={true}
                         style={{
                           width: isMobile ? '120px' : '150px',
@@ -584,16 +583,9 @@ export default function SettingsPage() {
                         <p style={{
                           fontSize: isMobile ? '0.875rem' : '1rem',
                           color: brandColors.neutral[400],
-                          margin: '0 0 0.5rem 0'
-                        }}>
-                          Hover over the avatar to upload or change your profile picture
-                        </p>
-                        <p style={{
-                          fontSize: isMobile ? '0.75rem' : '0.875rem',
-                          color: brandColors.neutral[400],
                           margin: 0
                         }}>
-                          Your profile picture will be used as your logo on invoices
+                          Hover over the avatar to upload or change your profile picture
                         </p>
                       </div>
                     </div>

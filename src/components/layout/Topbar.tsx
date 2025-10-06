@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { Bell } from 'lucide-react'
 import { useAuth } from '../../lib/useAuth'
 import { brandColors } from '../../stylings'
-import ProfilePictureDisplay from '../ProfilePictureDisplay'
-import { getUserDisplayName } from '../../lib/profileUtils'
+import AvatarDisplay from '../AvatarDisplay'
 import { useNotification } from '../../contexts/NotificationContext'
 
 interface TopbarProps {
@@ -28,7 +27,7 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const displayName = getUserDisplayName(user)
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
 
 
   return (
@@ -56,7 +55,10 @@ export default function Topbar({ onNotificationClick, onSettingsOpen }: TopbarPr
         alignItems: 'center',
         gap: '1rem'
       }}>
-        <ProfilePictureDisplay size="md" showBorder={true} />
+        <AvatarDisplay 
+          size="md" 
+          showBorder={true}
+        />
         
         <div>
           <p style={{

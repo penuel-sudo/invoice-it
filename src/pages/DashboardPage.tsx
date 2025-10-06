@@ -3,8 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
-import { getUserDisplayName, getUserInitial } from '../lib/profileUtils'
-import { useProfileImage } from '../hooks/useProfileImage'
 import NotificationDropdown from '../components/NotificationDropdown'
 import Topbar from '../components/layout/Topbar'
 import StatusButton from '../components/StatusButton'
@@ -38,8 +36,6 @@ export default function DashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
-  // Get profile picture using the new hook
-  const profilePictureUrl = useProfileImage(user?.id || '')
   const [transactions, setTransactions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)

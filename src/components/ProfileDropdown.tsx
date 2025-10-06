@@ -4,9 +4,8 @@ import { ChevronDown, User, CreditCard, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '../lib/useAuth'
 import { brandColors, typographyPresets } from '../stylings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { getUserDisplayName } from '../lib/profileUtils'
-import ProfilePictureDisplay from './ProfilePictureDisplay'
 import NotificationDropdown from './NotificationDropdown'
+import AvatarDisplay from './AvatarDisplay'
 import toast from 'react-hot-toast'
 
 interface ProfileDropdownProps {
@@ -33,7 +32,7 @@ export default function ProfileDropdown({
     }
   }
 
-  const displayName = getUserDisplayName(user)
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
 
   // Define styles based on variant
   const containerStyle = variant === 'sidebar' ? {
@@ -103,7 +102,7 @@ export default function ProfileDropdown({
           }}
         >
           {/* Profile Picture */}
-          <ProfilePictureDisplay 
+          <AvatarDisplay 
             size={variant === 'sidebar' ? 'md' : 'sm'} 
             showBorder={variant === 'topbar'}
             style={avatarStyle}
@@ -191,7 +190,7 @@ export default function ProfileDropdown({
             gap: '0.75rem',
             marginBottom: '0.25rem'
           }}>
-            <ProfilePictureDisplay size="sm" />
+            <AvatarDisplay size="sm" />
             <div>
               <p style={{
                 fontSize: '14px',

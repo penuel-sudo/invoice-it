@@ -5,14 +5,12 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { 
   ArrowLeft, 
-  User, 
+  User,
   Save,
   Building
 } from 'lucide-react'
-import { getUserInitial } from '../lib/profileUtils'
-import { useProfileImage } from '../hooks/useProfileImage'
-import ProfilePictureUpload from '../components/ProfilePictureUpload'
 import { supabase } from '../lib/supabaseClient'
+import AvatarDisplay from '../components/AvatarDisplay'
 import toast from 'react-hot-toast'
 
 interface ProfileData {
@@ -26,8 +24,6 @@ export default function ProfilePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   
-  // Get profile picture using the new hook
-  const profilePictureUrl = useProfileImage(user?.id || '')
   const [isSaving, setIsSaving] = useState(false)
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
@@ -205,12 +201,10 @@ export default function ProfilePage() {
               gap: '1rem',
               marginBottom: '1rem'
             }}>
-              <ProfilePictureUpload 
+              <AvatarDisplay 
                 size="lg"
-                showHoverEffect={true}
+                showBorder={true}
                 style={{
-                  width: '80px',
-                  height: '80px',
                   border: `3px solid ${brandColors.white}`,
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                 }}
@@ -241,7 +235,7 @@ export default function ProfilePage() {
               margin: 0,
               lineHeight: '1.5'
             }}>
-              Hover over the avatar to upload or change your profile picture. Your profile picture will be used as your logo on invoices.
+              Your current profile picture
             </p>
           </div>
 
