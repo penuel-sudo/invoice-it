@@ -10,26 +10,33 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    height: '100vh',
+    maxHeight: '100vh',
+    overflow: 'hidden'
   },
   container: {
     width: '100%',
     maxWidth: 400,
-    margin: 'auto'
+    margin: 'auto',
+    maxHeight: '90vh',
+    overflow: 'hidden'
   },
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 32,
-    marginBottom: 20,
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-    position: 'relative'
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 0,
+    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
+    position: 'relative',
+    maxHeight: '85vh',
+    overflow: 'hidden'
   },
   headerBadge: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20
+    marginBottom: 15
   },
   badge: {
     backgroundColor: '#dcfce7', // primary[100]
@@ -40,19 +47,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   amountSection: {
-    marginTop: 20,
-    marginBottom: 24,
+    marginTop: 15,
+    marginBottom: 18,
     textAlign: 'center'
   },
   amount: {
-    fontSize: 40,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#111827', // neutral[900]
     marginBottom: 8,
     fontFamily: 'Helvetica-Bold'
   },
   currencySymbol: {
-    fontSize: 40,
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#111827',
+    fontFamily: 'Helvetica-Bold'
+  },
+  currencySymbolSmall: {
+    fontSize: 10,
     fontWeight: 'bold',
     color: '#111827',
     fontFamily: 'Helvetica-Bold'
@@ -61,7 +74,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24
+    marginBottom: 18
   },
   clientLeft: {
     flexDirection: 'row',
@@ -111,19 +124,19 @@ const styles = StyleSheet.create({
   detailsSection: {
     backgroundColor: '#f9fafb',
     borderRadius: 8,
-    padding: 16
+    padding: 12
   },
   detailsTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: 'center'
   },
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6
+    paddingVertical: 4
   },
   itemDescription: {
     fontSize: 10,
@@ -204,8 +217,10 @@ const styles = StyleSheet.create({
   },
   paymentSection: {
     borderTop: '1px solid #e5e7eb',
-    marginTop: 12,
-    paddingTop: 12
+    marginTop: 8,
+    paddingTop: 8,
+    maxHeight: '200px',
+    overflow: 'hidden'
   },
   paymentTitle: {
     fontSize: 10,
@@ -252,7 +267,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={styles.page} wrap={false}>
         <View style={styles.container}>
           {/* Invoice Preview Card */}
           <View style={styles.card}>
@@ -308,7 +323,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                     {item.quantity} {item.description}
                   </Text>
                   <Text style={styles.itemPrice}>
-                    <Text style={styles.currencySymbol}>{currencySymbol}</Text>{item.lineTotal.toFixed(2)}
+                    <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{item.lineTotal.toFixed(2)}
                   </Text>
                 </View>
               ))}
@@ -320,13 +335,13 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Subtotal</Text>
                     <Text style={styles.totalValue}>
-                      <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.subtotal.toFixed(2)}
+                      <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{invoiceData.subtotal.toFixed(2)}
                     </Text>
                   </View>
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Tax</Text>
                     <Text style={styles.totalValue}>
-                      <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.taxTotal.toFixed(2)}
+                      <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{invoiceData.taxTotal.toFixed(2)}
                     </Text>
                   </View>
                 </>
@@ -368,12 +383,12 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                       const details = method.details as any
                       return (
                         <View key={index} style={{ 
-                          marginBottom: 12, 
-                          marginTop: index > 0 ? 12 : 0,
+                          marginBottom: 6, 
+                          marginTop: index > 0 ? 6 : 0,
                           backgroundColor: '#f0fdf4',
                           border: '1px solid #bbf7d0',
-                          borderRadius: 8,
-                          padding: 12
+                          borderRadius: 6,
+                          padding: 8
                         }}>
                           {/* Method Header */}
                           <View style={{ 

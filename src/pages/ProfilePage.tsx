@@ -5,7 +5,7 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { 
   ArrowLeft, 
-  User,
+  User, 
   Save,
   Building
 } from 'lucide-react'
@@ -204,10 +204,10 @@ export default function ProfilePage() {
               <AvatarDisplay 
                 size="lg"
                 showBorder={true}
-                style={{
-                  border: `3px solid ${brandColors.white}`,
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                }}
+                  style={{
+                    border: `3px solid ${brandColors.white}`,
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                  }}
               />
               
               <div style={{ flex: 1 }}>

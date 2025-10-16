@@ -337,7 +337,7 @@ export default function DashboardPage() {
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
               border: `1px solid ${brandColors.neutral[100]}`,
               minHeight: '180px',
-              position: 'relative',
+          position: 'relative',
               overflow: 'hidden',
               touchAction: 'pan-y'
             }}
@@ -356,43 +356,43 @@ export default function DashboardPage() {
                 }}>
                   Invoice Overview
                 </h3>
-                <div style={{
-                  display: 'flex',
+          <div style={{
+            display: 'flex',
                   flexDirection: 'column',
                   gap: '1.25rem'
-                }}>
+          }}>
                   <div style={{ textAlign: 'center' }}>
-                    <p style={{
+              <p style={{
                       fontSize: '3rem',
-                      fontWeight: '700',
+                fontWeight: '700',
                       color: brandColors.primary[600],
                       margin: '0 0 0.25rem 0',
                       lineHeight: 1
-                    }}>
+              }}>
                       {stats.total}
-                    </p>
-                    <p style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      color: brandColors.neutral[600],
-                      margin: 0
-                    }}>
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: brandColors.neutral[600],
+                margin: 0
+              }}>
                       Total Invoices
-                    </p>
-                  </div>
-                  
-                  <div style={{
+              </p>
+            </div>
+
+            <div style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',
                     gap: '1rem'
-                  }}>
+            }}>
                     <div style={{ textAlign: 'center' }}>
-                      <p style={{
+              <p style={{
                         fontSize: '1.75rem',
                         fontWeight: '600',
                         color: brandColors.success[600],
-                        margin: '0 0 0.25rem 0'
-                      }}>
+                margin: '0 0 0.25rem 0'
+              }}>
                         {stats.paid}
                       </p>
                       <p style={{
@@ -559,46 +559,46 @@ export default function DashboardPage() {
                       lineHeight: 1
                     }}>
                       {stats.thisMonthCount}
-                    </p>
-                    <p style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      color: brandColors.neutral[600],
-                      margin: 0
-                    }}>
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: brandColors.neutral[600],
+                margin: 0
+              }}>
                       Invoices Created
-                    </p>
-                  </div>
-                  <div style={{
+              </p>
+            </div>
+            <div style={{
                     width: '100%',
                     padding: '1rem',
                     backgroundColor: brandColors.success[50],
                     borderRadius: '12px',
-                    textAlign: 'center'
-                  }}>
-                    <p style={{
+              textAlign: 'center'
+            }}>
+              <p style={{
                       fontSize: '1.5rem',
-                      fontWeight: '700',
+                fontWeight: '700',
                       color: brandColors.success[600],
-                      margin: '0 0 0.25rem 0'
-                    }}>
+                margin: '0 0 0.25rem 0'
+              }}>
                       {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
-                    </p>
-                    <p style={{
+              </p>
+              <p style={{
                       fontSize: '0.75rem',
-                      color: brandColors.neutral[600],
-                      margin: 0
-                    }}>
+                color: brandColors.neutral[600],
+                margin: 0
+              }}>
                       Revenue Collected
-                    </p>
-                  </div>
-                </div>
+              </p>
+            </div>
+          </div>
               </div>
             )}
-          </div>
+        </div>
 
           {/* Dot Indicators */}
-          <div style={{
+        <div style={{
             display: 'flex',
             justifyContent: 'center',
             gap: '0.5rem',
@@ -693,9 +693,9 @@ export default function DashboardPage() {
             <button
               onClick={() => navigate('/invoices?tab=invoice')}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
@@ -703,13 +703,13 @@ export default function DashboardPage() {
                 cursor: 'pointer',
                 borderRadius: '14px',
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
                 e.currentTarget.style.borderColor = brandColors.success[200]
-              }}
-              onMouseLeave={(e) => {
+            }}
+            onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
                 e.currentTarget.style.borderColor = brandColors.neutral[100]
               }}
@@ -738,9 +738,9 @@ export default function DashboardPage() {
             <button
               onClick={() => navigate('/clients')}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
@@ -748,13 +748,13 @@ export default function DashboardPage() {
                 cursor: 'pointer',
                 borderRadius: '14px',
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
                 e.currentTarget.style.borderColor = brandColors.primary[200]
-              }}
-              onMouseLeave={(e) => {
+            }}
+            onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
                 e.currentTarget.style.borderColor = brandColors.neutral[100]
               }}
@@ -783,9 +783,9 @@ export default function DashboardPage() {
             <button 
               onClick={() => navigate('/expense/new')}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
@@ -793,13 +793,13 @@ export default function DashboardPage() {
                 cursor: 'pointer',
                 borderRadius: '14px',
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
                 e.currentTarget.style.borderColor = brandColors.error[200]
-              }}
-              onMouseLeave={(e) => {
+            }}
+            onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
                 e.currentTarget.style.borderColor = brandColors.neutral[100]
               }}
@@ -825,12 +825,12 @@ export default function DashboardPage() {
             </button>
 
             {/* Templates */}
-            <button
+            <button 
               onClick={() => navigate('/templates')}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
@@ -838,13 +838,13 @@ export default function DashboardPage() {
                 cursor: 'pointer',
                 borderRadius: '14px',
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
                 e.currentTarget.style.borderColor = brandColors.primary[200]
-              }}
-              onMouseLeave={(e) => {
+            }}
+            onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
                 e.currentTarget.style.borderColor = brandColors.neutral[100]
               }}
@@ -873,9 +873,9 @@ export default function DashboardPage() {
             <button
               onClick={() => navigate('/reports')}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
@@ -883,13 +883,13 @@ export default function DashboardPage() {
                 cursor: 'pointer',
                 borderRadius: '14px',
                 boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
                 e.currentTarget.style.borderColor = brandColors.warning[200]
-              }}
-              onMouseLeave={(e) => {
+            }}
+            onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
                 e.currentTarget.style.borderColor = brandColors.neutral[100]
               }}
