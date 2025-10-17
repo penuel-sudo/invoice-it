@@ -37,7 +37,7 @@ export default function DownloadButton({
       // Show loading state
       toast.loading('Generating PDF...', { id: 'pdf-generation' })
       
-      // Update invoice status to 'pending' if it's not already pending
+      // Update invoice status to 'pending' using shared save function
       console.log('🔄 [DOWNLOAD BUTTON] Starting status update...')
       console.log('📊 [DOWNLOAD BUTTON] Current invoiceData:', {
         invoiceNumber: invoiceData.invoiceNumber,
@@ -45,63 +45,44 @@ export default function DownloadButton({
         user_id: user.id
       })
 
-      // Query to find if this invoice exists in the database
-      console.log('🔍 [DOWNLOAD BUTTON] Searching for invoice in database...')
-      const { data: existingInvoice, error: searchError } = await supabase
-        .from('invoices')
-        .select('id, status')
-        .eq('invoice_number', invoiceData.invoiceNumber)
-        .eq('user_id', user.id)
-        .single()
-
-      if (searchError && searchError.code !== 'PGRST116') {
-        console.error('❌ [DOWNLOAD BUTTON] Error searching for invoice:', searchError)
-      }
+      // Always use the shared save function for consistency
+      console.log('📋 [DOWNLOAD BUTTON] Using shared save function for status update...')
       
-      if (existingInvoice && existingInvoice.status === 'draft') {
-        console.log('✅ [DOWNLOAD BUTTON] Invoice found in DB, updating status...')
-        // Invoice exists in DB and is draft, update to pending
-        const { error: updateError } = await supabase
-          .from('invoices')
-          .update({ 
-            status: 'pending',
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingInvoice.id)
-          .eq('user_id', user.id)
-
-        if (updateError) {
-          console.error('❌ [DOWNLOAD BUTTON] Error updating invoice status:', updateError)
-        } else {
-          console.log('✅ [DOWNLOAD BUTTON] Invoice status updated to pending in DB')
-        }
-      } else if (!existingInvoice && (invoiceData as any).status === 'draft') {
-        console.log('📋 [DOWNLOAD BUTTON] Invoice not found in DB (preview mode), using shared save function...')
-        
-        // Use shared save function - handles all the complex logic
-        const result = await saveInvoiceToDatabase(invoiceData, user, { 
-          status: 'pending',
-          updateStatus: true 
-        })
-        
-        if (result.success) {
-          console.log('✅ [DOWNLOAD BUTTON] Invoice saved successfully via shared function')
-          // Update the invoiceData object with new IDs
-          ;(invoiceData as any).id = result.invoiceId
-          ;(invoiceData as any).clientId = result.clientId
-          ;(invoiceData as any).status = 'pending'
-        } else {
-          console.error('❌ [DOWNLOAD BUTTON] Failed to save invoice:', result.error)
-        }
+      const result = await saveInvoiceToDatabase(invoiceData, user, { 
+        status: 'pending',
+        updateStatus: true 
+      })
+      
+      if (result.success) {
+        console.log('✅ [DOWNLOAD BUTTON] Invoice saved successfully via shared function')
+        // Update the invoiceData object with new IDs
+        ;(invoiceData as any).id = result.invoiceId
+        ;(invoiceData as any).clientId = result.clientId
+        ;(invoiceData as any).status = 'pending'
       } else {
-        console.log('ℹ️ [DOWNLOAD BUTTON] Invoice status is not draft, no update needed:', (invoiceData as any).status)
+        console.error('❌ [DOWNLOAD BUTTON] Failed to save invoice:', result.error)
+        toast.error(`Failed to save invoice: ${result.error}`)
       }
       
       // Get the correct PDF template based on template name
       const PDFTemplate = getPDFTemplate(template)
       
+      if (!PDFTemplate) {
+        throw new Error(`PDF template '${template}' not found`)
+      }
+      
+      console.log('📄 [DOWNLOAD BUTTON] Generating PDF with template:', template)
+      console.log('📊 [DOWNLOAD BUTTON] Invoice data for PDF:', {
+        invoiceNumber: invoiceData.invoiceNumber,
+        clientName: invoiceData.clientName,
+        grandTotal: invoiceData.grandTotal
+      })
+      
       // Generate PDF blob using client-side rendering
+      console.log('🔄 [DOWNLOAD BUTTON] Creating PDF document...')
       const blob = await pdf(<PDFTemplate invoiceData={invoiceData} />).toBlob()
+      
+      console.log('✅ [DOWNLOAD BUTTON] PDF generated successfully, size:', blob.size)
       
       // Create download link
       const url = URL.createObjectURL(blob)
@@ -112,6 +93,8 @@ export default function DownloadButton({
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
+      
+      console.log('✅ [DOWNLOAD BUTTON] PDF download initiated')
       
       // Success feedback
       toast.success('PDF downloaded successfully!', { id: 'pdf-generation' })

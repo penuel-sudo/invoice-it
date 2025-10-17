@@ -283,7 +283,7 @@ export default function InvoicePreviewPage() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem 1rem',
+      padding: window.innerWidth < 768 ? '1rem 0.5rem' : '2rem 1rem', // Mobile responsive padding
       position: 'relative'
     }}>
       {/* Background Pattern */}
@@ -304,16 +304,26 @@ export default function InvoicePreviewPage() {
         textAlign: 'center',
         minWidth: '400px',
         width: 'fit-content', // Dynamic width based on content
-        maxWidth: 'none' // No maximum width constraint
+        maxWidth: 'none', // No maximum width constraint
+        margin: '0 auto',
+        padding: '0 1rem', // Mobile padding
+        // Ensure mobile responsiveness
+        ...(window.innerWidth < 768 && {
+          minWidth: '320px',
+          width: '100%',
+          maxWidth: '100%'
+        })
       }}>
         {/* Invoice Preview Card */}
         <div style={{
           backgroundColor: brandColors.white,
           borderRadius: '16px',
-          padding: '2rem',
+          padding: window.innerWidth < 768 ? '1.5rem' : '2rem', // Mobile responsive padding
           marginBottom: '2rem',
           boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
-          position: 'relative'
+          position: 'relative',
+          width: '100%',
+          maxWidth: '100%'
         }}>
           {/* Payment Badge and Status */}
           <div style={{

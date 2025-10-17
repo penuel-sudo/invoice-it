@@ -6,6 +6,7 @@ import { useNotification } from '../../contexts/NotificationContext'
 import { supabase } from '../../lib/supabaseClient'
 import CustomizeMessageModal from '../CustomizeMessageModal'
 import { saveInvoiceToDatabase } from '../templatesfolder/DefaultTemplate/DefaultTemplateSave'
+import { invoiceStorage } from '../../lib/storage/invoiceStorage'
 
 interface SendButtonProps {
   invoiceData: any
@@ -105,63 +106,32 @@ export default function SendButton({
     })
 
     try {
-      // Only update if status is 'draft'
-      if (invoiceData.status === 'draft') {
-        console.log('📝 [SEND BUTTON] Invoice is draft, proceeding with status update...')
+      // Always use the shared save function for consistency
+      console.log('📋 [SEND BUTTON] Using shared save function for status update...')
+      
+      const result = await saveInvoiceToDatabase(invoiceData, userData, { 
+        status: 'pending',
+        updateStatus: true 
+      })
+      
+      if (result.success) {
+        console.log('✅ [SEND BUTTON] Invoice saved successfully via shared function')
+        // Update the invoiceData object with new IDs
+        invoiceData.id = result.invoiceId
+        invoiceData.clientId = result.clientId
+        invoiceData.status = 'pending'
         
-        // First, try to find the invoice in the database
-        console.log('🔍 [SEND BUTTON] Searching for invoice in database...')
-        const { data: existingInvoice, error: searchError } = await supabase
-          .from('invoices')
-          .select('id, status')
-          .eq('invoice_number', invoiceData.invoiceNumber)
-          .eq('user_id', invoiceData.user_id || userData?.id)
-          .single()
-
-        if (searchError && searchError.code !== 'PGRST116') {
-          console.error('❌ [SEND BUTTON] Error searching for invoice:', searchError)
-        }
-
-        if (existingInvoice) {
-          console.log('✅ [SEND BUTTON] Invoice found in DB, updating status...')
-          // Invoice exists in DB, update its status
-          const { error } = await supabase
-            .from('invoices')
-            .update({ 
-              status: 'pending',
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existingInvoice.id)
-
-          if (error) {
-            console.error('❌ [SEND BUTTON] Error updating invoice status:', error)
-          } else {
-            console.log('✅ [SEND BUTTON] Invoice status updated to pending in DB')
-          }
-        } else {
-          console.log('📋 [SEND BUTTON] Invoice not found in DB (preview mode), using shared save function...')
-          
-          // Use shared save function - handles all the complex logic
-          const result = await saveInvoiceToDatabase(invoiceData, userData, { 
-            status: 'pending',
-            updateStatus: true 
-          })
-          
-          if (result.success) {
-            console.log('✅ [SEND BUTTON] Invoice saved successfully via shared function')
-            // Update the invoiceData object with new IDs
-            invoiceData.id = result.invoiceId
-            invoiceData.clientId = result.clientId
-            invoiceData.status = 'pending'
-          } else {
-            console.error('❌ [SEND BUTTON] Failed to save invoice:', result.error)
-          }
-        }
+        // Update local storage with new status
+        const updatedData = { ...invoiceData, status: 'pending' }
+        invoiceStorage.saveDraft(updatedData)
+        console.log('✅ [SEND BUTTON] Local storage updated with pending status')
       } else {
-        console.log('ℹ️ [SEND BUTTON] Invoice status is not draft, no update needed:', invoiceData.status)
+        console.error('❌ [SEND BUTTON] Failed to save invoice:', result.error)
+        toast.error(`Failed to save invoice: ${result.error}`)
       }
     } catch (error) {
       console.error('❌ [SEND BUTTON] Error updating invoice status:', error)
+      toast.error('Failed to update invoice status')
     }
   }
 
