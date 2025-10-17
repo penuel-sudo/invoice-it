@@ -75,8 +75,22 @@ export default function DownloadButton({
       console.log('📊 [DOWNLOAD BUTTON] Invoice data for PDF:', {
         invoiceNumber: invoiceData.invoiceNumber,
         clientName: invoiceData.clientName,
-        grandTotal: invoiceData.grandTotal
+        grandTotal: invoiceData.grandTotal,
+        items: invoiceData.items?.length || 0,
+        currency: invoiceData.currency,
+        currencySymbol: invoiceData.currencySymbol
       })
+      
+      // Validate required fields
+      if (!invoiceData.invoiceNumber) {
+        throw new Error('Invoice number is required')
+      }
+      if (!invoiceData.clientName) {
+        throw new Error('Client name is required')
+      }
+      if (typeof invoiceData.grandTotal !== 'number') {
+        throw new Error('Grand total must be a number')
+      }
       
       // Generate PDF blob using client-side rendering
       console.log('🔄 [DOWNLOAD BUTTON] Creating PDF document...')
@@ -105,8 +119,17 @@ export default function DownloadButton({
       }
       
     } catch (error) {
-      console.error('PDF download error:', error)
-      toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-generation' })
+      console.error('❌ [DOWNLOAD BUTTON] PDF download error:', error)
+      console.error('❌ [DOWNLOAD BUTTON] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        invoiceData: {
+          invoiceNumber: invoiceData.invoiceNumber,
+          clientName: invoiceData.clientName,
+          grandTotal: invoiceData.grandTotal
+        }
+      })
+      toast.error(`Failed to generate PDF: ${error.message}`, { id: 'pdf-generation' })
     }
   }
 

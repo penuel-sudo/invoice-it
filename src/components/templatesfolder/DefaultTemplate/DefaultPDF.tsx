@@ -16,9 +16,8 @@ const styles = StyleSheet.create({
   },
   container: {
     minWidth: 400,
-    width: 'fit-content', // Dynamic width based on content
+    width: '100%',
     margin: 'auto',
-    maxHeight: '90vh',
     overflow: 'hidden'
   },
   card: {
@@ -26,9 +25,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     marginBottom: 0,
-    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
     position: 'relative',
-    maxHeight: '85vh',
     overflow: 'hidden'
   },
   headerBadge: {
@@ -139,8 +136,7 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
-    minWidth: 'fit-content'
+    paddingVertical: 4
   },
   itemDescription: {
     fontSize: 10,
@@ -157,8 +153,7 @@ const styles = StyleSheet.create({
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
-    minWidth: 'fit-content'
+    paddingVertical: 6
   },
   totalLabel: {
     fontSize: 10,
@@ -175,8 +170,7 @@ const styles = StyleSheet.create({
   grandTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
-    minWidth: 'fit-content'
+    paddingVertical: 8
   },
   grandTotalLabel: {
     fontSize: 10,
@@ -289,9 +283,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
               <View style={{ 
                 flexDirection: 'row', 
                 alignItems: 'baseline', 
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-                minWidth: 'fit-content'
+                justifyContent: 'center'
               }}>
                 <Text style={styles.currencySymbol}>{currencySymbol}</Text>
                 <Text style={styles.amount}>{invoiceData.grandTotal.toFixed(2)}</Text>
