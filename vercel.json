@@ -12,11 +12,11 @@
     "api/send-invoice-email.js": {
       "maxDuration": 30
     },
-    "api/auth/login.ts": {
-      "runtime": "nodejs18.x"
+    "api/auth/login.js": {
+      "maxDuration": 30
     },
-    "api/auth/register.ts": {
-      "runtime": "nodejs18.x"
+    "api/auth/register.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
