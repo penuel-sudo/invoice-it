@@ -11,6 +11,12 @@
     },
     "api/send-invoice-email.js": {
       "maxDuration": 30
+    },
+    "api/auth/login.ts": {
+      "runtime": "nodejs18.x"
+    },
+    "api/auth/register.ts": {
+      "runtime": "nodejs18.x"
     }
   },
   "headers": [
