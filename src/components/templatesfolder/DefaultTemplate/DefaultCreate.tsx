@@ -5,6 +5,7 @@ import { brandColors } from '../../../stylings'
 import { Layout } from '../../layout'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import type { InvoiceFormData, InvoiceItem, PaymentDetails, PaymentMethod } from '../../../lib/storage/invoiceStorage'
+import { saveInvoiceToDatabase } from './DefaultTemplateSave'
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
 import { CURRENCIES, getCurrencySymbol } from '../../../lib/currencyUtils'
@@ -268,165 +269,17 @@ export default function InvoiceCreatePage() {
   }
 
   const handleSave = async () => {
-    if (!formData.clientName.trim()) {
-      toast.error('Client name is required')
-      return
-    }
-
-    if (formData.items.some(item => !item.description.trim())) {
-      toast.error('All items must have a description')
-      return
-    }
-
-    if (!user) {
-      toast.error('User not authenticated')
-      return
-    }
-
     setIsSaving(true)
     try {
-      // Step 1: Save or find client
-      let clientId: string
+      // Use shared save function - handles all validation, saving, and localStorage clearing
+      const result = await saveInvoiceToDatabase(formData, user, { status: 'draft' })
       
-      // Check if client already exists by name and email (more flexible matching)
-      const { data: existingClients } = await supabase
-        .from('clients')
-        .select('id, name, email, address, phone, company_name')
-        .eq('user_id', user.id)
-        .eq('name', formData.clientName)
-
-      // Find exact match or update existing
-      let existingClient = existingClients?.find(client => 
-        client.name === formData.clientName && 
-        client.email === (formData.clientEmail || null)
-      )
-
-      if (existingClient) {
-        // Update existing client with new data
-        const { error: updateError } = await supabase
-          .from('clients')
-          .update({
-            email: formData.clientEmail || null,
-            address: formData.clientAddress || null,
-            phone: formData.clientPhone || null,
-            company_name: formData.clientCompanyName || null,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existingClient.id)
-
-        if (updateError) {
-          console.error('Error updating client:', updateError)
-          toast.error('Failed to update client: ' + updateError.message)
-          return
-        }
-        
-        clientId = existingClient.id
-        toast.success('Client information updated')
-      } else {
-        // Create new client
-        const { data: client, error: clientError } = await supabase
-          .from('clients')
-          .insert({
-            user_id: user.id,
-            name: formData.clientName,
-            email: formData.clientEmail || null,
-            address: formData.clientAddress || null,
-            phone: formData.clientPhone || null,
-            company_name: formData.clientCompanyName || null
-          })
-          .select()
-          .single()
-
-        if (clientError) {
-          console.error('Error saving client:', clientError)
-          toast.error('Failed to save client: ' + clientError.message)
-          return
-        }
-        clientId = client.id
-        toast.success('New client created')
+      if (result.success) {
+        // Reset form to default state (like the original function did)
+        setFormData(invoiceStorage.getDraftWithFallback())
       }
-
-      // Step 2: Save invoice to database
-      const { data: invoice, error: invoiceError} = await supabase
-        .from('invoices')
-        .insert({
-          user_id: user.id,
-          client_id: clientId,
-          invoice_number: formData.invoiceNumber,
-          issue_date: formData.invoiceDate,
-          due_date: formData.dueDate,
-          notes: formData.notes || null,
-          subtotal: formData.subtotal,
-          tax_amount: formData.taxTotal,
-          total_amount: formData.grandTotal,
-          status: 'draft',
-          template: 'default',
-          currency_code: formData.currency || 'USD',
-          payment_details: formData.paymentDetails || null,
-          selected_payment_method_ids: formData.selectedPaymentMethodIds || null,
-          template_data: {
-            layout: 'clean',
-            colors: {
-              primary: '#16a34a',
-              secondary: '#6b7280'
-            },
-            fonts: {
-              heading: 'Inter',
-              body: 'Inter'
-            }
-          },
-          template_settings: {
-            userPreferences: {
-              defaultTaxRate: formData.taxTotal,
-              currency: formData.currency || 'USD',
-              currencySymbol: formData.currencySymbol || '$',
-              dateFormat: 'MM/DD/YYYY'
-            },
-            branding: {
-              companyName: 'Your Business'
-            }
-          }
-        })
-        .select()
-        .single()
-
-      if (invoiceError) {
-        console.error('Error saving invoice:', invoiceError)
-        toast.error('Failed to save invoice: ' + invoiceError.message)
-        return
-      }
-
-      // Save invoice items
-      const invoiceItems = formData.items.map(item => ({
-        invoice_id: invoice.id,
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        tax_rate: item.taxRate,
-        line_total: item.lineTotal
-      }))
-
-      const { error: itemsError } = await supabase
-        .from('invoice_items')
-        .insert(invoiceItems)
-
-      if (itemsError) {
-        console.error('Error saving invoice items:', itemsError)
-        // Clean up the invoice if items failed
-        await supabase.from('invoices').delete().eq('id', invoice.id)
-        toast.error('Failed to save invoice items: ' + itemsError.message)
-        return
-      }
-
-      // Clear the draft from localStorage after successful save
-      invoiceStorage.clearDraft()
-      
-      // Reset form to default state
-      setFormData(invoiceStorage.getDraftWithFallback())
-      
-      toast.success('Invoice saved successfully!')
     } catch (error) {
-      console.error('Error saving invoice:', error)
+      console.error('Error in handleSave:', error)
       toast.error('Failed to save invoice')
     } finally {
       setIsSaving(false)

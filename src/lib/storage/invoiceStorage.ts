@@ -97,6 +97,9 @@ export interface PaymentDetails {
 }
 
 export interface InvoiceFormData {
+  id?: string // Database ID (added after save)
+  clientId?: string // Client database ID (added after save)  
+  status?: string // Invoice status (draft, pending, paid, etc.)
   clientName: string
   clientEmail: string
   clientAddress: string

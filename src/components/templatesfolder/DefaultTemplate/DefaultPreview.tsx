@@ -303,8 +303,8 @@ export default function InvoicePreviewPage() {
         zIndex: 1,
         textAlign: 'center',
         minWidth: '400px',
-        maxWidth: '600px', // Increased max width for large amounts
-        width: '100%'
+        width: 'fit-content', // Dynamic width based on content
+        maxWidth: 'none' // No maximum width constraint
       }}>
         {/* Invoice Preview Card */}
         <div style={{

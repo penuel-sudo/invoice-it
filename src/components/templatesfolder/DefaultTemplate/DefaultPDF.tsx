@@ -12,13 +12,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    maxHeight: '100vh',
     overflow: 'hidden'
   },
   container: {
-    width: '100%',
     minWidth: 400,
-    maxWidth: 600, // Increased max width for large amounts
+    width: 'fit-content', // Dynamic width based on content
     margin: 'auto',
     maxHeight: '90vh',
     overflow: 'hidden'
