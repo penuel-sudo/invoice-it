@@ -56,14 +56,14 @@ export default function InvoicePreviewPage() {
             .from('invoices')
             .select(`
               *,
-              clients (
+              clients!invoices_client_id_fkey (
                 name,
                 email,
                 address,
                 phone,
                 company_name
               ),
-              invoice_items (
+              invoice_items!invoice_items_invoice_id_fkey (
                 description,
                 quantity,
                 unit_price,
@@ -302,7 +302,8 @@ export default function InvoicePreviewPage() {
         position: 'relative',
         zIndex: 1,
         textAlign: 'center',
-        maxWidth: '400px',
+        minWidth: '400px',
+        maxWidth: '600px', // Increased max width for large amounts
         width: '100%'
       }}>
         {/* Invoice Preview Card */}

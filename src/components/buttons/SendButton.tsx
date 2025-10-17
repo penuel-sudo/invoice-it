@@ -124,7 +124,16 @@ export default function SendButton({
           }
         } else {
           // Invoice doesn't exist in DB yet (preview mode)
-          // Auto-save the invoice to database first
+          // Update localStorage first, then auto-save to database
+          invoiceData.status = 'pending'
+          const updatedInvoiceData = { ...invoiceData, status: 'pending' }
+          localStorage.setItem('invoiceData', JSON.stringify(updatedInvoiceData))
+          
+          // Also update the invoiceStorage
+          const { invoiceStorage } = await import('../../lib/storage/invoiceStorage')
+          invoiceStorage.saveDraftDebounced(updatedInvoiceData)
+          
+          // Auto-save the invoice to database
           await autoSaveInvoice()
         }
       }
@@ -256,9 +265,13 @@ export default function SendButton({
       invoiceData.id = invoice.id
       invoiceData.status = 'pending'
       
-      // Update localStorage with the new data
+      // Update localStorage with the new data (including the database ID)
       const updatedInvoiceData = { ...invoiceData, id: invoice.id, status: 'pending' }
       localStorage.setItem('invoiceData', JSON.stringify(updatedInvoiceData))
+      
+      // Also update the invoiceStorage
+      const { invoiceStorage } = await import('../../lib/storage/invoiceStorage')
+      invoiceStorage.saveDraftDebounced(updatedInvoiceData)
 
     } catch (error) {
       console.error('Error in auto-save:', error)

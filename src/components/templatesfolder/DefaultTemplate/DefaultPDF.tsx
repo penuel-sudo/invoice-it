@@ -17,7 +17,8 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    maxWidth: 400,
+    minWidth: 400,
+    maxWidth: 600, // Increased max width for large amounts
     margin: 'auto',
     maxHeight: '90vh',
     overflow: 'hidden'
@@ -62,13 +63,17 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: 'bold',
     color: '#111827',
-    fontFamily: 'Helvetica-Bold'
+    fontFamily: 'Helvetica-Bold',
+    marginRight: 6,
+    letterSpacing: 0.5
   },
   currencySymbolSmall: {
     fontSize: 10,
     fontWeight: 'bold',
     color: '#111827',
-    fontFamily: 'Helvetica-Bold'
+    fontFamily: 'Helvetica-Bold',
+    marginRight: 3,
+    letterSpacing: 0.3
   },
   clientSection: {
     flexDirection: 'row',
@@ -136,7 +141,8 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4
+    paddingVertical: 4,
+    minWidth: 'fit-content'
   },
   itemDescription: {
     fontSize: 10,
@@ -153,7 +159,8 @@ const styles = StyleSheet.create({
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6
+    paddingVertical: 6,
+    minWidth: 'fit-content'
   },
   totalLabel: {
     fontSize: 10,
@@ -170,7 +177,8 @@ const styles = StyleSheet.create({
   grandTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8
+    paddingVertical: 8,
+    minWidth: 'fit-content'
   },
   grandTotalLabel: {
     fontSize: 10,
@@ -262,7 +270,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
     return `${displayDays} days`
   }
 
-  // Get currency symbol
+  // Get currency symbol with proper font support
   const currencySymbol = invoiceData.currencySymbol || getCurrencySymbol(invoiceData.currency || 'USD')
 
   return (
@@ -280,9 +288,16 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
 
             {/* Amount */}
             <View style={styles.amountSection}>
-              <Text style={styles.amount}>
-                <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.grandTotal.toFixed(2)}
-              </Text>
+              <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'baseline', 
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                minWidth: 'fit-content'
+              }}>
+                <Text style={styles.currencySymbol}>{currencySymbol}</Text>
+                <Text style={styles.amount}>{invoiceData.grandTotal.toFixed(2)}</Text>
+              </View>
             </View>
 
             {/* Client Info */}
@@ -322,9 +337,10 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                   <Text style={styles.itemDescription}>
                     {item.quantity} {item.description}
                   </Text>
-                  <Text style={styles.itemPrice}>
-                    <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{item.lineTotal.toFixed(2)}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                    <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>
+                    <Text style={styles.itemPrice}>{item.lineTotal.toFixed(2)}</Text>
+                  </View>
                 </View>
               ))}
 
@@ -334,15 +350,17 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                   <View style={styles.separator} />
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Subtotal</Text>
-                    <Text style={styles.totalValue}>
-                      <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{invoiceData.subtotal.toFixed(2)}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                      <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>
+                      <Text style={styles.totalValue}>{invoiceData.subtotal.toFixed(2)}</Text>
+                    </View>
                   </View>
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Tax</Text>
-                    <Text style={styles.totalValue}>
-                      <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{invoiceData.taxTotal.toFixed(2)}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                      <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>
+                      <Text style={styles.totalValue}>{invoiceData.taxTotal.toFixed(2)}</Text>
+                    </View>
                   </View>
                 </>
               )}
@@ -351,9 +369,10 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
               <View style={styles.grandTotalSeparator} />
               <View style={styles.grandTotalRow}>
                 <Text style={styles.grandTotalLabel}>TOTAL</Text>
-                <Text style={styles.grandTotalValue}>
-                  <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{invoiceData.grandTotal.toFixed(2)}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                  <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>
+                  <Text style={styles.grandTotalValue}>{invoiceData.grandTotal.toFixed(2)}</Text>
+                </View>
               </View>
 
               {/* Notes Section */}
