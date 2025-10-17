@@ -48,7 +48,7 @@ export default function InvoicePreviewPage() {
       // First check URL parameter for invoice number
       const invoiceNumber = getInvoiceFromUrl(searchParams)
       
-      if (invoiceNumber) {
+      if (invoiceNumber && !loading) {
         setLoading(true)
         try {
           // Load invoice from database using invoice number with proper joins
@@ -129,8 +129,8 @@ export default function InvoicePreviewPage() {
               clientEmail: invoiceData.clients?.email || '',
               clientPhone: invoiceData.clients?.phone || '',
               clientAddress: invoiceData.clients?.address || '',
-              items: invoiceData.invoice_items?.map(item => ({
-                id: Date.now().toString(), // Generate ID for form compatibility
+              items: invoiceData.invoice_items?.map((item, index) => ({
+                id: `item-${index}-${Date.now()}`, // Generate unique ID for form compatibility
                 description: item.description,
                 quantity: item.quantity,
                 unitPrice: item.unit_price,

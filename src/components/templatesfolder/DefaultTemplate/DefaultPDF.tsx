@@ -15,9 +15,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   container: {
+    flex: 1,
     minWidth: 400,
-    width: 'fit-content',
-    margin: 'auto'
+    margin: 'auto',
+    alignItems: 'stretch'
   },
   card: {
     backgroundColor: '#ffffff',
@@ -25,7 +26,9 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 0,
     position: 'relative',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    flex: 1,
+    minWidth: 400
   },
   headerBadge: {
     flexDirection: 'row',
