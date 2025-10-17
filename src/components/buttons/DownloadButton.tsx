@@ -36,7 +36,7 @@ export default function DownloadButton({
       // Show loading state
       toast.loading('Generating PDF...', { id: 'pdf-generation' })
       
-      // Update invoice status to 'pending' if it's not already pending (for saved invoices)
+      // Update invoice status to 'pending' if it's not already pending
       // Query to find if this invoice exists in the database
       const { data: existingInvoice } = await supabase
         .from('invoices')
@@ -45,8 +45,8 @@ export default function DownloadButton({
         .eq('user_id', user.id)
         .single()
       
-      // If invoice exists and status is 'draft', update to 'pending'
       if (existingInvoice && existingInvoice.status === 'draft') {
+        // Invoice exists in DB and is draft, update to pending
         await supabase
           .from('invoices')
           .update({ 
@@ -55,6 +55,11 @@ export default function DownloadButton({
           })
           .eq('id', existingInvoice.id)
           .eq('user_id', user.id)
+        console.log('Invoice status updated from draft to pending')
+      } else if (!existingInvoice && invoiceData.status === 'draft') {
+        // Invoice doesn't exist in DB yet (preview mode)
+        // Auto-save the invoice to database first
+        await autoSaveInvoice()
       }
       
       // Get the correct PDF template based on template name
@@ -84,6 +89,142 @@ export default function DownloadButton({
     } catch (error) {
       console.error('PDF download error:', error)
       toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-generation' })
+    }
+  }
+
+  const autoSaveInvoice = async () => {
+    try {
+      let clientId = invoiceData.clientId
+
+      // Step 1: Handle client (create or update if needed)
+      if (!clientId && invoiceData.clientName) {
+        // Check if client already exists
+        const { data: existingClient } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('name', invoiceData.clientName)
+          .eq('email', invoiceData.clientEmail || null)
+          .single()
+
+        if (existingClient) {
+          clientId = existingClient.id
+        } else {
+          // Create new client
+          const { data: client, error: clientError } = await supabase
+            .from('clients')
+            .insert({
+              user_id: user.id,
+              name: invoiceData.clientName,
+              email: invoiceData.clientEmail || null,
+              address: invoiceData.clientAddress || null,
+              phone: invoiceData.clientPhone || null,
+              company_name: invoiceData.clientCompanyName || null
+            })
+            .select()
+            .single()
+
+          if (clientError) {
+            console.error('Error creating client:', clientError)
+          } else {
+            clientId = client.id
+          }
+        }
+      }
+
+      // Step 2: Save invoice to database
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          user_id: user.id,
+          client_id: clientId,
+          invoice_number: invoiceData.invoiceNumber,
+          issue_date: invoiceData.invoiceDate,
+          due_date: invoiceData.dueDate,
+          notes: invoiceData.notes || null,
+          subtotal: invoiceData.subtotal,
+          tax_amount: invoiceData.taxTotal,
+          total_amount: invoiceData.grandTotal,
+          status: 'pending', // Set to pending since user is taking action
+          template: template,
+          currency_code: invoiceData.currency || 'USD',
+          payment_details: invoiceData.paymentDetails || null,
+          selected_payment_method_ids: invoiceData.selectedPaymentMethodIds || null,
+          template_data: {
+            layout: 'clean',
+            colors: {
+              primary: '#16a34a',
+              secondary: '#6b7280'
+            },
+            fonts: {
+              heading: 'Inter',
+              body: 'Inter'
+            }
+          },
+          template_settings: {
+            userPreferences: {
+              defaultTaxRate: invoiceData.taxTotal,
+              currency: invoiceData.currency || 'USD',
+              currencySymbol: invoiceData.currencySymbol || '$',
+              dateFormat: 'MM/DD/YYYY'
+            },
+            branding: {
+              companyName: user?.businessName || 'Your Business'
+            }
+          }
+        })
+        .select()
+        .single()
+
+      if (invoiceError) {
+        console.error('Error auto-saving invoice:', invoiceError)
+        // Fallback: update localStorage
+        invoiceData.status = 'pending'
+        const updatedInvoiceData = { ...invoiceData, status: 'pending' }
+        localStorage.setItem('invoiceData', JSON.stringify(updatedInvoiceData))
+        return
+      }
+
+      // Step 3: Save invoice items
+      const invoiceItems = invoiceData.items.map(item => ({
+        invoice_id: invoice.id,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        tax_rate: item.taxRate,
+        line_total: item.lineTotal
+      }))
+
+      const { error: itemsError } = await supabase
+        .from('invoice_items')
+        .insert(invoiceItems)
+
+      if (itemsError) {
+        console.error('Error saving invoice items:', itemsError)
+        // Clean up the invoice if items failed
+        await supabase.from('invoices').delete().eq('id', invoice.id)
+        // Fallback: update localStorage
+        invoiceData.status = 'pending'
+        const updatedInvoiceData = { ...invoiceData, status: 'pending' }
+        localStorage.setItem('invoiceData', JSON.stringify(updatedInvoiceData))
+        return
+      }
+
+      console.log('Invoice auto-saved to database with pending status')
+      // Update the invoiceData with the saved ID
+      invoiceData.id = invoice.id
+      invoiceData.status = 'pending'
+      
+      // Update localStorage with the new data
+      const updatedInvoiceData = { ...invoiceData, id: invoice.id, status: 'pending' }
+      localStorage.setItem('invoiceData', JSON.stringify(updatedInvoiceData))
+
+    } catch (error) {
+      console.error('Error in auto-save:', error)
+      // Fallback: update localStorage
+      invoiceData.status = 'pending'
+      const updatedInvoiceData = { ...invoiceData, status: 'pending' }
+      localStorage.setItem('invoiceData', JSON.stringify(updatedInvoiceData))
     }
   }
 

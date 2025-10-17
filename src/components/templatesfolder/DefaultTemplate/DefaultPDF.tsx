@@ -352,7 +352,7 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
               <View style={styles.grandTotalRow}>
                 <Text style={styles.grandTotalLabel}>TOTAL</Text>
                 <Text style={styles.grandTotalValue}>
-                  <Text style={styles.currencySymbol}>{currencySymbol}</Text>{invoiceData.grandTotal.toFixed(2)}
+                  <Text style={styles.currencySymbolSmall}>{currencySymbol}</Text>{invoiceData.grandTotal.toFixed(2)}
                 </Text>
               </View>
 
