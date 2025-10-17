@@ -3,7 +3,7 @@ import AuthWrapper from '../components/AuthWrapper'
 
 // Import all pages normally to avoid dynamic import issues
 import OnboardingPage from '../pages/OnboardingPage'
-import AuthPage from '../pages/AuthPage'
+
 import Login from '../pages/AuthPage/Login'
 import Register from '../pages/AuthPage/Register'
 import DashboardPage from '../pages/DashboardPage'
