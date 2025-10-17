@@ -126,7 +126,8 @@ const styles = StyleSheet.create({
   detailsSection: {
     backgroundColor: '#f9fafb',
     borderRadius: 8,
-    padding: 8
+    padding: 8,
+    textAlign: 'center'
   },
   detailsTitle: {
     fontSize: 12,
@@ -187,7 +188,8 @@ const styles = StyleSheet.create({
   notesSection: {
     borderTop: '1px solid #e5e7eb',
     marginTop: 8,
-    paddingTop: 8
+    paddingTop: 8,
+    textAlign: 'center'
   },
   notesTitle: {
     fontSize: 10,
@@ -211,17 +213,20 @@ const styles = StyleSheet.create({
   disclaimerText: {
     fontSize: 9,
     color: '#d1d5db',
-    marginBottom: 4
+    marginBottom: 4,
+    textAlign: 'center'
   },
   disclaimerSubtext: {
     fontSize: 8,
     color: '#d1d5db',
-    fontStyle: 'italic'
+    fontStyle: 'italic',
+    textAlign: 'center'
   },
   paymentSection: {
     borderTop: '1px solid #e5e7eb',
     marginTop: 8,
-    paddingTop: 8
+    paddingTop: 8,
+    textAlign: 'center'
   },
   paymentTitle: {
     fontSize: 10,
