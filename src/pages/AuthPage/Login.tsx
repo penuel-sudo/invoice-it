@@ -208,13 +208,7 @@ export default function Login() {
 
         {/* Auth Form */}
         <div style={{
-          width: '100%',
-          border: `1px solid ${brandColors.neutral[200]}`,
-          borderRadius: '16px',
-          padding: '2rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          width: '100%'
         }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ position: 'relative' }}>
@@ -222,7 +216,10 @@ export default function Login() {
               position: 'relative',
               border: `1px solid ${brandColors.neutral[300]}`,
               borderRadius: '50px',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
             }}>
               <Input
                 id="email"
@@ -280,7 +277,10 @@ export default function Login() {
               position: 'relative',
               border: `1px solid ${brandColors.neutral[300]}`,
               borderRadius: '50px',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
             }}>
               <Input
                 id="password"
@@ -382,11 +382,13 @@ export default function Login() {
               width: '100%',
               maxWidth: '400px',
               padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
-              backgroundColor: brandColors.primary[600],
+              backgroundColor: 'rgba(99, 102, 241, 0.8)',
+              backdropFilter: 'blur(10px)',
               color: brandColors.white,
               border: 'none',
               marginTop: '0.5rem',
               borderRadius: '50px',
+              boxShadow: '0 4px 6px rgba(99, 102, 241, 0.3)',
               fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '600',
