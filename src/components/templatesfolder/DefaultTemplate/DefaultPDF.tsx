@@ -5,7 +5,7 @@ import { getCurrencySymbol } from '../../../lib/currencyUtils'
 // PDF-specific styles matching the preview layout
 const styles = StyleSheet.create({
   page: {
-    padding: 20,
+    padding: 10,
     backgroundColor: '#f0fdf4', // Light green background like preview
     fontFamily: 'Helvetica',
     display: 'flex',
@@ -16,14 +16,13 @@ const styles = StyleSheet.create({
   },
   container: {
     minWidth: 400,
-    width: '100%',
-    margin: 'auto',
-    overflow: 'hidden'
+    width: 'fit-content',
+    margin: 'auto'
   },
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
-    padding: 20,
+    padding: 15,
     marginBottom: 0,
     position: 'relative',
     overflow: 'hidden'
@@ -32,7 +31,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15
+    marginBottom: 10
   },
   badge: {
     backgroundColor: '#dcfce7', // primary[100]
@@ -43,23 +42,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   amountSection: {
-    marginTop: 15,
-    marginBottom: 18,
+    marginTop: 10,
+    marginBottom: 12,
     textAlign: 'center'
   },
   amount: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#111827', // neutral[900]
-    marginBottom: 8,
+    marginBottom: 6,
     fontFamily: 'Helvetica-Bold'
   },
   currencySymbol: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#111827',
     fontFamily: 'Helvetica-Bold',
-    marginRight: 6,
+    marginRight: 4,
     letterSpacing: 0.5
   },
   currencySymbolSmall: {
@@ -74,7 +73,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 18
+    marginBottom: 12
   },
   clientLeft: {
     flexDirection: 'row',
@@ -99,7 +98,7 @@ const styles = StyleSheet.create({
     gap: 2
   },
   clientName: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#111827',
     marginBottom: 2
@@ -117,14 +116,14 @@ const styles = StyleSheet.create({
     marginBottom: 4
   },
   dueValue: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#111827'
   },
   detailsSection: {
     backgroundColor: '#f9fafb',
     borderRadius: 8,
-    padding: 12
+    padding: 8
   },
   detailsTitle: {
     fontSize: 12,
@@ -184,8 +183,8 @@ const styles = StyleSheet.create({
   },
   notesSection: {
     borderTop: '1px solid #e5e7eb',
-    marginTop: 12,
-    paddingTop: 12
+    marginTop: 8,
+    paddingTop: 8
   },
   notesTitle: {
     fontSize: 10,
@@ -197,12 +196,13 @@ const styles = StyleSheet.create({
   notesText: {
     fontSize: 10,
     color: '#6b7280',
-    lineHeight: 1.4
+    lineHeight: 1.4,
+    textAlign: 'center'
   },
   disclaimerSection: {
     borderTop: '1px solid #e5e7eb',
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: 8,
+    paddingTop: 8,
     textAlign: 'center'
   },
   disclaimerText: {
@@ -218,9 +218,7 @@ const styles = StyleSheet.create({
   paymentSection: {
     borderTop: '1px solid #e5e7eb',
     marginTop: 8,
-    paddingTop: 8,
-    maxHeight: '200px',
-    overflow: 'hidden'
+    paddingTop: 8
   },
   paymentTitle: {
     fontSize: 10,
@@ -229,10 +227,10 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   paymentText: {
-    fontSize: 9,
+    fontSize: 8,
     color: '#6b7280',
-    lineHeight: 1.6,
-    marginBottom: 3
+    lineHeight: 1.4,
+    marginBottom: 2
   }
 })
 
@@ -378,12 +376,12 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                 <View style={styles.paymentSection}>
                   <Text style={[styles.paymentTitle, { 
                     textAlign: 'center', 
-                    fontSize: 12, 
+                    fontSize: 10, 
                     fontWeight: 'bold',
                     color: '#16a34a',
                     textTransform: 'uppercase',
                     letterSpacing: 0.5,
-                    marginBottom: 12
+                    marginBottom: 8
                   }]}>
                     Payment Information
                   </Text>
@@ -397,15 +395,15 @@ export default function DefaultPDF({ invoiceData }: DefaultPDFProps) {
                           backgroundColor: '#f0fdf4',
                           border: '1px solid #bbf7d0',
                           borderRadius: 6,
-                          padding: 8
+                          padding: 6
                         }}>
                           {/* Method Header */}
                           <View style={{ 
                             flexDirection: 'row', 
                             justifyContent: 'space-between', 
                             alignItems: 'center',
-                            marginBottom: 8,
-                            paddingBottom: 6,
+                            marginBottom: 4,
+                            paddingBottom: 4,
                             borderBottom: '1px solid #bbf7d0'
                           }}>
                             <Text style={{ 
