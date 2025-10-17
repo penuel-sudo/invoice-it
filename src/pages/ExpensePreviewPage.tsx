@@ -68,7 +68,7 @@ export default function ExpensePreviewPage() {
     const timer = setTimeout(() => {
       setAuthLoading(false)
       if (!user) {
-        navigate('/auth')
+        navigate('/auth/login')
         return
       }
 

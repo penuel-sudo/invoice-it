@@ -64,7 +64,7 @@ export default function ResetPasswordPage() {
         toast.error(error.message)
       } else {
         toast.success('Password updated successfully!')
-        navigate('/auth')
+        navigate('/auth/login')
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred')
@@ -86,7 +86,7 @@ export default function ResetPasswordPage() {
     }}>
       {/* Back Button */}
       <button
-        onClick={() => navigate('/auth')}
+            onClick={() => navigate('/auth/login')}
         style={{
           position: 'absolute',
           top: '1.5rem',

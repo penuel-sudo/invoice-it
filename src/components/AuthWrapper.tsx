@@ -18,7 +18,7 @@ export default function AuthWrapper({ children, requireAuth = true }: AuthWrappe
     if (!loading) {
       if (requireAuth && !user) {
         // User needs to be authenticated but isn't
-        navigate('/auth', { replace: true })
+        navigate('/auth/login', { replace: true })
       } else if (!requireAuth && user) {
         // User is authenticated but trying to access auth page
         navigate('/dashboard', { replace: true })

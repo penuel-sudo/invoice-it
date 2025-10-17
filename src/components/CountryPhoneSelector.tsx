@@ -454,18 +454,8 @@ export default function CountryPhoneSelector({
           )}
         </div>
 
-        {/* Phone Input with Prefix */}
+        {/* Phone Input - No Prefix Display */}
         <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
-          {selectedCountry && (
-            <span style={{
-              paddingLeft: '0.75rem',
-              fontSize: '1rem',
-              color: brandColors.neutral[600],
-              fontWeight: '500'
-            }}>
-              +{selectedCountry.phoneCode}
-            </span>
-          )}
           <input
             type="tel"
             value={phoneNumber}
@@ -476,7 +466,7 @@ export default function CountryPhoneSelector({
             disabled={disabled}
             style={{
               flex: 1,
-              padding: '0.875rem 3rem 0.875rem 0.5rem',
+              padding: '0.875rem 3rem 0.875rem 0.75rem',
               border: 'none',
               outline: 'none',
               backgroundColor: 'transparent',

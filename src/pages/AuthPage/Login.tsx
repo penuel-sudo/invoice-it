@@ -17,7 +17,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false)
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false)
 
-  const { signInWithGoogle } = useAuth()
+  const { signInWithGoogle, refreshSession } = useAuth()
   const navigate = useNavigate()
 
   const handleInputChange = (field: string, value: string) => {
@@ -59,8 +59,12 @@ export default function Login() {
         return
       }
 
+      // Refresh the frontend auth state to sync with server
+      await refreshSession()
+      
+      // Use the redirect path from serverless API
       toast.success('Welcome back!')
-      navigate('/dashboard')
+      navigate(data.redirectTo || '/dashboard')
     } catch (error: any) {
       toast.error(error.message || 'An error occurred during login')
     } finally {
@@ -73,7 +77,16 @@ export default function Login() {
       const { error } = await signInWithGoogle()
       if (error) {
         toast.error(error.message)
+        return
       }
+      
+      // Refresh session to get user data
+      await refreshSession()
+      
+      // The serverless API will handle profile checking
+      // For Google sign-in, we'll redirect to settings for profile completion
+      toast.success('Welcome! Please complete your profile.')
+      navigate('/settings')
     } catch (error: any) {
       toast.error(error.message || 'An error occurred during Google sign in')
     }
@@ -82,12 +95,12 @@ export default function Login() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: brandColors.white,
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
+      padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
       fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
       {/* Mobile Logo at Top */}
@@ -168,16 +181,17 @@ export default function Login() {
         {/* Welcome Section */}
         <div style={{
           textAlign: 'center',
-          marginBottom: window.innerWidth < 768 ? '3rem' : '2.5rem',
-          marginTop: window.innerWidth < 768 ? '6rem' : '2rem'
+          marginBottom: window.innerWidth < 768 ? '2rem' : '1.5rem',
+          marginTop: window.innerWidth < 768 ? '5rem' : '1rem'
         }}>
           <h1 style={{
-            fontSize: window.innerWidth < 768 ? '1.75rem' : '2rem',
-            fontWeight: '600',
+            fontSize: window.innerWidth < 768 ? '1.875rem' : '2.25rem',
+            fontWeight: '700',
             color: brandColors.neutral[900],
             margin: '0 0 0.5rem 0',
             letterSpacing: '-0.025em',
-            fontFamily: 'Poppins, sans-serif'
+            fontFamily: 'Poppins, sans-serif',
+            lineHeight: '1.2'
           }}>
             Welcome back
           </h1>
@@ -194,7 +208,13 @@ export default function Login() {
 
         {/* Auth Form */}
         <div style={{
-          width: '100%'
+          width: '100%',
+          border: `1px solid ${brandColors.neutral[200]}`,
+          borderRadius: '16px',
+          padding: '2rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ position: 'relative' }}>
@@ -387,7 +407,7 @@ export default function Login() {
               }
             }}
           >
-            {isLoading ? 'Loading...' : 'Sign In'}
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
 
           <div style={{
@@ -485,23 +505,24 @@ export default function Login() {
             </Link>
           </div>
 
-          {/* Footer Links */}
-          <div style={{
-            textAlign: 'center',
-            marginTop: '2rem',
-            fontSize: window.innerWidth < 768 ? '0.625rem' : '0.75rem',
-            color: brandColors.neutral[500],
-            fontFamily: 'Poppins, sans-serif'
-          }}>
-            <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>
-              Terms of Use
-            </span>
-            <span style={{ margin: '0 0.5rem' }}>|</span>
-            <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>
-              Privacy Policy
-            </span>
-          </div>
         </form>
+        </div>
+
+        {/* Footer Links - Outside Form */}
+        <div style={{
+          textAlign: 'center',
+          marginTop: '1.5rem',
+          fontSize: window.innerWidth < 768 ? '0.625rem' : '0.75rem',
+          color: brandColors.neutral[500],
+          fontFamily: 'Poppins, sans-serif'
+        }}>
+          <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>
+            Terms of Use
+          </span>
+          <span style={{ margin: '0 0.5rem' }}>|</span>
+          <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>
+            Privacy Policy
+          </span>
         </div>
       </div>
 

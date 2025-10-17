@@ -2,7 +2,7 @@ import { brandColors } from '../stylings'
 
 export const toastConfig = {
   position: 'top-right' as const,
-  duration: 4000,
+  duration: 3000,
   style: {
     background: brandColors.white,
     color: brandColors.neutral[900],

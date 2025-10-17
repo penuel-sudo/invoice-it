@@ -102,7 +102,7 @@ export default function SettingsPage() {
       fontSize: isMobile ? '1.125rem' : '1.5rem'
     },
     container: {
-      maxWidth: isMobile ? '100%' : '1000px',
+      maxWidth: '100%',
       padding: isMobile ? '0.875rem' : '2rem'
     },
     card: {
@@ -427,7 +427,7 @@ export default function SettingsPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            maxWidth: '1200px',
+            maxWidth: '100%',
             margin: '0 auto'
           }}>
             <button
@@ -460,7 +460,7 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div style={{
-          maxWidth: isMobile ? '100%' : '1000px',
+          maxWidth: '100%',
           margin: '0 auto',
           padding: isMobile ? '1rem' : '2rem',
           width: '100%',

@@ -222,7 +222,7 @@ export default function OnboardingPage() {
           justifyContent: 'center'
         }}>
           <Button
-            onClick={() => navigate('/auth')}
+            onClick={() => navigate('/auth/login')}
             style={{
               padding: '0.875rem 2rem',
               backgroundColor: brandColors.primary[600],
@@ -238,7 +238,7 @@ export default function OnboardingPage() {
             Sign up
           </Button>
           <Button
-            onClick={() => navigate('/auth')}
+            onClick={() => navigate('/auth/login')}
             style={{
               padding: '0.875rem 2rem',
               backgroundColor: 'transparent',

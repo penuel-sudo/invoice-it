@@ -28,11 +28,28 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: error.message })
     }
 
-    // Return success response with user data
+    // Check if user has complete profile (especially phone number)
+    let hasCompleteProfile = false
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('phone')
+        .eq('id', data.user.id)
+        .single()
+      
+      hasCompleteProfile = !profileError && profile?.phone
+    } catch (profileCheckError) {
+      console.log('Profile check failed:', profileCheckError)
+      hasCompleteProfile = false
+    }
+
+    // Return success response with user data and profile status
     return res.status(200).json({
       success: true,
       user: data.user,
-      session: data.session
+      session: data.session,
+      hasCompleteProfile,
+      redirectTo: hasCompleteProfile ? '/dashboard' : '/settings'
     })
 
   } catch (error) {
