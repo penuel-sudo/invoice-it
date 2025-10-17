@@ -34,14 +34,6 @@ export const router = createBrowserRouter([
     )
   },
   {
-    path: '/auth',
-    element: (
-      <AuthWrapper requireAuth={false}>
-        <AuthPage />
-      </AuthWrapper>
-    )
-  },
-  {
     path: '/auth/login',
     element: (
       <AuthWrapper requireAuth={false}>
