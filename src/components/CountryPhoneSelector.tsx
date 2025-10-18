@@ -316,7 +316,7 @@ export default function CountryPhoneSelector({
               left: 0,
               right: 0,
               width: '100%',
-              minWidth: '280px',
+              minWidth: '100%',
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',

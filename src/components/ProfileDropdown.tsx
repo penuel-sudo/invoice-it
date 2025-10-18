@@ -6,7 +6,6 @@ import { brandColors, typographyPresets } from '../stylings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import NotificationDropdown from './NotificationDropdown'
 import AvatarDisplay from './AvatarDisplay'
-import toast from 'react-hot-toast'
 
 interface ProfileDropdownProps {
   variant?: 'sidebar' | 'header' | 'topbar'
@@ -26,9 +25,8 @@ export default function ProfileDropdown({
   const handleSignOut = async () => {
     try {
       await signOut()
-      toast.success('Logged out successfully!')
     } catch (error) {
-      toast.error('Failed to logout')
+      console.error('Failed to logout:', error)
     }
   }
 
