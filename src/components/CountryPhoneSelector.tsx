@@ -314,7 +314,7 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              width: isMobile ? '100%' : '400px',
+              width: '100%',
               minWidth: '280px',
               maxWidth: isMobile ? '100vw' : '400px',
               backgroundColor: brandColors.white,

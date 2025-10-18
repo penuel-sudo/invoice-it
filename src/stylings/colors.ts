@@ -147,7 +147,7 @@ export const colorSchemes = {
     light: brandColors.neutral[200],     // Light borders
     medium: brandColors.neutral[300],    // Medium borders
     dark: brandColors.neutral[400],      // Darker borders
-    accent: brandColors.primary[200],    // Blue accent borders
+    accent: brandColors.primary[200],    // Green accent borders
   },
   
   // Background colors - Clean palette
@@ -155,7 +155,7 @@ export const colorSchemes = {
     primary: brandColors.white,          // Main background
     secondary: brandColors.neutral[50],  // Secondary background
     tertiary: brandColors.neutral[100],  // Tertiary background
-    accent: brandColors.primary[50],     // Blue accent background
+    accent: brandColors.primary[50],     // Green accent background
   }
 }
 

@@ -83,10 +83,8 @@ export default function Login() {
       // Refresh session to get user data
       await refreshSession()
       
-      // The serverless API will handle profile checking
-      // For Google sign-in, we'll redirect to settings for profile completion
-      toast.success('Welcome! Please complete your profile.')
-      navigate('/settings')
+      // Google users go directly to dashboard (OAuth handles this)
+      navigate('/dashboard')
     } catch (error: any) {
       toast.error(error.message || 'An error occurred during Google sign in')
     }
@@ -95,7 +93,7 @@ export default function Login() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%)',
+      background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -182,7 +180,7 @@ export default function Login() {
         <div style={{
           textAlign: 'center',
           marginBottom: window.innerWidth < 768 ? '2rem' : '1.5rem',
-          marginTop: window.innerWidth < 768 ? '5rem' : '1rem'
+          marginTop: window.innerWidth < 768 ? '5rem' : '2rem'
         }}>
           <h1 style={{
             fontSize: window.innerWidth < 768 ? '1.875rem' : '2.25rem',
@@ -260,7 +258,7 @@ export default function Login() {
                 fontSize: formData.email ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: formData.email ? brandColors.primary[600] : brandColors.neutral[500],
-                backgroundColor: brandColors.white,
+                backgroundColor: 'transparent',
                 padding: formData.email ? '0 0.5rem' : '0',
                 transition: 'all 0.2s ease',
                 pointerEvents: 'none',
@@ -321,7 +319,7 @@ export default function Login() {
                 fontSize: formData.password ? '0.75rem' : (window.innerWidth < 768 ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: formData.password ? brandColors.primary[600] : brandColors.neutral[500],
-                backgroundColor: brandColors.white,
+                backgroundColor: 'transparent',
                 padding: formData.password ? '0 0.5rem' : '0',
                 transition: 'all 0.2s ease',
                 pointerEvents: 'none',
@@ -382,13 +380,13 @@ export default function Login() {
               width: '100%',
               maxWidth: '400px',
               padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
-              backgroundColor: 'rgba(99, 102, 241, 0.8)',
+              backgroundColor: 'rgba(34, 197, 94, 0.8)',
               backdropFilter: 'blur(10px)',
               color: brandColors.white,
               border: 'none',
               marginTop: '0.5rem',
               borderRadius: '50px',
-              boxShadow: '0 4px 6px rgba(99, 102, 241, 0.3)',
+              boxShadow: '0 4px 6px rgba(34, 197, 94, 0.3)',
               fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '600',
@@ -400,12 +398,12 @@ export default function Login() {
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.backgroundColor = brandColors.primary[700]
+                e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.9)'
               }
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.backgroundColor = brandColors.primary[600]
+                e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.8)'
               }
             }}
           >
