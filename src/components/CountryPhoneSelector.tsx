@@ -314,9 +314,9 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              right: 0,
-              width: '100%',
-              minWidth: '100%',
+              width: '100vw',
+              maxWidth: '500px',
+              minWidth: '300px',
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',
@@ -466,7 +466,7 @@ export default function CountryPhoneSelector({
             disabled={disabled}
             style={{
               flex: 1,
-              padding: '0.875rem 3rem 0.875rem 0.75rem',
+              padding: `0.875rem ${phoneNumber.length > 8 ? '2rem' : '3rem'} 0.875rem 0.75rem`,
               border: 'none',
               outline: 'none',
               backgroundColor: 'transparent',
@@ -474,7 +474,8 @@ export default function CountryPhoneSelector({
               color: brandColors.neutral[900],
               borderRadius: '0 50px 50px 0',
               boxSizing: 'border-box',
-              minWidth: '120px'
+              minWidth: '120px',
+              transition: 'padding 0.2s ease'
             }}
           />
           <Phone 
@@ -482,11 +483,13 @@ export default function CountryPhoneSelector({
             color={brandColors.neutral[400]}
             style={{
               position: 'absolute',
-              right: '1.25rem',
+              right: phoneNumber.length > 8 ? '0.5rem' : '1.25rem',
               top: '50%',
               transform: 'translateY(-50%)',
               opacity: phoneNumber ? 0.3 : 1,
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              transition: 'right 0.2s ease',
+              display: phoneNumber.length > 12 ? 'none' : 'block'
             }}
           />
         </div>
