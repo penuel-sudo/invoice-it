@@ -168,6 +168,18 @@ export default function SettingsPage() {
   useEffect(() => {
     if (user) {
       loadProfileData()
+      
+      // Check if user is new (created today) and show welcome message
+      const userCreatedAt = new Date(user.created_at)
+      const today = new Date()
+      const isNewUser = userCreatedAt.toDateString() === today.toDateString()
+      
+      if (isNewUser) {
+        // Small delay to ensure page is fully loaded
+        setTimeout(() => {
+          toast.success('Welcome! Please complete your profile to get started.')
+        }, 100)
+      }
     }
   }, [user])
 

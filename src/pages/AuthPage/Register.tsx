@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../../lib/useAuth'
+import { supabase } from '../../lib/supabaseClient'
 import { brandColors } from '../../stylings'
 import { Button, Input, Label } from '../../components/ui'
 import CountryPhoneSelector from '../../components/CountryPhoneSelector'
@@ -60,38 +61,31 @@ export default function Register() {
     setIsLoading(true)
 
     try {
-      // Use serverless API for registration
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          countryCode: phoneData.countryCode,
-          phoneNumber: phoneData.phoneNumber,
-          countryName: phoneData.countryName || '',
-          phonePrefix: phoneData.phonePrefix || '',
-          languageCode: phoneData.languageCode || '',
-          currencyCode: phoneData.currencyCode || '',
-          timezone: phoneData.timezone || ''
-        })
+      // Use direct Supabase authentication (frontend)
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+            country_code: phoneData.countryCode,
+            phone: phoneData.phoneNumber,
+            country_name: phoneData.countryName || '',
+            phone_prefix: phoneData.phonePrefix || '',
+            language_code: phoneData.languageCode || '',
+            currency_code: phoneData.currencyCode || '',
+            timezone: phoneData.timezone || ''
+          }
+        }
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        toast.error(data.error || 'Registration failed')
+      if (error) {
+        toast.error(error.message)
         return
       }
 
-      // Refresh the frontend auth state to sync with server
-      await refreshSession()
-
-      toast.success(data.message || 'Account created successfully! Please check your email to verify your account.')
-      navigate('/dashboard')
+      // Redirect to auth-redirect page to handle user age check
+      navigate('/auth-redirect')
     } catch (error: any) {
       toast.error(error.message || 'An error occurred during registration')
     } finally {
@@ -107,11 +101,8 @@ export default function Register() {
         return
       }
       
-      // Refresh session to get user data
-      await refreshSession()
-      
-      // Google users go directly to dashboard (OAuth handles this)
-      navigate('/dashboard')
+      // Google OAuth will redirect to /auth-redirect automatically
+      // No need to handle redirect here
     } catch (error: any) {
       toast.error(error.message || 'An error occurred during Google sign in')
     }

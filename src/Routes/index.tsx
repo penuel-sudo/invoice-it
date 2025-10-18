@@ -6,6 +6,7 @@ import OnboardingPage from '../pages/OnboardingPage'
 
 import Login from '../pages/AuthPage/Login'
 import Register from '../pages/AuthPage/Register'
+import AuthRedirect from '../pages/AuthRedirect'
 import DashboardPage from '../pages/DashboardPage'
 import TransactionPage from '../pages/TransactionPage'
 import InvoiceCreatePage from '../pages/InvoiceCreatePage'
@@ -48,6 +49,10 @@ export const router = createBrowserRouter([
         <Register />
       </AuthWrapper>
     )
+  },
+  {
+    path: '/auth-redirect',
+    element: <AuthRedirect />
   },
   {
     path: '/invoice/create/:template',

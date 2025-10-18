@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../../lib/useAuth'
+import { supabase } from '../../lib/supabaseClient'
 import { brandColors } from '../../stylings'
 import { Button, Input, Label } from '../../components/ui'
 import ForgotPasswordModal from '../../components/ForgotPasswordModal'
@@ -40,31 +41,19 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      // Use serverless API for login
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+      // Use direct Supabase authentication (frontend)
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        toast.error(data.error || 'Login failed')
+      if (error) {
+        toast.error(error.message)
         return
       }
 
-      // Refresh the frontend auth state to sync with server
-      await refreshSession()
-      
-      // Use the redirect path from serverless API
-      toast.success('Welcome back!')
-      navigate(data.redirectTo || '/dashboard')
+      // Redirect to auth-redirect page to handle user age check
+      navigate('/auth-redirect')
     } catch (error: any) {
       toast.error(error.message || 'An error occurred during login')
     } finally {
@@ -80,11 +69,8 @@ export default function Login() {
         return
       }
       
-      // Refresh session to get user data
-      await refreshSession()
-      
-      // Google users go directly to dashboard (OAuth handles this)
-      navigate('/dashboard')
+      // Google OAuth will redirect to /auth-redirect automatically
+      // No need to handle redirect here
     } catch (error: any) {
       toast.error(error.message || 'An error occurred during Google sign in')
     }
