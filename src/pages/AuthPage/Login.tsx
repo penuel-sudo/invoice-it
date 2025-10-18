@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
@@ -17,9 +17,20 @@ export default function Login() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   const { signInWithGoogle, refreshSession } = useAuth()
   const navigate = useNavigate()
+
+  // Handle mobile responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(isMobile)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -84,11 +95,11 @@ export default function Login() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
+      padding: isMobile ? '1rem' : '1.5rem',
       fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
       {/* Mobile Logo at Top */}
-      {window.innerWidth < 768 && (
+      {isMobile && (
         <div style={{
           position: 'absolute',
           top: '1.5rem',
@@ -128,7 +139,7 @@ export default function Login() {
       )}
 
       {/* Desktop Logo on left */}
-      {window.innerWidth >= 768 && (
+      {!isMobile && (
         <div style={{
           position: 'fixed',
           top: '1.5rem',
@@ -149,7 +160,7 @@ export default function Login() {
             color: brandColors.neutral[900],
             letterSpacing: '-0.025em'
           }}>
-            InvoiceIt
+            
           </span>
         </div>
       )}
@@ -165,11 +176,11 @@ export default function Login() {
         {/* Welcome Section */}
         <div style={{
           textAlign: 'center',
-          marginBottom: window.innerWidth < 768 ? '2rem' : '1.5rem',
-          marginTop: window.innerWidth < 768 ? '5rem' : '2rem'
+          marginBottom: isMobile ? '2rem' : '1.5rem',
+          marginTop: isMobile ? '5rem' : '2rem'
         }}>
           <h1 style={{
-            fontSize: window.innerWidth < 768 ? '1.875rem' : '2.25rem',
+            fontSize: isMobile ? '1.875rem' : '2.25rem',
             fontWeight: '700',
             color: brandColors.neutral[900],
             margin: '0 0 0.5rem 0',
@@ -180,7 +191,7 @@ export default function Login() {
             Welcome back
           </h1>
           <p style={{
-            fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+            fontSize: isMobile ? '0.875rem' : '1rem',
             color: brandColors.neutral[600],
             margin: 0,
             fontWeight: '400',
@@ -224,16 +235,16 @@ export default function Login() {
                 style={{
                   width: '100%',
                   maxWidth: '400px',
-                  padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
+                  padding: isMobile ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+                  fontSize: isMobile ? '1rem' : '1rem',
                   backgroundColor: 'transparent',
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
+                  height: isMobile ? '3.25rem' : '3.25rem'
                 }}
               />
               <Label htmlFor="email" style={{ 
@@ -241,7 +252,7 @@ export default function Login() {
                 left: '1.5rem',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                fontSize: (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                fontSize: (isMobile ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: brandColors.neutral[500],
                 backgroundColor: 'transparent',
@@ -286,16 +297,16 @@ export default function Login() {
                 style={{
                   width: '100%',
                   maxWidth: '400px',
-                  padding: window.innerWidth < 768 ? '1.125rem 3.5rem 1.125rem 1.5rem' : '1.125rem 3.5rem 1.125rem 1.5rem',
+                  padding: isMobile ? '1.125rem 3.5rem 1.125rem 1.5rem' : '1.125rem 3.5rem 1.125rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+                  fontSize: isMobile ? '1rem' : '1rem',
                   backgroundColor: 'transparent',
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
+                  height: isMobile ? '3.25rem' : '3.25rem'
                 }}
               />
               <Label htmlFor="password" style={{ 
@@ -303,7 +314,7 @@ export default function Login() {
                 left: '1.5rem',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                fontSize: (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                fontSize: (isMobile ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: brandColors.neutral[500],
                 backgroundColor: 'transparent',
@@ -332,7 +343,7 @@ export default function Login() {
                   zIndex: 10
                 }}
               >
-                {showPassword ? <EyeOff size={window.innerWidth < 768 ? 18 : 20} /> : <Eye size={window.innerWidth < 768 ? 18 : 20} />}
+                {showPassword ? <EyeOff size={isMobile ? 18 : 20} /> : <Eye size={isMobile ? 18 : 20} />}
               </button>
             </div>
           </div>
@@ -350,7 +361,7 @@ export default function Login() {
                 background: 'none',
                 border: 'none',
                 color: brandColors.primary[600],
-                fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+                fontSize: isMobile ? '0.75rem' : '0.875rem',
                 fontWeight: '500',
                 cursor: 'pointer',
                 textDecoration: 'none',
@@ -367,7 +378,7 @@ export default function Login() {
             style={{
               width: '100%',
               maxWidth: '400px',
-              padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
+              padding: isMobile ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
               backgroundColor: 'rgba(34, 197, 94, 0.8)',
               backdropFilter: 'blur(10px)',
               color: brandColors.white,
@@ -375,14 +386,14 @@ export default function Login() {
               marginTop: '0.5rem',
               borderRadius: '50px',
               boxShadow: '0 4px 6px rgba(34, 197, 94, 0.3)',
-              fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+              fontSize: isMobile ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '600',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.7 : 1,
               transition: 'all 0.2s ease',
               boxSizing: 'border-box',
-              height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
+              height: isMobile ? '3.25rem' : '3.25rem'
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
@@ -411,7 +422,7 @@ export default function Login() {
             }}></div>
             <span style={{
               padding: '0 1rem',
-              fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
               color: brandColors.neutral[500],
               fontWeight: '500'
             }}>
@@ -431,12 +442,12 @@ export default function Login() {
             style={{
               width: '100%',
               maxWidth: '400px',
-              padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
+              padding: isMobile ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: 'transparent',
               color: brandColors.neutral[700],
               border: `1px solid ${brandColors.neutral[300]}`,
               borderRadius: '50px',
-              fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+              fontSize: isMobile ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '500',
               cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -446,7 +457,7 @@ export default function Login() {
               gap: '0.75rem',
               transition: 'all 0.2s ease',
               boxSizing: 'border-box',
-              height: window.innerWidth < 768 ? '3.5rem' : '3.5rem'
+              height: isMobile ? '3.5rem' : '3.5rem'
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
@@ -473,7 +484,7 @@ export default function Login() {
           <div style={{
             textAlign: 'center',
             marginTop: '2rem',
-            fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+            fontSize: isMobile ? '0.75rem' : '0.875rem',
             color: brandColors.neutral[600],
             fontFamily: 'Poppins, sans-serif'
           }}>
@@ -500,7 +511,7 @@ export default function Login() {
         <div style={{
           textAlign: 'center',
           marginTop: '1.5rem',
-          fontSize: window.innerWidth < 768 ? '0.625rem' : '0.75rem',
+          fontSize: isMobile ? '0.625rem' : '0.75rem',
           color: brandColors.neutral[500],
           fontFamily: 'Poppins, sans-serif'
         }}>

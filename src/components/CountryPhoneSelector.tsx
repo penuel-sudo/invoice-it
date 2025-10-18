@@ -121,7 +121,7 @@ export default function CountryPhoneSelector({
         const isValidNumber = isValidPhoneNumber(fullNumber)
         setIsValid(isValidNumber)
       } catch (error) {
-        console.warn('Phone validation error:', error)
+        // Phone validation error - silently handle
         setIsValid(false)
       }
     } else {
@@ -242,9 +242,9 @@ export default function CountryPhoneSelector({
         backgroundColor: disabled ? brandColors.neutral[50] : brandColors.white,
         transition: 'all 0.2s ease',
         position: 'relative'
-      }}>
+      }} ref={dropdownRef}>
         {/* Country Selector */}
-        <div style={{ position: 'relative' }} ref={dropdownRef}>
+        <div style={{ position: 'relative' }}>
           <button
             type="button"
             onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
@@ -314,9 +314,7 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              width: '100vw',
-              maxWidth: '500px',
-              minWidth: '300px',
+              width: '100%',
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',
@@ -489,7 +487,7 @@ export default function CountryPhoneSelector({
               opacity: phoneNumber ? 0.3 : 1,
               pointerEvents: 'none',
               transition: 'right 0.2s ease',
-              display: phoneNumber.length > 12 ? 'none' : 'block'
+              display: (phoneNumber.length > 12 || isMobile) ? 'none' : 'block'
             }}
           />
         </div>

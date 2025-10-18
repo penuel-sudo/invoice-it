@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
@@ -27,9 +27,20 @@ export default function Register() {
     timezone: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   const { signInWithGoogle, refreshSession } = useAuth()
   const navigate = useNavigate()
+
+  // Handle mobile responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(isMobile)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -116,27 +127,26 @@ export default function Register() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
+      padding: isMobile ? '1rem' : '1.5rem',
       fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
       {/* Mobile Logo at Top */}
-      {window.innerWidth < 768 && (
+      {isMobile && (
         <div style={{
           position: 'absolute',
           top: '1.5rem',
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.5rem',
+          justifyContent: 'center',
           zIndex: 10
         }}>
           <div style={{
-            width: '60px',
-            height: '60px',
+            width: '50px',
+            height: '50px',
             backgroundColor: brandColors.primary[100],
-            borderRadius: '16px',
+            borderRadius: '12px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -145,22 +155,14 @@ export default function Register() {
             <img 
               src="/logo_web_app_256x256.png" 
               alt="InvoiceIt" 
-              style={{ width: '40px', height: '40px' }}
+              style={{ width: '32px', height: '32px' }}
             />
           </div>
-          <span style={{
-            fontSize: '1.125rem',
-            fontWeight: '700',
-            color: brandColors.neutral[900],
-            letterSpacing: '-0.025em'
-          }}>
-            InvoiceIt
-          </span>
         </div>
       )}
 
       {/* Desktop Logo on left */}
-      {window.innerWidth >= 768 && (
+      {!isMobile && (
         <div style={{
           position: 'fixed',
           top: '1.5rem',
@@ -181,7 +183,7 @@ export default function Register() {
             color: brandColors.neutral[900],
             letterSpacing: '-0.025em'
           }}>
-            InvoiceIt
+            
           </span>
         </div>
       )}
@@ -197,11 +199,11 @@ export default function Register() {
         {/* Welcome Section */}
         <div style={{
           textAlign: 'center',
-          marginBottom: window.innerWidth < 768 ? '2rem' : '1.5rem',
-          marginTop: window.innerWidth < 768 ? '5rem' : '2rem'
+          marginBottom: isMobile ? '2rem' : '1.5rem',
+          marginTop: isMobile ? '5rem' : '2rem'
         }}>
           <h1 style={{
-            fontSize: window.innerWidth < 768 ? '1.875rem' : '2.25rem',
+            fontSize: isMobile ? '1.875rem' : '2.25rem',
             fontWeight: '700',
             color: brandColors.neutral[900],
             margin: '0 0 0.5rem 0',
@@ -212,7 +214,7 @@ export default function Register() {
             Create your account
           </h1>
           <p style={{
-            fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+            fontSize: isMobile ? '0.875rem' : '1rem',
             color: brandColors.neutral[600],
             margin: 0,
             fontWeight: '400',
@@ -255,16 +257,16 @@ export default function Register() {
                 }}
                 style={{
                   width: '100%',
-                  padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
+                  padding: isMobile ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+                  fontSize: isMobile ? '1rem' : '1rem',
                   backgroundColor: 'transparent',
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
+                  height: isMobile ? '3.25rem' : '3.25rem'
                 }}
               />
               <Label htmlFor="name" style={{ 
@@ -272,7 +274,7 @@ export default function Register() {
                 left: '1.5rem',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                fontSize: (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                fontSize: (isMobile ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: brandColors.neutral[500],
                 backgroundColor: 'transparent',
@@ -344,16 +346,16 @@ export default function Register() {
                 style={{
                   width: '100%',
                   maxWidth: '400px',
-                  padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
+                  padding: isMobile ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+                  fontSize: isMobile ? '1rem' : '1rem',
                   backgroundColor: 'transparent',
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
+                  height: isMobile ? '3.25rem' : '3.25rem'
                 }}
               />
               <Label htmlFor="email" style={{ 
@@ -361,7 +363,7 @@ export default function Register() {
                 left: '1.5rem',
                 top: (formData.email || focused === 'email') ? '-0.5rem' : '50%',
                 transform: (formData.email || focused === 'email') ? 'translateY(0)' : 'translateY(-50%)',
-                fontSize: (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                fontSize: (isMobile ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: brandColors.neutral[500],
                 backgroundColor: 'transparent',
@@ -406,16 +408,16 @@ export default function Register() {
                 style={{
                   width: '100%',
                   maxWidth: '400px',
-                  padding: window.innerWidth < 768 ? '1.125rem 3.5rem 1.125rem 1.5rem' : '1.125rem 3.5rem 1.125rem 1.5rem',
+                  padding: isMobile ? '1.125rem 3.5rem 1.125rem 1.5rem' : '1.125rem 3.5rem 1.125rem 1.5rem',
                   border: 'none',
                   borderRadius: '50px',
-                  fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+                  fontSize: isMobile ? '1rem' : '1rem',
                   backgroundColor: 'transparent',
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
+                  height: isMobile ? '3.25rem' : '3.25rem'
                 }}
               />
               <Label htmlFor="password" style={{ 
@@ -423,7 +425,7 @@ export default function Register() {
                 left: '1.5rem',
                 top: (formData.password || focused === 'password') ? '-0.5rem' : '50%',
                 transform: (formData.password || focused === 'password') ? 'translateY(0)' : 'translateY(-50%)',
-                fontSize: (window.innerWidth < 768 ? '0.875rem' : '1rem'),
+                fontSize: (isMobile ? '0.875rem' : '1rem'),
                 fontWeight: '500',
                 color: brandColors.neutral[500],
                 backgroundColor: 'transparent',
@@ -452,7 +454,7 @@ export default function Register() {
                   zIndex: 10
                 }}
               >
-                {showPassword ? <EyeOff size={window.innerWidth < 768 ? 18 : 20} /> : <Eye size={window.innerWidth < 768 ? 18 : 20} />}
+                {showPassword ? <EyeOff size={isMobile ? 18 : 20} /> : <Eye size={isMobile ? 18 : 20} />}
               </button>
             </div>
           </div>
@@ -463,7 +465,7 @@ export default function Register() {
             style={{
               width: '100%',
               maxWidth: '400px',
-              padding: window.innerWidth < 768 ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
+              padding: isMobile ? '1.125rem 1.5rem' : '1.125rem 1.5rem',
               backgroundColor: 'rgba(34, 197, 94, 0.8)',
               backdropFilter: 'blur(10px)',
               color: brandColors.white,
@@ -471,14 +473,14 @@ export default function Register() {
               marginTop: '0.5rem',
               borderRadius: '50px',
               boxShadow: '0 4px 6px rgba(34, 197, 94, 0.3)',
-              fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+              fontSize: isMobile ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '600',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.7 : 1,
               transition: 'all 0.2s ease',
               boxSizing: 'border-box',
-              height: window.innerWidth < 768 ? '3.25rem' : '3.25rem'
+              height: isMobile ? '3.25rem' : '3.25rem'
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
@@ -507,7 +509,7 @@ export default function Register() {
             }}></div>
             <span style={{
               padding: '0 1rem',
-              fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
               color: brandColors.neutral[500],
               fontWeight: '500'
             }}>
@@ -527,12 +529,12 @@ export default function Register() {
             style={{
               width: '100%',
               maxWidth: '400px',
-              padding: window.innerWidth < 768 ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
+              padding: isMobile ? '1.25rem 1.5rem' : '1.25rem 1.5rem',
               backgroundColor: 'transparent',
               color: brandColors.neutral[700],
               border: `1px solid ${brandColors.neutral[300]}`,
               borderRadius: '50px',
-              fontSize: window.innerWidth < 768 ? '1rem' : '1rem',
+              fontSize: isMobile ? '1rem' : '1rem',
               fontFamily: 'Poppins, sans-serif',
               fontWeight: '500',
               cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -542,7 +544,7 @@ export default function Register() {
               gap: '0.75rem',
               transition: 'all 0.2s ease',
               boxSizing: 'border-box',
-              height: window.innerWidth < 768 ? '3.5rem' : '3.5rem'
+              height: isMobile ? '3.5rem' : '3.5rem'
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
@@ -569,7 +571,7 @@ export default function Register() {
           <div style={{
             textAlign: 'center',
             marginTop: '2rem',
-            fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+            fontSize: isMobile ? '0.75rem' : '0.875rem',
             color: brandColors.neutral[600],
             fontFamily: 'Poppins, sans-serif'
           }}>
@@ -596,7 +598,7 @@ export default function Register() {
         <div style={{
           textAlign: 'center',
           marginTop: '1.5rem',
-          fontSize: window.innerWidth < 768 ? '0.625rem' : '0.75rem',
+          fontSize: isMobile ? '0.625rem' : '0.75rem',
           color: brandColors.neutral[500],
           fontFamily: 'Poppins, sans-serif'
         }}>
