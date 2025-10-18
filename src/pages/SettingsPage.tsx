@@ -174,10 +174,15 @@ export default function SettingsPage() {
       const today = new Date()
       const isNewUser = userCreatedAt.toDateString() === today.toDateString()
       
-      if (isNewUser) {
+      // Check if user has already seen the welcome message
+      const hasSeenWelcome = localStorage.getItem(`welcome-shown-${user.id}`)
+      
+      if (isNewUser && !hasSeenWelcome) {
         // Small delay to ensure page is fully loaded
         setTimeout(() => {
           toast.success('Welcome! Please complete your profile to get started.')
+          // Mark that user has seen the welcome message
+          localStorage.setItem(`welcome-shown-${user.id}`, 'true')
         }, 100)
       }
     }
