@@ -5,6 +5,7 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { supabase } from '../lib/supabaseClient'
 import StatusButton from '../components/StatusButton'
+import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
 import { 
   ArrowLeft, 
   MoreVertical, 
@@ -52,6 +53,7 @@ export default function TransactionPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { currencySymbol } = useGlobalCurrency()
   
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -61,9 +63,22 @@ export default function TransactionPage() {
   const [showBulkActions, setShowBulkActions] = useState(false)
   const [showTopbarDropdown, setShowTopbarDropdown] = useState(false)
   const [showTransactionDropdown, setShowTransactionDropdown] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const topbarDropdownRef = useRef<HTMLDivElement>(null)
   const transactionDropdownRef = useRef<HTMLDivElement>(null)
 
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Load transactions from database
   useEffect(() => {
@@ -385,8 +400,8 @@ export default function TransactionPage() {
   }
 
   const formatAmount = (amount: number | undefined, type: string) => {
-    if (!amount || isNaN(amount)) return type === 'invoice' ? '+$0.00' : '-$0.00'
-    const formatted = `$${amount.toFixed(2)}`
+    if (!amount || isNaN(amount)) return type === 'invoice' ? `+${currencySymbol}0.00` : `-${currencySymbol}0.00`
+    const formatted = `${currencySymbol}${amount.toFixed(2)}`
     return type === 'invoice' ? `+${formatted}` : `-${formatted}`
   }
 
@@ -408,7 +423,7 @@ export default function TransactionPage() {
   if (!user) return null
 
   return (
-    <Layout hideBottomNav={true}>
+    <Layout hideBottomNav={false}>
       <div style={{
         minHeight: '100vh',
         background: `linear-gradient(135deg, ${brandColors.primary[50]} 0%, ${brandColors.neutral[50]} 100%)`,
@@ -428,25 +443,27 @@ export default function TransactionPage() {
           top: 0,
           zIndex: 10
         }}>
-          <button
-            onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.5rem',
-              backgroundColor: brandColors.neutral[100],
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: brandColors.neutral[600],
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
+          {!isMobile && (
+            <button
+              onClick={() => navigate('/dashboard')}
+              style={{
+                padding: '0.5rem',
+                backgroundColor: brandColors.neutral[100],
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: brandColors.neutral[600],
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          )}
           
           <h1 style={{
             fontSize: window.innerWidth < 768 ? '1.125rem' : '1.25rem',
@@ -743,7 +760,7 @@ export default function TransactionPage() {
                 No transactions found
               </p>
               <button
-                onClick={() => navigate('/invoice/new')}
+                onClick={() => navigate(activeTab === 'expenses' ? '/expense/new' : '/invoice/create/default')}
                 style={{
                   padding: '1rem 2rem',
                   backgroundColor: brandColors.primary[600],
@@ -763,7 +780,7 @@ export default function TransactionPage() {
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)'
                 }}
               >
-                Create Your First Invoice
+                {activeTab === 'expenses' ? 'Create Your First Expense' : 'Create Your First Invoice'}
               </button>
             </div>
           ) : (

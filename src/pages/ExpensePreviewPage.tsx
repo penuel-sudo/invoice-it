@@ -62,6 +62,19 @@ export default function ExpensePreviewPage() {
   const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     // Wait a bit for auth to initialize
@@ -304,133 +317,62 @@ export default function ExpensePreviewPage() {
         maxWidth: '100vw',
         overflow: 'hidden'
       }}>
-        {/* Header - Clean Design */}
+        {/* Header - Simplified Design */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '2rem',
-          paddingBottom: '1rem',
+          marginBottom: isMobile ? '1.5rem' : '2rem',
+          paddingBottom: isMobile ? '0.875rem' : '1rem',
           borderBottom: `1px solid ${brandColors.neutral[200]}`
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem'
-          }}>
-            <button
-              onClick={() => navigate('/invoices')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '40px',
-                height: '40px',
-                backgroundColor: 'transparent',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '10px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
+          <button
+            onClick={() => navigate('/invoices')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: isMobile ? '36px' : '40px',
+              height: isMobile ? '36px' : '40px',
+              backgroundColor: isMobile ? brandColors.neutral[900] : 'transparent',
+              border: isMobile ? 'none' : `1px solid ${brandColors.neutral[300]}`,
+              borderRadius: isMobile ? '8px' : '10px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (!isMobile) {
                 e.currentTarget.style.backgroundColor = brandColors.neutral[50]
                 e.currentTarget.style.borderColor = brandColors.neutral[400]
-              }}
-              onMouseLeave={(e) => {
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isMobile) {
                 e.currentTarget.style.backgroundColor = 'transparent'
                 e.currentTarget.style.borderColor = brandColors.neutral[300]
-              }}
-            >
-              <ArrowLeft size={20} color={brandColors.neutral[600]} />
-            </button>
-            <div>
-              <h1 style={{
-                fontSize: '1.5rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
-                margin: '0 0 0.25rem 0'
-              }}>
-                Expense Receipt
-              </h1>
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[500],
-                margin: 0
-              }}>
-                {formatDate(expense.expense_date)}
-              </p>
-            </div>
-          </div>
+              }
+            }}
+          >
+            <ArrowLeft 
+              size={isMobile ? 18 : 20} 
+              color={isMobile ? brandColors.white : brandColors.neutral[600]} 
+              strokeWidth={isMobile ? 2.5 : 2}
+            />
+          </button>
 
-          {/* Action Buttons */}
-          <div style={{
-            display: 'flex',
-            gap: '0.5rem'
+          <h1 style={{
+            fontSize: isMobile ? '1.125rem' : '1.5rem',
+            fontWeight: '600',
+            color: brandColors.neutral[900],
+            margin: 0,
+            textAlign: 'center',
+            flex: 1
           }}>
-            <button
-              onClick={() => navigate('/expense/new', { state: { expenseData: expense } })}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1rem',
-                backgroundColor: 'transparent',
-                color: brandColors.primary[600],
-                border: `1px solid ${brandColors.primary[300]}`,
-                borderRadius: '10px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = brandColors.primary[50]
-                e.currentTarget.style.borderColor = brandColors.primary[400]
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.borderColor = brandColors.primary[300]
-              }}
-            >
-              <Edit size={16} />
-              Edit
-            </button>
-            
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1rem',
-                backgroundColor: 'transparent',
-                color: brandColors.error[600],
-                border: `1px solid ${brandColors.error[300]}`,
-                borderRadius: '10px',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: deleting ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: deleting ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!deleting) {
-                  e.currentTarget.style.backgroundColor = brandColors.error[50]
-                  e.currentTarget.style.borderColor = brandColors.error[400]
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!deleting) {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.borderColor = brandColors.error[300]
-                }
-              }}
-            >
-              <Trash2 size={16} />
-              {deleting ? 'Deleting...' : 'Delete'}
-            </button>
-          </div>
+            Expense Receipt
+          </h1>
+
+          <div style={{ width: isMobile ? '36px' : '40px' }}></div> {/* Spacer for centering */}
         </div>
 
         {/* Main Content - Clean Card Layout */}
@@ -439,15 +381,15 @@ export default function ExpensePreviewPage() {
           margin: '0 auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.5rem'
+          gap: isMobile ? '1rem' : '1.5rem'
         }}>
           {/* Expense Summary Card */}
           <div style={{
             backgroundColor: brandColors.white,
-            borderRadius: '16px',
+            borderRadius: isMobile ? '12px' : '16px',
             border: `1px solid ${brandColors.neutral[200]}`,
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            padding: '2rem',
+            padding: isMobile ? '1.5rem' : '2rem',
             textAlign: 'center'
           }}>
             {/* Expense Icon & Status */}
@@ -512,16 +454,16 @@ export default function ExpensePreviewPage() {
           {/* Details Grid */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '1.5rem'
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: isMobile ? '1rem' : '1.5rem'
           }}>
             {/* Payment Information */}
             <div style={{
               backgroundColor: brandColors.white,
-              borderRadius: '16px',
+              borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-              padding: '1.5rem'
+              padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{
                 fontSize: '1.125rem',
@@ -584,10 +526,10 @@ export default function ExpensePreviewPage() {
             {/* Tax Information */}
             <div style={{
               backgroundColor: brandColors.white,
-              borderRadius: '16px',
+              borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-              padding: '1.5rem'
+              padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{
                 fontSize: '1.125rem',
@@ -671,10 +613,10 @@ export default function ExpensePreviewPage() {
           {expense.notes && (
             <div style={{
               backgroundColor: brandColors.white,
-              borderRadius: '16px',
+              borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-              padding: '1.5rem'
+              padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{
                 fontSize: '1.125rem',
@@ -704,10 +646,10 @@ export default function ExpensePreviewPage() {
           {expense.receipt_url && (
             <div style={{
               backgroundColor: brandColors.white,
-              borderRadius: '16px',
+              borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-              padding: '1.5rem'
+              padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{
                 fontSize: '1.125rem',
@@ -722,27 +664,68 @@ export default function ExpensePreviewPage() {
                 Receipt
               </h3>
               
+              {/* Receipt Preview - Show image/PDF inline */}
+              <div style={{
+                backgroundColor: brandColors.neutral[50],
+                borderRadius: isMobile ? '10px' : '12px',
+                border: `1px solid ${brandColors.neutral[200]}`,
+                overflow: 'hidden',
+                marginBottom: '1rem'
+              }}>
+                {expense.receipt_filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                  // Display image
+                  <img 
+                    src={expense.receipt_url} 
+                    alt="Receipt"
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block',
+                      maxHeight: isMobile ? '400px' : '600px',
+                      objectFit: 'contain'
+                    }}
+                    onClick={() => window.open(expense.receipt_url, '_blank')}
+                  />
+                ) : expense.receipt_filename?.match(/\.pdf$/i) ? (
+                  // Display PDF
+                  <iframe
+                    src={expense.receipt_url}
+                    style={{
+                      width: '100%',
+                      height: isMobile ? '400px' : '600px',
+                      border: 'none'
+                    }}
+                    title="Receipt PDF"
+                  />
+                ) : (
+                  // Fallback for other file types
+                  <div style={{
+                    padding: '2rem',
+                    textAlign: 'center',
+                    color: brandColors.neutral[600]
+                  }}>
+                    <Receipt size={48} style={{ marginBottom: '1rem' }} />
+                    <p style={{ fontSize: '0.875rem', margin: '0 0 0.5rem 0' }}>
+                      {expense.receipt_filename || 'Receipt file'}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: brandColors.neutral[500] }}>
+                      Preview not available for this file type
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* File Info and Download Button */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem',
-                padding: '1rem',
+                justifyContent: 'space-between',
+                padding: isMobile ? '0.875rem' : '1rem',
                 backgroundColor: brandColors.neutral[50],
-                borderRadius: '12px',
+                borderRadius: isMobile ? '8px' : '10px',
                 border: `1px solid ${brandColors.neutral[200]}`
               }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '8px',
-                  backgroundColor: brandColors.primary[100],
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Receipt size={24} color={brandColors.primary[600]} />
-                </div>
-                <div style={{ flex: 1 }}>
+                <div>
                   <p style={{
                     fontSize: '0.875rem',
                     fontWeight: '500',
@@ -765,7 +748,7 @@ export default function ExpensePreviewPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    padding: '0.5rem 1rem',
+                    padding: isMobile ? '0.625rem 1rem' : '0.5rem 1rem',
                     backgroundColor: brandColors.primary[600],
                     color: brandColors.white,
                     border: 'none',
@@ -783,7 +766,7 @@ export default function ExpensePreviewPage() {
                   }}
                 >
                   <Download size={16} />
-                  View
+                  {isMobile ? 'Open' : 'Open in New Tab'}
                 </button>
               </div>
             </div>
@@ -803,6 +786,86 @@ export default function ExpensePreviewPage() {
             }}>
               Created on {formatDate(expense.created_at)} • Expense ID: {expense.id.slice(0, 8).toUpperCase()}
             </p>
+          </div>
+
+          {/* Action Buttons - Below Preview Card */}
+          <div style={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '0.75rem' : '1rem',
+            padding: isMobile ? '1rem' : '0',
+            position: 'sticky',
+            bottom: isMobile ? '0' : 'auto',
+            backgroundColor: isMobile ? brandColors.white : 'transparent',
+            borderTop: isMobile ? `1px solid ${brandColors.neutral[200]}` : 'none',
+            margin: isMobile ? '0 -1rem' : '0',
+            paddingBottom: isMobile ? '1.5rem' : '0'
+          }}>
+            <button
+              onClick={() => navigate('/expense/new', { state: { expenseData: expense } })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                flex: 1,
+                padding: isMobile ? '1rem' : '0.875rem 1.5rem',
+                minHeight: isMobile ? '52px' : 'auto',
+                backgroundColor: 'transparent',
+                color: brandColors.primary[600],
+                border: `2px solid ${brandColors.primary[600]}`,
+                borderRadius: isMobile ? '12px' : '10px',
+                fontSize: isMobile ? '0.9375rem' : '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = brandColors.primary[50]
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <Edit size={isMobile ? 20 : 16} />
+              Edit Expense
+            </button>
+            
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                flex: 1,
+                padding: isMobile ? '1rem' : '0.875rem 1.5rem',
+                minHeight: isMobile ? '52px' : 'auto',
+                backgroundColor: brandColors.error[600],
+                color: brandColors.white,
+                border: 'none',
+                borderRadius: isMobile ? '12px' : '10px',
+                fontSize: isMobile ? '0.9375rem' : '0.875rem',
+                fontWeight: '600',
+                cursor: deleting ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                opacity: deleting ? 0.6 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!deleting) {
+                  e.currentTarget.style.backgroundColor = brandColors.error[700]
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!deleting) {
+                  e.currentTarget.style.backgroundColor = brandColors.error[600]
+                }
+              }}
+            >
+              <Trash2 size={isMobile ? 20 : 16} />
+              {deleting ? 'Deleting...' : 'Delete Expense'}
+            </button>
           </div>
         </div>
       </div>

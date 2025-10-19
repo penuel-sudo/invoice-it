@@ -100,8 +100,8 @@ export default function NotificationDropdown({ isVisible, onClose, triggerRef }:
         style={{
         position: 'fixed',
         top: isVisible ? (isMobile ? '70px' : '80px') : '-100vh',
-        right: isMobile ? '1rem' : '2rem',
-        left: isMobile ? '1rem' : 'auto',
+        right: isMobile ? '0' : '2rem',
+        left: isMobile ? '0' : 'auto',
         width: isMobile ? 'auto' : '400px',
         backgroundColor: brandColors.white,
         borderRadius: '20px',
@@ -109,7 +109,7 @@ export default function NotificationDropdown({ isVisible, onClose, triggerRef }:
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         zIndex: 50,
         transition: 'top 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        maxHeight: '80vh',
+        maxHeight: isMobile ? '60vh' : '80vh',
         overflowY: 'auto',
         scrollbarWidth: 'none', // Firefox
         msOverflowStyle: 'none', // IE/Edge

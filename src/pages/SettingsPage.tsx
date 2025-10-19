@@ -403,7 +403,7 @@ export default function SettingsPage() {
 
   if (!user || loading) {
     return (
-      <Layout hideBottomNav={true}>
+      <Layout hideBottomNav={false}>
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -425,7 +425,7 @@ export default function SettingsPage() {
   ]
 
   return (
-    <Layout hideBottomNav={true}>
+    <Layout hideBottomNav={false}>
       <div style={{
         minHeight: '100vh',
         backgroundColor: brandColors.neutral[50],
@@ -447,20 +447,22 @@ export default function SettingsPage() {
             maxWidth: '100%',
             margin: '0 auto'
           }}>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                padding: '0.5rem',
-                backgroundColor: brandColors.neutral[100],
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <ArrowLeft size={20} color={brandColors.neutral[600]} />
-            </button>
+            {!isMobile && (
+              <button
+                onClick={() => navigate('/dashboard')}
+                style={{
+                  padding: '0.5rem',
+                  backgroundColor: brandColors.neutral[100],
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <ArrowLeft size={20} color={brandColors.neutral[600]} />
+              </button>
+            )}
             <h1 style={{
               fontSize: isMobile ? '1.25rem' : '1.5rem',
               fontWeight: '600',
@@ -471,7 +473,7 @@ export default function SettingsPage() {
             }}>
               Settings
             </h1>
-            <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
+            {!isMobile && <div style={{ width: '40px' }}></div>} {/* Spacer for centering */}
           </div>
         </div>
 

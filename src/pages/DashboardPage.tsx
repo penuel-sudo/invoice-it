@@ -779,9 +779,9 @@ export default function DashboardPage() {
               </span>
             </button>
 
-            {/* Create Expense */}
+            {/* View Expenses */}
             <button 
-              onClick={() => navigate('/expense/new')}
+              onClick={() => navigate('/invoices?tab=expenses')}
               style={{
               display: 'flex',
               flexDirection: 'column',

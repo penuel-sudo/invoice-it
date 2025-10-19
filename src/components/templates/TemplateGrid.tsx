@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { brandColors } from '../../stylings'
 
 interface TemplateGridProps {
@@ -13,12 +14,25 @@ export default function TemplateGrid({
   gap = '2rem',
   style 
 }: TemplateGridProps) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: `repeat(auto-fit, minmax(350px, 1fr))`,
-      gap,
-      marginBottom: '3rem',
+      gridTemplateColumns: isMobile ? '1fr' : `repeat(auto-fit, minmax(350px, 1fr))`,
+      gap: isMobile ? '1rem' : gap,
+      marginBottom: isMobile ? '1.5rem' : '3rem',
       ...style
     }}>
       {children}

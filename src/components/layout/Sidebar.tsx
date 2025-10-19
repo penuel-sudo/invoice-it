@@ -8,7 +8,7 @@ const navigationItems = [
   { id: 'invoices', label: 'Transactions', icon: FileText, path: '/invoices' },
   { id: 'templates', label: 'Templates', icon: Layout, path: '/templates' },
   { id: 'clients', label: 'Clients', icon: Users, path: '/clients' },
-  { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/invoices?tab=expenses' }
+  { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/expense/new' }
 ]
 
 interface SidebarProps {

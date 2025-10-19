@@ -69,6 +69,7 @@ export default function ExpenseCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
     category: '',
@@ -85,6 +86,18 @@ export default function ExpenseCreatePage() {
   })
   const [errors, setErrors] = useState<Partial<ExpenseFormData>>({})
   const [clients, setClients] = useState<Client[]>([])
+
+  useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (user) {
@@ -304,7 +317,7 @@ export default function ExpenseCreatePage() {
   return (
     <Layout hideBottomNav={true}>
       <div style={{
-        paddingBottom: '0.5rem',
+        paddingBottom: isMobile ? '0.5rem' : '0.5rem',
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',
@@ -352,13 +365,13 @@ export default function ExpenseCreatePage() {
         </div>
 
         {/* Form Content */}
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: isMobile ? '0.875rem' : '1rem' }}>
           {/* Basic Information Card */}
           <div style={{
             backgroundColor: brandColors.white,
-            borderRadius: '16px',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
+            borderRadius: isMobile ? '12px' : '16px',
+            padding: isMobile ? '1.25rem' : '1.5rem',
+            marginBottom: isMobile ? '1rem' : '1.5rem',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
