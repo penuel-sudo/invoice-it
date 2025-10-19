@@ -102,7 +102,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
 
         {/* Center Section: Create Button (FAB) */}
         <button
-          onClick={() => navigate('/invoice/new')}
+          onClick={() => navigate('/invoice/create/default')}
           style={{
             flexShrink: 0,
             display: 'flex',

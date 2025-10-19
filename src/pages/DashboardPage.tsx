@@ -646,7 +646,7 @@ export default function DashboardPage() {
           }}>
             {/* Create Invoice */}
             <button
-              onClick={() => navigate('/invoice/new')}
+              onClick={() => navigate('/invoice/create/default')}
               style={{
                 display: 'flex',
                 flexDirection: 'column',

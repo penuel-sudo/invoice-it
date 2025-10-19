@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../lib/useAuth'
+import { useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar.tsx'
 import BottomNav from './BottomNav.tsx'
 import Topbar from './Topbar.tsx'
@@ -16,6 +17,7 @@ interface LayoutProps {
 
 export default function Layout({ children, isNotificationVisible, onNotificationToggle, onSettingsOpen, hideBottomNav = false, showTopbar = false }: LayoutProps) {
   const { user } = useAuth()
+  const location = useLocation()
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -28,6 +30,10 @@ export default function Layout({ children, isNotificationVisible, onNotification
     
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Routes where bottom nav should be visible on mobile
+  const bottomNavRoutes = ['/dashboard', '/invoices', '/templates', '/settings']
+  const shouldShowBottomNav = isMobile && !hideBottomNav && bottomNavRoutes.includes(location.pathname)
 
   if (!user) return null
 
@@ -59,7 +65,7 @@ export default function Layout({ children, isNotificationVisible, onNotification
           width: '100%',
           maxWidth: isMobile ? '100vw' : 'calc(100vw - 280px)',
           padding: isMobile ? '0' : '0.5rem',
-          paddingBottom: isMobile && !hideBottomNav ? '5rem' : '2rem', // Space for bottom nav on mobile
+          paddingBottom: shouldShowBottomNav ? '5rem' : '2rem', // Space for bottom nav on mobile
           marginLeft: isMobile ? 0 : '280px', // Sidebar width
           transition: 'margin-left 0.3s ease',
           overflowX: 'hidden',
@@ -69,8 +75,8 @@ export default function Layout({ children, isNotificationVisible, onNotification
         </main>
       </div>
       
-      {/* Bottom Navigation - Mobile only */}
-      {isMobile && !hideBottomNav && <BottomNav isNotificationVisible={isNotificationVisible} onNotificationToggle={onNotificationToggle} />}
+      {/* Bottom Navigation - Mobile only, specific routes */}
+      {shouldShowBottomNav && <BottomNav isNotificationVisible={isNotificationVisible} onNotificationToggle={onNotificationToggle} />}
     </div>
   )
 }

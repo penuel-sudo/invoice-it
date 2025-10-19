@@ -14,9 +14,10 @@ import { formatDistanceToNow } from 'date-fns'
 interface NotificationDropdownProps {
   isVisible: boolean
   onClose: () => void
+  triggerRef?: React.RefObject<HTMLElement>
 }
 
-export default function NotificationDropdown({ isVisible, onClose }: NotificationDropdownProps) {
+export default function NotificationDropdown({ isVisible, onClose, triggerRef }: NotificationDropdownProps) {
   const [isMobile, setIsMobile] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotification()
@@ -32,12 +33,23 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Click outside to close
+  // Click outside to close (but not on the trigger button)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        onClose()
+      const target = event.target as Node
+      
+      // Don't close if clicking the dropdown itself
+      if (dropdownRef.current && dropdownRef.current.contains(target)) {
+        return
       }
+      
+      // Don't close if clicking the trigger button (let it handle the toggle)
+      if (triggerRef?.current && triggerRef.current.contains(target)) {
+        return
+      }
+      
+      // Close for any other outside click
+      onClose()
     }
 
     if (isVisible) {
@@ -47,7 +59,7 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isVisible, onClose])
+  }, [isVisible, onClose, triggerRef])
 
   // Get icon based on notification type
   const getNotificationIcon = (type: string) => {
@@ -129,7 +141,10 @@ export default function NotificationDropdown({ isVisible, onClose }: Notificatio
           Notifications
         </h3>
         <button
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation()
+            onClose()
+          }}
           style={{
             padding: '0.5rem',
             backgroundColor: 'transparent',

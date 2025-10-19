@@ -10,7 +10,6 @@ import {
   Plus,
   Search,
   Edit,
-  Trash2,
   Mail,
   Phone,
   MapPin,
@@ -193,33 +192,6 @@ export default function ClientPage() {
     setShowClientForm(true)
   }
 
-  const handleDeleteClient = async (clientId: string) => {
-    if (!user) return
-
-    if (!confirm('Are you sure you want to delete this client? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId)
-        .eq('user_id', user.id)
-
-      if (error) {
-        console.error('Error deleting client:', error)
-        toast.error('Failed to delete client')
-        return
-      }
-
-      toast.success('Client deleted successfully!')
-      loadClients()
-    } catch (error) {
-      console.error('Error deleting client:', error)
-      toast.error('Failed to delete client')
-    }
-  }
 
   const resetForm = () => {
     setFormData({
@@ -288,8 +260,9 @@ export default function ClientPage() {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: isMobile ? '1rem' : '1rem 2rem',
-        backgroundColor: 'white',
-        borderBottom: `1px solid ${brandColors.neutral[200]}`,
+        backgroundColor: isMobile ? 'rgba(255, 255, 255, 0.7)' : 'white',
+        backdropFilter: isMobile ? 'blur(10px)' : 'none',
+        borderBottom: `1px solid ${isMobile ? 'rgba(0, 0, 0, 0.05)' : brandColors.neutral[200]}`,
         position: 'sticky',
         top: 0,
         zIndex: 10
@@ -297,20 +270,22 @@ export default function ClientPage() {
         <button
           onClick={() => navigate('/dashboard')}
           style={{
-            padding: '0.5rem',
-            backgroundColor: brandColors.neutral[100],
+            padding: isMobile ? '0.625rem' : '0.5rem',
+            backgroundColor: isMobile ? brandColors.neutral[900] : brandColors.neutral[100],
             border: 'none',
-            borderRadius: '8px',
+            borderRadius: isMobile ? '10px' : '8px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            color: brandColors.neutral[600],
+            color: isMobile ? 'white' : brandColors.neutral[600],
             fontSize: '0.875rem',
-            fontWeight: '500'
+            fontWeight: isMobile ? '600' : '500',
+            boxShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none',
+            transition: 'all 0.2s ease'
           }}
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={isMobile ? 18 : 16} strokeWidth={isMobile ? 2.5 : 2} />
           {isMobile ? '' : 'Back'}
         </button>
         
@@ -354,227 +329,151 @@ export default function ClientPage() {
       <div style={{
         padding: isMobile ? '1rem' : '2rem 2rem 1rem 2rem'
       }}>
-        {/* Statistics - Mobile vs Desktop */}
-        {isMobile ? (
-          /* Mobile: Simple horizontal stats bar */
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              <div>
-                <div style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '700',
-                  color: brandColors.neutral[900],
-                  marginBottom: '0.25rem'
-                }}>
-                  {totalClients}
-                </div>
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[600],
-                  fontWeight: '500'
-                }}>
-                  Total
-                </div>
-              </div>
-              <div style={{
-                width: '1px',
-                height: '30px',
-                backgroundColor: brandColors.neutral[200]
-              }}></div>
-              <div>
-                <div style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '700',
-                  color: brandColors.error[600],
-                  marginBottom: '0.25rem'
-                }}>
-                  {clientsWithOverdue}
-                </div>
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[600],
-                  fontWeight: '500'
-                }}>
-                  Overdue
-                </div>
-              </div>
-              <div style={{
-                width: '1px',
-                height: '30px',
-                backgroundColor: brandColors.neutral[200]
-              }}></div>
-              <div>
-                <div style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '700',
-                  color: brandColors.warning[600],
-                  marginBottom: '0.25rem'
-                }}>
-                  {totalOverdueCount}
-                </div>
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[600],
-                  fontWeight: '500'
-                }}>
-                  Count
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Desktop: Full stats cards */
+        {/* Statistics - Modern Minimal Design */}
         <div style={{
           display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1rem',
-          marginBottom: '2rem'
+          gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)',
+          gap: isMobile ? '0.75rem' : '1.25rem',
+          marginBottom: '1.5rem'
         }}>
           {/* Total Clients */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            background: `linear-gradient(135deg, ${brandColors.primary[50]} 0%, ${brandColors.primary[100]} 100%)`,
+            borderRadius: isMobile ? '16px' : '20px',
+            padding: isMobile ? '1rem' : '1.5rem',
+            border: `1px solid ${brandColors.primary[200]}`,
+            position: 'relative',
+            overflow: 'hidden'
           }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.5rem'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: brandColors.primary[100],
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Users size={20} color={brandColors.primary[600]} />
-              </div>
-              <h3 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
-                margin: 0
-              }}>
-                Total Clients
-              </h3>
-            </div>
+              position: 'absolute',
+              top: '-10px',
+              right: '-10px',
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: brandColors.primary[200],
+              opacity: 0.3
+            }} />
+            <Users 
+              size={isMobile ? 18 : 24} 
+              color={brandColors.primary[600]} 
+              style={{ marginBottom: '0.5rem', position: 'relative', zIndex: 1 }} 
+            />
             <p style={{
-              fontSize: '2rem',
+              fontSize: isMobile ? '1.75rem' : '2.25rem',
               fontWeight: '700',
-              color: brandColors.neutral[900],
-              margin: 0
+              color: brandColors.primary[700],
+              margin: '0 0 0.25rem 0',
+              position: 'relative',
+              zIndex: 1
             }}>
               {totalClients}
+            </p>
+            <p style={{
+              fontSize: isMobile ? '0.7rem' : '0.875rem',
+              fontWeight: '600',
+              color: brandColors.primary[600],
+              margin: 0,
+              position: 'relative',
+              zIndex: 1
+            }}>
+              Total Clients
             </p>
           </div>
 
           {/* Clients with Overdue */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            background: `linear-gradient(135deg, ${brandColors.error[50]} 0%, ${brandColors.error[100]} 100%)`,
+            borderRadius: isMobile ? '16px' : '20px',
+            padding: isMobile ? '1rem' : '1.5rem',
+            border: `1px solid ${brandColors.error[200]}`,
+            position: 'relative',
+            overflow: 'hidden'
           }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.5rem'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: brandColors.error[100],
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <AlertTriangle size={20} color={brandColors.error[600]} />
-              </div>
-              <h3 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
-                margin: 0
-              }}>
-                With Overdue
-              </h3>
-            </div>
+              position: 'absolute',
+              top: '-10px',
+              right: '-10px',
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: brandColors.error[200],
+              opacity: 0.3
+            }} />
+            <AlertTriangle 
+              size={isMobile ? 18 : 24} 
+              color={brandColors.error[600]} 
+              style={{ marginBottom: '0.5rem', position: 'relative', zIndex: 1 }} 
+            />
             <p style={{
-              fontSize: '2rem',
+              fontSize: isMobile ? '1.75rem' : '2.25rem',
               fontWeight: '700',
-              color: brandColors.error[600],
-              margin: 0
+              color: brandColors.error[700],
+              margin: '0 0 0.25rem 0',
+              position: 'relative',
+              zIndex: 1
             }}>
               {clientsWithOverdue}
+            </p>
+            <p style={{
+              fontSize: isMobile ? '0.7rem' : '0.875rem',
+              fontWeight: '600',
+              color: brandColors.error[600],
+              margin: 0,
+              position: 'relative',
+              zIndex: 1
+            }}>
+              With Overdue
             </p>
           </div>
 
           {/* Total Overdue Count */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            background: `linear-gradient(135deg, ${brandColors.warning[50]} 0%, ${brandColors.warning[100]} 100%)`,
+            borderRadius: isMobile ? '16px' : '20px',
+            padding: isMobile ? '1rem' : '1.5rem',
+            border: `1px solid ${brandColors.warning[200]}`,
+            position: 'relative',
+            overflow: 'hidden'
           }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '0.5rem'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: brandColors.warning[100],
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <DollarSign size={20} color={brandColors.warning[600]} />
-              </div>
-              <h3 style={{
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: brandColors.neutral[900],
-                margin: 0
-              }}>
-                Total Overdue
-              </h3>
-            </div>
+              position: 'absolute',
+              top: '-10px',
+              right: '-10px',
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: brandColors.warning[200],
+              opacity: 0.3
+            }} />
+            <DollarSign 
+              size={isMobile ? 18 : 24} 
+              color={brandColors.warning[600]} 
+              style={{ marginBottom: '0.5rem', position: 'relative', zIndex: 1 }} 
+            />
             <p style={{
-              fontSize: '2rem',
+              fontSize: isMobile ? '1.75rem' : '2.25rem',
               fontWeight: '700',
-              color: brandColors.warning[600],
-              margin: 0
+              color: brandColors.warning[700],
+              margin: '0 0 0.25rem 0',
+              position: 'relative',
+              zIndex: 1
             }}>
               {totalOverdueCount}
             </p>
+            <p style={{
+              fontSize: isMobile ? '0.7rem' : '0.875rem',
+              fontWeight: '600',
+              color: brandColors.warning[600],
+              margin: 0,
+              position: 'relative',
+              zIndex: 1
+            }}>
+              Overdue Count
+            </p>
           </div>
         </div>
-        )}
 
         {/* Search */}
         <div style={{
@@ -649,205 +548,170 @@ export default function ClientPage() {
           )}
         </div>
 
-        {/* Clients List */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          border: `1px solid ${brandColors.neutral[100]}`
-        }}>
-          {filteredClients.length === 0 ? (
-            <div style={{
-              padding: '3rem',
-              textAlign: 'center'
+        {/* Clients List - Transaction Style */}
+        {filteredClients.length === 0 ? (
+          <div style={{
+            padding: '3rem',
+            textAlign: 'center',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            border: `1px solid ${brandColors.neutral[100]}`
+          }}>
+            <Users size={48} color={brandColors.neutral[300]} style={{ marginBottom: '1rem' }} />
+            <h3 style={{
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: brandColors.neutral[700],
+              margin: '0 0 0.5rem 0'
             }}>
-              <Users size={48} color={brandColors.neutral[300]} style={{ marginBottom: '1rem' }} />
-              <h3 style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                color: brandColors.neutral[700],
-                margin: '0 0 0.5rem 0'
-              }}>
-                {searchQuery ? 'No clients found' : 'No clients yet'}
-              </h3>
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[500],
-                margin: '0 0 1.5rem 0'
-              }}>
-                {searchQuery 
-                  ? 'Try adjusting your search terms'
-                  : 'Add your first client to get started'
-                }
-              </p>
-              {!searchQuery && (
-                <button
-                  onClick={() => setShowClientForm(true)}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    backgroundColor: brandColors.primary[600],
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
+              {searchQuery ? 'No clients found' : 'No clients yet'}
+            </h3>
+            <p style={{
+              fontSize: '0.875rem',
+              color: brandColors.neutral[500],
+              margin: '0 0 1.5rem 0'
+            }}>
+              {searchQuery 
+                ? 'Try adjusting your search terms'
+                : 'Add your first client to get started'
+              }
+            </p>
+            {!searchQuery && (
+              <button
+                onClick={() => setShowClientForm(true)}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: brandColors.primary[600],
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  margin: '0 auto'
+                }}
+              >
+                <Plus size={16} />
+                Add First Client
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+            {filteredClients.map((client) => (
+              <div
+                key={client.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: isMobile ? '0.875rem' : '1rem 1.25rem',
+                  backgroundColor: brandColors.white,
+                  borderRadius: '12px',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                  border: `1px solid ${brandColors.neutral[100]}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => handleEditClient(client)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.08)'
+                  e.currentTarget.style.borderColor = brandColors.neutral[200]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  e.currentTarget.style.borderColor = brandColors.neutral[100]
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                  {/* Avatar Circle */}
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    minWidth: '36px',
+                    borderRadius: '50%',
+                    backgroundColor: client.overdue_count > 0 ? brandColors.error[100] : brandColors.primary[100],
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     fontSize: '0.875rem',
                     fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    margin: '0 auto'
-                  }}
-                >
-                  <Plus size={16} />
-                  Add First Client
-                </button>
-              )}
-            </div>
-          ) : (
-            <div>
-              {filteredClients.map((client, index) => (
-                <div
-                  key={client.id}
-                  style={{
-                    padding: '1.5rem',
-                    borderBottom: index < filteredClients.length - 1 ? `1px solid ${brandColors.neutral[100]}` : 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}
-                >
+                    color: client.overdue_count > 0 ? brandColors.error[600] : brandColors.primary[600]
+                  }}>
+                    {client.name.charAt(0).toUpperCase()}
+                  </div>
+                  
                   {/* Client Info */}
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.75rem',
-                      marginBottom: '0.5rem'
+                      gap: '0.5rem',
+                      marginBottom: '0.125rem'
                     }}>
-                      <h3 style={{
-                        fontSize: '1rem',
+                      <p style={{
+                        fontSize: isMobile ? '0.875rem' : '0.9375rem',
                         fontWeight: '600',
                         color: brandColors.neutral[900],
-                        margin: 0
+                        margin: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                       }}>
                         {client.name}
-                      </h3>
+                      </p>
                       {client.overdue_count > 0 && (
                         <div style={{
                           backgroundColor: brandColors.error[100],
                           color: brandColors.error[700],
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '6px',
-                          fontSize: '0.75rem',
+                          padding: '0.125rem 0.375rem',
+                          borderRadius: '4px',
+                          fontSize: '0.625rem',
                           fontWeight: '600',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.25rem'
+                          gap: '0.25rem',
+                          flexShrink: 0
                         }}>
-                          <AlertTriangle size={12} />
-                          {client.overdue_count} overdue
+                          <AlertTriangle size={10} />
+                          {client.overdue_count}
                         </div>
                       )}
                     </div>
-                    
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.25rem'
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: brandColors.neutral[500],
+                      margin: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
                     }}>
-                      {client.company_name && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          fontSize: '0.875rem',
-                          color: brandColors.neutral[600]
-                        }}>
-                          <Building size={14} />
-                          {client.company_name}
-                        </div>
-                      )}
-                      {client.email && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          fontSize: '0.875rem',
-                          color: brandColors.neutral[600]
-                        }}>
-                          <Mail size={14} />
-                          {client.email}
-                        </div>
-                      )}
-                      {client.phone && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          fontSize: '0.875rem',
-                          color: brandColors.neutral[600]
-                        }}>
-                          <Phone size={14} />
-                          {client.phone}
-                        </div>
-                      )}
-                      {client.address && (
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          fontSize: '0.875rem',
-                          color: brandColors.neutral[600]
-                        }}>
-                          <MapPin size={14} />
-                          {client.address}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <button
-                      onClick={() => handleEditClient(client)}
-                      style={{
-                        padding: '0.5rem',
-                        backgroundColor: brandColors.neutral[100],
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Edit size={16} color={brandColors.neutral[600]} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClient(client.id)}
-                      style={{
-                        padding: '0.5rem',
-                        backgroundColor: brandColors.error[100],
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Trash2 size={16} color={brandColors.error[600]} />
-                    </button>
+                      {client.company_name || client.email || client.phone || 'No contact info'}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+
+                {/* Edit Icon */}
+                {!isMobile && (
+                  <div style={{
+                    padding: '0.5rem',
+                    backgroundColor: brandColors.neutral[50],
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Edit size={16} color={brandColors.neutral[600]} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Client Form Modal */}
