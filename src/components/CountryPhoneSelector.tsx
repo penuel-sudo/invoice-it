@@ -51,8 +51,10 @@ export default function CountryPhoneSelector({
   const [phoneNumber, setPhoneNumber] = useState(value.phoneNumber)
   const [isValid, setIsValid] = useState(false)
   const [showError, setShowError] = useState(false)
+  const [containerWidth, setContainerWidth] = useState<number>(0)
   
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const mainContainerRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Memoize countries data for performance
@@ -101,6 +103,20 @@ export default function CountryPhoneSelector({
     window.addEventListener('resize', checkMobile)
     
     return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Measure container width on mount and resize
+  useEffect(() => {
+    const updateContainerWidth = () => {
+      if (mainContainerRef.current) {
+        setContainerWidth(mainContainerRef.current.offsetWidth)
+      }
+    }
+    
+    updateContainerWidth()
+    window.addEventListener('resize', updateContainerWidth)
+    
+    return () => window.removeEventListener('resize', updateContainerWidth)
   }, [])
 
   // Set initial country from value
@@ -234,17 +250,20 @@ export default function CountryPhoneSelector({
     <div style={{ width: '100%' }}>
 
       {/* Main Input Container */}
-      <div style={{
-        display: 'flex',
-        width: '100%',
-        border: `1px solid ${error ? brandColors.error[300] : brandColors.neutral[300]}`,
-        borderRadius: '50px',
-        backgroundColor: disabled ? brandColors.neutral[50] : brandColors.white,
-        transition: 'all 0.2s ease',
-        position: 'relative'
-      }} ref={dropdownRef}>
+      <div 
+        ref={mainContainerRef}
+        style={{
+          display: 'flex',
+          width: '100%',
+          border: `1px solid ${error ? brandColors.error[300] : brandColors.neutral[300]}`,
+          borderRadius: '50px',
+          backgroundColor: disabled ? brandColors.neutral[50] : brandColors.white,
+          transition: 'all 0.2s ease',
+          position: 'relative'
+        }}
+      >
         {/* Country Selector */}
-        <div style={{ position: 'relative' }}>
+        <div ref={dropdownRef} style={{ position: 'relative' }}>
           <button
             type="button"
             onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
@@ -314,7 +333,7 @@ export default function CountryPhoneSelector({
               position: 'absolute',
               top: '100%',
               left: 0,
-              width: '400px',
+              width: containerWidth ? `${containerWidth}px` : '100%',
               backgroundColor: brandColors.white,
               border: `1px solid ${brandColors.neutral[200]}`,
               borderRadius: '12px',
@@ -322,7 +341,8 @@ export default function CountryPhoneSelector({
               zIndex: 50,
               maxHeight: '400px',
               overflow: 'hidden',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              marginTop: '0.5rem'
             }}>
               {/* Search Input */}
               <div style={{

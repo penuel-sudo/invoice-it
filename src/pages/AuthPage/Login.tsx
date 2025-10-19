@@ -106,8 +106,9 @@ export default function Login() {
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
+          gap: '0.5rem',
           zIndex: 10
         }}>
           <div style={{
@@ -126,6 +127,14 @@ export default function Login() {
               style={{ width: '40px', height: '40px' }}
             />
           </div>
+          <span style={{
+            fontSize: '1.125rem',
+            fontWeight: '700',
+            color: brandColors.neutral[900],
+            letterSpacing: '-0.025em'
+          }}>
+            
+          </span>
         </div>
       )}
 
