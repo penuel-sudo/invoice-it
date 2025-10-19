@@ -183,7 +183,7 @@ export default function Register() {
             color: brandColors.neutral[900],
             letterSpacing: '-0.025em'
           }}>
-            
+            InvoiceIt
           </span>
         </div>
       )}
