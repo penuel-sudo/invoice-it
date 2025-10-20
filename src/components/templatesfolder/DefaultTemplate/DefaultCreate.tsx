@@ -10,6 +10,8 @@ import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
 import { CURRENCIES, getCurrencySymbol } from '../../../lib/currencyUtils'
 import { useInvoiceCurrency } from '../../../hooks/useInvoiceCurrency'
+import ClientDropdown from '../../ClientDropdown'
+import type { Client } from '../../ClientDropdown'
 import { 
   ArrowLeft, 
   Save, 
@@ -384,6 +386,40 @@ export default function InvoiceCreatePage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Client Dropdown - Auto-fill client info */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: brandColors.neutral[700],
+                  marginBottom: '0.5rem'
+                }}>
+                  Select Existing Client (Optional)
+                </label>
+                <ClientDropdown
+                  onClientSelect={(client: Client) => {
+                    // Auto-fill only fields that have data
+                    setFormData(prev => ({
+                      ...prev,
+                      clientName: client.name || prev.clientName,
+                      clientEmail: client.email || prev.clientEmail,
+                      clientPhone: client.phone || prev.clientPhone,
+                      clientAddress: client.address || prev.clientAddress,
+                      clientCompanyName: client.company_name || prev.clientCompanyName
+                    }))
+                    toast.success(`Client "${client.name}" info loaded!`)
+                  }}
+                  placeholder="Search and select a client to auto-fill..."
+                />
+              </div>
+
+              <div style={{
+                height: '1px',
+                background: `linear-gradient(to right, transparent, ${brandColors.neutral[200]}, transparent)`,
+                margin: '0.5rem 0'
+              }} />
+
               <div>
                 <label style={{
                   display: 'block',

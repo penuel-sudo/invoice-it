@@ -26,6 +26,7 @@ export default function TemplateCard({
 }: TemplateCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isTapped, setIsTapped] = useState(false)
   const IconComponent = template.icon
   const PreviewComponent = template.PreviewComponent
 
@@ -46,10 +47,10 @@ export default function TemplateCard({
         backgroundColor: brandColors.white,
         borderRadius: isMobile ? '16px' : '20px',
         padding: isMobile ? '1.25rem' : '2rem',
-        boxShadow: isHovered 
+        boxShadow: (isHovered || isTapped)
           ? `0 20px 40px rgba(0, 0, 0, 0.15)` 
           : `0 8px 25px rgba(0, 0, 0, 0.08)`,
-        border: `2px solid ${isHovered ? template.color : 'transparent'}`,
+        border: `2px solid ${(isHovered || isTapped) ? template.color : 'transparent'}`,
         transition: 'all 0.3s ease',
         cursor: 'pointer',
         position: 'relative',
@@ -60,6 +61,11 @@ export default function TemplateCard({
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => {
+        if (isMobile) {
+          setIsTapped(!isTapped)
+        }
+      }}
     >
       {/* Template Preview */}
       <div style={{
@@ -157,12 +163,16 @@ export default function TemplateCard({
       <div style={{
         display: 'flex',
         gap: isMobile ? '0.5rem' : '0.75rem',
-        opacity: isMobile ? 1 : (isHovered ? 1 : 0),
-        transform: isMobile ? 'translateY(0)' : (isHovered ? 'translateY(0)' : 'translateY(10px)'),
-        transition: 'all 0.3s ease'
+        opacity: (isHovered || isTapped) ? 1 : 0,
+        transform: (isHovered || isTapped) ? 'translateY(0)' : 'translateY(10px)',
+        transition: 'all 0.3s ease',
+        pointerEvents: (isHovered || isTapped) ? 'auto' : 'none'
       }}>
         <button
-          onClick={() => onView?.(template.id)}
+          onClick={(e) => {
+            e.stopPropagation()
+            onView?.(template.id)
+          }}
           style={{
             flex: 1,
             padding: isMobile ? '0.875rem 1rem' : '0.75rem 1rem',
@@ -193,7 +203,10 @@ export default function TemplateCard({
           View
         </button>
         <button
-          onClick={() => onEdit?.(template.id)}
+          onClick={(e) => {
+            e.stopPropagation()
+            onEdit?.(template.id)
+          }}
           style={{
             flex: 1,
             padding: isMobile ? '0.875rem 1rem' : '0.75rem 1rem',

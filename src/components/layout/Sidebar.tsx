@@ -90,7 +90,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
         {/* Create Invoice Button */}
         <div style={{ padding: '1rem 0.5rem' }}>
           <button
-            onClick={() => navigate('/invoice/new')}
+            onClick={() => navigate('/invoice/create/default')}
             style={{
               width: '100%',
               display: 'flex',
