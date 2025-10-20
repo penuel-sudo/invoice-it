@@ -895,18 +895,27 @@ export default function InvoiceCreatePage() {
                         <input
                           type="text"
                           inputMode="decimal"
-                          value={item.quantity > 0 ? formatNumberForDisplay(item.quantity) : ''}
+                          value={item.quantity || ''}
                           onChange={(e) => {
-                            const value = e.target.value.replace(/[^0-9.]/g, '')
-                            updateItem(item.id, 'quantity', parseFloat(value) || 0)
-                          }}
-                          onBlur={(e) => {
-                            const parsed = parseFormattedNumber(e.target.value)
-                            if (parsed !== item.quantity) {
-                              updateItem(item.id, 'quantity', parsed)
+                            const value = e.target.value
+                            // Allow digits, one decimal point, and backspace/delete
+                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                              updateItem(item.id, 'quantity', value === '' ? 0 : parseFloat(value) || 0)
                             }
                           }}
-                          placeholder="0.00"
+                          onFocus={(e) => {
+                            // Show raw number when focused (remove formatting)
+                            e.target.value = item.quantity > 0 ? String(item.quantity) : ''
+                          }}
+                          onBlur={(e) => {
+                            // Format only when user leaves the field
+                            const num = parseFloat(e.target.value) || 0
+                            updateItem(item.id, 'quantity', num)
+                            if (num > 0) {
+                              e.target.value = formatNumberForDisplay(num)
+                            }
+                          }}
+                          placeholder="0"
                           style={{
                             width: '100%',
                             padding: '0.5rem',
@@ -932,18 +941,27 @@ export default function InvoiceCreatePage() {
                         <input
                           type="text"
                           inputMode="decimal"
-                          value={item.unitPrice > 0 ? formatNumberForDisplay(item.unitPrice) : ''}
+                          value={item.unitPrice || ''}
                           onChange={(e) => {
-                            const value = e.target.value.replace(/[^0-9.]/g, '')
-                            updateItem(item.id, 'unitPrice', parseFloat(value) || 0)
-                          }}
-                          onBlur={(e) => {
-                            const parsed = parseFormattedNumber(e.target.value)
-                            if (parsed !== item.unitPrice) {
-                              updateItem(item.id, 'unitPrice', parsed)
+                            const value = e.target.value
+                            // Allow digits, one decimal point, and backspace/delete
+                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                              updateItem(item.id, 'unitPrice', value === '' ? 0 : parseFloat(value) || 0)
                             }
                           }}
-                          placeholder="0.00"
+                          onFocus={(e) => {
+                            // Show raw number when focused (remove formatting)
+                            e.target.value = item.unitPrice > 0 ? String(item.unitPrice) : ''
+                          }}
+                          onBlur={(e) => {
+                            // Format only when user leaves the field
+                            const num = parseFloat(e.target.value) || 0
+                            updateItem(item.id, 'unitPrice', num)
+                            if (num > 0) {
+                              e.target.value = formatNumberForDisplay(num)
+                            }
+                          }}
+                          placeholder="0"
                           style={{
                             width: '100%',
                             padding: '0.5rem',
