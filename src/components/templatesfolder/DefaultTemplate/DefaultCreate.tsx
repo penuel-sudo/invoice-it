@@ -324,6 +324,20 @@ export default function InvoiceCreatePage() {
     })
   }
 
+  // Format number while typing (with commas, no forced decimals)
+  const formatNumberWhileTyping = (value: string): string => {
+    if (!value) return ''
+    
+    // Split by decimal point
+    const parts = value.split('.')
+    
+    // Format the integer part with commas
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    
+    // Join back with decimal if it exists
+    return parts.join('.')
+  }
+
   // Parse formatted number back to number
   const parseFormattedNumber = (value: string): number => {
     if (!value || value.trim() === '') return 0
@@ -356,8 +370,18 @@ export default function InvoiceCreatePage() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
+      // Filter out empty items before saving
+      const validItems = formData.items.filter(item => 
+        item.description.trim() !== '' || item.quantity > 0 || item.unitPrice > 0
+      )
+
+      const saveData = {
+        ...formData,
+        items: validItems
+      }
+
       // Use shared save function - handles all validation, saving, and localStorage clearing
-      const result = await saveInvoiceToDatabase(formData, user, { status: 'draft' })
+      const result = await saveInvoiceToDatabase(saveData, user, { status: 'draft' })
       
       if (result.success) {
         // Reset form to default state (like the original function did)
@@ -377,14 +401,31 @@ export default function InvoiceCreatePage() {
       return
     }
 
-    if (formData.items.some(item => !item.description.trim())) {
+    // Filter out empty items before preview
+    const validItems = formData.items.filter(item => 
+      item.description.trim() !== '' || item.quantity > 0 || item.unitPrice > 0
+    )
+
+    if (validItems.length === 0) {
+      toast.error('Add at least one item to the invoice')
+      return
+    }
+
+    // Create preview data with only valid items
+    const previewData = {
+      ...formData,
+      items: validItems
+    }
+
+    // Check if all valid items have descriptions
+    if (validItems.some(item => !item.description.trim())) {
       toast.error('All items must have a description')
       return
     }
 
-    // Navigate to preview with form data
+    // Navigate to preview with filtered data (only valid items)
     navigate('/invoice/preview/default', { 
-      state: { invoiceData: formData } 
+      state: { invoiceData: previewData } 
     })
   }
 
@@ -895,25 +936,20 @@ export default function InvoiceCreatePage() {
                         <input
                           type="text"
                           inputMode="decimal"
-                          value={item.quantity || ''}
+                          value={formatNumberWhileTyping(String(item.quantity || ''))}
                           onChange={(e) => {
-                            const value = e.target.value
-                            // Allow digits, one decimal point, and backspace/delete
+                            let value = e.target.value.replace(/,/g, '') // Remove commas for processing
+                            
+                            // Allow empty, digits, and ONE decimal point
                             if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                              updateItem(item.id, 'quantity', value === '' ? 0 : parseFloat(value) || 0)
+                              const numValue = value === '' ? 0 : (parseFloat(value) || 0)
+                              updateItem(item.id, 'quantity', numValue)
                             }
-                          }}
-                          onFocus={(e) => {
-                            // Show raw number when focused (remove formatting)
-                            e.target.value = item.quantity > 0 ? String(item.quantity) : ''
                           }}
                           onBlur={(e) => {
-                            // Format only when user leaves the field
-                            const num = parseFloat(e.target.value) || 0
+                            // Format with .00 when user leaves the field
+                            const num = parseFormattedNumber(e.target.value)
                             updateItem(item.id, 'quantity', num)
-                            if (num > 0) {
-                              e.target.value = formatNumberForDisplay(num)
-                            }
                           }}
                           placeholder="0"
                           style={{
@@ -941,25 +977,20 @@ export default function InvoiceCreatePage() {
                         <input
                           type="text"
                           inputMode="decimal"
-                          value={item.unitPrice || ''}
+                          value={formatNumberWhileTyping(String(item.unitPrice || ''))}
                           onChange={(e) => {
-                            const value = e.target.value
-                            // Allow digits, one decimal point, and backspace/delete
+                            let value = e.target.value.replace(/,/g, '') // Remove commas for processing
+                            
+                            // Allow empty, digits, and ONE decimal point
                             if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                              updateItem(item.id, 'unitPrice', value === '' ? 0 : parseFloat(value) || 0)
+                              const numValue = value === '' ? 0 : (parseFloat(value) || 0)
+                              updateItem(item.id, 'unitPrice', numValue)
                             }
-                          }}
-                          onFocus={(e) => {
-                            // Show raw number when focused (remove formatting)
-                            e.target.value = item.unitPrice > 0 ? String(item.unitPrice) : ''
                           }}
                           onBlur={(e) => {
-                            // Format only when user leaves the field
-                            const num = parseFloat(e.target.value) || 0
+                            // Format with .00 when user leaves the field
+                            const num = parseFormattedNumber(e.target.value)
                             updateItem(item.id, 'unitPrice', num)
-                            if (num > 0) {
-                              e.target.value = formatNumberForDisplay(num)
-                            }
                           }}
                           placeholder="0"
                           style={{

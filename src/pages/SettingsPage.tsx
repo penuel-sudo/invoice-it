@@ -13,7 +13,8 @@ import {
   Bell, 
   Palette, 
   Save, 
-  Loader2
+  Loader2,
+  LogOut
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import CountryPhoneSelector from '../components/CountryPhoneSelector'
@@ -791,6 +792,50 @@ export default function SettingsPage() {
                         </>
                       )}
                     </button>
+
+                    {/* Sign Out Button - Mobile Only */}
+                    {isMobile && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { error } = await supabase.auth.signOut()
+                            if (error) {
+                              toast.error('Failed to sign out')
+                            } else {
+                              toast.success('Signed out successfully')
+                              navigate('/auth/login')
+                            }
+                          } catch (error) {
+                            console.error('Sign out error:', error)
+                            toast.error('An error occurred while signing out')
+                          }
+                        }}
+                        style={{
+                          padding: '0.875rem 1.5rem',
+                          backgroundColor: brandColors.error[600],
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = brandColors.error[700]
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = brandColors.error[600]
+                        }}
+                      >
+                        <LogOut size={16} />
+                        Sign Out
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
