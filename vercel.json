@@ -6,16 +6,7 @@
     }
   ],
   "functions": {
-    "api/generate-pdf.js": {
-      "maxDuration": 30
-    },
     "api/send-invoice-email.js": {
-      "maxDuration": 30
-    },
-    "api/auth/login.js": {
-      "maxDuration": 30
-    },
-    "api/auth/register.js": {
       "maxDuration": 30
     }
   },

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../../lib/useAuth'
 import { brandColors } from '../../../stylings'
@@ -46,6 +46,8 @@ export default function InvoiceCreatePage() {
   const [formData, setFormData] = useState<InvoiceFormData>(invoiceStorage.getDraftWithFallback())
   const [loading, setLoading] = useState(false)
   const { currency: globalCurrency, currencySymbol: globalCurrencySymbol, setCurrency } = useInvoiceCurrency(formData.currency)
+  const itemsContainerRef = useRef<HTMLDivElement>(null)
+  const lastItemRef = useRef<HTMLDivElement>(null)
   const [userDefaults, setUserDefaults] = useState<{ 
     paymentMethods: PaymentMethod[]
   }>({
@@ -244,6 +246,11 @@ export default function InvoiceCreatePage() {
       ...prev,
       items: [...prev.items, newItem]
     }))
+    
+    // Scroll to new item
+    setTimeout(() => {
+      lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 100)
   }
 
   const removeItem = (id: string) => {
@@ -256,9 +263,8 @@ export default function InvoiceCreatePage() {
   }
 
   const updateItem = (id: string, field: keyof InvoiceItem, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.map(item => {
+    setFormData(prev => {
+      const updatedItems = prev.items.map(item => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value }
           // Recalculate line total
@@ -267,7 +273,84 @@ export default function InvoiceCreatePage() {
         }
         return item
       })
-    }))
+
+      // Check if we should auto-add a new item
+      const currentItem = updatedItems.find(item => item.id === id)
+      const isLastItem = updatedItems[updatedItems.length - 1]?.id === id
+      
+      if (currentItem && isLastItem) {
+        // Check if current item is complete (has description, quantity > 0, and unitPrice > 0)
+        const isComplete = 
+          currentItem.description.trim() !== '' &&
+          currentItem.quantity > 0 &&
+          currentItem.unitPrice > 0
+
+        if (isComplete) {
+          // Auto-add new empty item
+          const newItem: InvoiceItem = {
+            id: Date.now().toString(),
+            description: '',
+            quantity: 1,
+            unitPrice: 0,
+            taxRate: 0,
+            lineTotal: 0
+          }
+          
+          // Scroll to new item after state update
+          setTimeout(() => {
+            lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+          }, 100)
+
+          return {
+            ...prev,
+            items: [...updatedItems, newItem]
+          }
+        }
+      }
+
+      return {
+        ...prev,
+        items: updatedItems
+      }
+    })
+  }
+
+  // Format number for display (with commas and decimals)
+  const formatNumberForDisplay = (value: number): string => {
+    if (value === 0) return ''
+    return value.toLocaleString('en-US', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    })
+  }
+
+  // Parse formatted number back to number
+  const parseFormattedNumber = (value: string): number => {
+    if (!value || value.trim() === '') return 0
+    // Remove commas and parse
+    const cleaned = value.replace(/,/g, '')
+    const parsed = parseFloat(cleaned)
+    return isNaN(parsed) ? 0 : parsed
+  }
+
+  // Remove empty last item when user clicks another section
+  const cleanupEmptyLastItem = () => {
+    setFormData(prev => {
+      const lastItem = prev.items[prev.items.length - 1]
+      if (
+        prev.items.length > 1 &&
+        lastItem &&
+        lastItem.description.trim() === '' &&
+        lastItem.quantity <= 0 &&
+        lastItem.unitPrice <= 0
+      ) {
+        return {
+          ...prev,
+          items: prev.items.slice(0, -1)
+        }
+      }
+      return prev
+    })
   }
 
   const handleSave = async () => {
@@ -368,12 +451,15 @@ export default function InvoiceCreatePage() {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '1rem'
-            }}>
+            <div 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '1rem'
+              }}
+              onClick={cleanupEmptyLastItem}
+            >
               <User size={20} color={brandColors.primary[600]} />
               <h2 style={{
                 fontSize: '1rem',
@@ -723,14 +809,18 @@ export default function InvoiceCreatePage() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div ref={itemsContainerRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {formData.items.map((item, index) => (
-                <div key={item.id} style={{
-                  padding: '1rem',
-                  backgroundColor: brandColors.neutral[50],
-                  borderRadius: '12px',
-                  border: `1px solid ${brandColors.neutral[200]}`
-                }}>
+                <div 
+                  key={item.id} 
+                  ref={index === formData.items.length - 1 ? lastItemRef : null}
+                  style={{
+                    padding: '1rem',
+                    backgroundColor: brandColors.neutral[50],
+                    borderRadius: '12px',
+                    border: `1px solid ${brandColors.neutral[200]}`
+                  }}
+                >
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -803,11 +893,20 @@ export default function InvoiceCreatePage() {
                           Qty
                         </label>
                         <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                          type="text"
+                          inputMode="decimal"
+                          value={item.quantity > 0 ? formatNumberForDisplay(item.quantity) : ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '')
+                            updateItem(item.id, 'quantity', parseFloat(value) || 0)
+                          }}
+                          onBlur={(e) => {
+                            const parsed = parseFormattedNumber(e.target.value)
+                            if (parsed !== item.quantity) {
+                              updateItem(item.id, 'quantity', parsed)
+                            }
+                          }}
+                          placeholder="0.00"
                           style={{
                             width: '100%',
                             padding: '0.5rem',
@@ -831,11 +930,20 @@ export default function InvoiceCreatePage() {
                           Unit Price
                         </label>
                         <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                          type="text"
+                          inputMode="decimal"
+                          value={item.unitPrice > 0 ? formatNumberForDisplay(item.unitPrice) : ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '')
+                            updateItem(item.id, 'unitPrice', parseFloat(value) || 0)
+                          }}
+                          onBlur={(e) => {
+                            const parsed = parseFormattedNumber(e.target.value)
+                            if (parsed !== item.unitPrice) {
+                              updateItem(item.id, 'unitPrice', parsed)
+                            }
+                          }}
+                          placeholder="0.00"
                           style={{
                             width: '100%',
                             padding: '0.5rem',
