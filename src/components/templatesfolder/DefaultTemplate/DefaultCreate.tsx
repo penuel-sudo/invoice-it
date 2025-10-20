@@ -315,15 +315,6 @@ export default function InvoiceCreatePage() {
     })
   }
 
-  // Format number for display (with commas and decimals)
-  const formatNumberForDisplay = (value: number): string => {
-    if (value === 0) return ''
-    return value.toLocaleString('en-US', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
-    })
-  }
-
   // Format number while typing (with commas, no forced decimals)
   const formatNumberWhileTyping = (value: string): string => {
     if (!value) return ''
