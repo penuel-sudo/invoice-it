@@ -554,63 +554,63 @@ export default function InvoicePreviewPage() {
                   gap: '0.75rem'
                 }}>
                   {invoiceData.paymentMethods.map((method) => {
-                      const details = method.details as any
-                      return (
-                        <div
-                          key={method.id}
-                          style={{
-                            fontSize: '0.7rem',
-                            color: brandColors.neutral[600],
-                            lineHeight: '1.6',
-                            padding: '0.5rem',
-                            backgroundColor: brandColors.neutral[50],
-                            borderRadius: '6px'
-                          }}
-                        >
-                          <div style={{ fontWeight: '500', color: brandColors.neutral[800], marginBottom: '0.25rem' }}>
-                            {method.label}
-                          </div>
-                          {method.type === 'bank_local_us' && (
-                            <>
-                              <div>Bank: {details.bankName}</div>
-                              <div>Account: {details.accountName}</div>
-                              <div>Type: {details.accountType}</div>
-                              <div>Acct #: {details.accountNumber}</div>
-                              <div>Routing: {details.routingNumber}</div>
-                            </>
-                          )}
-                          {method.type === 'bank_local_ng' && (
-                            <>
-                              <div>Bank: {details.bankName}</div>
-                              <div>Account Name: {details.accountName}</div>
-                              <div>Account #: {details.accountNumber}</div>
-                              <div>Bank Code: {details.bankCode}</div>
-                            </>
-                          )}
-                          {method.type === 'bank_international' && (
-                            <>
-                              <div>Bank: {details.bankName}</div>
-                              <div>Beneficiary: {details.accountName}</div>
-                              <div>IBAN: {details.iban}</div>
-                              <div>SWIFT: {details.swiftCode}</div>
-                              <div>Address: {details.bankAddress}, {details.bankCity}, {details.bankCountry}</div>
-                            </>
-                          )}
-                          {method.type === 'paypal' && (
-                            <div>Email: {details.email}</div>
-                          )}
-                          {method.type === 'crypto' && (
-                            <>
-                              <div>Network: {details.network}</div>
-                              <div style={{ wordBreak: 'break-all' }}>Address: {details.walletAddress}</div>
-                            </>
-                          )}
-                          {method.type === 'other' && (
-                            <div>{details.instructions}</div>
-                          )}
+                    const details = method.details as any
+                    return (
+                      <div
+                        key={method.id}
+                        style={{
+                          fontSize: '0.7rem',
+                          color: brandColors.neutral[600],
+                          lineHeight: '1.6',
+                          padding: '0.5rem',
+                          backgroundColor: brandColors.neutral[50],
+                          borderRadius: '6px'
+                        }}
+                      >
+                        <div style={{ fontWeight: '500', color: brandColors.neutral[800], marginBottom: '0.25rem' }}>
+                          {method.label}
                         </div>
-                      )
-                    })}
+                        {method.type === 'bank_local_us' && (
+                          <>
+                            <div>Bank: {details.bankName}</div>
+                            <div>Account: {details.accountName}</div>
+                            <div>Type: {details.accountType}</div>
+                            <div>Acct #: {details.accountNumber}</div>
+                            <div>Routing: {details.routingNumber}</div>
+                          </>
+                        )}
+                        {method.type === 'bank_local_ng' && (
+                          <>
+                            <div>Bank: {details.bankName}</div>
+                            <div>Account Name: {details.accountName}</div>
+                            <div>Account #: {details.accountNumber}</div>
+                            <div>Bank Code: {details.bankCode}</div>
+                          </>
+                        )}
+                        {method.type === 'bank_international' && (
+                          <>
+                            <div>Bank: {details.bankName}</div>
+                            <div>Beneficiary: {details.accountName}</div>
+                            <div>IBAN: {details.iban}</div>
+                            <div>SWIFT: {details.swiftCode}</div>
+                            <div>Address: {details.bankAddress}, {details.bankCity}, {details.bankCountry}</div>
+                          </>
+                        )}
+                        {method.type === 'paypal' && (
+                          <div>Email: {details.email}</div>
+                        )}
+                        {method.type === 'crypto' && (
+                          <>
+                            <div>Network: {details.network}</div>
+                            <div style={{ wordBreak: 'break-all' }}>Address: {details.walletAddress}</div>
+                          </>
+                        )}
+                        {method.type === 'other' && (
+                          <div>{details.instructions}</div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
