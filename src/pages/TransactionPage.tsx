@@ -6,6 +6,7 @@ import { Layout } from '../components/layout'
 import { supabase } from '../lib/supabaseClient'
 import StatusButton from '../components/StatusButton'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
+import SendButton from '../components/buttons/SendButton'
 import { 
   ArrowLeft, 
   MoreVertical, 
@@ -64,8 +65,10 @@ export default function TransactionPage() {
   const [showTopbarDropdown, setShowTopbarDropdown] = useState(false)
   const [showTransactionDropdown, setShowTransactionDropdown] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [sendButtonTrigger, setSendButtonTrigger] = useState<{show: boolean, transaction: Transaction | null}>({ show: false, transaction: null })
   const topbarDropdownRef = useRef<HTMLDivElement>(null)
   const transactionDropdownRef = useRef<HTMLDivElement>(null)
+  const sendButtonWrapperRef = useRef<HTMLDivElement>(null)
 
 
   // Check if mobile
@@ -79,6 +82,16 @@ export default function TransactionPage() {
     
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Auto-trigger SendButton when sendButtonTrigger is set
+  useEffect(() => {
+    if (sendButtonTrigger.show && sendButtonWrapperRef.current) {
+      const button = sendButtonWrapperRef.current.querySelector('button')
+      if (button) {
+        button.click()
+      }
+    }
+  }, [sendButtonTrigger])
 
   // Load transactions from database
   useEffect(() => {
@@ -1036,14 +1049,14 @@ export default function TransactionPage() {
                               View Details
                             </button>
                             
-                            {/* Edit */}
+                            {/* Send Invoice */}
                             <button
                               onMouseDown={(e) => {
                                 e.preventDefault()
                                 if (transaction.type === 'invoice') {
-                                  toast.success('Send functionality coming soon!')
+                                  setSendButtonTrigger({ show: true, transaction })
                                 } else {
-                                  toast.success('Send functionality coming soon!')
+                                  toast.error('Only invoices can be sent via email')
                                 }
                                 setShowTransactionDropdown(null)
                               }}
@@ -1198,6 +1211,20 @@ export default function TransactionPage() {
           )}
         </div>
       </div>
+
+      {/* Hidden SendButton - Triggered when user clicks Send in dropdown */}
+      {sendButtonTrigger.show && sendButtonTrigger.transaction && (
+        <div ref={sendButtonWrapperRef} style={{ display: 'none' }}>
+          <SendButton
+            invoiceData={sendButtonTrigger.transaction}
+            userData={user}
+            onSend={() => {
+              setSendButtonTrigger({ show: false, transaction: null })
+              loadTransactions() // Reload transactions to reflect updated status
+            }}
+          />
+        </div>
+      )}
     </Layout>
   )
 }

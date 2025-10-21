@@ -259,11 +259,21 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
               <p style={{
                 fontSize: '0.875rem',
                 color: brandColors.neutral[600],
-                margin: 0,
+                margin: '0 0 0.75rem 0',
                 fontWeight: '400',
                 fontFamily: 'Poppins, sans-serif'
               }}>
                 We've sent a password reset link to <strong>{email}</strong>
+              </p>
+              <p style={{
+                fontSize: '0.8125rem',
+                color: brandColors.neutral[500],
+                margin: 0,
+                fontWeight: '400',
+                fontFamily: 'Poppins, sans-serif',
+                fontStyle: 'italic'
+              }}>
+                If you don't see it, check your spam folder.
               </p>
             </div>
 
