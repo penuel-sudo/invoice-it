@@ -45,12 +45,18 @@ export default function PaymentMethodManager({
       return
     }
 
+    // Ensure account type is saved for US bank transfers (Checking or Savings)
+    const details = { ...formData }
+    if (selectedType === 'bank_local_us') {
+      details.accountType = formData.accountType || 'checking'
+    }
+
     const newMethod: PaymentMethod = {
       id: `pm_${Date.now()}`,
       type: selectedType,
       label: methodLabel,
       isDefault: paymentMethods.length === 0,
-      details: formData
+      details: details
     }
 
     onAdd(newMethod)
@@ -88,8 +94,8 @@ export default function PaymentMethodManager({
         }
         return true
       case 'crypto':
-        if (!details.walletAddress || !details.network) {
-          toast.error('Please enter wallet address and network')
+        if (!details.walletAddress || !details.currency || !details.network) {
+          toast.error('Please select currency/network and enter wallet address')
           return false
         }
         return true
@@ -367,6 +373,43 @@ export default function PaymentMethodManager({
       case 'crypto':
         return (
           <>
+            <select
+              value={formData.currencyNetwork || 'BTC-Bitcoin'}
+              onChange={(e) => {
+                const [currency, network] = e.target.value.split('-')
+                setFormData({ 
+                  ...formData, 
+                  currency, 
+                  network,
+                  currencyNetwork: e.target.value 
+                })
+              }}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: `1px solid ${brandColors.neutral[300]}`,
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                marginBottom: '1rem'
+              }}
+            >
+              <optgroup label="Bitcoin">
+                <option value="BTC-Bitcoin Network">Bitcoin (BTC) - Bitcoin Network</option>
+              </optgroup>
+              <optgroup label="Ethereum">
+                <option value="ETH-Ethereum Network">Ethereum (ETH) - Ethereum Network</option>
+              </optgroup>
+              <optgroup label="Tether (USDT)">
+                <option value="USDT-ERC-20">Tether (USDT) - Ethereum (ERC-20)</option>
+                <option value="USDT-TRC-20">Tether (USDT) - Tron (TRC-20)</option>
+                <option value="USDT-BEP-20">Tether (USDT) - BSC (BEP-20)</option>
+              </optgroup>
+              <optgroup label="USD Coin (USDC)">
+                <option value="USDC-ERC-20">USD Coin (USDC) - Ethereum (ERC-20)</option>
+                <option value="USDC-Polygon">USD Coin (USDC) - Polygon Network</option>
+                <option value="USDC-BEP-20">USD Coin (USDC) - BSC (BEP-20)</option>
+              </optgroup>
+            </select>
             <input
               type="text"
               placeholder="Wallet Address"
@@ -377,26 +420,23 @@ export default function PaymentMethodManager({
                 padding: '0.75rem',
                 border: `1px solid ${brandColors.neutral[300]}`,
                 borderRadius: '8px',
-                fontSize: '0.875rem',
-                marginBottom: '1rem'
-              }}
-            />
-            <select
-              value={formData.network || 'BTC'}
-              onChange={(e) => setFormData({ ...formData, network: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: `1px solid ${brandColors.neutral[300]}`,
-                borderRadius: '8px',
                 fontSize: '0.875rem'
               }}
-            >
-              <option value="BTC">Bitcoin (BTC)</option>
-              <option value="ETH">Ethereum (ETH)</option>
-              <option value="USDT">Tether (USDT)</option>
-              <option value="USDC">USD Coin (USDC)</option>
-            </select>
+            />
+            {formData.currency && formData.network && (
+              <div style={{
+                marginTop: '0.75rem',
+                padding: '0.75rem',
+                backgroundColor: brandColors.warning[50],
+                border: `1px solid ${brandColors.warning[200]}`,
+                borderRadius: '8px',
+                fontSize: '0.8125rem',
+                color: brandColors.warning[800],
+                lineHeight: '1.5'
+              }}>
+                ⚠️ <strong>Important:</strong> Ensure clients send <strong>{formData.currency}</strong> on the <strong>{formData.network}</strong> network. Sending to the wrong network will result in permanent loss of funds.
+              </div>
+            )}
           </>
         )
 
@@ -461,8 +501,12 @@ export default function PaymentMethodManager({
       case 'crypto':
         return (
           <div style={{ fontSize: '0.8rem', color: brandColors.neutral[600], lineHeight: '1.6' }}>
-            <div>{details.network}</div>
-            <div style={{ wordBreak: 'break-all' }}>{details.walletAddress}</div>
+            <div style={{ fontWeight: '500', color: brandColors.neutral[700] }}>
+              {details.currency || 'Crypto'} • {details.network || 'Network'}
+            </div>
+            <div style={{ wordBreak: 'break-all', marginTop: '0.25rem', fontSize: '0.75rem' }}>
+              {details.walletAddress}
+            </div>
           </div>
         )
       case 'other':
@@ -752,4 +796,5 @@ export default function PaymentMethodManager({
     </div>
   )
 }
+
 

@@ -6,13 +6,11 @@ import { Layout } from '../components/layout'
 import { supabase } from '../lib/supabaseClient'
 import StatusButton from '../components/StatusButton'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
-import SendButton from '../components/buttons/SendButton'
 import { 
   ArrowLeft, 
   MoreVertical, 
   Eye, 
   Edit, 
-  Send,
   Trash2, 
   Check,
   CheckSquare,
@@ -65,10 +63,8 @@ export default function TransactionPage() {
   const [showTopbarDropdown, setShowTopbarDropdown] = useState(false)
   const [showTransactionDropdown, setShowTransactionDropdown] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [selectedInvoiceForSend, setSelectedInvoiceForSend] = useState<Transaction | null>(null)
   const topbarDropdownRef = useRef<HTMLDivElement>(null)
   const transactionDropdownRef = useRef<HTMLDivElement>(null)
-  const sendButtonContainerRef = useRef<HTMLDivElement>(null)
 
 
   // Check if mobile
@@ -83,16 +79,6 @@ export default function TransactionPage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Auto-trigger SendButton when invoice is selected for sending
-  useEffect(() => {
-    if (selectedInvoiceForSend && sendButtonContainerRef.current) {
-      // Find the SendButton and click it to open the modal
-      const sendButton = sendButtonContainerRef.current.querySelector('button') as HTMLButtonElement
-      if (sendButton) {
-        sendButton.click()
-      }
-    }
-  }, [selectedInvoiceForSend])
 
   // Load transactions from database
   useEffect(() => {
@@ -1050,41 +1036,6 @@ export default function TransactionPage() {
                               View Details
                             </button>
                             
-                            {/* Send Invoice - Only for invoices */}
-                            {transaction.type === 'invoice' && (
-                              <button
-                                onMouseDown={(e) => {
-                                  e.preventDefault()
-                                  setSelectedInvoiceForSend(transaction)
-                                  setShowTransactionDropdown(null)
-                                }}
-                                style={{
-                                  width: '100%',
-                                  padding: '0.875rem 1rem',
-                                  backgroundColor: 'transparent',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.75rem',
-                                  fontSize: '0.875rem',
-                                  fontWeight: '500',
-                                  color: brandColors.neutral[800],
-                                  transition: 'background-color 0.2s ease',
-                                  textAlign: 'left'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.backgroundColor = 'transparent'
-                                }}
-                              >
-                                <Send size={16} color={brandColors.primary[600]} />
-                                Send Invoice
-                              </button>
-                            )}
-                            
                             {/* Status Actions for Invoices */}
                             {transaction.type === 'invoice' && (
                               <>
@@ -1210,23 +1161,6 @@ export default function TransactionPage() {
           )}
         </div>
       </div>
-
-      {/* SendButton Modal - Reusable component from Default Template */}
-      {selectedInvoiceForSend && (
-        <div 
-          ref={sendButtonContainerRef}
-          style={{ position: 'fixed', top: 0, left: 0, width: 0, height: 0, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}
-        >
-          <SendButton
-            invoiceData={selectedInvoiceForSend}
-            userData={user}
-            onSend={() => {
-              setSelectedInvoiceForSend(null)
-              loadTransactions() // Reload transactions to reflect updated status
-            }}
-          />
-        </div>
-      )}
     </Layout>
   )
 }

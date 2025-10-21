@@ -38,13 +38,22 @@ export default defineConfig({
           if (id.includes('framer-motion')) {
             return 'framer-motion'
           }
+          // Keep template components together to improve reliability
+          if (id.includes('templatesfolder')) {
+            return 'templates'
+          }
           // Keep lucide-react and other smaller libs in main bundle
           return undefined
         },
-        // Optimized file naming
+        // Optimized file naming with better cache busting
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Improve module loading reliability
+        format: 'es',
+        generatedCode: {
+          constBindings: true
+        }
       }
     },
     

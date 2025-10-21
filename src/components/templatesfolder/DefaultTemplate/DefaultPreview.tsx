@@ -550,7 +550,7 @@ export default function InvoicePreviewPage() {
                 </div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
                   gap: '0.75rem'
                 }}>
                   {invoiceData.paymentMethods.map((method) => {
@@ -564,7 +564,9 @@ export default function InvoicePreviewPage() {
                           lineHeight: '1.6',
                           padding: '0.5rem',
                           backgroundColor: brandColors.neutral[50],
-                          borderRadius: '6px'
+                          borderRadius: '6px',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word'
                         }}
                       >
                         <div style={{ fontWeight: '500', color: brandColors.neutral[800], marginBottom: '0.25rem' }}>
@@ -601,8 +603,26 @@ export default function InvoicePreviewPage() {
                         )}
                         {method.type === 'crypto' && (
                           <>
-                            <div>Network: {details.network}</div>
-                            <div style={{ wordBreak: 'break-all' }}>Address: {details.walletAddress}</div>
+                            <div style={{ fontWeight: '500' }}>
+                              {details.currency || 'Crypto'} • {details.network || 'Network'}
+                            </div>
+                            <div style={{ wordBreak: 'break-all', fontSize: '0.65rem', marginTop: '0.25rem' }}>
+                              Address: {details.walletAddress}
+                            </div>
+                            {details.currency && details.network && (
+                              <div style={{ 
+                                marginTop: '0.5rem', 
+                                padding: '0.35rem 0.5rem',
+                                backgroundColor: brandColors.warning[50],
+                                border: `1px solid ${brandColors.warning[200]}`,
+                                borderRadius: '4px',
+                                fontSize: '0.6rem',
+                                color: brandColors.warning[800],
+                                lineHeight: '1.4'
+                              }}>
+                                ⚠️ Send {details.currency} on {details.network} only
+                              </div>
+                            )}
                           </>
                         )}
                         {method.type === 'other' && (
