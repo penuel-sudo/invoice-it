@@ -10,6 +10,7 @@ import { useInvoiceCurrency } from '../../../hooks/useInvoiceCurrency'
 import ClientDropdown from '../../ClientDropdown'
 import type { Client } from '../../ClientDropdown'
 import type { PaymentMethod } from '../../../lib/storage/invoiceStorage'
+import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import { saveProfessionalInvoice } from './ProfessionalTemplateSave'
 import type { ProfessionalInvoiceFormData, ProfessionalInvoiceItem } from './ProfessionalTemplateSave'
 import { 
@@ -53,45 +54,74 @@ export default function ProfessionalInvoiceCreatePage() {
     return `INV-${timestamp}`
   }
 
-  // Initialize form data with extended fields
-  const [formData, setFormData] = useState<ProfessionalInvoiceFormData>({
-    clientName: '',
-    clientEmail: '',
-    clientAddress: '',
-    clientPhone: '',
-    clientCompanyName: '',
-    invoiceNumber: generateInvoiceNumber(),
-    invoiceDate: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    poNumber: '',
-    taxId: '',
-    shipToName: '',
-    shipToAddress: '',
-    shipToCity: '',
-    shipToState: '',
-    shipToZip: '',
-    shipToCountry: '',
-    items: [{
-      id: Date.now().toString(),
-      description: '',
-      quantity: 1,
-      unitPrice: 0,
-      discount: 0,
-      taxRate: 0,
-      lineTotal: 0
-    }],
-    notes: '',
-    termsAndConditions: '',
-    subtotal: 0,
-    discountAmount: 0,
-    shippingCost: 0,
-    taxTotal: 0,
-    grandTotal: 0,
-    amountPaid: 0,
-    balanceDue: 0,
-    currency: 'USD',
-    currencySymbol: '$',
-    selectedPaymentMethodIds: []
+  // Initialize form data with localStorage like Default template
+  const [formData, setFormData] = useState<ProfessionalInvoiceFormData>(() => {
+    // Start with localStorage data like Default template
+    const savedData = invoiceStorage.getDraft()
+    if (savedData) {
+      // Convert to ProfessionalInvoiceFormData with defaults for missing fields
+      return {
+        ...savedData,
+        discountAmount: (savedData as any).discountAmount || 0,
+        shippingCost: (savedData as any).shippingCost || 0,
+        amountPaid: (savedData as any).amountPaid || 0,
+        balanceDue: (savedData as any).balanceDue || 0,
+        poNumber: (savedData as any).poNumber || '',
+        taxId: (savedData as any).taxId || '',
+        shipToName: (savedData as any).shipToName || '',
+        shipToAddress: (savedData as any).shipToAddress || '',
+        shipToCity: (savedData as any).shipToCity || '',
+        shipToState: (savedData as any).shipToState || '',
+        shipToZip: (savedData as any).shipToZip || '',
+        shipToCountry: (savedData as any).shipToCountry || '',
+        termsAndConditions: (savedData as any).termsAndConditions || '',
+        items: (savedData.items || []).map((item: any) => ({
+          ...item,
+          discount: item.discount || 0
+        }))
+      }
+    }
+    
+    // Default values if no saved data
+    return {
+      clientName: '',
+      clientEmail: '',
+      clientAddress: '',
+      clientPhone: '',
+      clientCompanyName: '',
+      invoiceNumber: generateInvoiceNumber(),
+      invoiceDate: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      poNumber: '',
+      taxId: '',
+      shipToName: '',
+      shipToAddress: '',
+      shipToCity: '',
+      shipToState: '',
+      shipToZip: '',
+      shipToCountry: '',
+      items: [{
+        id: Date.now().toString(),
+        description: '',
+        quantity: 1,
+        unitPrice: 0,
+        discount: 0,
+        taxRate: 0,
+        lineTotal: 0
+      }],
+      notes: '',
+      termsAndConditions: '',
+      subtotal: 0,
+      discountAmount: 0,
+      shippingCost: 0,
+      taxTotal: 0,
+      grandTotal: 0,
+      amountPaid: 0,
+      balanceDue: 0,
+      currency: 'USD',
+      currencySymbol: '$',
+      selectedPaymentMethodIds: []
+    }
   })
 
   const [loading, setLoading] = useState(false)
@@ -204,7 +234,7 @@ export default function ProfessionalInvoiceCreatePage() {
     if (user) {
       loadInvoiceData()
     }
-  }, [searchParams, location.state, navigate, user])
+  }, [searchParams, location.state, navigate, user, setSearchParams])
 
   // Load user's default currency and payment details
   useEffect(() => {
@@ -299,12 +329,27 @@ export default function ProfessionalInvoiceCreatePage() {
     }))
   }, [formData.items, formData.discountAmount, formData.shippingCost, formData.amountPaid])
 
+  // Auto-save form data to localStorage (like Default)
+  useEffect(() => {
+    // For localStorage: include selected payment methods from allPaymentMethods
+    const selectedPaymentMethods = allPaymentMethods.filter(method => 
+      formData.selectedPaymentMethodIds?.includes(method.id)
+    )
+    
+    const dataToSave = {
+      ...formData,
+      paymentMethods: selectedPaymentMethods
+    }
+    
+    invoiceStorage.saveDraftDebounced(dataToSave)
+  }, [formData, allPaymentMethods])
+
   // Update URL when invoice number changes (like Default)
   useEffect(() => {
-    if (formData.invoiceNumber) {
+    if (formData.invoiceNumber && !loading) {
       setSearchParams({ invoice: formData.invoiceNumber })
     }
-  }, [formData.invoiceNumber, setSearchParams])
+  }, [formData.invoiceNumber, setSearchParams, loading])
 
   // Add item
   const addItem = () => {
@@ -433,7 +478,49 @@ export default function ProfessionalInvoiceCreatePage() {
       const result = await saveProfessionalInvoice(saveData, user, undefined, { status: 'draft' })
       
       if (result.success) {
-        navigate('/invoices')
+        // Reset form to default state (like Default template)
+        setFormData({
+          clientName: '',
+          clientEmail: '',
+          clientAddress: '',
+          clientPhone: '',
+          clientCompanyName: '',
+          invoiceNumber: generateInvoiceNumber(),
+          invoiceDate: new Date().toISOString().split('T')[0],
+          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          poNumber: '',
+          taxId: '',
+          shipToName: '',
+          shipToAddress: '',
+          shipToCity: '',
+          shipToState: '',
+          shipToZip: '',
+          shipToCountry: '',
+          items: [{
+            id: Date.now().toString(),
+            description: '',
+            quantity: 1,
+            unitPrice: 0,
+            discount: 0,
+            taxRate: 0,
+            lineTotal: 0
+          }],
+          notes: '',
+          termsAndConditions: '',
+          subtotal: 0,
+          discountAmount: 0,
+          shippingCost: 0,
+          taxTotal: 0,
+          grandTotal: 0,
+          amountPaid: 0,
+          balanceDue: 0,
+          currency: 'USD',
+          currencySymbol: '$',
+          selectedPaymentMethodIds: []
+        })
+        // Clear URL params
+        setSearchParams({})
+        toast.success('Invoice saved successfully!')
       }
     } catch (error) {
       console.error('Error saving invoice:', error)
