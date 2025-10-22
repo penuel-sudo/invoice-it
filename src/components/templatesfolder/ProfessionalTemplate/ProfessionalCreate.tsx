@@ -299,6 +299,13 @@ export default function ProfessionalInvoiceCreatePage() {
     }))
   }, [formData.items, formData.discountAmount, formData.shippingCost, formData.amountPaid])
 
+  // Update URL when invoice number changes (like Default)
+  useEffect(() => {
+    if (formData.invoiceNumber) {
+      setSearchParams({ invoice: formData.invoiceNumber })
+    }
+  }, [formData.invoiceNumber, setSearchParams])
+
   // Add item
   const addItem = () => {
     const newItem: ProfessionalInvoiceItem = {
@@ -481,111 +488,55 @@ export default function ProfessionalInvoiceCreatePage() {
   return (
     <Layout hideBottomNav={true}>
       <div style={{
+        paddingBottom: '0.5rem',
+        backgroundColor: brandColors.white,
         minHeight: '100vh',
-        backgroundColor: brandColors.neutral[50],
-        padding: '2rem 1rem'
+        width: '100%',
+        maxWidth: '100vw',
+        overflow: 'hidden'
       }}>
         {/* Header */}
         <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          marginBottom: '2rem'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '1rem',
+          backgroundColor: brandColors.white,
+          borderBottom: `1px solid ${brandColors.neutral[200]}`,
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1rem'
-          }}>
-            <button
-              onClick={() => navigate('/invoices')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[200]}`,
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                color: brandColors.neutral[700]
-              }}
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-
-            <div style={{
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
               display: 'flex',
-              gap: '0.75rem'
-            }}>
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.625rem 1.25rem',
-                  backgroundColor: brandColors.white,
-                  border: `1px solid ${brandColors.neutral[300]}`,
-                  borderRadius: '8px',
-                  cursor: isSaving ? 'not-allowed' : 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: brandColors.neutral[700],
-                  opacity: isSaving ? 0.6 : 1
-                }}
-              >
-                <Save size={16} />
-                {isSaving ? 'Saving...' : 'Save Draft'}
-              </button>
-
-              <button
-                onClick={handlePreview}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.625rem 1.25rem',
-                  backgroundColor: brandColors.primary[600],
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: brandColors.white
-                }}
-              >
-                <Eye size={16} />
-                Preview
-              </button>
-            </div>
-          </div>
-
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <ArrowLeft size={20} color={brandColors.neutral[600]} />
+          </button>
+          
           <h1 style={{
-            fontSize: '1.875rem',
-            fontWeight: '700',
+            fontSize: '1.125rem',
+            fontWeight: '600',
             color: brandColors.neutral[900],
             margin: 0
           }}>
-            Create Professional Invoice
+            Professional Invoice
           </h1>
-          <p style={{
-            fontSize: '0.875rem',
-            color: brandColors.neutral[600],
-            margin: '0.5rem 0 0 0'
-          }}>
-            Complete invoice with all business fields
-          </p>
+          
+          <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
         </div>
 
-        {/* Form Container */}
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
+        {/* Form Content */}
+        <div style={{ padding: '1rem' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr',
@@ -595,20 +546,22 @@ export default function ProfessionalInvoiceCreatePage() {
             {/* Client Information Section */}
             <div style={{
               backgroundColor: brandColors.white,
-              borderRadius: '12px',
+              borderRadius: '16px',
               padding: '1.5rem',
-              border: `1px solid ${brandColors.neutral[200]}`
+              marginBottom: '1.5rem',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${brandColors.neutral[100]}`
             }}
             onClick={cleanupEmptyLastItem}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                marginBottom: '1.5rem'
+                marginBottom: '1rem'
               }}>
                 <User size={20} color={brandColors.primary[600]} />
                 <h2 style={{
-                  fontSize: '1.125rem',
+                  fontSize: '1rem',
                   fontWeight: '600',
                   color: brandColors.neutral[900],
                   margin: 0
@@ -644,11 +597,12 @@ export default function ProfessionalInvoiceCreatePage() {
                     placeholder="John Doe"
                     style={{
                       width: '100%',
-                      padding: '0.625rem',
-                      border: `1px solid ${brandColors.neutral[300]}`,
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
                     }}
                   />
                 </div>
@@ -1559,7 +1513,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
                 {/* Right column - Totals summary */}
                 <div style={{
-                  backgroundColor: brandColors.neutral[50],
+                  backgroundColor: brandColors.white,
                   borderRadius: '8px',
                   padding: '1rem',
                   display: 'flex',
@@ -1841,10 +1795,70 @@ export default function ProfessionalInvoiceCreatePage() {
             </div>
 
           </div>
-        </div>
 
-        {/* Bottom Spacer */}
-        <div style={{ height: '4rem' }} />
+          {/* Action Buttons - Bottom like Default */}
+          <div style={{
+            position: 'sticky',
+            bottom: 0,
+            backgroundColor: brandColors.white,
+            borderTop: `1px solid ${brandColors.neutral[200]}`,
+            padding: '1rem',
+            display: 'flex',
+            gap: '0.75rem',
+            justifyContent: 'center'
+          }}>
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              style={{
+                flex: 1,
+                maxWidth: '200px',
+                padding: '0.75rem 1.5rem',
+                backgroundColor: brandColors.neutral[100],
+                color: brandColors.neutral[700],
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: isSaving ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                opacity: isSaving ? 0.6 : 1
+              }}
+            >
+              <Save size={16} />
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+            
+            <button
+              onClick={handlePreview}
+              style={{
+                flex: 1,
+                padding: '0.75rem 1.5rem',
+                backgroundColor: brandColors.primary[600],
+                color: brandColors.white,
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              <Eye size={16} />
+              Preview
+            </button>
+          </div>
+        </div>
       </div>
     </Layout>
   )

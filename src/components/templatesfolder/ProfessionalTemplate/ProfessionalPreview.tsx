@@ -5,6 +5,7 @@ import { brandColors } from '../../../stylings'
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
 import { getCurrencySymbol } from '../../../lib/currencyUtils'
+import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import type { ProfessionalInvoiceFormData } from './ProfessionalTemplateSave'
 import { 
   ArrowLeft, 
@@ -38,12 +39,13 @@ export default function ProfessionalInvoicePreviewPage() {
 
   useEffect(() => {
     const loadInvoiceData = async () => {
+      // First check URL parameter for invoice number
       const invoiceNumber = getInvoiceFromUrl(searchParams)
       
       if (invoiceNumber && !loading) {
         setLoading(true)
         try {
-          // Load invoice from database with proper joins
+          // Load invoice from database using invoice number with proper joins
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
             .select(`
@@ -71,19 +73,66 @@ export default function ProfessionalInvoicePreviewPage() {
             .single()
 
           if (invoiceError) {
-            console.log('Invoice not found in database, checking state...')
+            console.log('Invoice not found in database, checking localStorage and state...')
             
             // Check state data first (from create page navigation)
             if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in state (create → preview flow)')
-              setInvoiceData(location.state.invoiceData)
+              // Convert to ProfessionalInvoiceFormData with defaults for missing fields
+              const stateData = location.state.invoiceData as any
+              const professionalData: ProfessionalInvoiceFormData = {
+                ...stateData,
+                discountAmount: stateData.discountAmount || 0,
+                shippingCost: stateData.shippingCost || 0,
+                amountPaid: stateData.amountPaid || 0,
+                balanceDue: stateData.balanceDue || 0,
+                poNumber: stateData.poNumber || '',
+                taxId: stateData.taxId || '',
+                shipToName: stateData.shipToName || '',
+                shipToAddress: stateData.shipToAddress || '',
+                termsAndConditions: stateData.termsAndConditions || '',
+                // Convert items to ProfessionalInvoiceItem format
+                items: (stateData.items || []).map((item: any) => ({
+                  ...item,
+                  discount: item.discount || 0
+                }))
+              }
+              setInvoiceData(professionalData)
+              setIsFromDatabase(false)
+              setLoading(false)
+              return
+            }
+            
+            // Check localStorage for this invoice number
+            const savedData = invoiceStorage.getDraft()
+            if (savedData && savedData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in localStorage')
+              // Convert to ProfessionalInvoiceFormData with defaults for missing fields
+              const professionalData: ProfessionalInvoiceFormData = {
+                ...savedData,
+                discountAmount: (savedData as any).discountAmount || 0,
+                shippingCost: (savedData as any).shippingCost || 0,
+                amountPaid: (savedData as any).amountPaid || 0,
+                balanceDue: (savedData as any).balanceDue || 0,
+                poNumber: (savedData as any).poNumber || '',
+                taxId: (savedData as any).taxId || '',
+                shipToName: (savedData as any).shipToName || '',
+                shipToAddress: (savedData as any).shipToAddress || '',
+                termsAndConditions: (savedData as any).termsAndConditions || '',
+                // Convert items to ProfessionalInvoiceItem format
+                items: (savedData.items || []).map((item: any) => ({
+                  ...item,
+                  discount: item.discount || 0
+                }))
+              }
+              setInvoiceData(professionalData)
               setIsFromDatabase(false)
               setLoading(false)
               return
             }
             
             // If not found anywhere, show error
-            console.error('Invoice not found anywhere')
+            console.log('Invoice not found anywhere')
             toast.error('Invoice not found')
             navigate('/invoices')
             return
@@ -191,46 +240,53 @@ export default function ProfessionalInvoicePreviewPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: brandColors.neutral[50],
-      padding: '2rem 1rem'
+      backgroundColor: brandColors.primary[50],
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: window.innerWidth < 768 ? '1rem 0.5rem' : '2rem 1rem', // Mobile responsive padding
+      position: 'relative'
     }}>
-      {/* Header */}
+      {/* Background Pattern */}
       <div style={{
-        maxWidth: '900px',
-        margin: '0 auto',
-        marginBottom: '2rem'
-      }}>
-        <button
-          onClick={() => navigate('/invoices')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 1rem',
-            backgroundColor: brandColors.white,
-            border: `1px solid ${brandColors.neutral[200]}`,
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '0.875rem',
-            color: brandColors.neutral[700],
-            marginBottom: '1rem'
-          }}
-        >
-          <ArrowLeft size={16} />
-          Back to Invoices
-        </button>
-      </div>
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: `linear-gradient(135deg, ${brandColors.primary[100]} 0%, ${brandColors.primary[50]} 100%)`,
+        zIndex: 0
+      }} />
 
-      {/* Invoice Preview Card */}
+      {/* Content */}
       <div style={{
-        maxWidth: '900px',
+        position: 'relative',
+        zIndex: 1,
+        textAlign: 'center',
+        minWidth: '400px',
+        width: 'fit-content', // Dynamic width based on content
+        maxWidth: 'none', // No maximum width constraint
         margin: '0 auto',
-        backgroundColor: brandColors.white,
-        borderRadius: '12px',
-        padding: '3rem',
-        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        border: `1px solid ${brandColors.neutral[200]}`
+        padding: '0 1rem', // Mobile padding
+        // Ensure mobile responsiveness
+        ...(window.innerWidth < 768 && {
+          minWidth: '320px',
+          width: '100%',
+          maxWidth: '100%'
+        })
       }}>
+        {/* Invoice Preview Card */}
+        <div style={{
+          backgroundColor: brandColors.white,
+          borderRadius: '16px',
+          padding: window.innerWidth < 768 ? '1.5rem' : '2rem', // Mobile responsive padding
+          marginBottom: '2rem',
+          boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
+          position: 'relative',
+          width: '100%',
+          maxWidth: '100%'
+        }}>
         
         {/* Header Section */}
         <div style={{
@@ -889,42 +945,39 @@ export default function ProfessionalInvoicePreviewPage() {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div style={{
-        maxWidth: '900px',
-        margin: '2rem auto 0',
-        display: 'flex',
-        gap: '0.75rem',
-        justifyContent: 'center',
-        flexWrap: 'wrap'
-      }}>
-        {/* Only show Edit button for CREATE mode (not from database) */}
-        {!isFromDatabase && (
+        {/* Action Buttons */}
+        <div style={{
+          display: 'flex',
+          gap: '0.75rem',
+          justifyContent: 'center'
+        }}>
+          {/* Only show Edit button for CREATE mode (not from database) */}
+          {!isFromDatabase && (
           <EditButton 
             onEdit={handleEdit}
             size="md"
             variant="secondary"
           />
-        )}
-        
-        <DownloadButton 
-          invoiceData={invoiceData}
-          user={user}
-          template="professional"
-          size="md"
-          variant="primary"
-        />
-        
-        <SendButton 
-          invoiceData={invoiceData}
-          userData={user}
-          size="md"
-          variant="primary"
-        />
+          )}
+          
+          <DownloadButton 
+            invoiceData={invoiceData}
+            user={user}
+            template="professional"
+            size="md"
+            variant="primary"
+          />
+          
+          <SendButton 
+            invoiceData={invoiceData}
+            userData={user}
+            size="md"
+            variant="secondary"
+          />
+        </div>
+
       </div>
 
-      {/* Bottom Spacer */}
-      <div style={{ height: '4rem' }} />
     </div>
   )
 }
