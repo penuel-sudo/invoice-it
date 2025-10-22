@@ -13,6 +13,7 @@ import type { PaymentMethod } from '../../../lib/storage/invoiceStorage'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import { saveProfessionalInvoice } from './ProfessionalTemplateSave'
 import type { ProfessionalInvoiceFormData, ProfessionalInvoiceItem } from './ProfessionalTemplateSave'
+import FormattedNumberInput from '../../FormattedNumberInput'
 import { 
   ArrowLeft, 
   Save, 
@@ -48,6 +49,11 @@ export default function ProfessionalInvoiceCreatePage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   
+  // Helper function for responsive grid
+  const getResponsiveGrid = (minWidth: number = 250) => {
+    return window.innerWidth < 768 ? '1fr' : `repeat(auto-fit, minmax(${minWidth}px, 1fr))`
+  }
+  
   // Generate default invoice number
   const generateInvoiceNumber = () => {
     const timestamp = Date.now().toString().slice(-6)
@@ -56,8 +62,8 @@ export default function ProfessionalInvoiceCreatePage() {
 
   // Initialize form data with localStorage like Default template
   const [formData, setFormData] = useState<ProfessionalInvoiceFormData>(() => {
-    // Start with localStorage data like Default template
-    const savedData = invoiceStorage.getDraft()
+    // Start with template-specific localStorage data
+    const savedData = invoiceStorage.getDraftProfessional()
     if (savedData) {
       // Convert to ProfessionalInvoiceFormData with defaults for missing fields
       return {
@@ -341,7 +347,7 @@ export default function ProfessionalInvoiceCreatePage() {
       paymentMethods: selectedPaymentMethods
     }
     
-    invoiceStorage.saveDraftDebounced(dataToSave)
+    invoiceStorage.saveDraftDebouncedProfessional(dataToSave)
   }, [formData, allPaymentMethods])
 
   // Update URL when invoice number changes (like Default)
@@ -368,7 +374,7 @@ export default function ProfessionalInvoiceCreatePage() {
     }))
     
     setTimeout(() => {
-      lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 100)
   }
 
@@ -420,7 +426,7 @@ export default function ProfessionalInvoiceCreatePage() {
           updatedItems.push(newItem)
           
           setTimeout(() => {
-            lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+            lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
           }, 100)
         }
       }
@@ -579,7 +585,7 @@ export default function ProfessionalInvoiceCreatePage() {
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',
-        maxWidth: '100vw',
+        maxWidth: '100%',
         overflow: 'hidden'
       }}>
         {/* Header */}
@@ -664,7 +670,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: getResponsiveGrid(250),
                 gap: '1rem'
               }}>
                 <div>
@@ -829,7 +835,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: getResponsiveGrid(250),
                 gap: '1rem'
               }}>
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -1017,7 +1023,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gridTemplateColumns: getResponsiveGrid(200),
                 gap: '1rem'
               }}>
                 <div>
@@ -1408,13 +1414,12 @@ export default function ProfessionalInvoiceCreatePage() {
                           />
                         </td>
                         <td style={{ padding: '0.75rem' }}>
-                          <input
-                            type="number"
+                          <FormattedNumberInput
                             value={item.discount}
-                            onChange={(e) => updateItem(item.id, 'discount', parseFloat(e.target.value) || 0)}
-                            min="0"
-                            max="100"
-                            step="0.1"
+                            onChange={(value) => updateItem(item.id, 'discount', value)}
+                            min={0}
+                            max={100}
+                            step={0.1}
                             style={{
                               width: '100%',
                               padding: '0.5rem',
@@ -1427,13 +1432,12 @@ export default function ProfessionalInvoiceCreatePage() {
                           />
                         </td>
                         <td style={{ padding: '0.75rem' }}>
-                          <input
-                            type="number"
+                          <FormattedNumberInput
                             value={item.taxRate}
-                            onChange={(e) => updateItem(item.id, 'taxRate', parseFloat(e.target.value) || 0)}
-                            min="0"
-                            max="100"
-                            step="0.1"
+                            onChange={(value) => updateItem(item.id, 'taxRate', value)}
+                            min={0}
+                            max={100}
+                            step={0.1}
                             style={{
                               width: '100%',
                               padding: '0.5rem',
@@ -1521,12 +1525,11 @@ export default function ProfessionalInvoiceCreatePage() {
                       <Percent size={14} style={{ display: 'inline', marginRight: '4px' }} />
                       Overall Discount
                     </label>
-                    <input
-                      type="number"
+                    <FormattedNumberInput
                       value={formData.discountAmount}
-                      onChange={(e) => setFormData(prev => ({ ...prev, discountAmount: parseFloat(e.target.value) || 0 }))}
-                      min="0"
-                      step="0.01"
+                      onChange={(value) => setFormData(prev => ({ ...prev, discountAmount: value }))}
+                      min={0}
+                      step={0.01}
                       placeholder="0.00"
                       style={{
                         width: '100%',
@@ -1550,12 +1553,11 @@ export default function ProfessionalInvoiceCreatePage() {
                       <Truck size={14} style={{ display: 'inline', marginRight: '4px' }} />
                       Shipping / Handling
                     </label>
-                    <input
-                      type="number"
+                    <FormattedNumberInput
                       value={formData.shippingCost}
-                      onChange={(e) => setFormData(prev => ({ ...prev, shippingCost: parseFloat(e.target.value) || 0 }))}
-                      min="0"
-                      step="0.01"
+                      onChange={(value) => setFormData(prev => ({ ...prev, shippingCost: value }))}
+                      min={0}
+                      step={0.01}
                       placeholder="0.00"
                       style={{
                         width: '100%',
@@ -1579,12 +1581,11 @@ export default function ProfessionalInvoiceCreatePage() {
                       <DollarSign size={14} style={{ display: 'inline', marginRight: '4px' }} />
                       Amount Paid / Deposit
                     </label>
-                    <input
-                      type="number"
+                    <FormattedNumberInput
                       value={formData.amountPaid}
-                      onChange={(e) => setFormData(prev => ({ ...prev, amountPaid: parseFloat(e.target.value) || 0 }))}
-                      min="0"
-                      step="0.01"
+                      onChange={(value) => setFormData(prev => ({ ...prev, amountPaid: value }))}
+                      min={0}
+                      step={0.01}
                       placeholder="0.00"
                       style={{
                         width: '100%',
@@ -1756,6 +1757,7 @@ export default function ProfessionalInvoiceCreatePage() {
                         style={{
                           width: '18px',
                           height: '18px',
+                          accentColor: brandColors.primary[600],
                           cursor: 'pointer'
                         }}
                       />

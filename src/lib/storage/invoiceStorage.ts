@@ -12,7 +12,9 @@
 
 // Storage keys - add new keys here as needed
 const STORAGE_KEYS = {
-  INVOICE_DRAFT: 'invoice-draft'
+  INVOICE_DRAFT: 'invoice-draft',
+  INVOICE_DRAFT_DEFAULT: 'invoice-draft-default',
+  INVOICE_DRAFT_PROFESSIONAL: 'invoice-draft-professional'
 } as const
 
 export interface InvoiceItem {
@@ -260,5 +262,62 @@ export const invoiceStorage = {
       currencySymbol: '$',
       paymentDetails: undefined
     }
+  },
+
+  // Template-specific storage functions
+  /**
+   * Save Default template draft to localStorage
+   */
+  saveDraftDefault: (invoiceData: InvoiceFormData): boolean => {
+    return storage.setItem(STORAGE_KEYS.INVOICE_DRAFT_DEFAULT, invoiceData)
+  },
+
+  /**
+   * Save Default template draft with debounce for auto-save
+   */
+  saveDraftDebouncedDefault: (invoiceData: InvoiceFormData): void => {
+    debouncedStorage.setItem(STORAGE_KEYS.INVOICE_DRAFT_DEFAULT, invoiceData)
+  },
+
+  /**
+   * Get Default template draft from localStorage
+   */
+  getDraftDefault: (): InvoiceFormData | null => {
+    return storage.getItem<InvoiceFormData>(STORAGE_KEYS.INVOICE_DRAFT_DEFAULT)
+  },
+
+  /**
+   * Clear Default template draft from localStorage
+   */
+  clearDraftDefault: (): boolean => {
+    return storage.removeItem(STORAGE_KEYS.INVOICE_DRAFT_DEFAULT)
+  },
+
+  /**
+   * Save Professional template draft to localStorage
+   */
+  saveDraftProfessional: (invoiceData: any): boolean => {
+    return storage.setItem(STORAGE_KEYS.INVOICE_DRAFT_PROFESSIONAL, invoiceData)
+  },
+
+  /**
+   * Save Professional template draft with debounce for auto-save
+   */
+  saveDraftDebouncedProfessional: (invoiceData: any): void => {
+    debouncedStorage.setItem(STORAGE_KEYS.INVOICE_DRAFT_PROFESSIONAL, invoiceData)
+  },
+
+  /**
+   * Get Professional template draft from localStorage
+   */
+  getDraftProfessional: (): any | null => {
+    return storage.getItem(STORAGE_KEYS.INVOICE_DRAFT_PROFESSIONAL)
+  },
+
+  /**
+   * Clear Professional template draft from localStorage
+   */
+  clearDraftProfessional: (): boolean => {
+    return storage.removeItem(STORAGE_KEYS.INVOICE_DRAFT_PROFESSIONAL)
   }
 }

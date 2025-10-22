@@ -329,7 +329,7 @@ export const saveInvoiceToDatabase = async (
 
     // Step 4: Clear localStorage and reset form (like Create page does)
     console.log('💾 [DEFAULT TEMPLATE SAVE] Step 4: Clearing localStorage and resetting form...')
-    invoiceStorage.clearDraft()
+    invoiceStorage.clearDraftDefault()
     
     // Update formData with new IDs
     formData.id = invoiceId

@@ -6,6 +6,7 @@ import { Layout } from '../../layout'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import type { InvoiceFormData, InvoiceItem, PaymentDetails, PaymentMethod } from '../../../lib/storage/invoiceStorage'
 import { saveInvoiceToDatabase } from './DefaultTemplateSave'
+import FormattedNumberInput from '../../FormattedNumberInput'
 import { supabase } from '../../../lib/supabaseClient'
 import { getInvoiceFromUrl } from '../../../lib/urlUtils'
 import { CURRENCIES, getCurrencySymbol } from '../../../lib/currencyUtils'
@@ -43,7 +44,13 @@ export default function InvoiceCreatePage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   
-  const [formData, setFormData] = useState<InvoiceFormData>(invoiceStorage.getDraftWithFallback())
+  const [formData, setFormData] = useState<InvoiceFormData>(() => {
+    const savedData = invoiceStorage.getDraftDefault()
+    if (savedData) {
+      return savedData
+    }
+    return invoiceStorage.getDraftWithFallback()
+  })
   const [loading, setLoading] = useState(false)
   const { currency: globalCurrency, currencySymbol: globalCurrencySymbol, setCurrency } = useInvoiceCurrency(formData.currency)
   const itemsContainerRef = useRef<HTMLDivElement>(null)
@@ -223,7 +230,7 @@ export default function InvoiceCreatePage() {
       paymentMethods: selectedPaymentMethods
     }
     
-    invoiceStorage.saveDraftDebounced(dataToSave)
+    invoiceStorage.saveDraftDebouncedDefault(dataToSave)
   }, [formData, allPaymentMethods])
 
   // Update URL when invoice number changes
@@ -249,7 +256,7 @@ export default function InvoiceCreatePage() {
     
     // Scroll to new item
     setTimeout(() => {
-      lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 100)
   }
 
@@ -298,7 +305,7 @@ export default function InvoiceCreatePage() {
           
           // Scroll to new item after state update
           setTimeout(() => {
-            lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+            lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
           }, 100)
 
           return {
@@ -538,58 +545,64 @@ export default function InvoiceCreatePage() {
                 margin: '0.5rem 0'
               }} />
 
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: brandColors.neutral[700],
-                  marginBottom: '0.5rem'
-                }}>
-                  Client Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.clientName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
-                  placeholder="Enter client name"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[200]}`,
-                    borderRadius: '8px',
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: window.innerWidth < 768 ? '1fr 1fr' : '1fr',
+                gap: '1rem'
+              }}>
+                <div>
+                  <label style={{
+                    display: 'block',
                     fontSize: '0.875rem',
-                    backgroundColor: brandColors.white,
-                    color: brandColors.neutral[900]
-                  }}
-                />
-              </div>
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Client Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.clientName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
+                    placeholder="Enter client name"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
 
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: brandColors.neutral[700],
-                  marginBottom: '0.5rem'
-                }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.clientEmail}
-                  onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                  placeholder="client@example.com"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[200]}`,
-                    borderRadius: '8px',
+                <div>
+                  <label style={{
+                    display: 'block',
                     fontSize: '0.875rem',
-                    backgroundColor: brandColors.white,
-                    color: brandColors.neutral[900]
-                  }}
-                />
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.clientEmail}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
+                    placeholder="client@example.com"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900]
+                    }}
+                  />
+                </div>
               </div>
 
               <div>
@@ -1006,13 +1019,12 @@ export default function InvoiceCreatePage() {
                         }}>
                           Tax %
                         </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.01"
+                        <FormattedNumberInput
+                          min={0}
+                          max={100}
+                          step={0.01}
                           value={item.taxRate}
-                          onChange={(e) => updateItem(item.id, 'taxRate', parseFloat(e.target.value) || 0)}
+                          onChange={(value) => updateItem(item.id, 'taxRate', value)}
                           style={{
                             width: '100%',
                             padding: '0.5rem',
@@ -1226,6 +1238,7 @@ export default function InvoiceCreatePage() {
                       style={{
                         width: '18px',
                         height: '18px',
+                        accentColor: brandColors.primary[600],
                         cursor: 'pointer'
                       }}
                     />

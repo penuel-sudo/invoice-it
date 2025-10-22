@@ -334,7 +334,7 @@ export default function ProfessionalInvoicePreviewPage() {
         {/* Invoice Details Bar */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gridTemplateColumns: window.innerWidth < 768 ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '1.5rem',
           padding: '1.5rem',
           backgroundColor: brandColors.neutral[50],
@@ -457,7 +457,7 @@ export default function ProfessionalInvoicePreviewPage() {
         {/* Bill To & Ship To */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: hasShipTo ? '1fr 1fr' : '1fr',
+          gridTemplateColumns: hasShipTo ? (window.innerWidth < 768 ? '1fr' : '1fr 1fr') : '1fr',
           gap: '2rem',
           marginBottom: '3rem'
         }}>
@@ -699,7 +699,9 @@ export default function ProfessionalInvoicePreviewPage() {
               </tr>
             </thead>
             <tbody>
-              {invoiceData.items.map((item, index) => (
+              {invoiceData.items.filter(item => 
+                item.description.trim() !== '' || item.quantity > 0 || item.unitPrice > 0
+              ).map((item, index) => (
                 <tr key={item.id} style={{
                   borderBottom: `1px solid ${brandColors.neutral[200]}`
                 }}>

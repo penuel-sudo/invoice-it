@@ -396,7 +396,7 @@ export const saveProfessionalInvoice = async (
 
     // Step 4: Clear localStorage draft
     console.log('🧹 [PROFESSIONAL TEMPLATE SAVE] Step 4: Clearing localStorage draft...')
-    invoiceStorage.clearDraft()
+    invoiceStorage.clearDraftProfessional()
 
     // Mark save as complete
     saveInProgress.delete(saveKey)
