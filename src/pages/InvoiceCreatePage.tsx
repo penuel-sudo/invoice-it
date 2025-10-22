@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react'
 
 // Dynamic imports for template components
 const DefaultCreate = lazy(() => import('../components/templatesfolder/DefaultTemplate/DefaultCreate'))
+const ProfessionalCreate = lazy(() => import('../components/templatesfolder/ProfessionalTemplate/ProfessionalCreate'))
 
 export default function InvoiceCreatePage() {
   const { template } = useParams<{ template: string }>()
@@ -16,9 +17,9 @@ export default function InvoiceCreatePage() {
     switch (template) {
       case 'default':
         return DefaultCreate
+      case 'professional':
+        return ProfessionalCreate
       // Future templates will be added here
-      // case 'professional':
-      //   return lazy(() => import('../components/templatesfolder/ProfessionalTemplate/ProfessionalCreate'))
       // case 'creative':
       //   return lazy(() => import('../components/templatesfolder/CreativeTemplate/CreativeCreate'))
       default:

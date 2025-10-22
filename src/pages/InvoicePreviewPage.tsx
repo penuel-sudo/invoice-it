@@ -1,5 +1,6 @@
 import { useParams, useSearchParams } from 'react-router-dom'
 import DefaultPreview from '../components/templatesfolder/DefaultTemplate/DefaultPreview'
+import ProfessionalPreview from '../components/templatesfolder/ProfessionalTemplate/ProfessionalPreview'
 
 export default function InvoicePreviewPage() {
   const { template } = useParams<{ template: string }>()
@@ -13,9 +14,9 @@ export default function InvoicePreviewPage() {
     switch (template) {
       case 'default':
         return DefaultPreview
+      case 'professional':
+        return ProfessionalPreview
       // Future templates will be added here
-      // case 'professional':
-      //   return lazy(() => import('../components/templatesfolder/ProfessionalTemplate/ProfessionalPreview'))
       // case 'creative':
       //   return lazy(() => import('../components/templatesfolder/CreativeTemplate/CreativePreview'))
       default:

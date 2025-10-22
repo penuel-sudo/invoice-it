@@ -8,6 +8,8 @@ import { TemplateGallery, TemplateGrid, TemplateCard } from '../components/templ
 // Dynamic imports for heavy template components
 const DefaultCreate = lazy(() => import('../components/templatesfolder/DefaultTemplate/DefaultCreate'))
 const DefaultPreviewStatic = lazy(() => import('../components/templatesfolder/DefaultTemplate/DefaultPreviewStatic'))
+const ProfessionalCreate = lazy(() => import('../components/templatesfolder/ProfessionalTemplate/ProfessionalCreate'))
+const ProfessionalPreviewStatic = lazy(() => import('../components/templatesfolder/ProfessionalTemplate/ProfessionalPreviewStatic'))
 
 export default function TemplateGalleryPage() {
   const navigate = useNavigate()
@@ -19,7 +21,7 @@ export default function TemplateGalleryPage() {
     template: null
   })
 
-  // Real template data for the default template
+  // Real template data for all templates
   const templates = [
     {
       id: 'default',
@@ -29,9 +31,19 @@ export default function TemplateGalleryPage() {
       color: brandColors.primary[600],
       features: ['Clean Layout', 'Professional Design', 'Easy to Read', 'Modern Typography', 'Responsive'],
       preview: 'Clean and minimal invoice design with professional typography and modern layout',
-            // Template components
-            CreateComponent: DefaultCreate,
-            PreviewComponent: DefaultPreviewStatic
+      CreateComponent: DefaultCreate,
+      PreviewComponent: DefaultPreviewStatic
+    },
+    {
+      id: 'professional',
+      name: 'Professional Template',
+      description: 'Comprehensive business invoice with advanced fields. Perfect for B2B transactions with PO numbers, tax IDs, shipping, and detailed line items.',
+      icon: FileText,
+      color: brandColors.primary[700],
+      features: ['PO Numbers', 'Tax ID Support', 'Ship To Address', 'Line Item Discounts', 'Balance Due', 'Terms & Conditions'],
+      preview: 'Corporate-grade invoice with all business fields and professional layout',
+      CreateComponent: ProfessionalCreate,
+      PreviewComponent: ProfessionalPreviewStatic
     }
   ]
 
