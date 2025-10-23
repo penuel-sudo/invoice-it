@@ -150,7 +150,10 @@ export default function ProfessionalInvoiceCreatePage() {
       const invoiceNumber = getInvoiceFromUrl(searchParams)
       
       if (invoiceNumber) {
-        setLoading(true)
+        // Only show loading if we don't already have the data
+        if (formData.invoiceNumber !== invoiceNumber) {
+          setLoading(true)
+        }
         try {
           // Load invoice from database using invoice number (same as DefaultCreate)
           const { data, error } = await supabase
@@ -340,18 +343,33 @@ export default function ProfessionalInvoiceCreatePage() {
       return sum + (taxableAmount * (item.taxRate / 100))
     }, 0)
 
-    const grandTotal = subtotal + taxTotal - discountAmt + shippingCost
+    // Calculate total item discounts for auto-calculation
+    const totalItemDiscounts = items.reduce((sum, item) => {
+      const itemSubtotal = item.quantity * item.unitPrice
+      return sum + (itemSubtotal * (item.discount / 100))
+    }, 0)
+
+    // Use the larger of manual discount or auto-calculated item discounts
+    const effectiveDiscount = Math.max(discountAmt, totalItemDiscounts)
+
+    const grandTotal = subtotal + taxTotal - effectiveDiscount + shippingCost
     const balanceDue = grandTotal - amountPaid
 
-    return { subtotal, taxTotal, grandTotal, balanceDue }
+    return { subtotal, taxTotal, grandTotal, balanceDue, totalItemDiscounts }
   }
 
   // Auto-recalculate when items, discount, shipping, or amount paid changes
   useEffect(() => {
     const totals = calculateTotals(formData.items, formData.discountAmount, formData.shippingCost, formData.amountPaid)
+    
+    // Auto-update discount amount if it's less than the calculated item discounts
+    // This allows manual override while still auto-calculating
+    const newDiscountAmount = Math.max(formData.discountAmount, totals.totalItemDiscounts)
+    
     setFormData(prev => ({
       ...prev,
-      ...totals
+      ...totals,
+      discountAmount: newDiscountAmount
     }))
   }, [formData.items, formData.discountAmount, formData.shippingCost, formData.amountPaid])
 
@@ -1199,10 +1217,13 @@ export default function ProfessionalInvoiceCreatePage() {
                       width: '100%',
                       padding: '0.625rem',
                       border: `1px solid ${brandColors.neutral[300]}`,
-                      borderRadius: '8px',
+                      borderRadius: '12px',
                       fontSize: '0.875rem',
                       outline: 'none',
-                      backgroundColor: brandColors.white
+                      backgroundColor: brandColors.white,
+                      color: brandColors.neutral[900],
+                      cursor: 'pointer',
+                      accentColor: brandColors.primary[600]
                     }}
                   >
                     {CURRENCIES.map(currency => (

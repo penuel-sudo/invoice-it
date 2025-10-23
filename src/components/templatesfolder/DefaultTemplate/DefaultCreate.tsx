@@ -944,8 +944,8 @@ export default function InvoiceCreatePage() {
                           onChange={(e) => {
                             let value = e.target.value.replace(/,/g, '') // Remove commas for processing
                             
-                            // Allow empty, digits, and ONE decimal point
-                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            // Allow empty, digits, and ONE decimal point with up to 2 decimal places
+                            if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
                               const numValue = value === '' ? 0 : (parseFloat(value) || 0)
                               updateItem(item.id, 'quantity', numValue)
                             }
@@ -985,8 +985,8 @@ export default function InvoiceCreatePage() {
                           onChange={(e) => {
                             let value = e.target.value.replace(/,/g, '') // Remove commas for processing
                             
-                            // Allow empty, digits, and ONE decimal point
-                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            // Allow empty, digits, and ONE decimal point with up to 2 decimal places
+                            if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
                               const numValue = value === '' ? 0 : (parseFloat(value) || 0)
                               updateItem(item.id, 'unitPrice', numValue)
                             }
