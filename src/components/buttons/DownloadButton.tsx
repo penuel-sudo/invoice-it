@@ -7,6 +7,7 @@ import { getPDFTemplate } from '../../lib/templateRegistry'
 import type { InvoiceData } from '../../lib/storage/invoiceStorage'
 import { supabase } from '../../lib/supabaseClient'
 import { saveInvoiceToDatabase } from '../templatesfolder/DefaultTemplate/DefaultTemplateSave'
+import { saveProfessionalInvoice } from '../templatesfolder/ProfessionalTemplate/ProfessionalTemplateSave'
 
 interface DownloadButtonProps {
   invoiceData: InvoiceData
@@ -45,13 +46,21 @@ export default function DownloadButton({
         user_id: user.id
       })
 
-      // Always use the shared save function for consistency
-      console.log('📋 [DOWNLOAD BUTTON] Using shared save function for status update...')
+      // Use template-specific save function
+      console.log('📋 [DOWNLOAD BUTTON] Using template-specific save function for status update...')
       
-      const result = await saveInvoiceToDatabase(invoiceData, user, { 
-        status: 'pending',
-        updateStatus: true 
-      })
+      let result
+      if (template === 'professional') {
+        result = await saveProfessionalInvoice(invoiceData, user, undefined, { 
+          status: 'pending',
+          updateStatus: true 
+        })
+      } else {
+        result = await saveInvoiceToDatabase(invoiceData, user, { 
+          status: 'pending',
+          updateStatus: true 
+        })
+      }
       
       if (result.success) {
         console.log('✅ [DOWNLOAD BUTTON] Invoice saved successfully via shared function')

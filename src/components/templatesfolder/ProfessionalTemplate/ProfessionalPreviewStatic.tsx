@@ -131,12 +131,6 @@ export default function ProfessionalPreviewStatic() {
               }}>
                 INVOICE
               </h1>
-              <div style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[600]
-              }}>
-                Professional Invoice Template
-              </div>
             </div>
 
             {/* Right - Status */}
@@ -642,6 +636,171 @@ export default function ProfessionalPreviewStatic() {
               }}>
                 <span>Balance Due:</span>
                 <span>{mockInvoiceData.currencySymbol}{mockInvoiceData.balanceDue.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Terms & Information */}
+          <div style={{
+            backgroundColor: brandColors.neutral[50],
+            borderRadius: '8px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            border: `1px solid ${brandColors.neutral[200]}`
+          }}>
+            <h3 style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: brandColors.neutral[700],
+              marginBottom: '1rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Payment Terms & Information
+            </h3>
+            
+            <div style={{
+              marginBottom: '1rem'
+            }}>
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                marginBottom: '0.5rem',
+                lineHeight: '1.6'
+              }}>
+                <strong>Payment Terms:</strong> Net 30 days. Late payments subject to 1.5% monthly interest charge.
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                lineHeight: '1.6'
+              }}>
+                <strong>Payment Due:</strong> Payment is due within 30 days from invoice date. Please include invoice number with payment.
+              </p>
+            </div>
+
+            {/* Payment Methods Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem',
+              marginTop: '1rem'
+            }}>
+              {/* Bank Transfer */}
+              <div style={{
+                backgroundColor: brandColors.white,
+                padding: '1rem',
+                borderRadius: '6px',
+                border: `1px solid ${brandColors.neutral[200]}`,
+                minHeight: '80px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  fontSize: '0.875rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  Bank Transfer
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  lineHeight: '1.4'
+                }}>
+                  Bank: ABC Bank<br/>
+                  Account: 1234567890<br/>
+                  Routing: 123456789
+                </div>
+              </div>
+
+              {/* Credit Card */}
+              <div style={{
+                backgroundColor: brandColors.white,
+                padding: '1rem',
+                borderRadius: '6px',
+                border: `1px solid ${brandColors.neutral[200]}`,
+                minHeight: '80px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  fontSize: '0.875rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  Credit Card
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  lineHeight: '1.4'
+                }}>
+                  Visa, Mastercard, AmEx<br/>
+                  Pay online at:<br/>
+                  www.company.com/pay
+                </div>
+              </div>
+
+              {/* PayPal */}
+              <div style={{
+                backgroundColor: brandColors.white,
+                padding: '1rem',
+                borderRadius: '6px',
+                border: `1px solid ${brandColors.neutral[200]}`,
+                minHeight: '80px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  fontSize: '0.875rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  PayPal
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  lineHeight: '1.4'
+                }}>
+                  payments@company.com
+                </div>
+              </div>
+
+              {/* Check */}
+              <div style={{
+                backgroundColor: brandColors.white,
+                padding: '1rem',
+                borderRadius: '6px',
+                border: `1px solid ${brandColors.neutral[200]}`,
+                minHeight: '80px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  fontWeight: '600',
+                  color: brandColors.neutral[900],
+                  fontSize: '0.875rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  Check
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  lineHeight: '1.4'
+                }}>
+                  Payable to: Your Company<br/>
+                  Mail to address above
+                </div>
               </div>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { useNotification } from '../../contexts/NotificationContext'
 import { supabase } from '../../lib/supabaseClient'
 import CustomizeMessageModal from '../CustomizeMessageModal'
 import { saveInvoiceToDatabase } from '../templatesfolder/DefaultTemplate/DefaultTemplateSave'
+import { saveProfessionalInvoice } from '../templatesfolder/ProfessionalTemplate/ProfessionalTemplateSave'
 import { invoiceStorage } from '../../lib/storage/invoiceStorage'
 
 interface SendButtonProps {
@@ -106,13 +107,21 @@ export default function SendButton({
     })
 
     try {
-      // Always use the shared save function for consistency
-      console.log('📋 [SEND BUTTON] Using shared save function for status update...')
+      // Use template-specific save function
+      console.log('📋 [SEND BUTTON] Using template-specific save function for status update...')
       
-      const result = await saveInvoiceToDatabase(invoiceData, userData, { 
-        status: 'pending',
-        updateStatus: true 
-      })
+      let result
+      if (invoiceData.template === 'professional') {
+        result = await saveProfessionalInvoice(invoiceData, userData, undefined, { 
+          status: 'pending',
+          updateStatus: true 
+        })
+      } else {
+        result = await saveInvoiceToDatabase(invoiceData, userData, { 
+          status: 'pending',
+          updateStatus: true 
+        })
+      }
       
       if (result.success) {
         console.log('✅ [SEND BUTTON] Invoice saved successfully via shared function')

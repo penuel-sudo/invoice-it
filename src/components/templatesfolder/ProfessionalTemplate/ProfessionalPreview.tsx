@@ -36,6 +36,7 @@ export default function ProfessionalInvoicePreviewPage() {
   const [dbStatus, setDbStatus] = useState<string>('draft')
   const [loading, setLoading] = useState(false)
   const [isFromDatabase, setIsFromDatabase] = useState(false)
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([])
 
   useEffect(() => {
     const loadInvoiceData = async () => {
@@ -186,6 +187,22 @@ export default function ProfessionalInvoicePreviewPage() {
             setInvoiceData(formData)
             setDbStatus(invoiceData.status || 'draft')
             setIsFromDatabase(true)
+            
+            // Load payment methods from profiles
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('payment_methods')
+              .eq('id', user?.id)
+              .single()
+
+            if (profileData?.payment_methods) {
+              const allPaymentMethods = profileData.payment_methods || []
+              const selectedIds = invoiceData.selected_payment_method_ids || []
+              const selectedPaymentMethods = allPaymentMethods.filter((method: any) => 
+                selectedIds.includes(method.id)
+              )
+              setPaymentMethods(selectedPaymentMethods)
+            }
           }
         } catch (error) {
           console.error('Error loading invoice:', error)
@@ -198,6 +215,7 @@ export default function ProfessionalInvoicePreviewPage() {
         // From create page
         setInvoiceData(location.state.invoiceData)
         setIsFromDatabase(false)
+        setDbStatus('draft') // Default status for new invoices
       } else {
         toast.error('No invoice data found')
         navigate('/invoices')
@@ -264,17 +282,9 @@ export default function ProfessionalInvoicePreviewPage() {
         position: 'relative',
         zIndex: 1,
         textAlign: 'center',
-        minWidth: '400px',
-        width: 'fit-content', // Dynamic width based on content
-        maxWidth: 'none', // No maximum width constraint
+        width: '100%',
         margin: '0 auto',
-        padding: '0 1rem', // Mobile padding
-        // Ensure mobile responsiveness
-        ...(window.innerWidth < 768 && {
-          minWidth: '320px',
-          width: '100%',
-          maxWidth: '100%'
-        })
+        padding: '0 1rem' // Mobile padding
       }}>
         {/* Invoice Preview Card */}
         <div style={{
@@ -871,6 +881,123 @@ export default function ProfessionalInvoicePreviewPage() {
           </div>
         </div>
 
+        {/* Payment Terms & Information */}
+        {paymentMethods.length > 0 && (
+          <div style={{
+            backgroundColor: brandColors.neutral[50],
+            borderRadius: '8px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            border: `1px solid ${brandColors.neutral[200]}`
+          }}>
+            <h3 style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: brandColors.neutral[700],
+              marginBottom: '1rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Payment Terms & Information
+            </h3>
+            
+            <div style={{
+              marginBottom: '1rem'
+            }}>
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                marginBottom: '0.5rem',
+                lineHeight: '1.6'
+              }}>
+                <strong>Payment Terms:</strong> Net 30 days. Late payments subject to 1.5% monthly interest charge.
+              </p>
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                lineHeight: '1.6'
+              }}>
+                <strong>Payment Due:</strong> Payment is due within 30 days from invoice date. Please include invoice number with payment.
+              </p>
+            </div>
+
+            {/* Payment Methods Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem',
+              marginTop: '1rem'
+            }}>
+              {paymentMethods.map((method) => {
+                const details = method.details as any
+                return (
+                  <div key={method.id} style={{
+                    backgroundColor: brandColors.white,
+                    padding: '1rem',
+                    borderRadius: '6px',
+                    border: `1px solid ${brandColors.neutral[200]}`,
+                    minHeight: '80px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{
+                      fontWeight: '600',
+                      color: brandColors.neutral[900],
+                      fontSize: '0.875rem',
+                      marginBottom: '0.5rem'
+                    }}>
+                      {method.label}
+                    </div>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      color: brandColors.neutral[600],
+                      lineHeight: '1.4'
+                    }}>
+                      {method.type === 'bank_local_us' && details && (
+                        <>
+                          Bank: {details.bankName}<br/>
+                          Account: {details.accountNumber}<br/>
+                          Routing: {details.routingNumber}
+                        </>
+                      )}
+                      {method.type === 'bank_local_ng' && details && (
+                        <>
+                          Bank: {details.bankName}<br/>
+                          Account: {details.accountNumber}<br/>
+                          Sort Code: {details.sortCode}
+                        </>
+                      )}
+                      {method.type === 'bank_international' && details && (
+                        <>
+                          Bank: {details.bankName}<br/>
+                          SWIFT: {details.swiftCode}<br/>
+                          IBAN: {details.iban}
+                        </>
+                      )}
+                      {method.type === 'paypal' && details && (
+                        <>
+                          PayPal: {details.email}<br/>
+                          {details.instructions}
+                        </>
+                      )}
+                      {method.type === 'crypto' && details && (
+                        <>
+                          {details.cryptocurrency}: {details.walletAddress}<br/>
+                          Network: {details.network}
+                        </>
+                      )}
+                      {method.type === 'other' && details && (
+                        <div>{details.instructions}</div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Notes & Terms */}
         {(invoiceData.notes || invoiceData.termsAndConditions) && (
           <div style={{
@@ -935,16 +1062,6 @@ export default function ProfessionalInvoicePreviewPage() {
           </div>
         )}
 
-        {/* Footer */}
-        <div style={{
-          borderTop: `1px solid ${brandColors.neutral[200]}`,
-          paddingTop: '1.5rem',
-          textAlign: 'center',
-          fontSize: '0.75rem',
-          color: brandColors.neutral[400]
-        }}>
-          Thank you for your business! • Generated by InvoiceIt
-        </div>
       </div>
 
         {/* Action Buttons */}
