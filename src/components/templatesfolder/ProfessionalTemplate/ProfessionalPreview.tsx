@@ -368,8 +368,8 @@ export default function ProfessionalInvoicePreviewPage() {
         {/* Invoice Details Bar */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: window.innerWidth < 768 ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: '0.75rem',
+          gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)',
+          gap: '1rem',
           padding: '1rem',
           backgroundColor: brandColors.neutral[50],
           borderRadius: '8px',
@@ -519,8 +519,7 @@ export default function ProfessionalInvoicePreviewPage() {
           display: 'grid',
           gridTemplateColumns: hasShipTo ? (window.innerWidth < 768 ? '1fr' : '1fr 1fr') : '1fr',
           gap: '1.5rem',
-          marginBottom: '2rem',
-          maxWidth: '600px'
+          marginBottom: '2rem'
         }}>
           {/* Bill To */}
           <div>
