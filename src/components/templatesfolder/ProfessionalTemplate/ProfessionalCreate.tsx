@@ -152,17 +152,37 @@ export default function ProfessionalInvoiceCreatePage() {
       if (invoiceNumber) {
         setLoading(true)
         try {
+          // Load invoice from database using invoice number (same as DefaultCreate)
           const { data, error } = await supabase
             .from('invoices')
             .select('*')
             .eq('invoice_number', invoiceNumber)
             .eq('user_id', user?.id)
-            .eq('template', 'professional')
             .single()
 
           if (error) {
             console.error('Error loading invoice from database:', error)
-            toast.error('Invoice not found')
+            console.log('Invoice not found in database, checking localStorage and state...')
+            
+            // Check localStorage for this invoice number (same as DefaultCreate)
+            const savedData = invoiceStorage.getDraftProfessional()
+            if (savedData && savedData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in localStorage')
+              setFormData(savedData)
+              setLoading(false)
+              return
+            }
+            
+            // Check state data (same as DefaultCreate)
+            if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in state')
+              setFormData(location.state.invoiceData)
+              setLoading(false)
+              return
+            }
+            
+            // If not found anywhere, redirect to new invoice (same as DefaultCreate)
+            console.log('Invoice not found anywhere, creating new invoice')
             navigate('/invoice/create/professional')
             return
           }
@@ -240,7 +260,7 @@ export default function ProfessionalInvoiceCreatePage() {
     if (user) {
       loadInvoiceData()
     }
-  }, [searchParams, location.state, navigate, user, setSearchParams])
+  }, [searchParams, location.state, navigate, user])
 
   // Load user's default currency and payment details
   useEffect(() => {
@@ -355,7 +375,7 @@ export default function ProfessionalInvoiceCreatePage() {
     if (formData.invoiceNumber && !loading) {
       setSearchParams({ invoice: formData.invoiceNumber })
     }
-  }, [formData.invoiceNumber, setSearchParams, loading])
+  }, [formData.invoiceNumber, setSearchParams])
 
   // Add item
   const addItem = () => {
@@ -484,7 +504,7 @@ export default function ProfessionalInvoiceCreatePage() {
       const result = await saveProfessionalInvoice(saveData, user, undefined, { status: 'draft' })
       
       if (result.success) {
-        // Reset form to default state (like Default template)
+        // Reset form to default state (same as DefaultCreate)
         setFormData({
           clientName: '',
           clientEmail: '',
