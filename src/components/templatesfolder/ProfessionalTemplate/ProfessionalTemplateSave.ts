@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabaseClient'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import type { PaymentMethod } from '../../../lib/storage/invoiceStorage'
+import { saveClient } from '../../../lib/clientCheck'
 import toast from 'react-hot-toast'
 
 // Simple debounce mechanism to prevent multiple simultaneous saves
@@ -137,83 +138,34 @@ export const saveProfessionalInvoice = async (
       return { success: false, error: 'User not authenticated' }
     }
 
-    // Step 1: Save or find client (CASE-INSENSITIVE MATCHING)
-    console.log('👤 [PROFESSIONAL TEMPLATE SAVE] Step 1: Handling client with case-insensitive matching...')
-    let clientId: string
+    // Step 1: Save or find client using reusable utility
+    console.log('👤 [PROFESSIONAL TEMPLATE SAVE] Step 1: Handling client with reusable utility...')
     
-    // Check if client already exists by name (CASE-INSENSITIVE)
-    console.log('🔍 [PROFESSIONAL TEMPLATE SAVE] Searching for existing client by name...')
-    const { data: existingClients } = await supabase
-      .from('clients')
-      .select('id, name, email, address, phone, company_name')
-      .eq('user_id', user.id)
-      .ilike('name', formData.clientName)
+    const clientResult = await saveClient({
+      name: formData.clientName,
+      email: formData.clientEmail,
+      address: formData.clientAddress,
+      phone: formData.clientPhone,
+      company_name: formData.clientCompanyName
+    }, user.id)
 
-    let existingClient = existingClients?.find(client => 
-      client.name.toLowerCase() === formData.clientName.toLowerCase()
-    )
+    if (!clientResult.success) {
+      console.error('❌ [PROFESSIONAL TEMPLATE SAVE] Error handling client:', clientResult.error)
+      toast.error('Failed to handle client: ' + (clientResult.error || 'Unknown error'))
+      return { success: false, error: clientResult.error || 'Failed to handle client' }
+    }
+
+    const clientId = clientResult.clientId!
     
-    console.log('📊 [PROFESSIONAL TEMPLATE SAVE] Client search results:', {
-      foundClients: existingClients?.length || 0,
-      exactMatch: !!existingClient,
-      clientName: formData.clientName,
-      existingClientName: existingClient?.name
-    })
-
-    if (existingClient) {
-      clientId = existingClient.id
-      console.log('✅ [PROFESSIONAL TEMPLATE SAVE] Using existing client:', clientId)
-      
-      // Update client details if they've changed
-      const shouldUpdate = 
-        existingClient.email !== formData.clientEmail ||
-        existingClient.address !== formData.clientAddress ||
-        existingClient.phone !== formData.clientPhone ||
-        existingClient.company_name !== formData.clientCompanyName
-
-      if (shouldUpdate) {
-        console.log('🔄 [PROFESSIONAL TEMPLATE SAVE] Updating client details...')
-        const { error: updateError } = await supabase
-          .from('clients')
-          .update({
-            email: formData.clientEmail || null,
-            address: formData.clientAddress || null,
-            phone: formData.clientPhone || null,
-            company_name: formData.clientCompanyName || null,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', clientId)
-
-        if (updateError) {
-          console.error('❌ [PROFESSIONAL TEMPLATE SAVE] Error updating client:', updateError)
-        } else {
-          console.log('✅ [PROFESSIONAL TEMPLATE SAVE] Client updated successfully')
-        }
-      }
-    } else {
-      // Create new client
-      console.log('🆕 [PROFESSIONAL TEMPLATE SAVE] Creating new client...')
-      const { data: newClient, error: clientError } = await supabase
-        .from('clients')
-        .insert({
-          user_id: user.id,
-          name: formData.clientName,
-          email: formData.clientEmail || null,
-          address: formData.clientAddress || null,
-          phone: formData.clientPhone || null,
-          company_name: formData.clientCompanyName || null
-        })
-        .select()
-        .single()
-
-      if (clientError || !newClient) {
-        console.error('❌ [PROFESSIONAL TEMPLATE SAVE] Error creating client:', clientError)
-        toast.error('Failed to create client: ' + (clientError?.message || 'Unknown error'))
-        return { success: false, error: clientError?.message || 'Failed to create client' }
-      }
-
-      clientId = newClient.id
+    // Show appropriate success message
+    if (clientResult.isNewClient) {
       console.log('✅ [PROFESSIONAL TEMPLATE SAVE] New client created with ID:', clientId)
+      toast.success('New client added successfully')
+    } else if (clientResult.isUpdated) {
+      console.log('✅ [PROFESSIONAL TEMPLATE SAVE] Existing client updated with ID:', clientId)
+      toast.success('Client information updated')
+    } else {
+      console.log('✅ [PROFESSIONAL TEMPLATE SAVE] Using existing client with ID:', clientId)
     }
 
     // Step 2: Save invoice (UPDATE existing or INSERT new)

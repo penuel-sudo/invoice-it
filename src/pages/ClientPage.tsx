@@ -5,6 +5,7 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
 import { supabase } from '../lib/supabaseClient'
+import { saveClient } from '../lib/clientCheck'
 import {
   ArrowLeft,
   Plus,
@@ -118,7 +119,7 @@ export default function ClientPage() {
       setSaving(true)
       
       if (editingClient) {
-        // Update existing client
+        // Update existing client (direct update for editing mode)
         const { error } = await supabase
           .from('clients')
           .update({
@@ -140,25 +141,29 @@ export default function ClientPage() {
 
         toast.success('Client updated successfully!')
       } else {
-        // Create new client
-        const { error } = await supabase
-          .from('clients')
-          .insert({
-            user_id: user.id,
-            name: formData.name.trim(),
-            email: formData.email.trim() || null,
-            phone: formData.phone.trim() || null,
-            address: formData.address.trim() || null,
-            company_name: formData.company_name.trim() || null
-          })
+        // Create new client - check for duplicates first
+        const clientResult = await saveClient({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          address: formData.address.trim(),
+          company_name: formData.company_name.trim()
+        }, user.id)
 
-        if (error) {
-          console.error('Error creating client:', error)
-          toast.error('Failed to create client')
+        if (!clientResult.success) {
+          console.error('Error creating client:', clientResult.error)
+          toast.error('Failed to create client: ' + (clientResult.error || 'Unknown error'))
           return
         }
 
-        toast.success('Client created successfully!')
+        // Show appropriate success message
+        if (clientResult.isNewClient) {
+          toast.success('Client created successfully!')
+        } else if (clientResult.isUpdated) {
+          toast.success('Client updated successfully!')
+        } else {
+          toast.success('Client already exists!')
+        }
       }
 
       // Reset form and reload clients

@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabaseClient'
 import { invoiceStorage } from '../../../lib/storage/invoiceStorage'
 import type { InvoiceFormData } from '../../../lib/storage/invoiceStorage'
+import { saveClient } from '../../../lib/clientCheck'
 import toast from 'react-hot-toast'
 
 // Simple debounce mechanism to prevent multiple simultaneous saves
@@ -67,112 +68,34 @@ export const saveInvoiceToDatabase = async (
       return { success: false, error: 'User not authenticated' }
     }
 
-    // Step 1: Save or find client (CASE-INSENSITIVE MATCHING)
-    console.log('👤 [DEFAULT TEMPLATE SAVE] Step 1: Handling client with case-insensitive matching...')
-    let clientId: string
+    // Step 1: Save or find client using reusable utility
+    console.log('👤 [DEFAULT TEMPLATE SAVE] Step 1: Handling client with reusable utility...')
     
-    // Check if client already exists by name (CASE-INSENSITIVE) - PRIMARY MATCH
-    console.log('🔍 [DEFAULT TEMPLATE SAVE] Searching for existing client by name...')
-    const { data: existingClients } = await supabase
-      .from('clients')
-      .select('id, name, email, address, phone, company_name')
-      .eq('user_id', user.id)
-      .ilike('name', formData.clientName) // CASE-INSENSITIVE MATCHING
+    const clientResult = await saveClient({
+      name: formData.clientName,
+      email: formData.clientEmail,
+      address: formData.clientAddress,
+      phone: formData.clientPhone,
+      company_name: formData.clientCompanyName
+    }, user.id)
 
-    // Find client by name match (case-insensitive) - this is the primary match
-    let existingClient = existingClients?.find(client => 
-      client.name.toLowerCase() === formData.clientName.toLowerCase()
-    )
-    
-    // Fallback: If no exact match found, try a broader search
-    if (!existingClient && existingClients && existingClients.length > 0) {
-      console.log('🔄 [DEFAULT TEMPLATE SAVE] No exact match, trying broader search...')
-      // Try to find any client with similar name (fuzzy matching)
-      existingClient = existingClients.find(client => 
-        client.name.toLowerCase().trim() === formData.clientName.toLowerCase().trim()
-      )
+    if (!clientResult.success) {
+      console.error('❌ [DEFAULT TEMPLATE SAVE] Error handling client:', clientResult.error)
+      toast.error('Failed to handle client: ' + (clientResult.error || 'Unknown error'))
+      return { success: false, error: clientResult.error || 'Failed to handle client' }
     }
+
+    const clientId = clientResult.clientId!
     
-    console.log('📊 [DEFAULT TEMPLATE SAVE] Client search results:', {
-      foundClients: existingClients?.length || 0,
-      exactMatch: !!existingClient,
-      clientName: formData.clientName,
-      existingClientName: existingClient?.name
-    })
-
-    if (existingClient) {
-      console.log('✅ [DEFAULT TEMPLATE SAVE] Found existing client, updating...')
-      console.log('📝 [DEFAULT TEMPLATE SAVE] Updating client with new data:', {
-        existingId: existingClient.id,
-        existingName: existingClient.name,
-        newEmail: formData.clientEmail,
-        newAddress: formData.clientAddress,
-        newPhone: formData.clientPhone,
-        newCompany: formData.clientCompanyName
-      })
-      
-      // Update existing client with new data (merge with existing data)
-      const updateData: any = {
-        updated_at: new Date().toISOString()
-      }
-      
-      // Only update fields that have new values
-      if (formData.clientEmail) updateData.email = formData.clientEmail
-      if (formData.clientAddress) updateData.address = formData.clientAddress
-      if (formData.clientPhone) updateData.phone = formData.clientPhone
-      if (formData.clientCompanyName) updateData.company_name = formData.clientCompanyName
-      
-      const { error: updateError } = await supabase
-        .from('clients')
-        .update(updateData)
-        .eq('id', existingClient.id)
-
-      if (updateError) {
-        console.error('❌ [DEFAULT TEMPLATE SAVE] Error updating client:', updateError)
-        toast.error('Failed to update client: ' + updateError.message)
-        return { success: false, error: updateError.message }
-      }
-      
-      clientId = existingClient.id
-      console.log('✅ [DEFAULT TEMPLATE SAVE] Client updated successfully')
+    // Show appropriate success message
+    if (clientResult.isNewClient) {
+      console.log('✅ [DEFAULT TEMPLATE SAVE] New client created with ID:', clientId)
+      toast.success('New client added successfully')
+    } else if (clientResult.isUpdated) {
+      console.log('✅ [DEFAULT TEMPLATE SAVE] Existing client updated with ID:', clientId)
       toast.success('Client information updated')
     } else {
-      console.log('🆕 [DEFAULT TEMPLATE SAVE] Creating new client...')
-      console.log('📝 [DEFAULT TEMPLATE SAVE] New client data:', {
-        name: formData.clientName,
-        email: formData.clientEmail,
-        address: formData.clientAddress,
-        phone: formData.clientPhone,
-        company: formData.clientCompanyName
-      })
-      
-      // Create new client
-      const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .insert({
-          user_id: user.id,
-          name: formData.clientName.trim(), // Trim whitespace
-          email: formData.clientEmail?.trim() || null,
-          address: formData.clientAddress?.trim() || null,
-          phone: formData.clientPhone?.trim() || null,
-          company_name: formData.clientCompanyName?.trim() || null
-        })
-        .select()
-        .single()
-
-      if (clientError) {
-        console.error('❌ [DEFAULT TEMPLATE SAVE] Error creating client:', clientError)
-        console.error('❌ [DEFAULT TEMPLATE SAVE] Client error details:', {
-          message: clientError.message,
-          details: clientError.details,
-          hint: clientError.hint
-        })
-        toast.error('Failed to save client: ' + clientError.message)
-        return { success: false, error: clientError.message }
-      }
-      clientId = client.id
-      console.log('✅ [DEFAULT TEMPLATE SAVE] New client created with ID:', clientId)
-      toast.success('New client created')
+      console.log('✅ [DEFAULT TEMPLATE SAVE] Using existing client with ID:', clientId)
     }
 
     // Step 2: Check if invoice already exists before creating new one
