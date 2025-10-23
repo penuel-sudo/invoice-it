@@ -60,6 +60,14 @@ export default function ProfessionalInvoiceCreatePage() {
     return `INV-${timestamp}`
   }
 
+  // Format currency with commas
+  const formatCurrency = (amount: number): string => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  }
+
   // Initialize form data with localStorage like Default template
   const [formData, setFormData] = useState<ProfessionalInvoiceFormData>(() => {
     // Start with template-specific localStorage data
@@ -362,16 +370,14 @@ export default function ProfessionalInvoiceCreatePage() {
   useEffect(() => {
     const totals = calculateTotals(formData.items, formData.discountAmount, formData.shippingCost, formData.amountPaid)
     
-    // Auto-update discount amount if it's less than the calculated item discounts
-    // This allows manual override while still auto-calculating
-    const newDiscountAmount = Math.max(formData.discountAmount, totals.totalItemDiscounts)
-    
+    // Auto-update discount amount to match calculated item discounts
+    // This ensures the overall discount reflects the sum of item discounts
     setFormData(prev => ({
       ...prev,
       ...totals,
-      discountAmount: newDiscountAmount
+      discountAmount: totals.totalItemDiscounts
     }))
-  }, [formData.items, formData.discountAmount, formData.shippingCost, formData.amountPaid])
+  }, [formData.items, formData.shippingCost, formData.amountPaid])
 
   // Auto-save form data to localStorage (like Default)
   useEffect(() => {
@@ -1223,7 +1229,15 @@ export default function ProfessionalInvoiceCreatePage() {
                       backgroundColor: brandColors.white,
                       color: brandColors.neutral[900],
                       cursor: 'pointer',
-                      accentColor: brandColors.primary[600]
+                      accentColor: brandColors.primary[600],
+                      WebkitAppearance: 'none',
+                      MozAppearance: 'none',
+                      appearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2316a34a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                      backgroundPosition: 'right 0.5rem center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: '1.5em 1.5em',
+                      paddingRight: '2.5rem'
                     }}
                   >
                     {CURRENCIES.map(currency => (
@@ -1496,7 +1510,7 @@ export default function ProfessionalInvoiceCreatePage() {
                           fontWeight: '600',
                           color: brandColors.neutral[900]
                         }}>
-                          {formData.currencySymbol}{item.lineTotal.toFixed(2)}
+                          {formData.currencySymbol}{formatCurrency(item.lineTotal)}
                         </td>
                         <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                           <button
@@ -1656,7 +1670,7 @@ export default function ProfessionalInvoiceCreatePage() {
                     color: brandColors.neutral[700]
                   }}>
                     <span>Subtotal:</span>
-                    <span>{formData.currencySymbol}{formData.subtotal.toFixed(2)}</span>
+                    <span>{formData.currencySymbol}{formatCurrency(formData.subtotal)}</span>
                   </div>
                   
                   <div style={{
@@ -1666,7 +1680,7 @@ export default function ProfessionalInvoiceCreatePage() {
                     color: brandColors.neutral[700]
                   }}>
                     <span>Tax:</span>
-                    <span>{formData.currencySymbol}{formData.taxTotal.toFixed(2)}</span>
+                    <span>{formData.currencySymbol}{formatCurrency(formData.taxTotal)}</span>
                   </div>
 
               {formData.discountAmount > 0 && (
@@ -1677,7 +1691,7 @@ export default function ProfessionalInvoiceCreatePage() {
                   color: brandColors.error[600]
                 }}>
                   <span>Discount:</span>
-                  <span>-{formData.currencySymbol}{formData.discountAmount.toFixed(2)}</span>
+                  <span>-{formData.currencySymbol}{formatCurrency(formData.discountAmount)}</span>
                 </div>
               )}
 
@@ -1689,7 +1703,7 @@ export default function ProfessionalInvoiceCreatePage() {
                       color: brandColors.neutral[700]
                     }}>
                       <span>Shipping:</span>
-                      <span>{formData.currencySymbol}{formData.shippingCost.toFixed(2)}</span>
+                      <span>{formData.currencySymbol}{formatCurrency(formData.shippingCost)}</span>
                     </div>
                   )}
 
@@ -1703,7 +1717,7 @@ export default function ProfessionalInvoiceCreatePage() {
                     color: brandColors.neutral[900]
                   }}>
                     <span>Total:</span>
-                    <span>{formData.currencySymbol}{formData.grandTotal.toFixed(2)}</span>
+                    <span>{formData.currencySymbol}{formatCurrency(formData.grandTotal)}</span>
                   </div>
 
                   {formData.amountPaid > 0 && (
@@ -1715,7 +1729,7 @@ export default function ProfessionalInvoiceCreatePage() {
                         color: brandColors.success[600]
                       }}>
                         <span>Paid:</span>
-                        <span>-{formData.currencySymbol}{formData.amountPaid.toFixed(2)}</span>
+                        <span>-{formData.currencySymbol}{formatCurrency(formData.amountPaid)}</span>
                       </div>
 
                       <div style={{
@@ -1728,7 +1742,7 @@ export default function ProfessionalInvoiceCreatePage() {
                         color: brandColors.primary[600]
                       }}>
                         <span>Balance Due:</span>
-                        <span>{formData.currencySymbol}{formData.balanceDue.toFixed(2)}</span>
+                        <span>{formData.currencySymbol}{formatCurrency(formData.balanceDue)}</span>
                       </div>
                     </>
                   )}

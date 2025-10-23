@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 interface FormattedNumberInputProps {
   value: number
-  onChange: (value: number, formattedValue: string) => void
+  onChange: (value: number) => void
   placeholder?: string
   style?: React.CSSProperties
   disabled?: boolean
@@ -18,11 +18,12 @@ interface FormattedNumberInputProps {
  * Reusable Formatted Number Input Component
  * 
  * Features:
- * - Text input with comma formatting (e.g., "1,234.56")
- * - Flexible user input parsing (handles commas, decimals)
- * - Returns both formatted string and parsed number
- * - No interference with data flow
- * - Consistent behavior across all templates
+ * - FREE TYPING: Allows unrestricted input while typing
+ * - FORMAT ON BLUR: Only formats when user leaves the field
+ * - COMMA SEPARATION: Adds commas for display (1,234.56)
+ * - DECIMAL SUPPORT: Handles any decimal places
+ * - NO INTERFERENCE: Doesn't interrupt user input flow
+ * - CALCULATION READY: Returns parsed number for calculations
  */
 export default function FormattedNumberInput({
   value,
@@ -38,6 +39,8 @@ export default function FormattedNumberInput({
   name
 }: FormattedNumberInputProps) {
   const [displayValue, setDisplayValue] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+  const [hasUserTyped, setHasUserTyped] = useState(false)
 
   // Format number with commas for display
   const formatNumberWithCommas = (num: number): string => {
@@ -67,17 +70,28 @@ export default function FormattedNumberInput({
     return isNaN(parsed) ? 0 : parsed
   }
 
-  // Update display value when prop value changes
+  // Update display value when prop value changes (only when not focused)
   useEffect(() => {
-    setDisplayValue(formatNumberWithCommas(value))
-  }, [value])
+    if (!isFocused && !hasUserTyped) {
+      // Only show formatted value if user hasn't typed yet
+      if (value === 0) {
+        setDisplayValue('')  // Don't show 0.00 initially
+      } else {
+        setDisplayValue(formatNumberWithCommas(value))
+      }
+    }
+  }, [value, isFocused, hasUserTyped])
 
-  // Handle input change
+  // Handle input change - allow free typing
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
     
-    // Allow only numbers, commas, and decimal points
-    const sanitized = inputValue.replace(/[^0-9,.]/g, '')
+    // Mark that user has started typing
+    setHasUserTyped(true)
+    
+    // Allow only numbers, decimal points, and basic characters
+    // Don't restrict too much while typing
+    const sanitized = inputValue.replace(/[^0-9.]/g, '')
     
     // Prevent multiple decimal points
     const parts = sanitized.split('.')
@@ -85,7 +99,7 @@ export default function FormattedNumberInput({
     
     setDisplayValue(finalValue)
     
-    // Parse and validate the number
+    // Parse the number for internal calculation
     const parsedNumber = parseFormattedNumber(finalValue)
     
     // Apply min/max constraints
@@ -97,21 +111,35 @@ export default function FormattedNumberInput({
       constrainedNumber = max
     }
     
-    // Call onChange with both parsed number and formatted string
-    onChange(constrainedNumber, formatNumberWithCommas(constrainedNumber))
+    // Call onChange with the parsed number (for calculations)
+    onChange(constrainedNumber)
   }
 
-  // Handle blur - format the display value
+  // Handle blur - format the display value and finalize
   const handleBlur = () => {
+    setIsFocused(false)
     const parsedNumber = parseFormattedNumber(displayValue)
     const formatted = formatNumberWithCommas(parsedNumber)
     setDisplayValue(formatted)
+    
+    // Reset user typing flag for next interaction
+    setHasUserTyped(false)
+    
+    // Final onChange call with parsed number
+    onChange(parsedNumber)
   }
 
   // Handle focus - show raw number for easier editing
   const handleFocus = () => {
-    const parsedNumber = parseFormattedNumber(displayValue)
-    setDisplayValue(parsedNumber.toString())
+    setIsFocused(true)
+    
+    // If the field shows 0.00 or empty, clear it for user to type
+    if (displayValue === '0.00' || displayValue === '' || displayValue === '0') {
+      setDisplayValue('')
+    } else {
+      const parsedNumber = parseFormattedNumber(displayValue)
+      setDisplayValue(parsedNumber.toString())
+    }
   }
 
   return (

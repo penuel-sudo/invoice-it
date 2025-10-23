@@ -937,24 +937,9 @@ export default function InvoiceCreatePage() {
                         }}>
                           Qty
                         </label>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={formatNumberWhileTyping(String(item.quantity || ''))}
-                          onChange={(e) => {
-                            let value = e.target.value.replace(/,/g, '') // Remove commas for processing
-                            
-                            // Allow empty, digits, and ONE decimal point with up to 2 decimal places
-                            if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                              const numValue = value === '' ? 0 : (parseFloat(value) || 0)
-                              updateItem(item.id, 'quantity', numValue)
-                            }
-                          }}
-                          onBlur={(e) => {
-                            // Format with .00 when user leaves the field
-                            const num = parseFormattedNumber(e.target.value)
-                            updateItem(item.id, 'quantity', num)
-                          }}
+                        <FormattedNumberInput
+                          value={item.quantity}
+                          onChange={(value) => updateItem(item.id, 'quantity', value)}
                           placeholder="0"
                           style={{
                             width: '100%',
@@ -978,24 +963,9 @@ export default function InvoiceCreatePage() {
                         }}>
                           Unit Price
                         </label>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={formatNumberWhileTyping(String(item.unitPrice || ''))}
-                          onChange={(e) => {
-                            let value = e.target.value.replace(/,/g, '') // Remove commas for processing
-                            
-                            // Allow empty, digits, and ONE decimal point with up to 2 decimal places
-                            if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                              const numValue = value === '' ? 0 : (parseFloat(value) || 0)
-                              updateItem(item.id, 'unitPrice', numValue)
-                            }
-                          }}
-                          onBlur={(e) => {
-                            // Format with .00 when user leaves the field
-                            const num = parseFormattedNumber(e.target.value)
-                            updateItem(item.id, 'unitPrice', num)
-                          }}
+                        <FormattedNumberInput
+                          value={item.unitPrice}
+                          onChange={(value) => updateItem(item.id, 'unitPrice', value)}
                           placeholder="0"
                           style={{
                             width: '100%',
