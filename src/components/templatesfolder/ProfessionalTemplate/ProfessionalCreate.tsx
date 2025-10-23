@@ -1229,7 +1229,6 @@ export default function ProfessionalInvoiceCreatePage() {
                       backgroundColor: brandColors.white,
                       color: brandColors.neutral[900],
                       cursor: 'pointer',
-                      accentColor: brandColors.primary[600],
                       WebkitAppearance: 'none',
                       MozAppearance: 'none',
                       appearance: 'none',
@@ -1237,11 +1236,30 @@ export default function ProfessionalInvoiceCreatePage() {
                       backgroundPosition: 'right 0.5rem center',
                       backgroundRepeat: 'no-repeat',
                       backgroundSize: '1.5em 1.5em',
-                      paddingRight: '2.5rem'
+                      paddingRight: '2.5rem',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = brandColors.primary[500]
+                      e.target.style.boxShadow = `0 0 0 3px ${brandColors.primary[100]}`
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = brandColors.neutral[300]
+                      e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
                     }}
                   >
                     {CURRENCIES.map(currency => (
-                      <option key={currency.code} value={currency.code}>
+                      <option 
+                        key={currency.code} 
+                        value={currency.code}
+                        style={{
+                          backgroundColor: brandColors.white,
+                          color: brandColors.neutral[900],
+                          padding: '0.5rem',
+                          fontSize: '0.875rem'
+                        }}
+                      >
                         {currency.code} - {currency.name}
                       </option>
                     ))}
@@ -1411,23 +1429,9 @@ export default function ProfessionalInvoiceCreatePage() {
                           />
                         </td>
                         <td style={{ padding: '0.75rem' }}>
-                          <input
-                            type="text"
-                            inputMode="decimal"
+                          <FormattedNumberInput
                             value={item.quantity}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9.]/g, '')
-                              if (value === '' || value.match(/^\d*\.?\d*$/)) {
-                                updateItem(item.id, 'quantity', parseFloat(value) || 0)
-                              }
-                            }}
-                            onFocus={(e) => {
-                              e.target.value = item.quantity.toString()
-                            }}
-                            onBlur={(e) => {
-                              const formatted = formatNumberForDisplay(item.quantity)
-                              e.target.value = formatted
-                            }}
+                            onChange={(value) => updateItem(item.id, 'quantity', value)}
                             style={{
                               width: '100%',
                               padding: '0.5rem',
@@ -1440,23 +1444,9 @@ export default function ProfessionalInvoiceCreatePage() {
                           />
                         </td>
                         <td style={{ padding: '0.75rem' }}>
-                          <input
-                            type="text"
-                            inputMode="decimal"
+                          <FormattedNumberInput
                             value={item.unitPrice}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9.]/g, '')
-                              if (value === '' || value.match(/^\d*\.?\d*$/)) {
-                                updateItem(item.id, 'unitPrice', parseFloat(value) || 0)
-                              }
-                            }}
-                            onFocus={(e) => {
-                              e.target.value = item.unitPrice.toString()
-                            }}
-                            onBlur={(e) => {
-                              const formatted = formatNumberForDisplay(item.unitPrice)
-                              e.target.value = formatted
-                            }}
+                            onChange={(value) => updateItem(item.id, 'unitPrice', value)}
                             style={{
                               width: '100%',
                               padding: '0.5rem',
