@@ -362,20 +362,14 @@ export default function ProfessionalInvoicePreviewPage() {
             }}>
               INVOICE
             </h1>
-            <div style={{
-              fontSize: '0.875rem',
-              color: brandColors.neutral[600]
-            }}>
-              Professional Invoice Template
-            </div>
           </div>
         </div>
 
         {/* Invoice Details Bar */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: window.innerWidth < 768 ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: '1rem',
+          gridTemplateColumns: window.innerWidth < 768 ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))',
+          gap: '0.75rem',
           padding: '1rem',
           backgroundColor: brandColors.neutral[50],
           borderRadius: '8px',
@@ -389,10 +383,22 @@ export default function ProfessionalInvoicePreviewPage() {
             right: '1rem',
             zIndex: 10
           }}>
-            <StatusButton 
-              status={dbStatus}
-              size="sm"
-            />
+            <div>
+              <div style={{
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: brandColors.neutral[500],
+                marginBottom: '0.25rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Status
+              </div>
+              <StatusButton 
+                status={dbStatus}
+                size="sm"
+              />
+            </div>
           </div>
           
           <div>
@@ -512,8 +518,9 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: hasShipTo ? (window.innerWidth < 768 ? '1fr' : '1fr 1fr') : '1fr',
-          gap: '2rem',
-          marginBottom: '3rem'
+          gap: '1.5rem',
+          marginBottom: '2rem',
+          maxWidth: '600px'
         }}>
           {/* Bill To */}
           <div>
@@ -825,10 +832,10 @@ export default function ProfessionalInvoicePreviewPage() {
           marginBottom: '3rem'
         }}>
           <div style={{
-            minWidth: '300px',
+            minWidth: '350px',
             backgroundColor: brandColors.neutral[50],
             borderRadius: '8px',
-            padding: '1rem',
+            padding: '1.5rem',
             border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <div style={{
@@ -949,21 +956,34 @@ export default function ProfessionalInvoicePreviewPage() {
             <div style={{
               marginBottom: '1rem'
             }}>
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[600],
-                marginBottom: '0.5rem',
-                lineHeight: '1.6'
-              }}>
-                <strong>Payment Terms:</strong> Net 30 days. Late payments subject to 1.5% monthly interest charge.
-              </p>
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[600],
-                lineHeight: '1.6'
-              }}>
-                <strong>Payment Due:</strong> Payment is due within 30 days from invoice date. Please include invoice number with payment.
-              </p>
+              {invoiceData.termsAndConditions ? (
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: brandColors.neutral[600],
+                  lineHeight: '1.6',
+                  whiteSpace: 'pre-line'
+                }}>
+                  {invoiceData.termsAndConditions}
+                </div>
+              ) : (
+                <>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[600],
+                    marginBottom: '0.5rem',
+                    lineHeight: '1.6'
+                  }}>
+                    <strong>Payment Terms:</strong> Net 30 days. Late payments subject to 1.5% monthly interest charge.
+                  </p>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[600],
+                    lineHeight: '1.6'
+                  }}>
+                    <strong>Payment Due:</strong> Payment is due within 30 days from invoice date. Please include invoice number with payment.
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Payment Methods Grid */}
@@ -1003,6 +1023,7 @@ export default function ProfessionalInvoicePreviewPage() {
                         <>
                           Bank: {details.bankName}<br/>
                           Account: {details.accountNumber}<br/>
+                          {details.accountType && `Account Type: ${details.accountType}<br/>`}
                           Routing: {details.routingNumber}
                         </>
                       )}
@@ -1010,6 +1031,7 @@ export default function ProfessionalInvoicePreviewPage() {
                         <>
                           Bank: {details.bankName}<br/>
                           Account: {details.accountNumber}<br/>
+                          {details.accountType && `Account Type: ${details.accountType}<br/>`}
                           Sort Code: {details.sortCode}
                         </>
                       )}
@@ -1043,67 +1065,30 @@ export default function ProfessionalInvoicePreviewPage() {
           </div>
         )}
 
-        {/* Notes & Terms */}
-        {(invoiceData.notes || invoiceData.termsAndConditions) && (
+        {/* Notes */}
+        {invoiceData.notes && (
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: invoiceData.notes && invoiceData.termsAndConditions ? '1fr 1fr' : '1fr',
-            gap: '2rem',
-            marginBottom: '3rem'
+            textAlign: 'center',
+            marginBottom: '2rem'
           }}>
-            {invoiceData.notes && (
-              <div>
-                <h3 style={{
-                  fontSize: '0.875rem',
-                  fontWeight: '700',
-                  color: brandColors.neutral[700],
-                  marginBottom: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  Notes
-                </h3>
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: brandColors.neutral[50],
-                  borderRadius: '8px',
-                  border: `1px solid ${brandColors.neutral[200]}`,
-                  fontSize: '0.875rem',
-                  color: brandColors.neutral[700],
-                  whiteSpace: 'pre-line',
-                  lineHeight: '1.6'
-                }}>
-                  {invoiceData.notes}
-                </div>
-              </div>
-            )}
-
-            {invoiceData.termsAndConditions && (
-              <div>
-                <h3 style={{
-                  fontSize: '0.875rem',
-                  fontWeight: '700',
-                  color: brandColors.neutral[700],
-                  marginBottom: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  Terms & Conditions
-                </h3>
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: brandColors.neutral[50],
-                  borderRadius: '8px',
-                  border: `1px solid ${brandColors.neutral[200]}`,
-                  fontSize: '0.875rem',
-                  color: brandColors.neutral[700],
-                  whiteSpace: 'pre-line',
-                  lineHeight: '1.6'
-                }}>
-                  {invoiceData.termsAndConditions}
-                </div>
-              </div>
-            )}
+            <h3 style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: brandColors.neutral[700],
+              marginBottom: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Notes
+            </h3>
+            <div style={{
+              fontSize: '0.875rem',
+              color: brandColors.neutral[700],
+              whiteSpace: 'pre-line',
+              lineHeight: '1.6'
+            }}>
+              {invoiceData.notes}
+            </div>
           </div>
         )}
 
