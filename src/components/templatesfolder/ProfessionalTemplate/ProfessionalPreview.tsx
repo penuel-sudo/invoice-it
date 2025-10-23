@@ -317,12 +317,6 @@ export default function ProfessionalInvoicePreviewPage() {
             }}>
               INVOICE
             </h1>
-            <div style={{
-              fontSize: '0.875rem',
-              color: brandColors.neutral[600]
-            }}>
-              Professional Invoice Template
-            </div>
           </div>
 
           {/* Right - Status */}
