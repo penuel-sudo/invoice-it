@@ -86,7 +86,7 @@ export default function InvoiceCreatePage() {
             console.log('Invoice not found in database, checking localStorage and state...')
             
             // Check localStorage for this invoice number
-            const savedData = invoiceStorage.getDraft()
+            const savedData = invoiceStorage.getDraftDefault()
             if (savedData && savedData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in localStorage')
               setFormData(savedData)
