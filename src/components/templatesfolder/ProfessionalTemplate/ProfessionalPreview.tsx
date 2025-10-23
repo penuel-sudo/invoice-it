@@ -104,7 +104,7 @@ export default function ProfessionalInvoicePreviewPage() {
             }
             
             // Check localStorage for this invoice number
-            const savedData = invoiceStorage.getDraft()
+            const savedData = invoiceStorage.getDraftProfessional()
             if (savedData && savedData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in localStorage')
               // Convert to ProfessionalInvoiceFormData with defaults for missing fields

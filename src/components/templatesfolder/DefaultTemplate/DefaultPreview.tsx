@@ -88,7 +88,7 @@ export default function InvoicePreviewPage() {
             }
             
             // Check localStorage for this invoice number
-            const savedData = invoiceStorage.getDraft()
+            const savedData = invoiceStorage.getDraftDefault()
             if (savedData && savedData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in localStorage')
               setInvoiceData(savedData)
@@ -168,7 +168,7 @@ export default function InvoicePreviewPage() {
         }
       } else {
         // Try to get data from localStorage
-        const savedData = invoiceStorage.getDraft()
+        const savedData = invoiceStorage.getDraftDefault()
         if (savedData) {
           // For localStorage data: payment methods are already filtered
           setInvoiceData(savedData)
