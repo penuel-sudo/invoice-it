@@ -128,6 +128,30 @@ export default function ProfessionalInvoicePreviewPage() {
               }
               setInvoiceData(professionalData)
               setIsFromDatabase(false)
+              setDbStatus('draft')
+              
+              // Load payment methods for localStorage data
+              if (user) {
+                try {
+                  const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('payment_methods')
+                    .eq('id', user.id)
+                    .single()
+
+                  if (profileData?.payment_methods) {
+                    const allPaymentMethods = profileData.payment_methods || []
+                    const selectedIds = (savedData as any).selectedPaymentMethodIds || []
+                    const selectedPaymentMethods = allPaymentMethods.filter((method: any) => 
+                      selectedIds.includes(method.id)
+                    )
+                    setPaymentMethods(selectedPaymentMethods)
+                  }
+                } catch (error) {
+                  console.error('Error loading payment methods:', error)
+                }
+              }
+              
               setLoading(false)
               return
             }
@@ -216,6 +240,28 @@ export default function ProfessionalInvoicePreviewPage() {
         setInvoiceData(location.state.invoiceData)
         setIsFromDatabase(false)
         setDbStatus('draft') // Default status for new invoices
+        
+        // Load payment methods for localStorage data
+        if (user) {
+          try {
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('payment_methods')
+              .eq('id', user.id)
+              .single()
+
+            if (profileData?.payment_methods) {
+              const allPaymentMethods = profileData.payment_methods || []
+              const selectedIds = location.state.invoiceData.selectedPaymentMethodIds || []
+              const selectedPaymentMethods = allPaymentMethods.filter((method: any) => 
+                selectedIds.includes(method.id)
+              )
+              setPaymentMethods(selectedPaymentMethods)
+            }
+          } catch (error) {
+            console.error('Error loading payment methods:', error)
+          }
+        }
       } else {
         toast.error('No invoice data found')
         navigate('/invoices')
@@ -289,13 +335,12 @@ export default function ProfessionalInvoicePreviewPage() {
         {/* Invoice Preview Card */}
         <div style={{
           backgroundColor: brandColors.white,
-          borderRadius: '16px',
-          padding: window.innerWidth < 768 ? '1.5rem' : '2rem', // Mobile responsive padding
-          marginBottom: '2rem',
-          boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
+          borderRadius: '12px',
+          padding: window.innerWidth < 768 ? '1rem' : '1.5rem', // More compact padding
+          marginBottom: '1.5rem',
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
           position: 'relative',
-          width: '100%',
-          maxWidth: '100%'
+          width: '100%'
         }}>
         
         {/* Header Section */}
@@ -317,34 +362,39 @@ export default function ProfessionalInvoicePreviewPage() {
             }}>
               INVOICE
             </h1>
-          </div>
-
-          {/* Right - Status */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: '0.5rem'
-          }}>
-            {isFromDatabase && (
-              <StatusButton 
-                status={dbStatus}
-                size="sm"
-              />
-            )}
+            <div style={{
+              fontSize: '0.875rem',
+              color: brandColors.neutral[600]
+            }}>
+              Professional Invoice Template
+            </div>
           </div>
         </div>
 
         {/* Invoice Details Bar */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: window.innerWidth < 768 ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1.5rem',
-          padding: '1.5rem',
+          gridTemplateColumns: window.innerWidth < 768 ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(150px, 1fr))',
+          gap: '1rem',
+          padding: '1rem',
           backgroundColor: brandColors.neutral[50],
           borderRadius: '8px',
-          marginBottom: '2rem'
+          marginBottom: '1.5rem',
+          position: 'relative'
         }}>
+          {/* Status Button - Top Right */}
+          <div style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            zIndex: 10
+          }}>
+            <StatusButton 
+              status={dbStatus}
+              size="sm"
+            />
+          </div>
+          
           <div>
             <div style={{
               fontSize: '0.75rem',
@@ -632,7 +682,7 @@ export default function ProfessionalInvoicePreviewPage() {
               }}>
                 <th style={{
                   textAlign: 'left',
-                  padding: '0.75rem',
+                  padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
                   color: brandColors.neutral[700],
@@ -643,7 +693,7 @@ export default function ProfessionalInvoicePreviewPage() {
                 </th>
                 <th style={{
                   textAlign: 'center',
-                  padding: '0.75rem',
+                  padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
                   color: brandColors.neutral[700],
@@ -654,7 +704,7 @@ export default function ProfessionalInvoicePreviewPage() {
                 </th>
                 <th style={{
                   textAlign: 'right',
-                  padding: '0.75rem',
+                  padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
                   color: brandColors.neutral[700],
@@ -666,7 +716,7 @@ export default function ProfessionalInvoicePreviewPage() {
                 {invoiceData.items.some(item => item.discount > 0) && (
                   <th style={{
                     textAlign: 'center',
-                    padding: '0.75rem',
+                    padding: '0.75rem 0.5rem',
                     fontSize: '0.75rem',
                     fontWeight: '700',
                     color: brandColors.neutral[700],
@@ -679,7 +729,7 @@ export default function ProfessionalInvoicePreviewPage() {
                 {invoiceData.items.some(item => item.taxRate > 0) && (
                   <th style={{
                     textAlign: 'center',
-                    padding: '0.75rem',
+                    padding: '0.75rem 0.5rem',
                     fontSize: '0.75rem',
                     fontWeight: '700',
                     color: brandColors.neutral[700],
@@ -691,7 +741,7 @@ export default function ProfessionalInvoicePreviewPage() {
                 )}
                 <th style={{
                   textAlign: 'right',
-                  padding: '0.75rem',
+                  padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
                   color: brandColors.neutral[700],
@@ -710,14 +760,15 @@ export default function ProfessionalInvoicePreviewPage() {
                   borderBottom: `1px solid ${brandColors.neutral[200]}`
                 }}>
                   <td style={{
-                    padding: '1rem 0.75rem',
+                    padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
-                    color: brandColors.neutral[900]
+                    color: brandColors.neutral[900],
+                    textAlign: 'left'
                   }}>
                     {item.description}
                   </td>
                   <td style={{
-                    padding: '1rem 0.75rem',
+                    padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[700],
                     textAlign: 'center'
@@ -725,7 +776,7 @@ export default function ProfessionalInvoicePreviewPage() {
                     {item.quantity.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                   </td>
                   <td style={{
-                    padding: '1rem 0.75rem',
+                    padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[700],
                     textAlign: 'right'
@@ -734,7 +785,7 @@ export default function ProfessionalInvoicePreviewPage() {
                   </td>
                   {invoiceData.items.some(item => item.discount > 0) && (
                     <td style={{
-                      padding: '1rem 0.75rem',
+                      padding: '0.75rem 0.5rem',
                       fontSize: '0.875rem',
                       color: item.discount > 0 ? brandColors.error[600] : brandColors.neutral[400],
                       textAlign: 'center'
@@ -744,7 +795,7 @@ export default function ProfessionalInvoicePreviewPage() {
                   )}
                   {invoiceData.items.some(item => item.taxRate > 0) && (
                     <td style={{
-                      padding: '1rem 0.75rem',
+                      padding: '0.75rem 0.5rem',
                       fontSize: '0.875rem',
                       color: brandColors.neutral[700],
                       textAlign: 'center'
@@ -753,7 +804,7 @@ export default function ProfessionalInvoicePreviewPage() {
                     </td>
                   )}
                   <td style={{
-                    padding: '1rem 0.75rem',
+                    padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
                     fontWeight: '600',
                     color: brandColors.neutral[900],
@@ -774,10 +825,10 @@ export default function ProfessionalInvoicePreviewPage() {
           marginBottom: '3rem'
         }}>
           <div style={{
-            minWidth: '350px',
+            minWidth: '300px',
             backgroundColor: brandColors.neutral[50],
             borderRadius: '8px',
-            padding: '1.5rem',
+            padding: '1rem',
             border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <div style={{
