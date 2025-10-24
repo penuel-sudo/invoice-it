@@ -366,16 +366,37 @@ export default function ProfessionalInvoicePreviewPage() {
         </div>
 
         {/* Invoice Details Bar */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)',
-          gap: '1rem',
-          padding: '1rem',
-          backgroundColor: brandColors.neutral[50],
-          borderRadius: '8px',
-          marginBottom: '1.5rem',
-          position: 'relative'
-        }}>
+        {(() => {
+          // Count available fields
+          const availableFields = [
+            'invoiceNumber',
+            'invoiceDate', 
+            'dueDate',
+            ...(invoiceData.poNumber ? ['poNumber'] : []),
+            ...(invoiceData.taxId ? ['taxId'] : [])
+          ];
+          const fieldCount = availableFields.length;
+          
+          // Calculate optimal grid layout
+          const getGridColumns = () => {
+            if (window.innerWidth < 768) return '1fr'; // Mobile: single column
+            if (fieldCount <= 2) return 'repeat(2, 1fr)'; // 2 items: 2 columns
+            if (fieldCount <= 4) return 'repeat(2, 1fr)'; // 3-4 items: 2 columns
+            if (fieldCount <= 6) return 'repeat(3, 1fr)'; // 5-6 items: 3 columns
+            return 'repeat(4, 1fr)'; // 7+ items: 4 columns
+          };
+
+          return (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: getGridColumns(),
+              gap: '1rem',
+              padding: '1rem',
+              backgroundColor: brandColors.neutral[50],
+              borderRadius: '8px',
+              marginBottom: '1.5rem',
+              position: 'relative'
+            }}>
           {/* Status Button - Top Right */}
           <div style={{
             position: 'absolute',
@@ -512,13 +533,17 @@ export default function ProfessionalInvoicePreviewPage() {
               </div>
             </div>
           )}
-        </div>
+            </div>
+          );
+        })()}
 
         {/* Bill To & Ship To */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: hasShipTo ? (window.innerWidth < 768 ? '1fr' : '1fr 1fr') : '1fr',
-          gap: '1.5rem',
+          gridTemplateColumns: hasShipTo 
+            ? (window.innerWidth < 768 ? '1fr' : window.innerWidth < 1024 ? '1fr 1fr' : '1fr 1fr')
+            : '1fr',
+          gap: window.innerWidth < 768 ? '1rem' : '1.5rem',
           marginBottom: '2rem'
         }}>
           {/* Bill To */}
@@ -988,7 +1013,11 @@ export default function ProfessionalInvoicePreviewPage() {
             {/* Payment Methods Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: window.innerWidth < 768 
+                ? '1fr' 
+                : window.innerWidth < 1024 
+                  ? 'repeat(auto-fit, minmax(180px, 1fr))' 
+                  : 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '1rem',
               marginTop: '1rem'
             }}>
@@ -1019,39 +1048,39 @@ export default function ProfessionalInvoicePreviewPage() {
                       lineHeight: '1.4'
                     }}>
                       {method.type === 'bank_local_us' && details && (
-                        <>
-                          Bank: {details.bankName}<br/>
-                          Account: {details.accountNumber}<br/>
-                          {details.accountType && `Account Type: ${details.accountType}<br/>`}
-                          Routing: {details.routingNumber}
-                        </>
+                        <div>
+                          <div>Bank: {details.bankName}</div>
+                          <div>Account: {details.accountNumber}</div>
+                          {details.accountType && <div>Account Type: {details.accountType}</div>}
+                          <div>Routing: {details.routingNumber}</div>
+                        </div>
                       )}
                       {method.type === 'bank_local_ng' && details && (
-                        <>
-                          Bank: {details.bankName}<br/>
-                          Account: {details.accountNumber}<br/>
-                          {details.accountType && `Account Type: ${details.accountType}<br/>`}
-                          Sort Code: {details.sortCode}
-                        </>
+                        <div>
+                          <div>Bank: {details.bankName}</div>
+                          <div>Account: {details.accountNumber}</div>
+                          {details.accountType && <div>Account Type: {details.accountType}</div>}
+                          <div>Sort Code: {details.sortCode}</div>
+                        </div>
                       )}
                       {method.type === 'bank_international' && details && (
-                        <>
-                          Bank: {details.bankName}<br/>
-                          SWIFT: {details.swiftCode}<br/>
-                          IBAN: {details.iban}
-                        </>
+                        <div>
+                          <div>Bank: {details.bankName}</div>
+                          <div>SWIFT: {details.swiftCode}</div>
+                          <div>IBAN: {details.iban}</div>
+                        </div>
                       )}
                       {method.type === 'paypal' && details && (
-                        <>
-                          PayPal: {details.email}<br/>
-                          {details.instructions}
-                        </>
+                        <div>
+                          <div>PayPal: {details.email}</div>
+                          <div>{details.instructions}</div>
+                        </div>
                       )}
                       {method.type === 'crypto' && details && (
-                        <>
-                          {details.cryptocurrency}: {details.walletAddress}<br/>
-                          Network: {details.network}
-                        </>
+                        <div>
+                          <div>{details.cryptocurrency}: {details.walletAddress}</div>
+                          <div>Network: {details.network}</div>
+                        </div>
                       )}
                       {method.type === 'other' && details && (
                         <div>{details.instructions}</div>
