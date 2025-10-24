@@ -340,9 +340,7 @@ export default function ProfessionalInvoicePreviewPage() {
           marginBottom: '1.5rem',
           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
           position: 'relative',
-          width: 'fit-content', // Content determines width
-          maxWidth: '100%', // Don't exceed container
-          margin: '0 auto' // Center the card
+          width: '100%'
         }}>
         
         {/* Header Section */}
@@ -543,9 +541,7 @@ export default function ProfessionalInvoicePreviewPage() {
             ? (window.innerWidth < 768 ? '1fr' : '1fr 1fr')
             : '1fr',
           gap: window.innerWidth < 768 ? '1rem' : '1.5rem',
-          marginBottom: '2rem',
-          width: 'fit-content', // Content determines width
-          maxWidth: '100%' // Don't exceed container
+          marginBottom: '2rem'
         }}>
           {/* Bill To */}
           <div>
@@ -692,12 +688,7 @@ export default function ProfessionalInvoicePreviewPage() {
         </div>
 
         {/* Line Items Table */}
-        <div style={{ 
-          marginBottom: '2rem', 
-          overflowX: 'auto',
-          width: 'fit-content', // Content determines width
-          maxWidth: '100%' // Don't exceed container
-        }}>
+        <div style={{ marginBottom: '2rem', overflowX: 'auto' }}>
           <h3 style={{
             fontSize: '0.875rem',
             fontWeight: '700',
@@ -859,17 +850,14 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          marginBottom: '3rem',
-          width: 'fit-content', // Content determines width
-          maxWidth: '100%' // Don't exceed container
+          marginBottom: '3rem'
         }}>
           <div style={{
             minWidth: '350px',
             backgroundColor: brandColors.neutral[50],
             borderRadius: '8px',
             padding: '1.5rem',
-            border: `1px solid ${brandColors.neutral[200]}`,
-            width: 'fit-content' // Content determines width
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <div style={{
               display: 'flex',
@@ -973,9 +961,7 @@ export default function ProfessionalInvoicePreviewPage() {
             borderRadius: '8px',
             padding: '1.5rem',
             marginBottom: '2rem',
-            border: `1px solid ${brandColors.neutral[200]}`,
-            width: 'fit-content', // Content determines width
-            maxWidth: '100%' // Don't exceed container
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <h3 style={{
               fontSize: '0.875rem',
@@ -1006,11 +992,11 @@ export default function ProfessionalInvoicePreviewPage() {
               display: 'grid',
               gridTemplateColumns: window.innerWidth < 768 
                 ? '1fr' 
-                : `repeat(${Math.min(paymentMethods.length, 3)}, 1fr)`, // Max 3 columns, content determines width
+                : window.innerWidth < 1024 
+                  ? 'repeat(auto-fit, minmax(180px, 1fr))' 
+                  : 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '1rem',
-              marginTop: '1rem',
-              width: 'fit-content', // Content determines width
-              margin: '1rem auto 0 auto' // Center the grid
+              marginTop: '1rem'
             }}>
               {paymentMethods.map((method) => {
                 const details = method.details as any
