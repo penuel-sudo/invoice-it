@@ -336,11 +336,13 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           backgroundColor: brandColors.white,
           borderRadius: '12px',
-          padding: window.innerWidth < 768 ? '1rem' : '1.5rem', // More compact padding
+          padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
           marginBottom: '1.5rem',
           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
           position: 'relative',
-          width: '100%'
+          width: 'fit-content', // Content determines width
+          maxWidth: '100%', // Don't exceed container
+          margin: '0 auto' // Center the card
         }}>
         
         {/* Header Section */}
@@ -377,13 +379,10 @@ export default function ProfessionalInvoicePreviewPage() {
           ];
           const fieldCount = availableFields.length;
           
-          // Calculate optimal grid layout
+          // Calculate optimal grid layout - always 3 columns on desktop, content determines width
           const getGridColumns = () => {
             if (window.innerWidth < 768) return '1fr'; // Mobile: single column
-            if (fieldCount <= 2) return 'repeat(2, 1fr)'; // 2 items: 2 columns
-            if (fieldCount <= 4) return 'repeat(2, 1fr)'; // 3-4 items: 2 columns
-            if (fieldCount <= 6) return 'repeat(3, 1fr)'; // 5-6 items: 3 columns
-            return 'repeat(4, 1fr)'; // 7+ items: 4 columns
+            return 'repeat(3, 1fr)'; // Always 3 columns on desktop, content fills naturally
           };
 
           return (
@@ -541,10 +540,12 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: hasShipTo 
-            ? (window.innerWidth < 768 ? '1fr' : window.innerWidth < 1024 ? '1fr 1fr' : '1fr 1fr')
+            ? (window.innerWidth < 768 ? '1fr' : '1fr 1fr')
             : '1fr',
           gap: window.innerWidth < 768 ? '1rem' : '1.5rem',
-          marginBottom: '2rem'
+          marginBottom: '2rem',
+          width: 'fit-content', // Content determines width
+          maxWidth: '100%' // Don't exceed container
         }}>
           {/* Bill To */}
           <div>
@@ -691,7 +692,12 @@ export default function ProfessionalInvoicePreviewPage() {
         </div>
 
         {/* Line Items Table */}
-        <div style={{ marginBottom: '2rem', overflowX: 'auto' }}>
+        <div style={{ 
+          marginBottom: '2rem', 
+          overflowX: 'auto',
+          width: 'fit-content', // Content determines width
+          maxWidth: '100%' // Don't exceed container
+        }}>
           <h3 style={{
             fontSize: '0.875rem',
             fontWeight: '700',
@@ -853,14 +859,17 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          marginBottom: '3rem'
+          marginBottom: '3rem',
+          width: 'fit-content', // Content determines width
+          maxWidth: '100%' // Don't exceed container
         }}>
           <div style={{
             minWidth: '350px',
             backgroundColor: brandColors.neutral[50],
             borderRadius: '8px',
             padding: '1.5rem',
-            border: `1px solid ${brandColors.neutral[200]}`
+            border: `1px solid ${brandColors.neutral[200]}`,
+            width: 'fit-content' // Content determines width
           }}>
             <div style={{
               display: 'flex',
@@ -964,7 +973,9 @@ export default function ProfessionalInvoicePreviewPage() {
             borderRadius: '8px',
             padding: '1.5rem',
             marginBottom: '2rem',
-            border: `1px solid ${brandColors.neutral[200]}`
+            border: `1px solid ${brandColors.neutral[200]}`,
+            width: 'fit-content', // Content determines width
+            maxWidth: '100%' // Don't exceed container
           }}>
             <h3 style={{
               fontSize: '0.875rem',
@@ -980,7 +991,7 @@ export default function ProfessionalInvoicePreviewPage() {
             <div style={{
               marginBottom: '1rem'
             }}>
-              {invoiceData.termsAndConditions ? (
+
                 <div style={{
                   fontSize: '0.875rem',
                   color: brandColors.neutral[600],
@@ -989,37 +1000,17 @@ export default function ProfessionalInvoicePreviewPage() {
                 }}>
                   {invoiceData.termsAndConditions}
                 </div>
-              ) : (
-                <>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
-                    marginBottom: '0.5rem',
-                    lineHeight: '1.6'
-                  }}>
-                    <strong>Payment Terms:</strong> Net 30 days. Late payments subject to 1.5% monthly interest charge.
-                  </p>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[600],
-                    lineHeight: '1.6'
-                  }}>
-                    <strong>Payment Due:</strong> Payment is due within 30 days from invoice date. Please include invoice number with payment.
-                  </p>
-                </>
-              )}
-            </div>
-
+              </div>
             {/* Payment Methods Grid */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: window.innerWidth < 768 
                 ? '1fr' 
-                : window.innerWidth < 1024 
-                  ? 'repeat(auto-fit, minmax(180px, 1fr))' 
-                  : 'repeat(auto-fit, minmax(200px, 1fr))',
+                : `repeat(${Math.min(paymentMethods.length, 3)}, 1fr)`, // Max 3 columns, content determines width
               gap: '1rem',
-              marginTop: '1rem'
+              marginTop: '1rem',
+              width: 'fit-content', // Content determines width
+              margin: '1rem auto 0 auto' // Center the grid
             }}>
               {paymentMethods.map((method) => {
                 const details = method.details as any
@@ -1059,8 +1050,7 @@ export default function ProfessionalInvoicePreviewPage() {
                         <div>
                           <div>Bank: {details.bankName}</div>
                           <div>Account: {details.accountNumber}</div>
-                          {details.accountType && <div>Account Type: {details.accountType}</div>}
-                          <div>Sort Code: {details.sortCode}</div>
+                          <div>Bank Code: {details.bankCode}</div>
                         </div>
                       )}
                       {method.type === 'bank_international' && details && (
@@ -1073,12 +1063,11 @@ export default function ProfessionalInvoicePreviewPage() {
                       {method.type === 'paypal' && details && (
                         <div>
                           <div>PayPal: {details.email}</div>
-                          <div>{details.instructions}</div>
                         </div>
                       )}
                       {method.type === 'crypto' && details && (
                         <div>
-                          <div>{details.cryptocurrency}: {details.walletAddress}</div>
+                          <div>{details.currency || 'Crypto'}: {details.walletAddress}</div>
                           <div>Network: {details.network}</div>
                         </div>
                       )}
