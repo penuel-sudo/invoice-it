@@ -688,8 +688,6 @@ export default function ProfessionalInvoiceCreatePage() {
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',
-        maxWidth: '1200px',
-        margin: '0 auto',
         overflow: isMobile ? 'auto' : 'hidden'
       }}>
         {/* Header */}

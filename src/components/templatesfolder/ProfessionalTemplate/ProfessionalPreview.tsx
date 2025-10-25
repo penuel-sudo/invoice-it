@@ -411,37 +411,8 @@ export default function ProfessionalInvoicePreviewPage() {
           borderBottom: `2px solid ${brandColors.neutral[200]}`,
           position: 'relative'
         }}>
-          {/* Mobile Status - Top Right */}
-          {window.innerWidth < 768 && (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              zIndex: 10
-            }}>
-              <StatusButton 
-                status={dbStatus}
-                size="sm"
-              />
-            </div>
-          )}
-          
           {/* Left - Company details */}
           <div>
-            {/* Company Logo */}
-            {avatarUrl && templateSettings?.template_settings?.show_logo && (
-              <div style={{ marginBottom: '1rem' }}>
-                <img
-                  src={avatarUrl}
-                  alt="Company Logo"
-                  style={{
-                    maxHeight: '60px',
-                    maxWidth: '200px',
-                    objectFit: 'contain'
-                  }}
-                />
-              </div>
-            )}
             
             {/* Company Name */}
             <h1 style={{
@@ -499,6 +470,37 @@ export default function ProfessionalInvoicePreviewPage() {
               </p>
             )}
           </div>
+          
+          {/* Right - Logo and Status */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '1rem'
+          }}>
+            {/* Company Logo */}
+            {avatarUrl && templateSettings?.template_settings?.show_logo && (
+              <div>
+                <img
+                  src={avatarUrl}
+                  alt="Company Logo"
+                  style={{
+                    maxHeight: '60px',
+                    maxWidth: '200px',
+                    objectFit: 'contain'
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Status */}
+            <div>
+              <StatusButton 
+                status={dbStatus}
+                size="sm"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Invoice Details Bar */}
@@ -514,30 +516,6 @@ export default function ProfessionalInvoicePreviewPage() {
               marginBottom: '1.5rem',
               position: 'relative'
             }}>
-          {/* Status Button - Top Right */}
-          <div style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            zIndex: 10
-          }}>
-            <div>
-              <div style={{
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: brandColors.neutral[500],
-                marginBottom: '0.25rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>
-                Status
-              </div>
-              <StatusButton 
-                status={dbStatus}
-                size="sm"
-              />
-            </div>
-          </div>
           
           <div style={{ minWidth: '120px', flex: '1' }}>
             <div style={{
@@ -1221,7 +1199,9 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           display: 'flex',
           gap: '0.75rem',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          marginTop: '2rem',
+          paddingTop: '1.5rem'
         }}>
           {/* Only show Edit button for CREATE mode (not from database) */}
           {!isFromDatabase && (
