@@ -37,6 +37,39 @@ export default function ProfessionalInvoicePreviewPage() {
   const [loading, setLoading] = useState(false)
   const [isFromDatabase, setIsFromDatabase] = useState(false)
   const [paymentMethods, setPaymentMethods] = useState<any[]>([])
+  const [templateSettings, setTemplateSettings] = useState<any>(null)
+
+  // Load template settings
+  const loadTemplateSettings = async () => {
+    if (!user) return
+    
+    try {
+      // First try to load from localStorage for unsaved invoices
+      const savedCustomizations = localStorage.getItem('professional_template_customizations')
+      if (savedCustomizations) {
+        const customizations = JSON.parse(savedCustomizations)
+        setTemplateSettings(customizations)
+        return
+      }
+
+      // If no localStorage, try to load from database
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('template_settings')
+        .eq('user_id', user.id)
+        .eq('template', 'professional')
+        .not('template_settings', 'is', null)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (data?.template_settings) {
+        setTemplateSettings(data.template_settings)
+      }
+    } catch (error) {
+      console.error('Error loading template settings:', error)
+    }
+  }
 
   useEffect(() => {
     const loadInvoiceData = async () => {
@@ -270,6 +303,7 @@ export default function ProfessionalInvoicePreviewPage() {
 
     if (user) {
       loadInvoiceData()
+      loadTemplateSettings()
     }
   }, [searchParams, location.state, navigate, user])
 
@@ -304,7 +338,7 @@ export default function ProfessionalInvoicePreviewPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: brandColors.primary[50],
+      backgroundColor: templateSettings?.background_colors?.main_background || brandColors.primary[50],
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -334,7 +368,7 @@ export default function ProfessionalInvoicePreviewPage() {
       }}>
         {/* Invoice Preview Card */}
         <div style={{
-          backgroundColor: brandColors.white,
+          backgroundColor: templateSettings?.background_colors?.card_background || brandColors.white,
           borderRadius: '12px',
           padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
           marginBottom: '1.5rem',
@@ -352,16 +386,78 @@ export default function ProfessionalInvoicePreviewPage() {
           paddingBottom: '2rem',
           borderBottom: `2px solid ${brandColors.neutral[200]}`
         }}>
-          {/* Left - Logo space / Company name */}
+          {/* Left - Company details */}
           <div>
+            {/* Company Logo */}
+            {templateSettings?.logo_url && templateSettings?.template_settings?.show_logo && (
+              <div style={{ marginBottom: '1rem' }}>
+                <img
+                  src={templateSettings.logo_url}
+                  alt="Company Logo"
+                  style={{
+                    maxHeight: '60px',
+                    maxWidth: '200px',
+                    objectFit: 'contain'
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Company Name */}
             <h1 style={{
-              fontSize: '2.25rem',
+              fontSize: '1.5rem',
               fontWeight: '700',
-              color: brandColors.primary[600],
-              margin: '0 0 0.5rem 0'
+              color: templateSettings?.primary_color || brandColors.primary[600],
+              margin: '0 0 0.5rem 0',
+              fontFamily: templateSettings?.font_family || 'Inter, sans-serif'
             }}>
-              INVOICE
+              {templateSettings?.company_name || 'Your Company Name'}
             </h1>
+            
+            {/* Company Tagline */}
+            {templateSettings?.tagline && templateSettings?.template_settings?.show_tagline && (
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                margin: '0 0 0.5rem 0',
+                fontStyle: 'italic'
+              }}>
+                {templateSettings.tagline}
+              </p>
+            )}
+            
+            {/* Company Website */}
+            {templateSettings?.website && templateSettings?.template_settings?.show_website && (
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                margin: '0 0 0.5rem 0'
+              }}>
+                {templateSettings.website}
+              </p>
+            )}
+            
+            {/* Tax ID */}
+            {templateSettings?.tax_id && templateSettings?.template_settings?.show_tax_id && (
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                margin: '0 0 0.5rem 0'
+              }}>
+                Tax ID: {templateSettings.tax_id}
+              </p>
+            )}
+            
+            {/* Registration Number */}
+            {templateSettings?.registration_number && templateSettings?.template_settings?.show_registration && (
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[600],
+                margin: '0 0 0.5rem 0'
+              }}>
+                Reg: {templateSettings.registration_number}
+              </p>
+            )}
           </div>
         </div>
 
@@ -389,7 +485,7 @@ export default function ProfessionalInvoicePreviewPage() {
               gridTemplateColumns: getGridColumns(),
               gap: '1rem',
               padding: '1rem',
-              backgroundColor: brandColors.neutral[50],
+              backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[50],
               borderRadius: '8px',
               marginBottom: '1.5rem',
               position: 'relative'
@@ -557,7 +653,7 @@ export default function ProfessionalInvoicePreviewPage() {
             </h3>
             <div style={{
               padding: '1.25rem',
-              backgroundColor: brandColors.neutral[50],
+              backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[50],
               borderRadius: '8px',
               border: `1px solid ${brandColors.neutral[200]}`
             }}>

@@ -29,10 +29,12 @@ import {
   CreditCard,
   Building,
   Hash,
+  Settings,
   Truck,
   Percent
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import CustomizationPanel from '../../CustomizationPanel'
 
 const PAYMENT_METHOD_TYPES = [
   { value: 'bank_local_us', label: 'Bank Transfer (US)' },
@@ -151,6 +153,50 @@ export default function ProfessionalInvoiceCreatePage() {
   })
 
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethod[]>([])
+  
+  // Customization panel state
+  const [isCustomizationOpen, setIsCustomizationOpen] = useState(false)
+  const [customizationData, setCustomizationData] = useState<any>({})
+  const [templateSettings, setTemplateSettings] = useState<any>(null)
+  
+  // Load template settings
+  const loadTemplateSettings = async () => {
+    if (!user) return
+    
+    try {
+      // First try to load from localStorage for unsaved invoices
+      const savedCustomizations = localStorage.getItem('professional_template_customizations')
+      if (savedCustomizations) {
+        const customizations = JSON.parse(savedCustomizations)
+        setTemplateSettings(customizations)
+        setCustomizationData(customizations)
+        return
+      }
+
+      // If no localStorage, try to load from database
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('template_settings')
+        .eq('user_id', user.id)
+        .eq('template', 'professional')
+        .not('template_settings', 'is', null)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (data?.template_settings) {
+        setTemplateSettings(data.template_settings)
+        setCustomizationData(data.template_settings)
+      }
+    } catch (error) {
+      console.error('Error loading template settings:', error)
+    }
+  }
+  
+  // Load template settings on component mount
+  useEffect(() => {
+    loadTemplateSettings()
+  }, [user])
   
   // Load invoice data from URL parameter or state
   useEffect(() => {
@@ -669,7 +715,30 @@ export default function ProfessionalInvoiceCreatePage() {
             Professional Invoice
           </h1>
           
-          <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
+          {/* Customization Button */}
+          <button
+            onClick={() => setIsCustomizationOpen(true)}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: brandColors.primary[50],
+              border: `1px solid ${brandColors.primary[200]}`,
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: brandColors.primary[600],
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = brandColors.primary[100]
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = brandColors.primary[50]
+            }}
+          >
+            <Settings size={18} />
+          </button>
         </div>
 
         {/* Form Content */}
@@ -1994,6 +2063,20 @@ export default function ProfessionalInvoiceCreatePage() {
           </div>
         </div>
       </div>
+      
+      {/* Customization Panel */}
+      <CustomizationPanel
+        isOpen={isCustomizationOpen}
+        onClose={() => setIsCustomizationOpen(false)}
+        onSave={async (data) => {
+          // Save to localStorage for unsaved invoices
+          localStorage.setItem('professional_template_customizations', JSON.stringify(data))
+          setCustomizationData(data)
+          setTemplateSettings(data)
+        }}
+        initialData={customizationData}
+        template="professional"
+      />
     </Layout>
   )
 }

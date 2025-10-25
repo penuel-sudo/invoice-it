@@ -13,6 +13,7 @@ interface DownloadButtonProps {
   invoiceData: InvoiceData
   user: any
   template?: string
+  templateSettings?: any
   onDownload?: () => void
   style?: React.CSSProperties
   size?: 'sm' | 'md' | 'lg'
@@ -23,6 +24,7 @@ export default function DownloadButton({
   invoiceData, 
   user,
   template = 'default',
+  templateSettings,
   onDownload,
   style,
   size = 'md',
@@ -51,7 +53,7 @@ export default function DownloadButton({
       
       let result
       if (template === 'professional') {
-        result = await saveProfessionalInvoice(invoiceData, user, undefined, { 
+        result = await saveProfessionalInvoice(invoiceData, user, templateSettings, { 
           status: 'pending',
           updateStatus: true 
         })

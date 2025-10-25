@@ -84,12 +84,7 @@ export interface ProfessionalInvoiceFormData {
 export const saveProfessionalInvoice = async (
   formData: ProfessionalInvoiceFormData, 
   user: any,
-  customization?: {
-    logoUrl?: string
-    primaryColor?: string
-    accentColor?: string
-    fontFamily?: string
-  },
+  templateSettings?: any,
   options: {
     updateStatus?: boolean
     status?: 'draft' | 'pending'
@@ -115,7 +110,7 @@ export const saveProfessionalInvoice = async (
     grandTotal: formData.grandTotal,
     balanceDue: formData.balanceDue,
     status: options.status || 'draft',
-    hasCustomization: !!customization
+    hasCustomization: !!templateSettings
   })
 
   try {
@@ -214,17 +209,30 @@ export const saveProfessionalInvoice = async (
             amountPaid: formData.amountPaid,
             balanceDue: formData.balanceDue
           },
-          template_settings: {
-            customization: customization || {
-              primaryColor: '#16a34a', // Default green
-              accentColor: '#6b7280', // Default gray
-              fontFamily: 'Inter'
+          template_settings: templateSettings || {
+            company_name: '',
+            website: '',
+            tax_id: '',
+            tagline: '',
+            business_type: '',
+            registration_number: '',
+            logo_url: '',
+            primary_color: '#16a34a',
+            accent_color: '#6b7280',
+            font_family: 'Inter',
+            background_colors: {
+              main_background: '#f8fafc',
+              card_background: '#ffffff',
+              section_background: '#f1f5f9',
+              header_background: '#ffffff',
+              form_background: '#ffffff'
             },
-            userPreferences: {
-              defaultTaxRate: formData.taxTotal,
-              currency: formData.currency || 'USD',
-              currencySymbol: formData.currencySymbol || '$',
-              dateFormat: 'MM/DD/YYYY'
+            template_settings: {
+              show_logo: true,
+              show_tagline: true,
+              show_website: true,
+              show_tax_id: true,
+              show_registration: true
             }
           },
           updated_at: new Date().toISOString()
@@ -278,17 +286,30 @@ export const saveProfessionalInvoice = async (
             amountPaid: formData.amountPaid,
             balanceDue: formData.balanceDue
           },
-          template_settings: {
-            customization: customization || {
-              primaryColor: '#16a34a', // Default green
-              accentColor: '#6b7280', // Default gray
-              fontFamily: 'Inter'
+          template_settings: templateSettings || {
+            company_name: '',
+            website: '',
+            tax_id: '',
+            tagline: '',
+            business_type: '',
+            registration_number: '',
+            logo_url: '',
+            primary_color: '#16a34a',
+            accent_color: '#6b7280',
+            font_family: 'Inter',
+            background_colors: {
+              main_background: '#f8fafc',
+              card_background: '#ffffff',
+              section_background: '#f1f5f9',
+              header_background: '#ffffff',
+              form_background: '#ffffff'
             },
-            userPreferences: {
-              defaultTaxRate: formData.taxTotal,
-              currency: formData.currency || 'USD',
-              currencySymbol: formData.currencySymbol || '$',
-              dateFormat: 'MM/DD/YYYY'
+            template_settings: {
+              show_logo: true,
+              show_tagline: true,
+              show_website: true,
+              show_tax_id: true,
+              show_registration: true
             }
           }
         })

@@ -46,6 +46,13 @@ interface ProfileData {
   currency_code: string
   payment_methods: PaymentMethod[]
   notification_preferences: NotificationPreferences
+  // New company fields
+  website: string
+  tax_id: string
+  logo_url: string
+  tagline: string
+  business_type: string
+  registration_number: string
 }
 
 const CURRENCIES = [
@@ -162,7 +169,14 @@ export default function SettingsPage() {
       payment_overdue: true,
       invoice_created: true,
       status_changed: true
-    }
+    },
+    // New company fields
+    website: '',
+    tax_id: '',
+    logo_url: '',
+    tagline: '',
+    business_type: '',
+    registration_number: ''
   })
 
 
@@ -230,7 +244,14 @@ export default function SettingsPage() {
             payment_overdue: true,
             invoice_created: true,
             status_changed: true
-          }
+          },
+          // New company fields
+          website: data.website || '',
+          tax_id: data.tax_id || '',
+          logo_url: data.logo_url || '',
+          tagline: data.tagline || '',
+          business_type: data.business_type || '',
+          registration_number: data.registration_number || ''
         }
         setProfileData(profileData)
         setOriginalProfileData(profileData)
@@ -258,6 +279,13 @@ export default function SettingsPage() {
           country_code: profileData.country_code,
           country_name: profileData.country_name,
           phone_prefix: profileData.phone_prefix,
+          // New company fields
+          website: profileData.website,
+          tax_id: profileData.tax_id,
+          logo_url: profileData.logo_url,
+          tagline: profileData.tagline,
+          business_type: profileData.business_type,
+          registration_number: profileData.registration_number,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id)

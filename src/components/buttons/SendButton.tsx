@@ -12,6 +12,8 @@ import { invoiceStorage } from '../../lib/storage/invoiceStorage'
 interface SendButtonProps {
   invoiceData: any
   userData?: any
+  template?: string
+  templateSettings?: any
   onSend?: () => void
   style?: React.CSSProperties
   size?: 'sm' | 'md' | 'lg'
@@ -21,6 +23,8 @@ interface SendButtonProps {
 export default function SendButton({ 
   invoiceData, 
   userData,
+  template,
+  templateSettings,
   onSend,
   style,
   size = 'md',
@@ -112,7 +116,7 @@ export default function SendButton({
       
       let result
       if (invoiceData.template === 'professional') {
-        result = await saveProfessionalInvoice(invoiceData, userData, undefined, { 
+        result = await saveProfessionalInvoice(invoiceData, userData, templateSettings, { 
           status: 'pending',
           updateStatus: true 
         })

@@ -22,6 +22,7 @@ interface SaveResult {
 export const saveInvoiceToDatabase = async (
   formData: InvoiceFormData, 
   user: any,
+  templateSettings?: any,
   options: {
     updateStatus?: boolean
     status?: 'draft' | 'pending'
