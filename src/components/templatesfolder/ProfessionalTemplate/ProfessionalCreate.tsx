@@ -50,10 +50,23 @@ export default function ProfessionalInvoiceCreatePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   
-  // Helper function for responsive grid - always single column
+  // Responsive state management
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+  
+  // Helper function for responsive grid
   const getResponsiveGrid = (minWidth: number = 250) => {
-    return '1fr'
+    if (isMobile) return '1fr' // Mobile: single column
+    if (window.innerWidth < 1024) return `repeat(auto-fit, minmax(${minWidth}px, 1fr))` // Tablet: auto-fit
+    return `repeat(auto-fit, minmax(${minWidth}px, 1fr))` // Desktop: auto-fit
   }
   
   // Generate default invoice number
@@ -677,7 +690,7 @@ export default function ProfessionalInvoiceCreatePage() {
         width: '100%',
         maxWidth: '1200px',
         margin: '0 auto',
-        overflow: 'hidden'
+        overflow: isMobile ? 'auto' : 'hidden'
       }}>
         {/* Header */}
         <div style={{
@@ -1387,13 +1400,16 @@ export default function ProfessionalInvoiceCreatePage() {
                 </button>
               </div>
 
-              <div ref={itemsContainerRef} style={{ overflowX: 'auto' }}>
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{
-                    width: '100%',
-                    borderCollapse: 'collapse',
-                    minWidth: window.innerWidth < 768 ? '600px' : '800px'
-                  }}>
+              <div ref={itemsContainerRef} style={{ 
+                overflowX: 'auto',
+                width: '100%',
+                maxWidth: '100%'
+              }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  minWidth: window.innerWidth < 768 ? '600px' : '800px'
+                }}>
                   <thead>
                     <tr>
                       <th style={{
@@ -1590,8 +1606,7 @@ export default function ProfessionalInvoiceCreatePage() {
                       </tr>
                     ))}
                   </tbody>
-                  </table>
-                </div>
+                </table>
               </div>
             </div>
 

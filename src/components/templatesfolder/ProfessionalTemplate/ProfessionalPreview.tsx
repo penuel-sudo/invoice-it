@@ -365,6 +365,7 @@ export default function ProfessionalInvoicePreviewPage() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: window.innerWidth < 768 ? '1rem 0.5rem' : '2rem 1rem', // Mobile responsive padding
+      overflow: window.innerWidth < 768 ? 'auto' : 'visible',
       position: 'relative'
     }}>
       {/* Background Pattern */}
@@ -407,8 +408,24 @@ export default function ProfessionalInvoicePreviewPage() {
           alignItems: 'flex-start',
           marginBottom: '3rem',
           paddingBottom: '2rem',
-          borderBottom: `2px solid ${brandColors.neutral[200]}`
+          borderBottom: `2px solid ${brandColors.neutral[200]}`,
+          position: 'relative'
         }}>
+          {/* Mobile Status - Top Right */}
+          {window.innerWidth < 768 && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              zIndex: 10
+            }}>
+              <StatusButton 
+                status={dbStatus}
+                size="sm"
+              />
+            </div>
+          )}
+          
           {/* Left - Company details */}
           <div>
             {/* Company Logo */}
