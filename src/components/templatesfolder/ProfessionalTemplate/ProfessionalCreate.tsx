@@ -51,9 +51,9 @@ export default function ProfessionalInvoiceCreatePage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   
-  // Helper function for responsive grid
+  // Helper function for responsive grid - always single column
   const getResponsiveGrid = (minWidth: number = 250) => {
-    return window.innerWidth < 768 ? '1fr' : `repeat(auto-fit, minmax(${minWidth}px, 1fr))`
+    return '1fr'
   }
   
   // Generate default invoice number
@@ -675,7 +675,8 @@ export default function ProfessionalInvoiceCreatePage() {
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',
-        maxWidth: '100%',
+        maxWidth: '1200px',
+        margin: '0 auto',
         overflow: 'hidden'
       }}>
         {/* Header */}
@@ -1387,11 +1388,12 @@ export default function ProfessionalInvoiceCreatePage() {
               </div>
 
               <div ref={itemsContainerRef} style={{ overflowX: 'auto' }}>
-                <table style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  minWidth: '800px'
-                }}>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    minWidth: window.innerWidth < 768 ? '600px' : '800px'
+                  }}>
                   <thead>
                     <tr>
                       <th style={{
@@ -1588,7 +1590,8 @@ export default function ProfessionalInvoiceCreatePage() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                  </table>
+                </div>
               </div>
             </div>
 

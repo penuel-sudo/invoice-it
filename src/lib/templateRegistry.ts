@@ -9,12 +9,14 @@
  */
 
 import DefaultPDF from '../components/templatesfolder/DefaultTemplate/DefaultPDF'
+import ProfessionalPDF from '../components/templatesfolder/ProfessionalTemplate/ProfessionalPDF'
 // Import future templates here
 // import ModernPDF from '../components/templatesfolder/ModernTemplate/ModernPDF'
 // import ClassicPDF from '../components/templatesfolder/ClassicTemplate/ClassicPDF'
 
 export const PDF_TEMPLATES = {
   default: DefaultPDF,
+  professional: ProfessionalPDF,
   // Add more templates as you create them
   // modern: ModernPDF,
   // classic: ClassicPDF,

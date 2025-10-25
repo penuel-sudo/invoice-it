@@ -258,15 +258,25 @@ const styles = StyleSheet.create({
 interface ProfessionalPDFProps {
   invoiceData: ProfessionalInvoiceFormData
   user: any
+  templateSettings?: any
 }
 
-export default function ProfessionalPDF({ invoiceData, user }: ProfessionalPDFProps) {
+export default function ProfessionalPDF({ invoiceData, user, templateSettings }: ProfessionalPDFProps) {
   const hasShipTo = invoiceData.shipToName || invoiceData.shipToAddress
+  
+  // Apply customizations if available
+  const pageStyle = templateSettings?.background_colors?.main_background 
+    ? { ...styles.page, backgroundColor: templateSettings.background_colors.main_background }
+    : styles.page
+    
+  const containerStyle = templateSettings?.background_colors?.card_background
+    ? { ...styles.container, backgroundColor: templateSettings.background_colors.card_background }
+    : styles.container
   
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.container}>
+      <Page size="A4" style={pageStyle}>
+        <View style={containerStyle}>
           
           {/* Header */}
           <View style={styles.header}>

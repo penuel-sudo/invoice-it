@@ -38,6 +38,7 @@ export default function ProfessionalInvoicePreviewPage() {
   const [isFromDatabase, setIsFromDatabase] = useState(false)
   const [paymentMethods, setPaymentMethods] = useState<any[]>([])
   const [templateSettings, setTemplateSettings] = useState<any>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   // Load template settings
   const loadTemplateSettings = async () => {
@@ -68,6 +69,25 @@ export default function ProfessionalInvoicePreviewPage() {
       }
     } catch (error) {
       console.error('Error loading template settings:', error)
+    }
+  }
+
+  // Load avatar URL from profiles table
+  const loadAvatarUrl = async () => {
+    if (!user) return
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single()
+      
+      if (data?.avatar_url) {
+        setAvatarUrl(data.avatar_url)
+      }
+    } catch (error) {
+      console.error('Error loading avatar URL:', error)
     }
   }
 
@@ -304,6 +324,7 @@ export default function ProfessionalInvoicePreviewPage() {
     if (user) {
       loadInvoiceData()
       loadTemplateSettings()
+      loadAvatarUrl()
     }
   }, [searchParams, location.state, navigate, user])
 
@@ -369,12 +390,14 @@ export default function ProfessionalInvoicePreviewPage() {
         {/* Invoice Preview Card */}
         <div style={{
           backgroundColor: templateSettings?.background_colors?.card_background || brandColors.white,
-          borderRadius: '12px',
-          padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
+          borderRadius: window.innerWidth < 768 ? '8px' : '12px',
+          padding: window.innerWidth < 768 ? '0.75rem' : '1.5rem',
           marginBottom: '1.5rem',
           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
           position: 'relative',
-          width: '100%'
+          width: '100%',
+          maxWidth: window.innerWidth < 768 ? '100%' : '800px',
+          margin: '0 auto'
         }}>
         
         {/* Header Section */}
@@ -389,10 +412,10 @@ export default function ProfessionalInvoicePreviewPage() {
           {/* Left - Company details */}
           <div>
             {/* Company Logo */}
-            {templateSettings?.logo_url && templateSettings?.template_settings?.show_logo && (
+            {avatarUrl && templateSettings?.template_settings?.show_logo && (
               <div style={{ marginBottom: '1rem' }}>
                 <img
-                  src={templateSettings.logo_url}
+                  src={avatarUrl}
                   alt="Company Logo"
                   style={{
                     maxHeight: '60px',
@@ -411,7 +434,7 @@ export default function ProfessionalInvoicePreviewPage() {
               margin: '0 0 0.5rem 0',
               fontFamily: templateSettings?.font_family || 'Inter, sans-serif'
             }}>
-              {templateSettings?.company_name || 'Your Company Name'}
+              {templateSettings?.company_name || 'INVOICE'}
             </h1>
             
             {/* Company Tagline */}
@@ -463,28 +486,12 @@ export default function ProfessionalInvoicePreviewPage() {
 
         {/* Invoice Details Bar */}
         {(() => {
-          // Count available fields
-          const availableFields = [
-            'invoiceNumber',
-            'invoiceDate', 
-            'dueDate',
-            ...(invoiceData.poNumber ? ['poNumber'] : []),
-            ...(invoiceData.taxId ? ['taxId'] : [])
-          ];
-          const fieldCount = availableFields.length;
-          
-          // Calculate optimal grid layout - always 3 columns on desktop, content determines width
-          const getGridColumns = () => {
-            if (window.innerWidth < 768) return '1fr'; // Mobile: single column
-            return 'repeat(3, 1fr)'; // Always 3 columns on desktop, content fills naturally
-          };
-
           return (
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: getGridColumns(),
-              gap: '1rem',
-              padding: '1rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              padding: '0.75rem',
               backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[50],
               borderRadius: '8px',
               marginBottom: '1.5rem',
@@ -515,7 +522,7 @@ export default function ProfessionalInvoicePreviewPage() {
             </div>
           </div>
           
-          <div>
+          <div style={{ minWidth: '120px', flex: '1' }}>
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
@@ -535,7 +542,7 @@ export default function ProfessionalInvoicePreviewPage() {
             </div>
           </div>
 
-          <div>
+          <div style={{ minWidth: '120px', flex: '1' }}>
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
@@ -559,7 +566,7 @@ export default function ProfessionalInvoicePreviewPage() {
             </div>
           </div>
 
-          <div>
+          <div style={{ minWidth: '120px', flex: '1' }}>
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
@@ -584,7 +591,7 @@ export default function ProfessionalInvoicePreviewPage() {
           </div>
 
           {invoiceData.poNumber && (
-            <div>
+            <div style={{ minWidth: '120px', flex: '1' }}>
               <div style={{
                 fontSize: '0.75rem',
                 fontWeight: '600',
@@ -606,7 +613,7 @@ export default function ProfessionalInvoicePreviewPage() {
           )}
 
           {invoiceData.taxId && (
-            <div>
+            <div style={{ minWidth: '120px', flex: '1' }}>
               <div style={{
                 fontSize: '0.75rem',
                 fontWeight: '600',

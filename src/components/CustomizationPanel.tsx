@@ -94,12 +94,42 @@ export default function CustomizationPanel({
     ...initialData
   })
 
-  // Load initial data
+  // Load initial data and avatar_url
   useEffect(() => {
     if (initialData) {
       setFormData(prev => ({ ...prev, ...initialData }))
     }
-  }, [initialData])
+    
+    // Load user data from profiles table
+    const loadUserData = async () => {
+      if (!user) return
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url, company_name, website, tax_id, tagline, business_type, registration_number')
+          .eq('id', user.id)
+          .single()
+        
+        if (data) {
+          setFormData(prev => ({
+            ...prev,
+            logo_url: data.avatar_url || prev.logo_url,
+            company_name: data.company_name || prev.company_name,
+            website: data.website || prev.website,
+            tax_id: data.tax_id || prev.tax_id,
+            tagline: data.tagline || prev.tagline,
+            business_type: data.business_type || prev.business_type,
+            registration_number: data.registration_number || prev.registration_number
+          }))
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error)
+      }
+    }
+    
+    loadUserData()
+  }, [initialData, user])
 
   const handleInputChange = (field: keyof CustomizationData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -138,13 +168,15 @@ export default function CustomizationPanel({
 
     setIsUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`
-      const filePath = `logos/${fileName}`
+      // Use same bucket as profile pictures
+      const filePath = `${user.id}/${Date.now()}_${file.name}`
 
       const { error: uploadError } = await supabase.storage
-        .from('company-assets')
-        .upload(filePath, file)
+        .from('user-avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        })
 
       if (uploadError) {
         console.error('Upload error:', uploadError)
@@ -153,8 +185,20 @@ export default function CustomizationPanel({
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('company-assets')
+        .from('user-avatars')
         .getPublicUrl(filePath)
+
+      // Update avatar_url in profiles table
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id)
+
+      if (updateError) {
+        console.error('Update error:', updateError)
+        toast.error('Failed to save logo')
+        return
+      }
 
       handleInputChange('logo_url', publicUrl)
       toast.success('Logo uploaded successfully!')

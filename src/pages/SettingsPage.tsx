@@ -710,6 +710,156 @@ export default function SettingsPage() {
                       />
                     </div>
 
+                    {/* Website */}
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Website
+                      </label>
+                      <input
+                        type="url"
+                        value={profileData.website}
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, website: e.target.value })
+                          setHasChanges(true)
+                        }}
+                        placeholder="https://yourcompany.com"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    {/* Tax ID */}
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Tax ID
+                      </label>
+                      <input
+                        type="text"
+                        value={profileData.tax_id}
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, tax_id: e.target.value })
+                          setHasChanges(true)
+                        }}
+                        placeholder="Enter your tax ID"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    {/* Tagline */}
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Company Tagline
+                      </label>
+                      <input
+                        type="text"
+                        value={profileData.tagline}
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, tagline: e.target.value })
+                          setHasChanges(true)
+                        }}
+                        placeholder="Enter your company tagline"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    {/* Business Type */}
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Business Type
+                      </label>
+                      <input
+                        type="text"
+                        value={profileData.business_type}
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, business_type: e.target.value })
+                          setHasChanges(true)
+                        }}
+                        placeholder="e.g., Corporation, LLC, Partnership"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    {/* Registration Number */}
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: brandColors.neutral[700],
+                        marginBottom: '0.5rem'
+                      }}>
+                        Registration Number
+                      </label>
+                      <input
+                        type="text"
+                        value={profileData.registration_number}
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, registration_number: e.target.value })
+                          setHasChanges(true)
+                        }}
+                        placeholder="Enter your registration number"
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem',
+                          border: `1px solid ${brandColors.neutral[300]}`,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
                     {/* Email (Read Only) */}
                     <div>
                       <label style={{
