@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import type { ProfessionalInvoiceFormData } from './ProfessionalTemplateSave'
 
 // PDF-specific styles for Professional Template
@@ -28,6 +28,10 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start'
   },
   title: {
     fontSize: 28,
@@ -273,6 +277,14 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
     ? { ...styles.container, backgroundColor: templateSettings.background_colors.card_background }
     : styles.container
   
+  // Get company details from templateSettings or user
+  const companyName = templateSettings?.company_name || user?.user_metadata?.full_name || 'Company Name'
+  const companyTagline = templateSettings?.tagline || ''
+  const companyWebsite = templateSettings?.website || ''
+  const companyTaxId = templateSettings?.tax_id || ''
+  const companyRegistration = templateSettings?.registration_number || ''
+  const logoUrl = templateSettings?.logo_url || user?.user_metadata?.avatar_url || ''
+  
   return (
     <Document>
       <Page size="A4" style={pageStyle}>
@@ -280,14 +292,70 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
           
           {/* Header */}
           <View style={styles.header}>
+            {/* Left - Company details */}
             <View style={styles.headerLeft}>
-              <Text style={styles.title}>INVOICE</Text>
-              <Text style={styles.subtitle}>Professional Invoice Template</Text>
+              {/* Company Logo */}
+              {logoUrl && templateSettings?.template_settings?.show_logo && (
+                <View style={{ marginBottom: 10 }}>
+                  <Image src={logoUrl} style={{ maxHeight: 60, maxWidth: 200 }} />
+                </View>
+              )}
+              
+              {/* Company Name */}
+              <Text style={{
+                ...styles.title,
+                color: templateSettings?.primary_color || '#16a34a',
+                fontFamily: templateSettings?.font_family || 'Helvetica-Bold'
+              }}>
+                {companyName}
+              </Text>
+              
+              {/* Company Tagline */}
+              {companyTagline && templateSettings?.template_settings?.show_tagline && (
+                <Text style={styles.subtitle}>{companyTagline}</Text>
+              )}
+              
+              {/* Company Website */}
+              {companyWebsite && templateSettings?.template_settings?.show_website && (
+                <Text style={styles.subtitle}>{companyWebsite}</Text>
+              )}
+              
+              {/* Company Tax ID */}
+              {companyTaxId && templateSettings?.template_settings?.show_tax_id && (
+                <Text style={styles.subtitle}>Tax ID: {companyTaxId}</Text>
+              )}
+              
+              {/* Company Registration */}
+              {companyRegistration && templateSettings?.template_settings?.show_registration && (
+                <Text style={styles.subtitle}>Reg: {companyRegistration}</Text>
+              )}
+            </View>
+            
+            {/* Right - Status */}
+            <View style={styles.headerRight}>
+              <View style={{
+                backgroundColor: invoiceData.status === 'paid' ? '#10b981' : 
+                               invoiceData.status === 'pending' ? '#f59e0b' : '#6b7280',
+                padding: '4px 8px',
+                borderRadius: 4
+              }}>
+                <Text style={{
+                  color: 'white',
+                  fontSize: 10,
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }}>
+                  {invoiceData.status || 'draft'}
+                </Text>
+              </View>
             </View>
           </View>
 
           {/* Invoice Details Bar */}
-          <View style={styles.detailsBar}>
+          <View style={{
+            ...styles.detailsBar,
+            backgroundColor: templateSettings?.background_colors?.section_background || '#f1f5f9'
+          }}>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>Invoice Number</Text>
               <Text style={styles.detailValue}>{invoiceData.invoiceNumber}</Text>
@@ -335,7 +403,10 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
             {/* Bill To */}
             <View style={styles.billTo}>
               <Text style={styles.addressTitle}>Bill To</Text>
-              <View style={styles.addressCard}>
+              <View style={{
+                ...styles.addressCard,
+                backgroundColor: templateSettings?.background_colors?.section_background || '#f8fafc'
+              }}>
                 <Text style={styles.clientName}>{invoiceData.clientName}</Text>
                 {invoiceData.clientCompanyName && (
                   <Text style={styles.clientInfo}>🏢 {invoiceData.clientCompanyName}</Text>
@@ -356,20 +427,25 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
             {hasShipTo && (
               <View style={styles.shipTo}>
                 <Text style={styles.addressTitle}>Ship To</Text>
-                <Text style={styles.clientName}>🚚 {invoiceData.shipToName}</Text>
-                {invoiceData.shipToAddress && (
-                  <Text style={styles.clientAddress}>{invoiceData.shipToAddress}</Text>
-                )}
-                {(invoiceData.shipToCity || invoiceData.shipToState || invoiceData.shipToZip) && (
-                  <Text style={styles.clientAddress}>
-                    {[invoiceData.shipToCity, invoiceData.shipToState, invoiceData.shipToZip]
-                      .filter(Boolean)
-                      .join(', ')}
-                  </Text>
-                )}
-                {invoiceData.shipToCountry && (
-                  <Text style={styles.clientAddress}>{invoiceData.shipToCountry}</Text>
-                )}
+                <View style={{
+                  ...styles.addressCard,
+                  backgroundColor: templateSettings?.background_colors?.section_background || '#f0fdf4'
+                }}>
+                  <Text style={styles.clientName}>🚚 {invoiceData.shipToName}</Text>
+                  {invoiceData.shipToAddress && (
+                    <Text style={styles.clientAddress}>{invoiceData.shipToAddress}</Text>
+                  )}
+                  {(invoiceData.shipToCity || invoiceData.shipToState || invoiceData.shipToZip) && (
+                    <Text style={styles.clientAddress}>
+                      {[invoiceData.shipToCity, invoiceData.shipToState, invoiceData.shipToZip]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </Text>
+                  )}
+                  {invoiceData.shipToCountry && (
+                    <Text style={styles.clientAddress}>{invoiceData.shipToCountry}</Text>
+                  )}
+                </View>
               </View>
             )}
           </View>
@@ -471,6 +547,37 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
               )}
             </View>
           </View>
+
+          {/* Payment Methods */}
+          {invoiceData.selectedPaymentMethodIds && invoiceData.selectedPaymentMethodIds.length > 0 && (
+            <View style={{
+              ...styles.notesSection,
+              backgroundColor: templateSettings?.background_colors?.section_background || '#f8fafc',
+              padding: 15,
+              borderRadius: 8,
+              marginBottom: 20
+            }}>
+              <Text style={styles.notesTitle}>Payment Methods</Text>
+              <View style={{ marginTop: 10 }}>
+                {invoiceData.selectedPaymentMethodIds.map((methodId, index) => (
+                  <View key={index} style={{
+                    backgroundColor: 'white',
+                    padding: 10,
+                    borderRadius: 6,
+                    marginBottom: 8,
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#374151' }}>
+                      Payment Method {index + 1}
+                    </Text>
+                    <Text style={{ fontSize: 9, color: '#6b7280', marginTop: 2 }}>
+                      Please contact us for payment details
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
 
           {/* Notes & Terms */}
           {(invoiceData.notes || invoiceData.termsAndConditions) && (

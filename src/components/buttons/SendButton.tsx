@@ -86,11 +86,17 @@ export default function SendButton({
           title: 'Invoice Sent',
           message: `Invoice #${invoiceData.invoiceNumber} sent to ${email}`,
           status: 'pending'
-    })
+        })
+        
+        // Dispatch event to update UI immediately
+        if (template === 'professional') {
+          window.dispatchEvent(new CustomEvent('invoiceStatusChanged'))
+          window.dispatchEvent(new CustomEvent('invoiceSaved'))
+        }
     
-    if (onSend) {
-      onSend()
-    }
+        if (onSend) {
+          onSend()
+        }
       } else {
         throw new Error(result.error || 'Failed to send email')
       }

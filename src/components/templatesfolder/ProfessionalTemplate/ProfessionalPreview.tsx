@@ -52,20 +52,21 @@ export default function ProfessionalInvoicePreviewPage() {
         setTemplateSettings(customizations)
         return
       }
-
-      // If no localStorage, try to load from database
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('template_settings')
-        .eq('user_id', user.id)
-        .eq('template', 'professional')
-        .not('template_settings', 'is', null)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (data?.template_settings) {
-        setTemplateSettings(data.template_settings)
+      
+      // If no localStorage, try to load from database for saved invoices
+      const invoiceNumber = getInvoiceFromUrl(searchParams)
+      if (invoiceNumber) {
+        const { data: invoiceData, error } = await supabase
+          .from('invoices')
+          .select('template_settings')
+          .eq('invoice_number', invoiceNumber)
+          .eq('user_id', user.id)
+          .single()
+          
+        if (!error && invoiceData?.template_settings) {
+          setTemplateSettings(invoiceData.template_settings)
+          return
+        }
       }
     } catch (error) {
       console.error('Error loading template settings:', error)
@@ -327,6 +328,35 @@ export default function ProfessionalInvoicePreviewPage() {
       loadAvatarUrl()
     }
   }, [searchParams, location.state, navigate, user])
+
+  // Listen for status changes and update UI immediately
+  useEffect(() => {
+    const handleStatusChange = () => {
+      // Check if invoice was saved to database
+      const savedInvoice = localStorage.getItem('professional_invoice_saved')
+      if (savedInvoice) {
+        const invoiceData = JSON.parse(savedInvoice)
+        if (invoiceData.status && invoiceData.status !== 'draft') {
+          setDbStatus(invoiceData.status)
+          setIsFromDatabase(true)
+          // Clear the saved flag
+          localStorage.removeItem('professional_invoice_saved')
+        }
+      }
+    }
+
+    // Listen for custom events
+    window.addEventListener('invoiceStatusChanged', handleStatusChange)
+    window.addEventListener('invoiceSaved', handleStatusChange)
+    
+    // Check on mount
+    handleStatusChange()
+
+    return () => {
+      window.removeEventListener('invoiceStatusChanged', handleStatusChange)
+      window.removeEventListener('invoiceSaved', handleStatusChange)
+    }
+  }, [])
 
   const handleEdit = () => {
     if (invoiceData) {

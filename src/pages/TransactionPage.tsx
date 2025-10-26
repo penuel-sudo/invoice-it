@@ -153,8 +153,8 @@ export default function TransactionPage() {
           description: isExpense ? dbTransaction.client_name : undefined, // For expenses, client_name contains description
           payment_method: isExpense ? dbTransaction.payment_method : undefined,
           is_tax_deductible: isExpense ? dbTransaction.is_tax_deductible : undefined,
-          receipt_url: isExpense ? dbTransaction.receipt_url : undefined,
-          receipt_filename: isExpense ? dbTransaction.receipt_filename : undefined,
+          receipt_url: isExpense ? (dbTransaction.receipt_url || undefined) : undefined,
+          receipt_filename: isExpense ? (dbTransaction.receipt_filename || undefined) : undefined,
           template: isInvoice ? dbTransaction.template : undefined, // Template for invoices
           created_at: dbTransaction.created_at,
           updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
@@ -901,6 +901,21 @@ export default function TransactionPage() {
                           ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
                           : (transaction.category || 'Expense')
                         } • {transaction.issue_date ? formatDate(transaction.issue_date) : 'No Date'}
+                        {/* Template Badge */}
+                        {transaction.type === 'invoice' && transaction.template && (
+                          <span style={{
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            padding: '0.125rem 0.375rem',
+                            borderRadius: '0.25rem',
+                            backgroundColor: transaction.template === 'professional' ? brandColors.primary[100] : brandColors.neutral[100],
+                            color: transaction.template === 'professional' ? brandColors.primary[700] : brandColors.neutral[700],
+                            textTransform: 'capitalize',
+                            marginLeft: '0.5rem'
+                          }}>
+                            {transaction.template}
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>

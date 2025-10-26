@@ -109,6 +109,12 @@ export default function DownloadButton({
       
       console.log('✅ [DOWNLOAD BUTTON] PDF generated successfully, size:', blob.size)
       
+      // Dispatch event to update UI immediately
+      if (template === 'professional') {
+        window.dispatchEvent(new CustomEvent('invoiceStatusChanged'))
+        window.dispatchEvent(new CustomEvent('invoiceSaved'))
+      }
+      
       // Create download link
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
