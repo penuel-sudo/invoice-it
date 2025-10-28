@@ -41,9 +41,7 @@ interface Transaction {
   description?: string
   payment_method?: string
   is_tax_deductible?: boolean
-  receipt_url?: string
-  receipt_filename?: string
-  template?: string // Template used for the invoice
+  template?: string | null // Template used for the invoice - can be null for validation errors
   created_at: string
   updated_at?: string
 }
@@ -156,8 +154,6 @@ export default function TransactionPage() {
         console.log('  - Complete first transaction:', data[0])
         console.log('  - Available keys:', Object.keys(data[0]))
         console.log('  - Template field value:', data[0].template, '(type:', typeof data[0].template, ')')
-        console.log('  - Receipt URL field value:', data[0].receipt_url, '(type:', typeof data[0].receipt_url, ')')
-        console.log('  - Receipt filename field value:', data[0].receipt_filename, '(type:', typeof data[0].receipt_filename, ')')
         console.log('  - Transaction type:', data[0].transaction_type)
         console.log('  - Reference number:', data[0].reference_number)
         console.log('  - Status:', data[0].status)
@@ -171,8 +167,7 @@ export default function TransactionPage() {
               id: transaction.id,
               reference: transaction.reference_number,
               template: transaction.template,
-              receipt_url: transaction.receipt_url,
-              receipt_filename: transaction.receipt_filename
+              status: transaction.status
             })
           })
         }
@@ -189,7 +184,7 @@ export default function TransactionPage() {
 
       console.log('🔍 DEBUGGING: Raw database response:', data)
 
-      // Transform database response to match Transaction interface
+      // Transform database response to match Transaction interface with STRICT validation
       const transformedTransactions: Transaction[] = (data || []).map((dbTransaction: any, index: number) => {
         console.log(`🔍 DEBUGGING: Processing transaction ${index + 1}:`, dbTransaction.transaction_type, 'status:', dbTransaction.status)
         console.log(`🔍 DEBUGGING: Transaction ${index + 1} available fields:`, Object.keys(dbTransaction))
@@ -198,9 +193,22 @@ export default function TransactionPage() {
         const isExpense = dbTransaction.transaction_type === 'expense'
 
         console.log(`🔍 DEBUGGING: Transaction ${index + 1} field access:`)
-        console.log(`  - template: ${dbTransaction.template} (exists: ${dbTransaction.hasOwnProperty('template')})`)
-        console.log(`  - receipt_url: ${dbTransaction.receipt_url} (exists: ${dbTransaction.hasOwnProperty('receipt_url')})`)
-        console.log(`  - receipt_filename: ${dbTransaction.receipt_filename} (exists: ${dbTransaction.hasOwnProperty('receipt_filename')})`)
+        console.log(`  - template: ${dbTransaction.template} (type: ${typeof dbTransaction.template})`)
+
+        // STRICT TEMPLATE VALIDATION - No fallbacks!
+        let template: string | undefined = undefined
+        if (isInvoice) {
+          if (!dbTransaction.template || dbTransaction.template.trim() === '') {
+            const errorMsg = `🚨 STRICT VALIDATION ERROR: Invoice ${dbTransaction.reference_number} has NULL/empty template!`
+            console.error(errorMsg)
+            toast.error(`Invoice ${dbTransaction.reference_number} has no template assigned!`)
+            // Still include in list but mark as invalid
+            template = null as any // This will prevent navigation
+          } else {
+            template = dbTransaction.template.trim()
+            console.log(`✅ Valid template for invoice ${dbTransaction.reference_number}:`, template)
+          }
+        }
 
         const transformedTransaction = {
           id: dbTransaction.id,
@@ -215,9 +223,8 @@ export default function TransactionPage() {
           description: isExpense ? dbTransaction.client_name : undefined, // For expenses, client_name contains description
           payment_method: isExpense ? dbTransaction.payment_method : undefined,
           is_tax_deductible: isExpense ? dbTransaction.is_tax_deductible : undefined,
-          receipt_url: isExpense ? (dbTransaction.receipt_url || undefined) : undefined,
-          receipt_filename: isExpense ? (dbTransaction.receipt_filename || undefined) : undefined,
-          template: isInvoice ? dbTransaction.template : undefined, // Template for invoices
+          // Removed receipt_url and receipt_filename as they're not in the new RPC function
+          template: template, // Strict template validation applied
           created_at: dbTransaction.created_at,
           updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
         }
@@ -1090,11 +1097,29 @@ export default function TransactionPage() {
                                   console.log('  - Template type:', typeof transaction.template)
                                   console.log('  - Template is null/undefined:', transaction.template == null)
                                   
-                                  const template = transaction.template || 'default'
-                                  console.log('  - Final template used:', template)
-                                  console.log('  - Navigation URL:', `/invoice/preview/${template}?invoice=${transaction.invoice_number}`)
+                                  // STRICT TEMPLATE VALIDATION - No navigation if template is invalid
+                                  if (!transaction.template || transaction.template === null) {
+                                    const errorMsg = `🚨 NAVIGATION BLOCKED: Invoice ${transaction.invoice_number} has no valid template!`
+                                    console.error(errorMsg)
+                                    toast.error(`Cannot view invoice ${transaction.invoice_number}: No template assigned!`)
+                                    setShowTransactionDropdown(null)
+                                    return // Block navigation
+                                  }
                                   
-                                  navigate(`/invoice/preview/${template}?invoice=${transaction.invoice_number}`)
+                                  // Validate template is a known template
+                                  const validTemplates = ['default', 'professional']
+                                  if (!validTemplates.includes(transaction.template)) {
+                                    const errorMsg = `🚨 NAVIGATION BLOCKED: Invoice ${transaction.invoice_number} has unknown template: ${transaction.template}`
+                                    console.error(errorMsg)
+                                    toast.error(`Cannot view invoice ${transaction.invoice_number}: Unknown template '${transaction.template}'!`)
+                                    setShowTransactionDropdown(null)
+                                    return // Block navigation
+                                  }
+                                  
+                                  console.log('  ✅ Template validation passed:', transaction.template)
+                                  console.log('  - Navigation URL:', `/invoice/preview/${transaction.template}?invoice=${transaction.invoice_number}`)
+                                  
+                                  navigate(`/invoice/preview/${transaction.template}?invoice=${transaction.invoice_number}`)
                                 } else {
                                   navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
                                 }
