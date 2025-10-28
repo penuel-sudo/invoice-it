@@ -41,6 +41,8 @@ interface Transaction {
   description?: string
   payment_method?: string
   is_tax_deductible?: boolean
+  receipt_url?: string
+  receipt_filename?: string
   template?: string | null // Template used for the invoice - can be null for validation errors
   created_at: string
   updated_at?: string
@@ -228,7 +230,8 @@ export default function TransactionPage() {
           description: isExpense ? dbTransaction.client_name : undefined, // For expenses, client_name contains description
           payment_method: isExpense ? dbTransaction.payment_method : undefined,
           is_tax_deductible: isExpense ? dbTransaction.is_tax_deductible : undefined,
-          // Removed receipt_url and receipt_filename as they're not in the new RPC function
+          receipt_url: isExpense ? dbTransaction.receipt_url : undefined,
+          receipt_filename: isExpense ? dbTransaction.receipt_filename : undefined,
           template: template, // Strict template validation applied
           created_at: dbTransaction.created_at,
           updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
