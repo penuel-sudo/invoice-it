@@ -53,11 +53,6 @@ console.log('🔍 DEBUGGING: TransactionPage.tsx file loaded')
 export default function TransactionPage() {
   console.log('🔍 DEBUGGING: TransactionPage component rendered')
   
-  // Temporary alert to confirm component is loading
-  if (typeof window !== 'undefined') {
-    setTimeout(() => alert('TransactionPage component loaded!'), 100)
-  }
-  
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -152,12 +147,37 @@ export default function TransactionPage() {
       console.log('🔍 DEBUGGING: Data type:', typeof data)
       console.log('🔍 DEBUGGING: Data length:', data?.length)
       
+      // Log the complete raw data from RPC function
+      console.log('🔍 DEBUGGING: COMPLETE RAW DATA FROM RPC FUNCTION:')
+      console.log(JSON.stringify(data, null, 2))
+      
       if (data && data.length > 0) {
-        console.log('🔍 DEBUGGING: First transaction structure:', data[0])
-        console.log('🔍 DEBUGGING: First transaction keys:', Object.keys(data[0]))
-        console.log('🔍 DEBUGGING: Template field value:', data[0].template)
-        console.log('🔍 DEBUGGING: Receipt URL field value:', data[0].receipt_url)
-        console.log('🔍 DEBUGGING: Receipt filename field value:', data[0].receipt_filename)
+        console.log('🔍 DEBUGGING: DETAILED ANALYSIS OF FIRST TRANSACTION:')
+        console.log('  - Complete first transaction:', data[0])
+        console.log('  - Available keys:', Object.keys(data[0]))
+        console.log('  - Template field value:', data[0].template, '(type:', typeof data[0].template, ')')
+        console.log('  - Receipt URL field value:', data[0].receipt_url, '(type:', typeof data[0].receipt_url, ')')
+        console.log('  - Receipt filename field value:', data[0].receipt_filename, '(type:', typeof data[0].receipt_filename, ')')
+        console.log('  - Transaction type:', data[0].transaction_type)
+        console.log('  - Reference number:', data[0].reference_number)
+        console.log('  - Status:', data[0].status)
+        
+        // Log all transactions if there are multiple
+        if (data.length > 1) {
+          console.log('🔍 DEBUGGING: ALL TRANSACTIONS FROM RPC:')
+          data.forEach((transaction: any, index: number) => {
+            console.log(`  Transaction ${index + 1}:`, {
+              type: transaction.transaction_type,
+              id: transaction.id,
+              reference: transaction.reference_number,
+              template: transaction.template,
+              receipt_url: transaction.receipt_url,
+              receipt_filename: transaction.receipt_filename
+            })
+          })
+        }
+      } else {
+        console.log('🔍 DEBUGGING: NO DATA RETURNED FROM RPC FUNCTION')
       }
 
       if (error) {
