@@ -137,10 +137,15 @@ export default function TransactionPage() {
       
       console.log('🔍 DEBUGGING: About to call get_user_transactions with user_id:', user.id)
       
+      // Test if function exists first
+      console.log('🔍 DEBUGGING: Testing RPC function call...')
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
-
+      
+      console.log('🔍 DEBUGGING: RPC call completed')
+      console.log('🔍 DEBUGGING: Error object:', error)
+      console.log('🔍 DEBUGGING: Data object:', data)
       console.log('🔍 DEBUGGING: Raw Supabase response:', { data, error })
       console.log('🔍 DEBUGGING: Data type:', typeof data)
       console.log('🔍 DEBUGGING: Data length:', data?.length)
