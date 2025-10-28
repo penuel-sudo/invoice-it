@@ -48,11 +48,17 @@ interface Transaction {
   updated_at?: string
 }
 
+console.log('🔍 DEBUGGING: TransactionPage.tsx file loaded')
+
 export default function TransactionPage() {
+  console.log('🔍 DEBUGGING: TransactionPage component rendered')
+  
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { currencySymbol } = useGlobalCurrency()
+  
+  console.log('🔍 DEBUGGING: User from auth:', user?.id)
   
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -82,8 +88,12 @@ export default function TransactionPage() {
 
   // Load transactions from database
   useEffect(() => {
+    console.log('🔍 DEBUGGING: useEffect triggered with user:', user?.id)
     if (user) {
+      console.log('🔍 DEBUGGING: User exists, calling loadTransactions()')
       loadTransactions()
+    } else {
+      console.log('🔍 DEBUGGING: No user, skipping loadTransactions()')
     }
   }, [user])
 
@@ -114,9 +124,14 @@ export default function TransactionPage() {
   }, [activeTab, searchParams, setSearchParams])
 
   const loadTransactions = async () => {
-    if (!user) return
+    console.log('🔍 DEBUGGING: loadTransactions() called')
+    if (!user) {
+      console.log('🔍 DEBUGGING: No user in loadTransactions, returning early')
+      return
+    }
 
     try {
+      console.log('🔍 DEBUGGING: Starting transaction load process')
       setLoading(true)
       console.log('Loading transactions for user:', user.id)
       
