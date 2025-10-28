@@ -122,25 +122,47 @@ export default function TransactionPage() {
       
       // Overdue detection is now handled by OverdueDetector component
       
+      console.log('🔍 DEBUGGING: About to call get_user_transactions with user_id:', user.id)
+      
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
       })
 
+      console.log('🔍 DEBUGGING: Raw Supabase response:', { data, error })
+      console.log('🔍 DEBUGGING: Data type:', typeof data)
+      console.log('🔍 DEBUGGING: Data length:', data?.length)
+      
+      if (data && data.length > 0) {
+        console.log('🔍 DEBUGGING: First transaction structure:', data[0])
+        console.log('🔍 DEBUGGING: First transaction keys:', Object.keys(data[0]))
+        console.log('🔍 DEBUGGING: Template field value:', data[0].template)
+        console.log('🔍 DEBUGGING: Receipt URL field value:', data[0].receipt_url)
+        console.log('🔍 DEBUGGING: Receipt filename field value:', data[0].receipt_filename)
+      }
+
       if (error) {
-        console.error('Error loading transactions:', error)
+        console.error('🚨 DEBUGGING: Error loading transactions:', error)
+        console.error('🚨 DEBUGGING: Error details:', JSON.stringify(error, null, 2))
         toast.error('Failed to load transactions: ' + error.message)
         return
       }
 
-      console.log('Raw database response:', data)
+      console.log('🔍 DEBUGGING: Raw database response:', data)
 
       // Transform database response to match Transaction interface
-      const transformedTransactions: Transaction[] = (data || []).map((dbTransaction: any) => {
-        console.log('Processing transaction:', dbTransaction.transaction_type, 'status:', dbTransaction.status)
+      const transformedTransactions: Transaction[] = (data || []).map((dbTransaction: any, index: number) => {
+        console.log(`🔍 DEBUGGING: Processing transaction ${index + 1}:`, dbTransaction.transaction_type, 'status:', dbTransaction.status)
+        console.log(`🔍 DEBUGGING: Transaction ${index + 1} available fields:`, Object.keys(dbTransaction))
+        
         const isInvoice = dbTransaction.transaction_type === 'invoice'
         const isExpense = dbTransaction.transaction_type === 'expense'
 
-        return {
+        console.log(`🔍 DEBUGGING: Transaction ${index + 1} field access:`)
+        console.log(`  - template: ${dbTransaction.template} (exists: ${dbTransaction.hasOwnProperty('template')})`)
+        console.log(`  - receipt_url: ${dbTransaction.receipt_url} (exists: ${dbTransaction.hasOwnProperty('receipt_url')})`)
+        console.log(`  - receipt_filename: ${dbTransaction.receipt_filename} (exists: ${dbTransaction.hasOwnProperty('receipt_filename')})`)
+
+        const transformedTransaction = {
           id: dbTransaction.id,
           type: dbTransaction.transaction_type as 'invoice' | 'expense',
           // For invoices: reference_number = invoice_number, for expenses: reference_number = category
@@ -159,6 +181,9 @@ export default function TransactionPage() {
           created_at: dbTransaction.created_at,
           updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
         }
+        
+        console.log(`🔍 DEBUGGING: Transformed transaction ${index + 1}:`, transformedTransaction)
+        return transformedTransaction
       })
 
       console.log('Transformed transactions:', transformedTransactions)
@@ -1018,7 +1043,17 @@ export default function TransactionPage() {
                               onMouseDown={(e) => {
                                 e.preventDefault()
                                 if (transaction.type === 'invoice') {
+                                  console.log('🔍 DEBUGGING: View Details clicked for invoice:')
+                                  console.log('  - Transaction ID:', transaction.id)
+                                  console.log('  - Invoice Number:', transaction.invoice_number)
+                                  console.log('  - Template from transaction:', transaction.template)
+                                  console.log('  - Template type:', typeof transaction.template)
+                                  console.log('  - Template is null/undefined:', transaction.template == null)
+                                  
                                   const template = transaction.template || 'default'
+                                  console.log('  - Final template used:', template)
+                                  console.log('  - Navigation URL:', `/invoice/preview/${template}?invoice=${transaction.invoice_number}`)
+                                  
                                   navigate(`/invoice/preview/${template}?invoice=${transaction.invoice_number}`)
                                 } else {
                                   navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
