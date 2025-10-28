@@ -53,6 +53,11 @@ console.log('🔍 DEBUGGING: TransactionPage.tsx file loaded')
 export default function TransactionPage() {
   console.log('🔍 DEBUGGING: TransactionPage component rendered')
   
+  // Temporary alert to confirm component is loading
+  if (typeof window !== 'undefined') {
+    setTimeout(() => alert('TransactionPage component loaded!'), 100)
+  }
+  
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
