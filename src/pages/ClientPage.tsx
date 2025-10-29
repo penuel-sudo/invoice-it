@@ -143,7 +143,7 @@ export default function ClientPage() {
       } else {
         // Create new client - check for duplicates first
         const clientResult = await saveClient({
-          name: formData.name.trim(),
+            name: formData.name.trim(),
           email: formData.email.trim(),
           phone: formData.phone.trim(),
           address: formData.address.trim(),
@@ -158,7 +158,7 @@ export default function ClientPage() {
 
         // Show appropriate success message
         if (clientResult.isNewClient) {
-          toast.success('Client created successfully!')
+        toast.success('Client created successfully!')
         } else if (clientResult.isUpdated) {
           toast.success('Client updated successfully!')
         } else {
@@ -555,64 +555,64 @@ export default function ClientPage() {
 
         {/* Clients List - Transaction Style */}
         {filteredClients.length === 0 ? (
-          <div style={{
+        <div style={{
             padding: '3rem',
             textAlign: 'center',
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
-          }}>
-            <Users size={48} color={brandColors.neutral[300]} style={{ marginBottom: '1rem' }} />
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: brandColors.neutral[700],
-              margin: '0 0 0.5rem 0'
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+          border: `1px solid ${brandColors.neutral[100]}`
             }}>
-              {searchQuery ? 'No clients found' : 'No clients yet'}
-            </h3>
-            <p style={{
-              fontSize: '0.875rem',
-              color: brandColors.neutral[500],
-              margin: '0 0 1.5rem 0'
-            }}>
-              {searchQuery 
-                ? 'Try adjusting your search terms'
-                : 'Add your first client to get started'
-              }
-            </p>
-            {!searchQuery && (
-              <button
-                onClick={() => setShowClientForm(true)}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  backgroundColor: brandColors.primary[600],
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  margin: '0 auto'
-                }}
-              >
-                <Plus size={16} />
-                Add First Client
-              </button>
-            )}
-          </div>
-        ) : (
+              <Users size={48} color={brandColors.neutral[300]} style={{ marginBottom: '1rem' }} />
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: brandColors.neutral[700],
+                margin: '0 0 0.5rem 0'
+              }}>
+                {searchQuery ? 'No clients found' : 'No clients yet'}
+              </h3>
+              <p style={{
+                fontSize: '0.875rem',
+                color: brandColors.neutral[500],
+                margin: '0 0 1.5rem 0'
+              }}>
+                {searchQuery 
+                  ? 'Try adjusting your search terms'
+                  : 'Add your first client to get started'
+                }
+              </p>
+              {!searchQuery && (
+                <button
+                  onClick={() => setShowClientForm(true)}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: brandColors.primary[600],
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    margin: '0 auto'
+                  }}
+                >
+                  <Plus size={16} />
+                  Add First Client
+                </button>
+              )}
+            </div>
+          ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
             {filteredClients.map((client) => (
-              <div
-                key={client.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                <div
+                  key={client.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: isMobile ? '0.875rem' : '1rem 1.25rem',
                   backgroundColor: brandColors.white,
@@ -697,26 +697,26 @@ export default function ClientPage() {
                     }}>
                       {client.company_name || client.email || client.phone || 'No contact info'}
                     </p>
+                    </div>
                   </div>
-                </div>
 
                 {/* Edit Icon */}
                 {!isMobile && (
                   <div style={{
-                    padding: '0.5rem',
+                        padding: '0.5rem',
                     backgroundColor: brandColors.neutral[50],
                     borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                   }}>
-                    <Edit size={16} color={brandColors.neutral[600]} />
+                      <Edit size={16} color={brandColors.neutral[600]} />
                   </div>
                 )}
-              </div>
-            ))}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
       </div>
 
       {/* Client Form Modal */}

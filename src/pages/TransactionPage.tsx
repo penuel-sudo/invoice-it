@@ -6,6 +6,7 @@ import { Layout } from '../components/layout'
 import { supabase } from '../lib/supabaseClient'
 import StatusButton from '../components/StatusButton'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
+import { TransactionService, type TransactionData } from '../services/transactionService'
 import { 
   ArrowLeft, 
   MoreVertical, 
@@ -25,28 +26,8 @@ import { format } from 'date-fns'
 // StatusLogic removed - StatusButton handles validation internally
 import OverdueDetector from '../components/OverdueDetector'
 
-interface Transaction {
-  id: string
-  type: 'invoice' | 'expense'
-  invoice_number?: string
-  status: string // Accept any status from database
-  issue_date?: string
-  due_date?: string
-  subtotal?: number
-  tax_amount?: number
-  total_amount: number
-  notes?: string
-  client_name?: string
-  category?: string
-  description?: string
-  payment_method?: string
-  is_tax_deductible?: boolean
-  receipt_url?: string
-  receipt_filename?: string
-  template?: string | null // Template used for the invoice - can be null for validation errors
-  created_at: string
-  updated_at?: string
-}
+// Use TransactionData from service
+type Transaction = TransactionData
 
 console.log('🔍 DEBUGGING: TransactionPage.tsx file loaded')
 
@@ -131,130 +112,18 @@ export default function TransactionPage() {
     }
 
     try {
-      console.log('🔍 DEBUGGING: Starting transaction load process')
+      console.log('🔍 DEBUGGING: Starting transaction load process with TransactionService')
       setLoading(true)
-      console.log('Loading transactions for user:', user.id)
       
-      // Overdue detection is now handled by OverdueDetector component
+      // Use the new TransactionService instead of RPC
+      const transactions = await TransactionService.getUserTransactions(user.id)
       
-      console.log('🔍 DEBUGGING: About to call get_user_transactions with user_id:', user.id)
+      console.log('🔍 DEBUGGING: TransactionService returned:', transactions.length, 'transactions')
+      setTransactions(transactions)
       
-      // Test if function exists first
-      console.log('🔍 DEBUGGING: Testing RPC function call...')
-      const { data, error } = await supabase.rpc('get_user_transactions', {
-        user_id: user.id
-      })
-      
-      console.log('🔍 DEBUGGING: RPC call completed')
-      console.log('🔍 DEBUGGING: Error object:', error)
-      console.log('🔍 DEBUGGING: Data object:', data)
-      console.log('🔍 DEBUGGING: Raw Supabase response:', { data, error })
-      console.log('🔍 DEBUGGING: Data type:', typeof data)
-      console.log('🔍 DEBUGGING: Data length:', data?.length)
-      
-      // Log the complete raw data from RPC function
-      console.log('🔍 DEBUGGING: COMPLETE RAW DATA FROM RPC FUNCTION:')
-      console.log(JSON.stringify(data, null, 2))
-      
-      if (data && data.length > 0) {
-        console.log('🔍 DEBUGGING: DETAILED ANALYSIS OF FIRST TRANSACTION:')
-        console.log('  - Complete first transaction:', data[0])
-        console.log('  - Available keys:', Object.keys(data[0]))
-        console.log('  - Template field value:', data[0].template, '(type:', typeof data[0].template, ')')
-        console.log('  - Transaction type:', data[0].transaction_type)
-        console.log('  - Reference number:', data[0].reference_number)
-        console.log('  - Status:', data[0].status)
-        
-        // Log all transactions if there are multiple
-        if (data.length > 1) {
-          console.log('🔍 DEBUGGING: ALL TRANSACTIONS FROM RPC:')
-          data.forEach((transaction: any, index: number) => {
-            console.log(`  Transaction ${index + 1}:`, {
-              type: transaction.transaction_type,
-              id: transaction.id,
-              reference: transaction.reference_number,
-              template: transaction.template,
-              status: transaction.status
-            })
-          })
-        }
-      } else {
-        console.log('🔍 DEBUGGING: NO DATA RETURNED FROM RPC FUNCTION')
-      }
-
-      if (error) {
-        console.error('🚨 DEBUGGING: Error loading transactions:', error)
-        console.error('🚨 DEBUGGING: Error details:', JSON.stringify(error, null, 2))
-        toast.error('Failed to load transactions: ' + error.message)
-        return
-      }
-
-      console.log('🔍 DEBUGGING: Raw database response:', data)
-
-      // Transform database response to match Transaction interface with STRICT validation
-      const transformedTransactions: Transaction[] = (data || []).map((dbTransaction: any, index: number) => {
-        console.log(`🔍 DEBUGGING: Processing transaction ${index + 1}:`, dbTransaction.transaction_type, 'status:', dbTransaction.status)
-        console.log(`🔍 DEBUGGING: Transaction ${index + 1} available fields:`, Object.keys(dbTransaction))
-        
-        const isInvoice = dbTransaction.transaction_type === 'invoice'
-        const isExpense = dbTransaction.transaction_type === 'expense'
-
-        console.log(`🔍 DEBUGGING: Transaction ${index + 1} field access:`)
-        console.log(`  - template: ${dbTransaction.template} (type: ${typeof dbTransaction.template})`)
-
-        // STRICT TEMPLATE VALIDATION - No fallbacks!
-        let template: string | undefined = undefined
-        if (isInvoice) {
-          if (!dbTransaction.template || dbTransaction.template.trim() === '') {
-            const errorMsg = `🚨 STRICT VALIDATION ERROR: Invoice ${dbTransaction.reference_number} has NULL/empty template!`
-            console.error(errorMsg)
-            toast.error(`Invoice ${dbTransaction.reference_number} has no template assigned!`)
-            // Still include in list but mark as invalid
-            template = null as any // This will prevent navigation
-          } else {
-            template = dbTransaction.template.trim()
-            console.log(`✅ Valid template for invoice ${dbTransaction.reference_number}:`, template)
-          }
-        }
-
-        const transformedTransaction = {
-          id: dbTransaction.id,
-          type: dbTransaction.transaction_type as 'invoice' | 'expense',
-          // For invoices: reference_number = invoice_number, for expenses: reference_number = category
-          invoice_number: isInvoice ? dbTransaction.reference_number : undefined,
-          category: isExpense ? dbTransaction.reference_number : undefined,
-          status: dbTransaction.status as 'draft' | 'pending' | 'paid' | 'overdue' | 'spent' | 'expense',
-          issue_date: dbTransaction.transaction_date,
-          total_amount: dbTransaction.amount,
-          client_name: isInvoice ? dbTransaction.client_name : undefined,
-          description: isExpense ? dbTransaction.client_name : undefined, // For expenses, client_name contains description
-          payment_method: isExpense ? dbTransaction.payment_method : undefined,
-          is_tax_deductible: isExpense ? dbTransaction.is_tax_deductible : undefined,
-          receipt_url: isExpense ? dbTransaction.receipt_url : undefined,
-          receipt_filename: isExpense ? dbTransaction.receipt_filename : undefined,
-          template: template, // Strict template validation applied
-          created_at: dbTransaction.created_at,
-          updated_at: dbTransaction.created_at // Using created_at as updated_at since DB function doesn't return updated_at
-        }
-        
-        console.log(`🔍 DEBUGGING: Transformed transaction ${index + 1}:`, transformedTransaction)
-        return transformedTransaction
-      })
-
-      console.log('Transformed transactions:', transformedTransactions)
-      
-      // Sort by created_at DESC (latest first) as additional safety
-      const sortedTransactions = transformedTransactions.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
-      
-      setTransactions(sortedTransactions)
-    } catch (error) {
-      console.error('Error loading transactions:', error)
-      toast.error('Failed to load transactions')
-      
-      // Set empty array if database fails
-      console.log('No transactions found or database error')
+    } catch (error: any) {
+      console.error('🚨 DEBUGGING: Error loading transactions:', error)
+      toast.error('Failed to load transactions: ' + error.message)
       setTransactions([])
     } finally {
       setLoading(false)
