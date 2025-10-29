@@ -44,7 +44,6 @@ export default function TransactionPage() {
   console.log('🔍 DEBUGGING: User from auth:', user?.id)
   
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all')
   const [bulkMode, setBulkMode] = useState(false)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
@@ -115,7 +114,6 @@ export default function TransactionPage() {
 
     try {
       console.log('🔍 DEBUGGING: Starting transaction load process with TransactionService')
-      setLoading(true)
       setGlobalLoading(true)
       
       // Use the new TransactionService instead of RPC
@@ -129,7 +127,6 @@ export default function TransactionPage() {
       toast.error('Failed to load transactions: ' + error.message)
       setTransactions([])
     } finally {
-      setLoading(false)
       setGlobalLoading(false)
     }
   }
@@ -678,20 +675,8 @@ export default function TransactionPage() {
           padding: window.innerWidth < 768 
             ? (bulkMode ? '0 1rem 1rem 1rem' : '0 1rem 1rem 1rem')
             : (bulkMode ? '0 2rem 2rem 2rem' : '0 2rem 2rem 2rem')
-        }}>
-          {loading ? (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '4rem 2rem',
-              color: brandColors.neutral[600],
-              fontSize: '1rem',
-              fontWeight: '500'
-            }}>
-              Loading transactions...
-            </div>
-          ) : filteredTransactions.length === 0 ? (
+          }}>
+          {filteredTransactions.length === 0 ? (
             <div style={{
               display: 'flex',
               flexDirection: 'column',

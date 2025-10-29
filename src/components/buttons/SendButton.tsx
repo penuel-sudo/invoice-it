@@ -72,7 +72,20 @@ export default function SendButton({
         })
       })
 
+      // Parse response
       const result = await response.json()
+
+      // Check if response is ok
+      if (!response.ok) {
+        // Check for domain verification error
+        if (result.type === 'domain_verification_required') {
+          throw {
+            type: 'domain_verification_required',
+            message: result.message || 'Please verify your domain at resend.com/domains to send emails to clients'
+          }
+        }
+        throw new Error(result.error || result.message || `Server error: ${response.status}`)
+      }
 
       if (result.success) {
         toast.success('Invoice sent successfully!')
@@ -98,11 +111,28 @@ export default function SendButton({
           onSend()
         }
       } else {
-        throw new Error(result.error || 'Failed to send email')
+        throw new Error(result.error || result.message || 'Failed to send email')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Send email error:', error)
-      toast.error('Failed to send invoice. Please try again.')
+      
+      // Check if it's a domain verification error
+      if (error.type === 'domain_verification_required' || (error.message && (error.message.includes('domain') || error.message.includes('verified') || error.message.includes('test mode')))) {
+        const message = error.type === 'domain_verification_required' 
+          ? error.message 
+          : 'To send invoices to clients, please verify your domain at resend.com/domains'
+        
+        toast.error(message, {
+          duration: 10000, // Show longer for important message
+          style: {
+            maxWidth: '500px',
+            fontSize: '14px',
+            whiteSpace: 'normal'
+          }
+        })
+      } else {
+        toast.error(error.message || 'Failed to send invoice. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }

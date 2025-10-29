@@ -230,7 +230,24 @@ export default async function handler(req, res) {
 
     if (error) {
       console.error('Resend error:', error)
-      return res.status(500).json({ error: 'Failed to send email' })
+      
+      // Check for Resend domain validation error
+      if (error.statusCode === 403 && error.name === 'validation_error') {
+        const verifiedEmail = process.env.RESEND_VERIFIED_EMAIL || 'your verified email'
+        return res.status(403).json({ 
+          error: 'Email sending is restricted in test mode',
+          message: `Resend only allows sending to your verified email address (${verifiedEmail}) in test mode. To send to other recipients, please verify a domain at resend.com/domains and update the "from" address to use your verified domain.`,
+          type: 'domain_verification_required',
+          verifiedEmail: verifiedEmail,
+          helpUrl: 'https://resend.com/domains'
+        })
+      }
+      
+      // Generic error
+      return res.status(500).json({ 
+        error: error.message || 'Failed to send email',
+        details: error
+      })
     }
 
     return res.status(200).json({ 

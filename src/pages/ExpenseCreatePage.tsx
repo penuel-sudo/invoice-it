@@ -70,7 +70,6 @@ export default function ExpenseCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { setLoading: setGlobalLoading } = useLoading()
-  const [loading, setLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
@@ -228,7 +227,6 @@ export default function ExpenseCreatePage() {
     }
 
     try {
-      setLoading(true)
       setGlobalLoading(true)
 
       let receiptUrl = null
@@ -299,7 +297,6 @@ export default function ExpenseCreatePage() {
       console.error('Error saving expense:', error)
       toast.error('Failed to save expense')
     } finally {
-      setLoading(false)
       setGlobalLoading(false)
     }
   }
@@ -1059,18 +1056,17 @@ export default function ExpenseCreatePage() {
                 borderRadius: '8px',
                 fontSize: '0.875rem',
                 fontWeight: '500',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
                 whiteSpace: 'nowrap',
-                flexShrink: 0,
-                opacity: loading ? 0.6 : 1
+                flexShrink: 0
               }}
             >
               <Save size={16} />
-              {loading ? 'Saving...' : 'Save'}
+              Save
             </button>
             
             <button

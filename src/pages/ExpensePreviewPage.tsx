@@ -61,7 +61,6 @@ export default function ExpensePreviewPage() {
   const location = useLocation()
   const { setLoading: setGlobalLoading } = useLoading()
   const [expense, setExpense] = useState<Expense | null>(null)
-  const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -112,7 +111,6 @@ export default function ExpensePreviewPage() {
           updated_at: new Date().toISOString()
         }
         setExpense(transformedExpense)
-        setLoading(false)
         setGlobalLoading(false)
         return
       }
@@ -134,7 +132,6 @@ export default function ExpensePreviewPage() {
     if (!user) return
 
     try {
-      setLoading(true)
       setGlobalLoading(true)
       
       const { data, error } = await supabase
@@ -157,7 +154,6 @@ export default function ExpensePreviewPage() {
       toast.error('Failed to load expense')
       navigate('/invoices')
     } finally {
-      setLoading(false)
       setGlobalLoading(false)
     }
   }
@@ -239,28 +235,6 @@ export default function ExpensePreviewPage() {
   }
 
   if (!user) return null
-
-  if (loading) {
-    return (
-      <Layout>
-        <div style={{
-          padding: '2rem',
-          backgroundColor: brandColors.white,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{
-            fontSize: '1rem',
-            color: brandColors.neutral[600]
-          }}>
-            Loading expense...
-          </div>
-        </div>
-      </Layout>
-    )
-  }
 
   if (!expense) {
     return (

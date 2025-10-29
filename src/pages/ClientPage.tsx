@@ -52,7 +52,6 @@ export default function ClientPage() {
   const navigate = useNavigate()
   const { setLoading: setGlobalLoading } = useLoading()
   const [clients, setClients] = useState<Client[]>([])
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showClientForm, setShowClientForm] = useState(false)
@@ -89,7 +88,6 @@ export default function ClientPage() {
     if (!user) return
 
     try {
-      setLoading(true)
       setGlobalLoading(true)
       const { data, error } = await supabase
         .from('clients')
@@ -108,7 +106,6 @@ export default function ClientPage() {
       console.error('Error loading clients:', error)
       toast.error('Failed to load clients')
     } finally {
-      setLoading(false)
       setGlobalLoading(false)
     }
   }
@@ -225,41 +222,6 @@ export default function ClientPage() {
   const totalClients = clients.length
   const clientsWithOverdue = clients.filter(client => client.overdue_count > 0).length
   const totalOverdueCount = clients.reduce((sum, client) => sum + client.overdue_count, 0)
-
-  if (loading) {
-    return (
-      <Layout hideBottomNav={true}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh'
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '1rem'
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: `3px solid ${brandColors.primary[200]}`,
-              borderTop: `3px solid ${brandColors.primary[600]}`,
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }}></div>
-            <p style={{
-              color: brandColors.neutral[600],
-              fontSize: '0.875rem'
-            }}>
-              Loading clients...
-            </p>
-          </div>
-        </div>
-      </Layout>
-    )
-  }
 
   return (
     <Layout hideBottomNav={true}>

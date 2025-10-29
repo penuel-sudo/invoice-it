@@ -74,7 +74,6 @@ export default function SettingsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { setLoading: setGlobalLoading } = useLoading()
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'profile' | 'currency' | 'payment' | 'notifications' | 'appearance'>(
     (searchParams.get('tab') as any) || 'profile'
@@ -210,7 +209,6 @@ export default function SettingsPage() {
     if (!user) return
 
     try {
-      setLoading(true)
       setGlobalLoading(true)
       
       
@@ -263,7 +261,6 @@ export default function SettingsPage() {
       console.error('Error loading profile:', error)
       toast.error('Failed to load settings')
     } finally {
-      setLoading(false)
       setGlobalLoading(false)
     }
   }
@@ -434,7 +431,7 @@ export default function SettingsPage() {
 
 
 
-  if (!user || loading) {
+  if (!user) {
     return (
       <Layout hideBottomNav={false}>
         <div style={{

@@ -41,7 +41,6 @@ export default function DashboardPage() {
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
   const { currency, currencySymbol } = useGlobalCurrency()
   const [transactions, setTransactions] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
@@ -172,7 +171,6 @@ export default function DashboardPage() {
     if (!user) return
 
     try {
-      setLoading(true)
       setGlobalLoading(true)
       
       const { data, error } = await supabase.rpc('get_user_transactions', {
@@ -256,7 +254,6 @@ export default function DashboardPage() {
       console.error('Error loading transactions:', error)
       setTransactions([])
     } finally {
-      setLoading(false)
       setGlobalLoading(false)
     }
   }

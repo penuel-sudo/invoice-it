@@ -20,24 +20,13 @@ export default function PageLoader() {
 			zIndex: 9999
 		}}>
 			<div style={{
-				textAlign: 'center',
-				padding: '1rem 1.5rem',
-				background: '#ffffff',
-				borderRadius: '12px',
-				boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-				border: `1px solid ${brandColors.neutral[200]}`
-			}}>
-				<div style={{
-					width: '40px',
-					height: '40px',
-					border: `3px solid ${brandColors.primary[200]}`,
-					borderTop: `3px solid ${brandColors.primary[600]}`,
-					borderRadius: '50%',
-					animation: 'spin 1s linear infinite',
-					margin: '0 auto 0.5rem'
-				}} />
-				<div style={{ color: brandColors.neutral[600], fontSize: '0.9rem' }}>Loading...</div>
-			</div>
+				width: '40px',
+				height: '40px',
+				border: `3px solid ${brandColors.primary[200]}`,
+				borderTop: `3px solid ${brandColors.primary[600]}`,
+				borderRadius: '50%',
+				animation: 'spin 1s linear infinite'
+			}} />
 			<style>{`
 				@keyframes spin {
 					0% { transform: rotate(0deg); }
