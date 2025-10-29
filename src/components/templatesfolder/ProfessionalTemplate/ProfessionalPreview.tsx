@@ -24,10 +24,12 @@ import StatusButton from '../../StatusButton'
 import SendButton from '../../buttons/SendButton'
 import EditButton from '../../buttons/EditButton'
 import DownloadButton from '../../buttons/DownloadButton'
+import { useLoading } from '../../../contexts/LoadingContext'
 
 
 export default function ProfessionalInvoicePreviewPage() {
   const { user } = useAuth()
+  const { setLoading: setGlobalLoading } = useLoading()
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
@@ -39,6 +41,7 @@ export default function ProfessionalInvoicePreviewPage() {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([])
   const [templateSettings, setTemplateSettings] = useState<any>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [profileFallback, setProfileFallback] = useState<any>(null)
 
   // Load template settings
   const loadTemplateSettings = async () => {
@@ -80,12 +83,19 @@ export default function ProfessionalInvoicePreviewPage() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('avatar_url')
+        .select('avatar_url, company_name, tagline, website, tax_id, registration_number')
         .eq('id', user.id)
         .single()
       
-      if (data?.avatar_url) {
-        setAvatarUrl(data.avatar_url)
+      if (data) {
+        if (data.avatar_url) setAvatarUrl(data.avatar_url)
+        setProfileFallback({
+          company_name: data.company_name || '',
+          tagline: data.tagline || '',
+          website: data.website || '',
+          tax_id: data.tax_id || '',
+          registration_number: data.registration_number || ''
+        })
       }
     } catch (error) {
       console.error('Error loading avatar URL:', error)
@@ -99,6 +109,7 @@ export default function ProfessionalInvoicePreviewPage() {
       
       if (invoiceNumber && !loading) {
         setLoading(true)
+        setGlobalLoading(true)
         try {
           // Load invoice from database using invoice number with proper joins
           const { data: invoiceData, error: invoiceError } = await supabase
@@ -262,7 +273,8 @@ export default function ProfessionalInvoicePreviewPage() {
               selectedPaymentMethodIds: invoiceData.selected_payment_method_ids || []
             }
 
-            setInvoiceData(formData)
+            const withTemplate: any = { ...formData, template: 'professional' }
+            setInvoiceData(withTemplate)
             setDbStatus(invoiceData.status || 'draft')
             setIsFromDatabase(true)
             
@@ -288,10 +300,11 @@ export default function ProfessionalInvoicePreviewPage() {
           navigate('/invoices')
         } finally {
           setLoading(false)
+          setGlobalLoading(false)
         }
       } else if (location.state?.invoiceData) {
         // From create page
-        setInvoiceData(location.state.invoiceData)
+        setInvoiceData({ ...(location.state.invoiceData as any), template: 'professional' } as any)
         setIsFromDatabase(false)
         setDbStatus('draft') // Default status for new invoices
         
@@ -395,7 +408,7 @@ export default function ProfessionalInvoicePreviewPage() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: window.innerWidth < 768 ? '1rem 0.5rem' : '2rem 1rem', // Mobile responsive padding
-      overflow: window.innerWidth < 768 ? 'auto' : 'visible',
+      overflowX: window.innerWidth < 768 ? 'auto' : 'visible',
       position: 'relative'
     }}>
       {/* Background Pattern */}
@@ -426,109 +439,59 @@ export default function ProfessionalInvoicePreviewPage() {
           marginBottom: '1.5rem',
           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
           position: 'relative',
-          width: '100%',
-          maxWidth: window.innerWidth < 768 ? '100%' : '800px',
+          width: window.innerWidth < 768 ? '800px' : '100%',
+          maxWidth: '800px',
           margin: '0 auto'
         }}>
         
-        {/* Header Section */}
+        {/* Header Section - centered title, info left, logo+status right */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
           marginBottom: '3rem',
           paddingBottom: '2rem',
           borderBottom: `2px solid ${brandColors.neutral[200]}`,
           position: 'relative'
         }}>
-          {/* Left - Company details */}
-          <div>
-            
-            {/* Company Name */}
+          <div style={{ textAlign: 'center' }}>
             <h1 style={{
-              fontSize: '1.5rem',
-              fontWeight: '700',
-              color: templateSettings?.primary_color || brandColors.primary[600],
-              margin: '0 0 0.5rem 0',
+              fontSize: '1.75rem',
+              fontWeight: 800,
+              color: templateSettings?.primary_color || brandColors.primary[700],
+              margin: 0,
               fontFamily: templateSettings?.font_family || 'Inter, sans-serif'
             }}>
-              {templateSettings?.company_name || 'INVOICE'}
+              {(templateSettings?.company_name || profileFallback?.company_name || 'INVOICE').toString()}
             </h1>
-            
-            {/* Company Tagline */}
-            {templateSettings?.tagline && templateSettings?.template_settings?.show_tagline && (
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[600],
-                margin: '0 0 0.5rem 0',
-                fontStyle: 'italic'
-              }}>
-                {templateSettings.tagline}
-              </p>
-            )}
-            
-            {/* Company Website */}
-            {templateSettings?.website && templateSettings?.template_settings?.show_website && (
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[600],
-                margin: '0 0 0.5rem 0'
-              }}>
-                {templateSettings.website}
-              </p>
-            )}
-            
-            {/* Tax ID */}
-            {templateSettings?.tax_id && templateSettings?.template_settings?.show_tax_id && (
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[600],
-                margin: '0 0 0.5rem 0'
-              }}>
-                Tax ID: {templateSettings.tax_id}
-              </p>
-            )}
-            
-            {/* Registration Number */}
-            {templateSettings?.registration_number && templateSettings?.template_settings?.show_registration && (
-              <p style={{
-                fontSize: '0.875rem',
-                color: brandColors.neutral[600],
-                margin: '0 0 0.5rem 0'
-              }}>
-                Reg: {templateSettings.registration_number}
+            {(templateSettings?.tagline || profileFallback?.tagline) && (templateSettings?.template_settings?.show_tagline !== false) && (
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: brandColors.neutral[600] }}>
+                {(templateSettings?.tagline || profileFallback?.tagline) as string}
               </p>
             )}
           </div>
-          
-          {/* Right - Logo and Status */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: '1rem'
-          }}>
-            {/* Company Logo */}
-            {avatarUrl && templateSettings?.template_settings?.show_logo && (
-              <div>
-                <img
-                  src={avatarUrl}
-                  alt="Company Logo"
-                  style={{
-                    maxHeight: '60px',
-                    maxWidth: '200px',
-                    objectFit: 'contain'
-                  }}
-                />
-              </div>
-            )}
-            
-            {/* Status */}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '1.25rem' }}>
             <div>
-              <StatusButton 
-                status={dbStatus}
-                size="sm"
-              />
+              {(templateSettings?.website || profileFallback?.website) && (templateSettings?.template_settings?.show_website !== false) && (
+                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                  {(templateSettings?.website || profileFallback?.website) as string}
+                </p>
+              )}
+              {(templateSettings?.tax_id || profileFallback?.tax_id) && (templateSettings?.template_settings?.show_tax_id !== false) && (
+                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                  Tax ID: {(templateSettings?.tax_id || profileFallback?.tax_id) as string}
+                </p>
+              )}
+              {(templateSettings?.registration_number || profileFallback?.registration_number) && (templateSettings?.template_settings?.show_registration !== false) && (
+                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: 0 }}>
+                  Reg: {(templateSettings?.registration_number || profileFallback?.registration_number) as string}
+                </p>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+              {avatarUrl && (templateSettings?.template_settings?.show_logo !== false) && (
+                <img src={avatarUrl} alt="Company Logo" style={{ maxHeight: '60px', maxWidth: '200px', objectFit: 'contain' }} />
+              )}
+              <StatusButton status={dbStatus} size="sm" />
             </div>
           </div>
         </div>
@@ -676,7 +639,7 @@ export default function ProfessionalInvoicePreviewPage() {
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
-              color: brandColors.neutral[700],
+              color: templateSettings?.primary_color || brandColors.neutral[700],
               marginBottom: '1rem',
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
@@ -755,10 +718,10 @@ export default function ProfessionalInvoicePreviewPage() {
           {/* Ship To (if provided) */}
           {hasShipTo && (
             <div>
-              <h3 style={{
-                fontSize: '0.875rem',
-                fontWeight: '700',
-                color: brandColors.neutral[700],
+            <h3 style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: templateSettings?.primary_color || brandColors.neutral[700],
                 marginBottom: '1rem',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
@@ -767,9 +730,9 @@ export default function ProfessionalInvoicePreviewPage() {
               </h3>
               <div style={{
                 padding: '1.25rem',
-                backgroundColor: brandColors.primary[50],
+                backgroundColor: templateSettings?.background_colors?.section_background || brandColors.primary[50],
                 borderRadius: '8px',
-                border: `1px solid ${brandColors.primary[200]}`
+                border: `1px solid ${templateSettings?.primary_color || brandColors.primary[200]}`
               }}>
                 <div style={{
                   fontSize: '1.125rem',
@@ -833,7 +796,7 @@ export default function ProfessionalInvoicePreviewPage() {
           }}>
             <thead>
               <tr style={{
-                backgroundColor: brandColors.neutral[100],
+                backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[100],
                 borderBottom: `2px solid ${brandColors.neutral[300]}`
               }}>
                 <th style={{
@@ -1246,6 +1209,7 @@ export default function ProfessionalInvoicePreviewPage() {
             invoiceData={invoiceData}
             user={user}
             template="professional"
+            templateSettings={templateSettings}
             size="md"
             variant="primary"
           />
@@ -1253,6 +1217,8 @@ export default function ProfessionalInvoicePreviewPage() {
           <SendButton 
             invoiceData={invoiceData}
             userData={user}
+            template="professional"
+            templateSettings={templateSettings}
             size="md"
             variant="secondary"
           />

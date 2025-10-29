@@ -584,7 +584,10 @@ export default function ProfessionalInvoiceCreatePage() {
         items: validItems
       }
 
-      const result = await saveProfessionalInvoice(saveData, user, undefined, { status: 'draft' })
+      // Load latest customization from localStorage and pass to DB save
+      const savedCustomizationsRaw = localStorage.getItem('professional_template_customizations')
+      const latestTemplateSettings = savedCustomizationsRaw ? JSON.parse(savedCustomizationsRaw) : undefined
+      const result = await saveProfessionalInvoice(saveData, user, latestTemplateSettings, { status: 'draft' })
       
       if (result.success) {
         // Reset form to default state (same as DefaultCreate)

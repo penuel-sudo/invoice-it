@@ -22,6 +22,7 @@ import {
   Clock
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useLoading } from '../contexts/LoadingContext'
 import { format } from 'date-fns'
 // StatusLogic removed - StatusButton handles validation internally
 import OverdueDetector from '../components/OverdueDetector'
@@ -38,6 +39,7 @@ export default function TransactionPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { currencySymbol } = useGlobalCurrency()
+  const { setLoading: setGlobalLoading } = useLoading()
   
   console.log('🔍 DEBUGGING: User from auth:', user?.id)
   
@@ -114,6 +116,7 @@ export default function TransactionPage() {
     try {
       console.log('🔍 DEBUGGING: Starting transaction load process with TransactionService')
       setLoading(true)
+      setGlobalLoading(true)
       
       // Use the new TransactionService instead of RPC
       const transactions = await TransactionService.getUserTransactions(user.id)
@@ -127,6 +130,7 @@ export default function TransactionPage() {
       setTransactions([])
     } finally {
       setLoading(false)
+      setGlobalLoading(false)
     }
   }
 

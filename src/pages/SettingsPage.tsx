@@ -21,6 +21,7 @@ import CountryPhoneSelector from '../components/CountryPhoneSelector'
 import PaymentMethodManager from '../components/PaymentMethodManager'
 import NotificationSettings from '../components/NotificationSettings'
 import AvatarUpload from '../components/AvatarUpload'
+import { useLoading } from '../contexts/LoadingContext'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
 
 interface NotificationPreferences {
@@ -72,6 +73,7 @@ export default function SettingsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { setLoading: setGlobalLoading } = useLoading()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'profile' | 'currency' | 'payment' | 'notifications' | 'appearance'>(
@@ -209,6 +211,7 @@ export default function SettingsPage() {
 
     try {
       setLoading(true)
+      setGlobalLoading(true)
       
       
       const { data, error } = await supabase
@@ -261,6 +264,7 @@ export default function SettingsPage() {
       toast.error('Failed to load settings')
     } finally {
       setLoading(false)
+      setGlobalLoading(false)
     }
   }
 

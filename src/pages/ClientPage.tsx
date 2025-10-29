@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
+import { useLoading } from '../contexts/LoadingContext'
 
 interface Client {
   id: string
@@ -49,6 +50,7 @@ interface ClientFormData {
 export default function ClientPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { setLoading: setGlobalLoading } = useLoading()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -88,6 +90,7 @@ export default function ClientPage() {
 
     try {
       setLoading(true)
+      setGlobalLoading(true)
       const { data, error } = await supabase
         .from('clients')
         .select('*')
@@ -106,6 +109,7 @@ export default function ClientPage() {
       toast.error('Failed to load clients')
     } finally {
       setLoading(false)
+      setGlobalLoading(false)
     }
   }
 

@@ -30,6 +30,7 @@ export interface ProfessionalInvoiceFormData {
   id?: string
   clientId?: string
   status?: string
+  template?: string
   
   // Client Information (Bill To)
   clientName: string

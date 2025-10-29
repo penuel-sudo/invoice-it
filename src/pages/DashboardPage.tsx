@@ -30,11 +30,13 @@ import {
   AlertTriangle,
   FileText as FileTextIcon
 } from 'lucide-react'
+import { useLoading } from '../contexts/LoadingContext'
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { setLoading: setGlobalLoading } = useLoading()
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
   const { currency, currencySymbol } = useGlobalCurrency()
@@ -171,6 +173,7 @@ export default function DashboardPage() {
 
     try {
       setLoading(true)
+      setGlobalLoading(true)
       
       const { data, error } = await supabase.rpc('get_user_transactions', {
         user_id: user.id
@@ -254,6 +257,7 @@ export default function DashboardPage() {
       setTransactions([])
     } finally {
       setLoading(false)
+      setGlobalLoading(false)
     }
   }
 

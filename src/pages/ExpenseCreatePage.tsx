@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
+import { useLoading } from '../contexts/LoadingContext'
 
 interface ExpenseFormData {
   description: string
@@ -68,6 +69,7 @@ const PAYMENT_METHODS = [
 export default function ExpenseCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { setLoading: setGlobalLoading } = useLoading()
   const [loading, setLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [formData, setFormData] = useState<ExpenseFormData>({
@@ -227,6 +229,7 @@ export default function ExpenseCreatePage() {
 
     try {
       setLoading(true)
+      setGlobalLoading(true)
 
       let receiptUrl = null
       let receiptFilename = null
@@ -297,6 +300,7 @@ export default function ExpenseCreatePage() {
       toast.error('Failed to save expense')
     } finally {
       setLoading(false)
+      setGlobalLoading(false)
     }
   }
 

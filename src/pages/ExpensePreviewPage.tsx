@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
+import { useLoading } from '../contexts/LoadingContext'
 // StatusLogic removed - StatusButton handles validation internally
 
 const PAYMENT_METHODS = [
@@ -58,6 +59,7 @@ export default function ExpensePreviewPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { setLoading: setGlobalLoading } = useLoading()
   const [expense, setExpense] = useState<Expense | null>(null)
   const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
@@ -111,6 +113,7 @@ export default function ExpensePreviewPage() {
         }
         setExpense(transformedExpense)
         setLoading(false)
+        setGlobalLoading(false)
         return
       }
 
@@ -132,6 +135,7 @@ export default function ExpensePreviewPage() {
 
     try {
       setLoading(true)
+      setGlobalLoading(true)
       
       const { data, error } = await supabase
         .from('expenses')
@@ -154,6 +158,7 @@ export default function ExpensePreviewPage() {
       navigate('/invoices')
     } finally {
       setLoading(false)
+      setGlobalLoading(false)
     }
   }
 
