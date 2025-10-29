@@ -14,8 +14,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email address required' })
     }
 
+    const verifiedFromAddress = process.env.RESEND_FROM || 'invoices@mail.invoice-it.org'
     const { data, error } = await resend.emails.send({
-      from: 'Invoice App <noreply@resend.dev>',
+      from: `Invoice App <${verifiedFromAddress}>`,
       to: [to],
       subject: 'Test Email from Invoice App',
       html: '<h1>Hello!</h1><p>This is a test email from your Invoice App.</p>'

@@ -215,8 +215,10 @@ export default async function handler(req, res) {
     `
 
     // Send email
+    const verifiedFromAddress = process.env.RESEND_FROM || 'invoices@mail.invoice-it.org'
+
     const { data, error } = await resend.emails.send({
-      from: `${businessName || userData?.businessName || userData?.fullName || 'Your Business'} <noreply@resend.dev>`,
+      from: `${businessName || userData?.businessName || userData?.fullName || 'Your Business'} <${verifiedFromAddress}>`,
       to: [to],
       subject: `Invoice #${invoiceData.invoiceNumber} - $${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}`,
       html: emailHtml,
@@ -233,7 +235,7 @@ export default async function handler(req, res) {
       
       // Check for Resend domain validation error
       if (error.statusCode === 403 && error.name === 'validation_error') {
-        const verifiedEmail = process.env.RESEND_VERIFIED_EMAIL || 'your verified email'
+        const verifiedEmail = process.env.RESEND_VERIFIED_EMAIL || verifiedFromAddress || 'your verified email'
         return res.status(403).json({ 
           error: 'Email sending is restricted in test mode',
           message: `Resend only allows sending to your verified email address (${verifiedEmail}) in test mode. To send to other recipients, please verify a domain at resend.com/domains and update the "from" address to use your verified domain.`,
