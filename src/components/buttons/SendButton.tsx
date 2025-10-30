@@ -151,16 +151,22 @@ export default function SendButton({
       console.log('📋 [SEND BUTTON] Using template-specific save function for status update...')
       
       let result
-      if (invoiceData.template === 'professional') {
-        result = await saveProfessionalInvoice(invoiceData, userData, templateSettings, { 
-          status: 'pending',
-          updateStatus: true 
-        })
+      const isProfessional = template === 'professional' || invoiceData.template === 'professional'
+      if (isProfessional) {
+        result = await saveProfessionalInvoice(
+          invoiceData,
+          userData,
+          templateSettings,
+          { status: 'pending', updateStatus: true }
+        )
       } else {
-        result = await saveInvoiceToDatabase(invoiceData, userData, { 
-          status: 'pending',
-          updateStatus: true 
-        })
+        // IMPORTANT: third arg is templateSettings, fourth is options
+        result = await saveInvoiceToDatabase(
+          invoiceData,
+          userData,
+          templateSettings,
+          { status: 'pending', updateStatus: true }
+        )
       }
       
       if (result.success) {
