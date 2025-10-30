@@ -34,6 +34,32 @@ export default function SendButton({
   const [isLoading, setIsLoading] = useState(false)
   const { addNotification } = useNotification()
 
+  // Fetch user profile data for "Name at Business" format
+  const fetchUserProfile = async () => {
+    if (!userData?.id) return { full_name: '', business_name: '' }
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name, company_name')
+        .eq('id', userData.id)
+        .single()
+      
+      if (error) {
+        console.error('Error fetching profile:', error)
+        return { full_name: '', business_name: '' }
+      }
+      
+      return {
+        full_name: data?.full_name || '',
+        business_name: data?.company_name || ''
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+      return { full_name: '', business_name: '' }
+    }
+  }
+
   const handleSend = async () => {
     // Check if client email exists
     if (!invoiceData.clientEmail) {
@@ -48,12 +74,16 @@ export default function SendButton({
   const sendInvoiceEmail = async (email: string, messageData: any) => {
     setIsLoading(true)
     
+    // Fetch profile data for proper "Name at Business" format
+    const profile = await fetchUserProfile()
+    
     // Debug logging
     console.log('Sending email with data:', {
       to: email,
       invoiceData: invoiceData,
       userData: userData,
-      messageData: messageData
+      messageData: messageData,
+      profile: profile
     })
     
     try {
@@ -65,7 +95,11 @@ export default function SendButton({
         body: JSON.stringify({
           to: email,
           invoiceData: invoiceData || {},
-          userData: userData || { fullName: 'Business Owner', businessName: 'Your Business' },
+          userData: {
+            ...(userData || { id: '' }),
+            fullName: profile.full_name,
+            businessName: profile.business_name
+          },
           clientName: messageData.clientName || invoiceData?.clientName || 'Client',
           greetingMessage: messageData.greetingMessage || null,
           businessName: messageData.businessName || null
