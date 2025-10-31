@@ -1,5 +1,54 @@
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer'
 import type { ProfessionalInvoiceFormData } from './ProfessionalTemplateSave'
+
+// Register fonts for PDF generation
+// Using Google Fonts CDN URLs for Roboto
+// Font registration is done once when module loads
+const registerFonts = () => {
+  try {
+    // Check if Roboto is already registered by attempting to register
+    Font.register({
+      family: 'Roboto',
+      fonts: [
+        {
+          src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxP.ttf',
+          fontWeight: 400
+        },
+        {
+          src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc4.ttf',
+          fontWeight: 700
+        }
+      ]
+    })
+    console.log('✅ Roboto font registered successfully for PDF')
+  } catch (error: any) {
+    // Font already registered or registration failed - this is okay
+    // @react-pdf/renderer may throw if font is already registered
+    if (error?.message && !error.message.includes('already registered')) {
+      console.warn('⚠️ Font registration warning:', error.message)
+    }
+  }
+}
+
+// Register fonts on module load
+if (typeof window !== 'undefined') {
+  registerFonts()
+}
+
+// Font mapping function - maps custom font names to registered PDF fonts
+const getPDFFont = (fontFamily?: string): string => {
+  if (!fontFamily) return 'Helvetica'
+  
+  const fontMap: Record<string, string> = {
+    'Roboto': 'Roboto',
+    'Helvetica': 'Helvetica',
+    'Times-Roman': 'Times-Roman',
+    'Courier': 'Courier'
+  }
+  
+  // Return mapped font or fallback to Helvetica
+  return fontMap[fontFamily] || 'Helvetica'
+}
 
 // PDF-specific styles for Professional Template
 const styles = StyleSheet.create({
@@ -268,10 +317,13 @@ interface ProfessionalPDFProps {
 export default function ProfessionalPDF({ invoiceData, user, templateSettings }: ProfessionalPDFProps) {
   const hasShipTo = invoiceData.shipToName || invoiceData.shipToAddress
   
+  // Get the mapped font for PDF
+  const pdfFont = getPDFFont(templateSettings?.font_family)
+  
   // Apply customizations if available
   const pageStyle = templateSettings?.background_colors?.main_background 
-    ? { ...styles.page, backgroundColor: templateSettings.background_colors.main_background }
-    : styles.page
+    ? { ...styles.page, backgroundColor: templateSettings.background_colors.main_background, fontFamily: pdfFont }
+    : { ...styles.page, fontFamily: pdfFont }
     
   const containerStyle = templateSettings?.background_colors?.card_background
     ? { ...styles.container, backgroundColor: templateSettings.background_colors.card_background }
@@ -305,7 +357,8 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
               <Text style={{
                 ...styles.title,
                 color: templateSettings?.primary_color || '#16a34a',
-                fontFamily: templateSettings?.font_family || 'Helvetica-Bold'
+                fontFamily: getPDFFont(templateSettings?.font_family) || 'Helvetica',
+                fontWeight: 'bold'
               }}>
                 {companyName}
               </Text>

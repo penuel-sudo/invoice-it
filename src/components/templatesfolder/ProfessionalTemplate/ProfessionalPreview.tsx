@@ -135,7 +135,6 @@ export default function ProfessionalInvoicePreviewPage() {
             `)
             .eq('invoice_number', invoiceNumber)
             .eq('user_id', user?.id)
-            .eq('template', 'professional')
             .single()
 
           if (invoiceError) {

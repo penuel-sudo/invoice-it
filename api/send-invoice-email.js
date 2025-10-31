@@ -41,12 +41,29 @@ export default async function handler(req, res) {
       });
     }
 
+    // Helper function to get currency symbol (if not available in data)
+    function getCurrencySymbol(code) {
+      const symbols = {
+        'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'CAD': 'C$',
+        'AUD': 'A$', 'JPY': '¥', 'INR': '₹', 'ZAR': 'R'
+      }
+      return symbols[code] || '$'
+    }
+    
     // Format sender info early for use in HTML template
     const userFullName_ = userData?.fullName || userData?.full_name || ''
     const businessName_ = businessName || userData?.businessName || userData?.company_name || ''
     const displayBusinessName = businessName_ || 'Invoice It'
-    const displaySenderName = userFullName_ ? `${userFullName_} at ${displayBusinessName}` : displayBusinessName
+    // Simplified sender name - just business name for better deliverability
+    const displaySenderName = displayBusinessName
     const fullClientName = clientName || 'there'
+    
+    // Get currency symbol from invoice data or default to $
+    const currencySymbol = invoiceData?.currencySymbol 
+      ? invoiceData.currencySymbol 
+      : (invoiceData?.currency_code 
+        ? getCurrencySymbol(invoiceData.currency_code) 
+        : '$')
     
     // Default greeting with full client name
     const defaultGreeting = `Hi ${fullClientName},`
@@ -55,7 +72,7 @@ export default async function handler(req, res) {
     const textContent = `
 ${finalGreeting}
 
-Your invoice #${invoiceData.invoiceNumber} for $${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)} is ready.
+Your invoice #${invoiceData.invoiceNumber} for ${currencySymbol}${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)} is ready.
 
 Please review the details and complete the payment at your convenience.
 
@@ -105,15 +122,13 @@ ${displayBusinessName}
             }
             .meta-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 0; font-size: 14px; }
             .meta-key { color: #9ca3af; font-size: 13px; font-weight: 500; }
-            .invoice-number-row { margin-bottom: 16px; }
-            .invoice-number-label { color: #9ca3af; font-size: 12px; font-weight: 400; }
-            .invoice-number-value { color: #6b7280; font-size: 14px; font-weight: 500; }
-            .amount-row { margin: 20px 0; }
-            .amount-label { color: #374151; font-size: 14px; font-weight: 500; }
-            .amount { font-size: 32px; font-weight: 800; color: #16a34a; text-align: center; display: block; margin-top: 8px; }
-            .due-date-row { margin-top: 16px; }
-            .due-date-label { color: #6b7280; font-size: 13px; font-weight: 500; }
-            .due-date-value { color: #111827; font-size: 14px; font-weight: 500; text-align: right; }
+            .invoice-number-row { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+            .invoice-number-value { color: #9ca3af; font-size: 12px; font-weight: 400; text-align: left; }
+            .amount-row { margin: 24px 0; text-align: center; }
+            .amount { font-size: 36px; font-weight: 800; color: #16a34a; text-align: center; display: block; margin: 0; }
+            .due-date-row { margin-top: 20px; display: flex; justify-content: flex-end; }
+            .due-date-label { color: #6b7280; font-size: 12px; font-weight: 400; margin-right: 8px; }
+            .due-date-value { color: #111827; font-size: 13px; font-weight: 500; text-align: right; }
             .cta-wrapper { margin-top: 24px; }
             .cta-table {
               width: 100%;
@@ -143,16 +158,12 @@ ${displayBusinessName}
               padding: 24px 8px 8px 8px;
               line-height: 1.6;
             }
-            .unsubscribe-link {
-              color: #9ca3af;
-              text-decoration: underline;
-              font-size: 11px;
-              margin-top: 12px;
-              display: inline-block;
-            }
             @media (max-width: 480px) { 
-              .meta-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+              .invoice-number-row { flex-direction: column; gap: 8px; align-items: flex-start; }
+              .invoice-number-value { text-align: left; }
               .due-date-value { text-align: left; }
+              .amount-row { margin: 20px 0; }
+              .amount { font-size: 32px; }
               .cta-table td:first-child { padding-right: 6px; }
               .cta-table td:last-child { padding-left: 6px; }
               .btn { padding: 10px 16px; font-size: 13px; }
@@ -166,20 +177,15 @@ ${displayBusinessName}
             </div>
             <div class="card">
               <p class="greeting">${finalGreeting}</p>
-              <p class="lead">Your invoice is ready for review. Please complete payment by the due date shown below.</p>
+              <p class="lead">Your invoice is ready for review.</p>
 
               <div class="meta">
-                <div class="meta-row invoice-number-row">
-                  <span class="invoice-number-label">Invoice Number</span>
+                <div class="invoice-number-row">
                   <span class="invoice-number-value">#${invoiceData.invoiceNumber}</span>
-                </div>
-                <div class="meta-row amount-row">
-                  <span class="amount-label">Amount Due</span>
-                  <span class="amount">$${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}</span>
-                </div>
-                <div class="meta-row due-date-row">
-                  <span class="due-date-label">Payment Due</span>
                   <span class="due-date-value">${new Date(invoiceData.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </div>
+                <div class="amount-row">
+                  <span class="amount">${currencySymbol}${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}</span>
                 </div>
               </div>
 
@@ -198,10 +204,7 @@ ${displayBusinessName}
               </div>
             </div>
             <div class="footer">
-              <p style="margin: 0 0 8px 0;">Thank you for your business. If you have any questions, please reply to this email.</p>
-              <p style="margin: 0; font-size: 11px; color: #9ca3af;">
-                <a href="https://invoice-it.org/unsubscribe?email=${encodeURIComponent(to)}" class="unsubscribe-link">Unsubscribe</a>
-              </p>
+              <p style="margin: 0;">Thank you for your business. If you have any questions, please reply to this email.</p>
             </div>
           </div>
         </body>
@@ -209,11 +212,14 @@ ${displayBusinessName}
     `;
 
     const verifiedFromAddress = process.env.RESEND_FROM || 'invoices@mail.invoice-it.org';
-    // Informative subject line instead of raw amount
-    const invoiceSubject = `Invoice #${invoiceData.invoiceNumber} from ${displayBusinessName} - Payment Due`;
-
+    // Subject line without payment-related words - just indicates it's from the business
+    const invoiceSubject = `Invoice #${invoiceData.invoiceNumber} from ${displayBusinessName}`;
+    
+    // Generate a unique list ID for mailing list header (format similar to example)
+    const listId = `${invoiceData.invoiceNumber || Date.now()}-${displayBusinessName.toLowerCase().replace(/\s+/g, '-')}.list-id.mail.invoice-it.org`
+    
     const { data, error } = await resend.emails.send({
-      from: `${displaySenderName} <${verifiedFromAddress}>`,
+      from: `${displayBusinessName} <${verifiedFromAddress}>`,
       replyTo: verifiedFromAddress,
       to: [ to ],
       subject: invoiceSubject,
@@ -221,7 +227,10 @@ ${displayBusinessName}
       html: emailHtml,
       headers: {
         'List-Unsubscribe': '<mailto:unsubscribe@mail.invoice-it.org>, <https://invoice-it.org/unsubscribe>',
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        'List-Id': `<${listId}>`,
+        'Precedence': 'bulk',
+        'X-Auto-Response-Suppress': 'All'
       },
     });
 
