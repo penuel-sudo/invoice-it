@@ -25,7 +25,9 @@ export default function CustomizeMessageModal({
   defaultBusinessName = '',
   defaultClientName = ''
 }: CustomizeMessageModalProps) {
-  const [greetingMessage, setGreetingMessage] = useState('')
+  // Default greeting with full client name
+  const defaultGreeting = `Hi ${defaultClientName || 'Client'},`
+  const [greetingMessage, setGreetingMessage] = useState(defaultGreeting)
   const [businessName, setBusinessName] = useState(defaultBusinessName)
   const [clientName, setClientName] = useState(defaultClientName)
   const [userCompanyName, setUserCompanyName] = useState('')
@@ -54,12 +56,14 @@ export default function CustomizeMessageModal({
 
     if (isVisible) {
       fetchUserCompanyName()
+      // Update greeting when modal opens with new client name
+      setGreetingMessage(`Hi ${defaultClientName || 'Client'},`)
     }
-  }, [isVisible])
+  }, [isVisible, defaultClientName])
 
   const handleSend = () => {
     // Use default values if fields are empty
-    const finalGreetingMessage = greetingMessage.trim() || `Hi ${defaultClientName || 'Client'}, here's your invoice for the work completed by ${defaultBusinessName || 'our business'}.`
+    const finalGreetingMessage = greetingMessage.trim() || `Hi ${defaultClientName || 'Client'},`
     const finalBusinessName = businessName.trim() || defaultBusinessName || 'Your Business'
     const finalClientName = clientName.trim() || defaultClientName || 'Client'
 
@@ -71,7 +75,7 @@ export default function CustomizeMessageModal({
   }
 
   const handleClose = () => {
-    setGreetingMessage('')
+    setGreetingMessage(`Hi ${defaultClientName || 'Client'},`)
     setBusinessName(defaultBusinessName)
     setClientName(defaultClientName)
     onClose()
@@ -235,7 +239,7 @@ export default function CustomizeMessageModal({
             <textarea
               value={greetingMessage}
               onChange={(e) => setGreetingMessage(e.target.value)}
-              placeholder="Hi [Client Name], here's your invoice for the work completed by [Business Name]..."
+              placeholder={`Hi ${defaultClientName || 'Client'},`}
               rows={4}
               style={{
                 width: '100%',

@@ -36,7 +36,7 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { setLoading: setGlobalLoading } = useLoading()
+  const { loading, setLoading: setGlobalLoading } = useLoading()
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all')
   const [isNotificationVisible, setIsNotificationVisible] = useState(false)
   const { currency, currencySymbol } = useGlobalCurrency()

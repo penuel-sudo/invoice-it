@@ -69,7 +69,7 @@ const PAYMENT_METHODS = [
 export default function ExpenseCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { setLoading: setGlobalLoading } = useLoading()
+  const { loading, setLoading: setGlobalLoading } = useLoading()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
