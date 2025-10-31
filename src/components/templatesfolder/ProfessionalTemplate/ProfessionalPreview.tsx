@@ -107,10 +107,18 @@ export default function ProfessionalInvoicePreviewPage() {
       // First check URL parameter for invoice number
       const invoiceNumber = getInvoiceFromUrl(searchParams)
       
-      if (invoiceNumber && !loading) {
+      console.log('🔍 ProfessionalPreview: Loading invoice data')
+      console.log('  - Invoice number from URL:', invoiceNumber)
+      console.log('  - Search params:', Object.fromEntries(searchParams.entries()))
+      console.log('  - Location state:', location.state?.invoiceData ? 'exists' : 'none')
+      console.log('  - User ID:', user?.id)
+      
+      if (invoiceNumber) {
+        // Always try to load from database if we have invoice number
         setLoading(true)
         setGlobalLoading(true)
         try {
+          console.log('  - Querying database for invoice:', invoiceNumber)
           // Load invoice from database using invoice number with proper joins
           const { data: invoiceData, error: invoiceError } = await supabase
             .from('invoices')
@@ -137,8 +145,11 @@ export default function ProfessionalInvoicePreviewPage() {
             .eq('user_id', user?.id)
             .single()
 
+          console.log('  - Database query result:', invoiceData ? 'FOUND' : 'NOT FOUND')
+          console.log('  - Database query error:', invoiceError)
+
           if (invoiceError) {
-            console.log('Invoice not found in database, checking localStorage and state...')
+            console.log('  ⚠️ Invoice not found in database, checking localStorage and state...')
             
             // Check state data first (from create page navigation)
             if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
@@ -221,13 +232,21 @@ export default function ProfessionalInvoicePreviewPage() {
             }
             
             // If not found anywhere, show error
-            console.log('Invoice not found anywhere')
-            toast.error('Invoice not found')
+            console.error('  ❌ Invoice not found anywhere - invoice number:', invoiceNumber)
+            console.error('  - Database error:', invoiceError)
+            console.error('  - Location state:', location.state?.invoiceData ? 'exists but invoice number mismatch' : 'none')
+            console.error('  - localStorage:', invoiceStorage.getDraftProfessional() ? 'exists but invoice number mismatch' : 'none')
+            toast.error(`Invoice ${invoiceNumber} not found`)
             navigate('/invoices')
             return
           }
 
           if (invoiceData) {
+            console.log('  ✅ Invoice found in database! Loading data...')
+            console.log('  - Invoice ID:', invoiceData.id)
+            console.log('  - Invoice Template:', invoiceData.template)
+            console.log('  - Invoice Status:', invoiceData.status)
+            
             // Convert database data to form data
             const formData: ProfessionalInvoiceFormData = {
               id: invoiceData.id,
@@ -276,6 +295,7 @@ export default function ProfessionalInvoicePreviewPage() {
             setInvoiceData(withTemplate)
             setDbStatus(invoiceData.status || 'draft')
             setIsFromDatabase(true)
+            console.log('  ✅ Invoice data loaded and set in state')
             
             // Load payment methods from profiles
             const { data: profileData, error: profileError } = await supabase
@@ -302,7 +322,8 @@ export default function ProfessionalInvoicePreviewPage() {
           setGlobalLoading(false)
         }
       } else if (location.state?.invoiceData) {
-        // From create page
+        // From create page (via state, not URL)
+        console.log('  📦 Loading invoice from location.state (create → preview flow)')
         setInvoiceData({ ...(location.state.invoiceData as any), template: 'professional' } as any)
         setIsFromDatabase(false)
         setDbStatus('draft') // Default status for new invoices
@@ -329,7 +350,12 @@ export default function ProfessionalInvoicePreviewPage() {
           }
         }
       } else {
-        toast.error('No invoice data found')
+        // No invoice number in URL and no state data
+        console.error('  ❌ No invoice data found')
+        console.error('  - Invoice number from URL: NONE')
+        console.error('  - Location state: NONE')
+        console.error('  - Current URL:', window.location.href)
+        toast.error('No invoice data found. Please select an invoice from the transactions page.')
         navigate('/invoices')
       }
     }
