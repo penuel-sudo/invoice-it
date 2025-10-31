@@ -11,7 +11,7 @@ export default function InvoicePreviewPage() {
   console.log('  - Search params:', Object.fromEntries(searchParams.entries()))
   
   // Get template from URL parameter, default to 'default'
-  const templateName = template || 'default'
+  const templateName = template 
   console.log('  - Final template name:', templateName)
   
   // Simple template routing with dynamic imports
@@ -27,9 +27,6 @@ export default function InvoicePreviewPage() {
       // Future templates will be added here
       // case 'creative':
       //   return lazy(() => import('../components/templatesfolder/CreativeTemplate/CreativePreview'))
-      default:
-        console.log('  - Fallback to DefaultPreview component')
-        return DefaultPreview // fallback to default
     }
   }
   

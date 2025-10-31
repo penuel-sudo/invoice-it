@@ -956,36 +956,13 @@ export default function TransactionPage() {
                               onMouseDown={(e) => {
                                 e.preventDefault()
                                 if (transaction.type === 'invoice') {
-                                  console.log('🔍 DEBUGGING: View Details clicked for invoice:')
-                                  console.log('  - Transaction ID:', transaction.id)
-                                  console.log('  - Invoice Number:', transaction.invoice_number)
-                                  console.log('  - Template from transaction:', transaction.template)
-                                  console.log('  - Template type:', typeof transaction.template)
-                                  console.log('  - Template is null/undefined:', transaction.template == null)
+                                  // Simple navigation: use template and invoice_number from transaction
+                                  const template = transaction.template
+                                  const invoiceNumber = transaction.invoice_number
                                   
-                                  // STRICT TEMPLATE VALIDATION - No navigation if template is invalid
-                                  if (!transaction.template || transaction.template === null) {
-                                    const errorMsg = `🚨 NAVIGATION BLOCKED: Invoice ${transaction.invoice_number} has no valid template!`
-                                    console.error(errorMsg)
-                                    toast.error(`Cannot view invoice ${transaction.invoice_number}: No template assigned!`)
-                                    setShowTransactionDropdown(null)
-                                    return // Block navigation
+                                  if (invoiceNumber) {
+                                    navigate(`/invoice/preview/${template}?invoice=${invoiceNumber}`)
                                   }
-                                  
-                                  // Validate template is a known template
-                                  const validTemplates = ['default', 'professional']
-                                  if (!validTemplates.includes(transaction.template)) {
-                                    const errorMsg = `🚨 NAVIGATION BLOCKED: Invoice ${transaction.invoice_number} has unknown template: ${transaction.template}`
-                                    console.error(errorMsg)
-                                    toast.error(`Cannot view invoice ${transaction.invoice_number}: Unknown template '${transaction.template}'!`)
-                                    setShowTransactionDropdown(null)
-                                    return // Block navigation
-                                  }
-                                  
-                                  console.log('  ✅ Template validation passed:', transaction.template)
-                                  console.log('  - Navigation URL:', `/invoice/preview/${transaction.template}?invoice=${transaction.invoice_number}`)
-                                  
-                                  navigate(`/invoice/preview/${transaction.template}?invoice=${transaction.invoice_number}`)
                                 } else {
                                   navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
                                 }
