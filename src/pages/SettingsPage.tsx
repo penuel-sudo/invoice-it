@@ -54,6 +54,9 @@ interface ProfileData {
   tagline: string
   business_type: string
   registration_number: string
+  // Additional fields from CountryPhoneSelector
+  language_code?: string
+  timezone?: string
 }
 
 const CURRENCIES = [
@@ -252,7 +255,10 @@ export default function SettingsPage() {
           logo_url: data.logo_url || '',
           tagline: data.tagline || '',
           business_type: data.business_type || '',
-          registration_number: data.registration_number || ''
+          registration_number: data.registration_number || '',
+          // Additional fields
+          language_code: data.language_code || '',
+          timezone: data.timezone || ''
         }
         setProfileData(profileData)
         setOriginalProfileData(profileData)
@@ -287,6 +293,9 @@ export default function SettingsPage() {
           tagline: profileData.tagline,
           business_type: profileData.business_type,
           registration_number: profileData.registration_number,
+          // Additional fields
+          language_code: profileData.language_code,
+          timezone: profileData.timezone,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id)

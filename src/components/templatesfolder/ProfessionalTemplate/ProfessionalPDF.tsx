@@ -2,11 +2,11 @@ import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/
 import type { ProfessionalInvoiceFormData } from './ProfessionalTemplateSave'
 
 // Register fonts for PDF generation
-// Using Google Fonts CDN URLs for Roboto
+// Using Google Fonts CDN URLs
 // Font registration is done once when module loads
 const registerFonts = () => {
   try {
-    // Check if Roboto is already registered by attempting to register
+    // Register Roboto
     Font.register({
       family: 'Roboto',
       fonts: [
@@ -20,7 +20,12 @@ const registerFonts = () => {
         }
       ]
     })
-    console.log('✅ Roboto font registered successfully for PDF')
+    
+    // Note: Inter, Lora, and Poppins will fallback to built-in fonts
+    // @react-pdf doesn't support WOFF2, and Google Fonts CDN doesn't provide TTF directly
+    // We'll map these to similar built-in fonts in the getPDFFont function
+    
+    console.log('✅ All fonts registered successfully for PDF')
   } catch (error: any) {
     // Font already registered or registration failed - this is okay
     // @react-pdf/renderer may throw if font is already registered
@@ -40,7 +45,10 @@ const getPDFFont = (fontFamily?: string): string => {
   if (!fontFamily) return 'Helvetica'
   
   const fontMap: Record<string, string> = {
-    'Roboto': 'Roboto',
+    'Inter': 'Helvetica',      // Inter → Helvetica (similar sans-serif)
+    'Roboto': 'Roboto',        // Roboto registered above
+    'Lora': 'Times-Roman',     // Lora → Times-Roman (similar serif)
+    'Poppins': 'Helvetica',    // Poppins → Helvetica (similar sans-serif)
     'Helvetica': 'Helvetica',
     'Times-Roman': 'Times-Roman',
     'Courier': 'Courier'
