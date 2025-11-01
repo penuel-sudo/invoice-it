@@ -1235,6 +1235,7 @@ export default function ProfessionalInvoicePreviewPage() {
             user={user}
             template="professional"
             templateSettings={templateSettings}
+            paymentMethods={paymentMethods}
             size="md"
             variant="primary"
           />

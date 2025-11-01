@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
@@ -69,6 +69,7 @@ const PAYMENT_METHODS = [
 export default function ExpenseCreatePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const { loading, setLoading: setGlobalLoading } = useLoading()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [formData, setFormData] = useState<ExpenseFormData>({
@@ -99,6 +100,27 @@ export default function ExpenseCreatePage() {
     
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Load expense data from preview/edit navigation
+  useEffect(() => {
+    if (location.state?.expenseData) {
+      const expenseData = location.state.expenseData
+      setFormData({
+        description: expenseData.description || '',
+        category: expenseData.category || '',
+        amount: expenseData.amount?.toString() || '',
+        expense_date: expenseData.expense_date || new Date().toISOString().split('T')[0],
+        notes: expenseData.notes || '',
+        client_id: expenseData.client_id || '',
+        payment_method: expenseData.payment_method || 'cash',
+        is_tax_deductible: expenseData.is_tax_deductible || false,
+        tax_rate: expenseData.tax_rate?.toString() || '0',
+        receipt_file: undefined,
+        receipt_url: expenseData.receipt_url || '',
+        receipt_filename: expenseData.receipt_filename || ''
+      })
+    }
+  }, [location.state])
 
   useEffect(() => {
     if (user) {

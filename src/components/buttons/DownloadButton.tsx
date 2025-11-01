@@ -107,7 +107,7 @@ export default function DownloadButton({
       
       // Generate PDF blob using client-side rendering
       console.log('🔄 [DOWNLOAD BUTTON] Creating PDF document...')
-      const blob = await pdf(<PDFTemplate invoiceData={invoiceData} user={user} templateSettings={templateSettings} />).toBlob()
+      const blob = await pdf(<PDFTemplate invoiceData={invoiceData} user={user} templateSettings={templateSettings} paymentMethods={paymentMethods} />).toBlob()
       
       console.log('✅ [DOWNLOAD BUTTON] PDF generated successfully, size:', blob.size)
       

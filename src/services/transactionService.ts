@@ -101,7 +101,6 @@ export class TransactionService {
           is_tax_deductible,
           receipt_url,
           receipt_filename,
-          currency_code,
           created_at,
           updated_at,
           clients(name)
@@ -175,7 +174,6 @@ export class TransactionService {
           status: expense.status,
           expense_date: expense.expense_date,
           total_amount: expense.amount,
-          currency_code: expense.currency_code,
           description: expense.description || expense.clients?.name,
           payment_method: expense.payment_method,
           is_tax_deductible: expense.is_tax_deductible,

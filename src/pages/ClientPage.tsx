@@ -230,7 +230,7 @@ export default function ClientPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: isMobile ? '1rem' : '1rem 2rem',
+        padding: isMobile ? '0.75rem 1rem' : '0.75rem 1.5rem',
         backgroundColor: isMobile ? 'rgba(255, 255, 255, 0.7)' : 'white',
         backdropFilter: isMobile ? 'blur(10px)' : 'none',
         borderBottom: `1px solid ${isMobile ? 'rgba(0, 0, 0, 0.05)' : brandColors.neutral[200]}`,

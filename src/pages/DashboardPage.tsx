@@ -207,14 +207,13 @@ export default function DashboardPage() {
           created_at: invoice.created_at
         }))
         
-        const transformedExpenses = (expensesData.data || []).map(expense => ({
+         const transformedExpenses = (expensesData.data || []).map(expense => ({
           id: expense.id,
           type: 'expense' as const,
           status: expense.status,
           issue_date: expense.expense_date,
           expense_date: expense.expense_date,
-          total_amount: expense.total_amount,
-          currency_code: expense.currency_code,
+          total_amount: expense.amount,
           description: expense.description || 'Expense',
           category: expense.category || 'Expense',
           created_at: expense.created_at
@@ -242,7 +241,7 @@ export default function DashboardPage() {
           status: dbTransaction.status,
           issue_date: dbTransaction.transaction_date,
           total_amount: dbTransaction.amount,
-          currency_code: dbTransaction.currency_code,
+          currency_code: isInvoice ? dbTransaction.currency_code : undefined,
           client_name: isInvoice ? dbTransaction.client_name : undefined,
           description: isExpense ? dbTransaction.client_name : undefined,
           expense_date: isExpense ? dbTransaction.expense_date : undefined,
