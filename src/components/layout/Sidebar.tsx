@@ -32,12 +32,56 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
       width: '280px',
       backgroundColor: brandColors.white,
       borderRight: `1px solid ${brandColors.neutral[200]}`,
-      padding: '1.5rem 0.5rem 0.5rem 0.5rem',
+      padding: '1rem 0.5rem 0.5rem 0.5rem',
       zIndex: 40,
       overflowY: 'auto',
       display: 'flex',
       flexDirection: 'column'
     }}>
+      {/* Logo & App Name */}
+      <div 
+        onClick={() => navigate('/dashboard')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          padding: '0.75rem 1rem',
+          marginBottom: '1.5rem',
+          cursor: 'pointer',
+          borderRadius: '8px',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = brandColors.neutral[50]
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+        }}
+      >
+        <div style={{
+          width: '36px',
+          height: '36px',
+          backgroundColor: brandColors.primary[600],
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          color: brandColors.white
+        }}>
+          📄
+        </div>
+        <span style={{
+          fontSize: '18px',
+          fontWeight: '700',
+          color: brandColors.neutral[900],
+          letterSpacing: '-0.02em'
+        }}>
+          invoice-it
+        </span>
+      </div>
+
       {/* Main Content */}
       <div style={{ flex: 1 }}>
         {/* Navigation Items */}
@@ -127,7 +171,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
 
       {/* Profile Dropdown - Fixed at Bottom */}
       <div style={{
-        padding: '0.1rem 0.5rem 0.125rem 0.5rem',
+        padding: '0.5rem 0.5rem',
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         marginTop: 'auto'
       }}>

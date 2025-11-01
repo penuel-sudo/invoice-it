@@ -494,7 +494,7 @@ export default function ProfessionalInvoicePreviewPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '1.25rem' }}>
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
               {(templateSettings?.website || profileFallback?.website) && (templateSettings?.template_settings?.show_website !== false) && (
                 <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
                   {(templateSettings?.website || profileFallback?.website) as string}
@@ -514,7 +514,7 @@ export default function ProfessionalInvoicePreviewPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
               {avatarUrl && (templateSettings?.template_settings?.show_logo !== false) && (
-                <img src={avatarUrl} alt="Company Logo" style={{ maxHeight: '60px', maxWidth: '200px', objectFit: 'contain' }} />
+                <img src={avatarUrl} alt="Company Logo" style={{ maxHeight: '60px', maxWidth: '60px', borderRadius: '50%', objectFit: 'cover' }} />
               )}
               <StatusButton status={dbStatus} size="sm" />
             </div>

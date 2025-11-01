@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
-import { Button, Input, Label } from '../components/ui'
+import { Button, Input, Label } from '../components/ui' 
 
 export default function ResetPasswordPage() {
   const [formData, setFormData] = useState({
