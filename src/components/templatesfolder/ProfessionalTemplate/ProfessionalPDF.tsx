@@ -1,61 +1,25 @@
-import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import type { ProfessionalInvoiceFormData } from './ProfessionalTemplateSave'
 
-// Register fonts for PDF generation
-// Using Google Fonts CDN URLs
-// Font registration is done once when module loads
-const registerFonts = () => {
-  try {
-    // Register Roboto
-    Font.register({
-      family: 'Roboto',
-      fonts: [
-        {
-          src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxP.ttf',
-          fontWeight: 400
-        },
-        {
-          src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc4.ttf',
-          fontWeight: 700
-        }
-      ]
-    })
-    
-    // Note: Inter, Lora, and Poppins will fallback to built-in fonts
-    // @react-pdf doesn't support WOFF2, and Google Fonts CDN doesn't provide TTF directly
-    // We'll map these to similar built-in fonts in the getPDFFont function
-    
-    console.log('✅ All fonts registered successfully for PDF')
-  } catch (error: any) {
-    // Font already registered or registration failed - this is okay
-    // @react-pdf/renderer may throw if font is already registered
-    if (error?.message && !error.message.includes('already registered')) {
-      console.warn('⚠️ Font registration warning:', error.message)
-    }
-  }
-}
+// @react-pdf/renderer natively supports these fonts:
+// - Helvetica (regular, bold, oblique)
+// - Times-Roman (regular, bold, italic)
+// - Courier (regular, bold, oblique)
+// No font registration needed for built-in fonts
 
-// Register fonts on module load
-if (typeof window !== 'undefined') {
-  registerFonts()
-}
-
-// Font mapping function - maps custom font names to registered PDF fonts
+// Font mapping function - ensures only supported fonts are used
 const getPDFFont = (fontFamily?: string): string => {
   if (!fontFamily) return 'Helvetica'
   
-  const fontMap: Record<string, string> = {
-    'Inter': 'Helvetica',      // Inter → Helvetica (similar sans-serif)
-    'Roboto': 'Roboto',        // Roboto registered above
-    'Lora': 'Times-Roman',     // Lora → Times-Roman (similar serif)
-    'Poppins': 'Helvetica',    // Poppins → Helvetica (similar sans-serif)
+  // Only allow native PDF fonts
+  const supportedFonts: Record<string, string> = {
     'Helvetica': 'Helvetica',
     'Times-Roman': 'Times-Roman',
     'Courier': 'Courier'
   }
   
   // Return mapped font or fallback to Helvetica
-  return fontMap[fontFamily] || 'Helvetica'
+  return supportedFonts[fontFamily] || 'Helvetica'
 }
 
 // PDF-specific styles for Professional Template
@@ -325,13 +289,16 @@ interface ProfessionalPDFProps {
 export default function ProfessionalPDF({ invoiceData, user, templateSettings }: ProfessionalPDFProps) {
   const hasShipTo = invoiceData.shipToName || invoiceData.shipToAddress
   
-  // Get the mapped font for PDF
+  // Get the mapped font for PDF (with fallback migration for old font names)
   const pdfFont = getPDFFont(templateSettings?.font_family)
   
   // Apply customizations if available
   const pageStyle = templateSettings?.background_colors?.main_background 
     ? { ...styles.page, backgroundColor: templateSettings.background_colors.main_background, fontFamily: pdfFont }
     : { ...styles.page, fontFamily: pdfFont }
+  
+  // Log font being used for debugging
+  console.log('📝 PDF Font:', pdfFont, 'from:', templateSettings?.font_family)
     
   const containerStyle = templateSettings?.background_colors?.card_background
     ? { ...styles.container, backgroundColor: templateSettings.background_colors.card_background }

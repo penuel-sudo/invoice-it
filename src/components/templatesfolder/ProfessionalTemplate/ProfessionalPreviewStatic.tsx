@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { brandColors } from '../../../stylings'
 import { 
   Building,
@@ -70,17 +70,27 @@ const mockInvoiceData = {
 }
 
 export default function ProfessionalPreviewStatic() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const hasShipTo = mockInvoiceData.shipToName || mockInvoiceData.shipToAddress
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: brandColors.neutral[50],
+      backgroundColor: brandColors.primary[50],
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem 1rem',
+      padding: isMobile ? '1rem 0.5rem' : '2rem 1rem',
+      overflowX: isMobile ? 'auto' : 'visible',
       position: 'relative'
     }}>
       {/* Background Pattern */}
@@ -90,7 +100,7 @@ export default function ProfessionalPreviewStatic() {
         left: 0,
         right: 0,
         bottom: 0,
-        background: `linear-gradient(135deg, ${brandColors.primary[100]} 0%, ${brandColors.neutral[50]} 100%)`,
+        background: `linear-gradient(135deg, ${brandColors.primary[100]} 0%, ${brandColors.primary[50]} 100%)`,
         zIndex: 0
       }} />
 
@@ -99,69 +109,91 @@ export default function ProfessionalPreviewStatic() {
         position: 'relative',
         zIndex: 1,
         textAlign: 'center',
-        maxWidth: '900px',
-        width: '100%'
+        width: '100%',
+        margin: '0 auto',
+        padding: '0 1rem'
       }}>
         {/* Invoice Preview Card */}
         <div style={{
           backgroundColor: brandColors.white,
-          borderRadius: '12px',
-          padding: '3rem',
-          marginBottom: '2rem',
-          boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
-          position: 'relative'
+          borderRadius: isMobile ? '8px' : '12px',
+          padding: isMobile ? '0.75rem' : '1.5rem',
+          marginBottom: '1.5rem',
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
+          position: 'relative',
+          width: isMobile ? '800px' : '100%',
+          maxWidth: '800px',
+          margin: '0 auto'
         }}>
           
-          {/* Header Section */}
+          {/* Header Section - centered title, info left, logo+status right */}
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: '2rem',
-            paddingBottom: '1.5rem',
-            borderBottom: `2px solid ${brandColors.neutral[200]}`
+            marginBottom: '3rem',
+            paddingBottom: '2rem',
+            borderBottom: `2px solid ${brandColors.neutral[200]}`,
+            position: 'relative'
           }}>
-            {/* Left - Logo space / Company name */}
-            <div>
+            <div style={{ textAlign: 'center' }}>
               <h1 style={{
-                fontSize: '2.25rem',
-                fontWeight: '700',
-                color: brandColors.primary[600],
-                margin: '0 0 0.5rem 0'
+                fontSize: isMobile ? '1.5rem' : '1.75rem',
+                fontWeight: 800,
+                color: brandColors.primary[700],
+                margin: 0,
+                fontFamily: 'Helvetica, Arial, sans-serif'
               }}>
                 INVOICE
               </h1>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: isMobile ? '0.8rem' : '0.9rem', color: brandColors.neutral[600] }}>
+                Professional Business Solutions
+              </p>
             </div>
 
-            {/* Right - Status */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: brandColors.warning[100],
-              color: brandColors.warning[700],
-              borderRadius: '12px',
-              fontSize: '0.75rem',
-              fontWeight: '600'
-            }}>
-              Draft
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '1.25rem' }}>
+              <div>
+                <p style={{ fontSize: isMobile ? '0.75rem' : '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                  www.company.com
+                </p>
+                <p style={{ fontSize: isMobile ? '0.75rem' : '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                  Tax ID: 12-3456789
+                </p>
+                <p style={{ fontSize: isMobile ? '0.75rem' : '0.875rem', color: brandColors.neutral[600], margin: 0 }}>
+                  Reg: 123456
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 1rem',
+                  backgroundColor: brandColors.warning[100],
+                  color: brandColors.warning[700],
+                  borderRadius: '12px',
+                  fontSize: isMobile ? '0.7rem' : '0.75rem',
+                  fontWeight: '600'
+                }}>
+                  Draft
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Invoice Details Bar */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '1rem',
-            padding: '1rem',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            padding: isMobile ? '0.5rem' : '0.75rem',
             backgroundColor: brandColors.neutral[50],
             borderRadius: '8px',
-            marginBottom: '2rem'
+            marginBottom: '1.5rem',
+            position: 'relative'
           }}>
-            <div>
+          
+            <div style={{ minWidth: '120px', flex: '1' }}>
               <div style={{
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
                 fontWeight: '600',
                 color: brandColors.neutral[500],
                 marginBottom: '0.25rem',
@@ -171,7 +203,7 @@ export default function ProfessionalPreviewStatic() {
                 Invoice Number
               </div>
               <div style={{
-                fontSize: '1rem',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '600',
                 color: brandColors.neutral[900]
               }}>
@@ -179,9 +211,9 @@ export default function ProfessionalPreviewStatic() {
               </div>
             </div>
 
-            <div>
+            <div style={{ minWidth: '120px', flex: '1' }}>
               <div style={{
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
                 fontWeight: '600',
                 color: brandColors.neutral[500],
                 marginBottom: '0.25rem',
@@ -191,7 +223,7 @@ export default function ProfessionalPreviewStatic() {
                 Issue Date
               </div>
               <div style={{
-                fontSize: '1rem',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '600',
                 color: brandColors.neutral[900]
               }}>
@@ -203,9 +235,9 @@ export default function ProfessionalPreviewStatic() {
               </div>
             </div>
 
-            <div>
+            <div style={{ minWidth: '120px', flex: '1' }}>
               <div style={{
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
                 fontWeight: '600',
                 color: brandColors.neutral[500],
                 marginBottom: '0.25rem',
@@ -215,7 +247,7 @@ export default function ProfessionalPreviewStatic() {
                 Due Date
               </div>
               <div style={{
-                fontSize: '1rem',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '600',
                 color: brandColors.error[600]
               }}>
@@ -227,9 +259,9 @@ export default function ProfessionalPreviewStatic() {
               </div>
             </div>
 
-            <div>
+            <div style={{ minWidth: '120px', flex: '1' }}>
               <div style={{
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
                 fontWeight: '600',
                 color: brandColors.neutral[500],
                 marginBottom: '0.25rem',
@@ -239,7 +271,7 @@ export default function ProfessionalPreviewStatic() {
                 PO Number
               </div>
               <div style={{
-                fontSize: '1rem',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '600',
                 color: brandColors.neutral[900]
               }}>
@@ -247,9 +279,9 @@ export default function ProfessionalPreviewStatic() {
               </div>
             </div>
 
-            <div>
+            <div style={{ minWidth: '120px', flex: '1' }}>
               <div style={{
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
                 fontWeight: '600',
                 color: brandColors.neutral[500],
                 marginBottom: '0.25rem',
@@ -259,7 +291,7 @@ export default function ProfessionalPreviewStatic() {
                 Tax ID
               </div>
               <div style={{
-                fontSize: '1rem',
+                fontSize: isMobile ? '0.9rem' : '1rem',
                 fontWeight: '600',
                 color: brandColors.neutral[900]
               }}>
@@ -271,14 +303,16 @@ export default function ProfessionalPreviewStatic() {
           {/* Bill To & Ship To */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: hasShipTo ? '1fr 1fr' : '1fr',
-            gap: '1.5rem',
+            gridTemplateColumns: hasShipTo 
+              ? (isMobile ? '1fr' : '1fr 1fr')
+              : '1fr',
+            gap: isMobile ? '1rem' : '1.5rem',
             marginBottom: '2rem'
           }}>
             {/* Bill To */}
             <div>
               <h3 style={{
-                fontSize: '0.875rem',
+                fontSize: isMobile ? '0.8rem' : '0.875rem',
                 fontWeight: '700',
                 color: brandColors.neutral[700],
                 marginBottom: '1rem',
@@ -288,13 +322,13 @@ export default function ProfessionalPreviewStatic() {
                 Bill To
               </h3>
               <div style={{
-                padding: '1.25rem',
+                padding: isMobile ? '1rem' : '1.25rem',
                 backgroundColor: brandColors.neutral[50],
                 borderRadius: '8px',
                 border: `1px solid ${brandColors.neutral[200]}`
               }}>
                 <div style={{
-                  fontSize: '1.125rem',
+                  fontSize: isMobile ? '1rem' : '1.125rem',
                   fontWeight: '700',
                   color: brandColors.neutral[900],
                   marginBottom: '0.75rem'
@@ -302,7 +336,7 @@ export default function ProfessionalPreviewStatic() {
                   {mockInvoiceData.clientName}
                 </div>
                 <div style={{
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   color: brandColors.neutral[600],
                   marginBottom: '0.5rem',
                   display: 'flex',
@@ -313,7 +347,7 @@ export default function ProfessionalPreviewStatic() {
                   {mockInvoiceData.clientCompanyName}
                 </div>
                 <div style={{
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   color: brandColors.neutral[600],
                   marginBottom: '0.5rem',
                   display: 'flex',
@@ -324,7 +358,7 @@ export default function ProfessionalPreviewStatic() {
                   {mockInvoiceData.clientEmail}
                 </div>
                 <div style={{
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   color: brandColors.neutral[600],
                   marginBottom: '0.5rem',
                   display: 'flex',
@@ -335,7 +369,7 @@ export default function ProfessionalPreviewStatic() {
                   {mockInvoiceData.clientPhone}
                 </div>
                 <div style={{
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   color: brandColors.neutral[600],
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -349,64 +383,66 @@ export default function ProfessionalPreviewStatic() {
             </div>
 
             {/* Ship To */}
-            <div>
-              <h3 style={{
-                fontSize: '0.875rem',
-                fontWeight: '700',
-                color: brandColors.neutral[700],
-                marginBottom: '1rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>
-                Ship To
-              </h3>
-              <div style={{
-                padding: '1.25rem',
-                backgroundColor: brandColors.primary[50],
-                borderRadius: '8px',
-                border: `1px solid ${brandColors.primary[200]}`
-              }}>
-                <div style={{
-                  fontSize: '1.125rem',
+            {hasShipTo && (
+              <div>
+                <h3 style={{
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   fontWeight: '700',
-                  color: brandColors.neutral[900],
-                  marginBottom: '0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <Truck size={18} color={brandColors.primary[600]} />
-                  {mockInvoiceData.shipToName}
-                </div>
-                <div style={{
-                  fontSize: '0.875rem',
                   color: brandColors.neutral[700],
-                  marginBottom: '0.25rem'
+                  marginBottom: '1rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
                 }}>
-                  {mockInvoiceData.shipToAddress}
-                </div>
+                  Ship To
+                </h3>
                 <div style={{
-                  fontSize: '0.875rem',
-                  color: brandColors.neutral[700]
+                  padding: isMobile ? '1rem' : '1.25rem',
+                  backgroundColor: brandColors.primary[50],
+                  borderRadius: '8px',
+                  border: `1px solid ${brandColors.primary[200]}`
                 }}>
-                  {[mockInvoiceData.shipToCity, mockInvoiceData.shipToState, mockInvoiceData.shipToZip]
-                    .filter(Boolean)
-                    .join(', ')}
-                </div>
-                <div style={{
-                  fontSize: '0.875rem',
-                  color: brandColors.neutral[700]
-                }}>
-                  {mockInvoiceData.shipToCountry}
+                  <div style={{
+                    fontSize: isMobile ? '1rem' : '1.125rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[900],
+                    marginBottom: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <Truck size={18} color={brandColors.primary[600]} />
+                    {mockInvoiceData.shipToName}
+                  </div>
+                  <div style={{
+                    fontSize: isMobile ? '0.8rem' : '0.875rem',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.25rem'
+                  }}>
+                    {mockInvoiceData.shipToAddress}
+                  </div>
+                  <div style={{
+                    fontSize: isMobile ? '0.8rem' : '0.875rem',
+                    color: brandColors.neutral[700]
+                  }}>
+                    {[mockInvoiceData.shipToCity, mockInvoiceData.shipToState, mockInvoiceData.shipToZip]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </div>
+                  <div style={{
+                    fontSize: isMobile ? '0.8rem' : '0.875rem',
+                    color: brandColors.neutral[700]
+                  }}>
+                    {mockInvoiceData.shipToCountry}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Line Items Table */}
-          <div style={{ marginBottom: '2rem' }}>
+          <div style={{ marginBottom: '2rem', overflowX: 'auto' }}>
             <h3 style={{
-              fontSize: '0.875rem',
+              fontSize: isMobile ? '0.8rem' : '0.875rem',
               fontWeight: '700',
               color: brandColors.neutral[700],
               marginBottom: '1rem',
@@ -415,162 +451,161 @@ export default function ProfessionalPreviewStatic() {
             }}>
               Items
             </h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse'
-              }}>
-                <thead>
-                  <tr style={{
-                    backgroundColor: brandColors.neutral[100],
-                    borderBottom: `2px solid ${brandColors.neutral[300]}`
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse'
+            }}>
+              <thead>
+                <tr style={{
+                  backgroundColor: brandColors.neutral[100],
+                  borderBottom: `2px solid ${brandColors.neutral[300]}`
+                }}>
+                  <th style={{
+                    textAlign: 'left',
+                    padding: isMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem',
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
                   }}>
-                    <th style={{
-                      textAlign: 'left',
-                      padding: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
-                      color: brandColors.neutral[700],
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
+                    Description
+                  </th>
+                  <th style={{
+                    textAlign: 'center',
+                    padding: isMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem',
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Qty
+                  </th>
+                  <th style={{
+                    textAlign: 'right',
+                    padding: isMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem',
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Unit Price
+                  </th>
+                  <th style={{
+                    textAlign: 'center',
+                    padding: isMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem',
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Disc %
+                  </th>
+                  <th style={{
+                    textAlign: 'center',
+                    padding: isMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem',
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Tax %
+                  </th>
+                  <th style={{
+                    textAlign: 'right',
+                    padding: isMobile ? '0.5rem 0.25rem' : '0.75rem 0.5rem',
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    fontWeight: '700',
+                    color: brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockInvoiceData.items.map((item, index) => (
+                  <tr key={item.id} style={{
+                    borderBottom: `1px solid ${brandColors.neutral[200]}`
+                  }}>
+                    <td style={{
+                      padding: isMobile ? '0.75rem 0.25rem' : '0.75rem 0.5rem',
+                      fontSize: isMobile ? '0.8rem' : '0.875rem',
+                      color: brandColors.neutral[900],
+                      textAlign: 'left'
                     }}>
-                      Description
-                    </th>
-                    <th style={{
-                      textAlign: 'center',
-                      padding: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
+                      {item.description}
+                    </td>
+                    <td style={{
+                      padding: isMobile ? '0.75rem 0.25rem' : '0.75rem 0.5rem',
+                      fontSize: isMobile ? '0.8rem' : '0.875rem',
                       color: brandColors.neutral[700],
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
+                      textAlign: 'center'
                     }}>
-                      Qty
-                    </th>
-                    <th style={{
-                      textAlign: 'right',
-                      padding: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
+                      {item.quantity.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                    </td>
+                    <td style={{
+                      padding: isMobile ? '0.75rem 0.25rem' : '0.75rem 0.5rem',
+                      fontSize: isMobile ? '0.8rem' : '0.875rem',
                       color: brandColors.neutral[700],
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
+                      textAlign: 'right'
                     }}>
-                      Unit Price
-                    </th>
-                    <th style={{
-                      textAlign: 'center',
-                      padding: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
+                      {mockInvoiceData.currencySymbol}{item.unitPrice.toFixed(2)}
+                    </td>
+                    <td style={{
+                      padding: isMobile ? '0.75rem 0.25rem' : '0.75rem 0.5rem',
+                      fontSize: isMobile ? '0.8rem' : '0.875rem',
+                      color: item.discount > 0 ? brandColors.error[600] : brandColors.neutral[400],
+                      textAlign: 'center'
+                    }}>
+                      {item.discount > 0 ? `${item.discount}%` : '-'}
+                    </td>
+                    <td style={{
+                      padding: isMobile ? '0.75rem 0.25rem' : '0.75rem 0.5rem',
+                      fontSize: isMobile ? '0.8rem' : '0.875rem',
                       color: brandColors.neutral[700],
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
+                      textAlign: 'center'
                     }}>
-                      Disc %
-                    </th>
-                    <th style={{
-                      textAlign: 'center',
-                      padding: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
-                      color: brandColors.neutral[700],
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
+                      {item.taxRate > 0 ? `${item.taxRate}%` : '-'}
+                    </td>
+                    <td style={{
+                      padding: isMobile ? '0.75rem 0.25rem' : '0.75rem 0.5rem',
+                      fontSize: isMobile ? '0.8rem' : '0.875rem',
+                      fontWeight: '600',
+                      color: brandColors.neutral[900],
+                      textAlign: 'right'
                     }}>
-                      Tax %
-                    </th>
-                    <th style={{
-                      textAlign: 'right',
-                      padding: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
-                      color: brandColors.neutral[700],
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Total
-                    </th>
+                      {mockInvoiceData.currencySymbol}{item.lineTotal.toFixed(2)}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {mockInvoiceData.items.map((item, index) => (
-                    <tr key={item.id} style={{
-                      borderBottom: `1px solid ${brandColors.neutral[200]}`
-                    }}>
-                      <td style={{
-                        padding: '1rem 0.75rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[900]
-                      }}>
-                        {item.description}
-                      </td>
-                      <td style={{
-                        padding: '1rem 0.75rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[700],
-                        textAlign: 'center'
-                      }}>
-                        {item.quantity.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                      </td>
-                      <td style={{
-                        padding: '1rem 0.75rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[700],
-                        textAlign: 'right'
-                      }}>
-                        {mockInvoiceData.currencySymbol}{item.unitPrice.toFixed(2)}
-                      </td>
-                      <td style={{
-                        padding: '1rem 0.75rem',
-                        fontSize: '0.875rem',
-                        color: item.discount > 0 ? brandColors.error[600] : brandColors.neutral[400],
-                        textAlign: 'center'
-                      }}>
-                        {item.discount > 0 ? `${item.discount}%` : '-'}
-                      </td>
-                      <td style={{
-                        padding: '1rem 0.75rem',
-                        fontSize: '0.875rem',
-                        color: brandColors.neutral[700],
-                        textAlign: 'center'
-                      }}>
-                        {item.taxRate > 0 ? `${item.taxRate}%` : '-'}
-                      </td>
-                      <td style={{
-                        padding: '1rem 0.75rem',
-                        fontSize: '0.875rem',
-                        fontWeight: '600',
-                        color: brandColors.neutral[900],
-                        textAlign: 'right'
-                      }}>
-                        {mockInvoiceData.currencySymbol}{item.lineTotal.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           {/* Totals Section */}
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
-            marginBottom: '2rem'
+            marginBottom: '3rem'
           }}>
             <div style={{
-              minWidth: '350px',
+              minWidth: isMobile ? '280px' : '350px',
               backgroundColor: brandColors.neutral[50],
               borderRadius: '8px',
-              padding: '1.5rem',
+              padding: isMobile ? '1rem' : '1.5rem',
               border: `1px solid ${brandColors.neutral[200]}`
             }}>
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginBottom: '0.75rem',
-                fontSize: '0.875rem',
+                fontSize: isMobile ? '0.8rem' : '0.875rem',
                 color: brandColors.neutral[700]
               }}>
                 <span>Subtotal:</span>
@@ -581,7 +616,7 @@ export default function ProfessionalPreviewStatic() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginBottom: '0.75rem',
-                fontSize: '0.875rem',
+                fontSize: isMobile ? '0.8rem' : '0.875rem',
                 color: brandColors.error[600]
               }}>
                 <span>Discount:</span>
@@ -592,7 +627,7 @@ export default function ProfessionalPreviewStatic() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginBottom: '0.75rem',
-                fontSize: '0.875rem',
+                fontSize: isMobile ? '0.8rem' : '0.875rem',
                 color: brandColors.neutral[700]
               }}>
                 <span>Tax:</span>
@@ -605,7 +640,7 @@ export default function ProfessionalPreviewStatic() {
                 marginTop: '1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
-                fontSize: '1.25rem',
+                fontSize: isMobile ? '1.125rem' : '1.25rem',
                 fontWeight: '700',
                 color: brandColors.neutral[900]
               }}>
@@ -617,7 +652,7 @@ export default function ProfessionalPreviewStatic() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginTop: '0.75rem',
-                fontSize: '0.875rem',
+                fontSize: isMobile ? '0.8rem' : '0.875rem',
                 color: brandColors.success[600]
               }}>
                 <span>Amount Paid:</span>
@@ -630,7 +665,7 @@ export default function ProfessionalPreviewStatic() {
                 marginTop: '1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
-                fontSize: '1.5rem',
+                fontSize: isMobile ? '1.25rem' : '1.5rem',
                 fontWeight: '700',
                 color: brandColors.primary[600]
               }}>
@@ -644,12 +679,12 @@ export default function ProfessionalPreviewStatic() {
           <div style={{
             backgroundColor: brandColors.neutral[50],
             borderRadius: '8px',
-            padding: '1.5rem',
+            padding: isMobile ? '1rem' : '1.5rem',
             marginBottom: '2rem',
             border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <h3 style={{
-              fontSize: '0.875rem',
+              fontSize: isMobile ? '0.8rem' : '0.875rem',
               fontWeight: '700',
               color: brandColors.neutral[700],
               marginBottom: '1rem',
@@ -663,7 +698,7 @@ export default function ProfessionalPreviewStatic() {
               marginBottom: '1rem'
             }}>
               <p style={{
-                fontSize: '0.875rem',
+                fontSize: isMobile ? '0.8rem' : '0.875rem',
                 color: brandColors.neutral[600],
                 marginBottom: '0.5rem',
                 lineHeight: '1.6'
@@ -671,7 +706,7 @@ export default function ProfessionalPreviewStatic() {
                 <strong>Payment Terms:</strong> Net 30 days. Late payments subject to 1.5% monthly interest charge.
               </p>
               <p style={{
-                fontSize: '0.875rem',
+                fontSize: isMobile ? '0.8rem' : '0.875rem',
                 color: brandColors.neutral[600],
                 lineHeight: '1.6'
               }}>
@@ -682,14 +717,18 @@ export default function ProfessionalPreviewStatic() {
             {/* Payment Methods Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: isMobile 
+                ? '1fr' 
+                : isMobile && window.innerWidth < 1024
+                  ? 'repeat(auto-fit, minmax(180px, 1fr))' 
+                  : 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '1rem',
               marginTop: '1rem'
             }}>
               {/* Bank Transfer */}
               <div style={{
                 backgroundColor: brandColors.white,
-                padding: '1rem',
+                padding: isMobile ? '0.75rem' : '1rem',
                 borderRadius: '6px',
                 border: `1px solid ${brandColors.neutral[200]}`,
                 minHeight: '80px',
@@ -700,13 +739,13 @@ export default function ProfessionalPreviewStatic() {
                 <div style={{
                   fontWeight: '600',
                   color: brandColors.neutral[900],
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   marginBottom: '0.5rem'
                 }}>
                   Bank Transfer
                 </div>
                 <div style={{
-                  fontSize: '0.75rem',
+                  fontSize: isMobile ? '0.7rem' : '0.75rem',
                   color: brandColors.neutral[600],
                   lineHeight: '1.4'
                 }}>
@@ -719,7 +758,7 @@ export default function ProfessionalPreviewStatic() {
               {/* Credit Card */}
               <div style={{
                 backgroundColor: brandColors.white,
-                padding: '1rem',
+                padding: isMobile ? '0.75rem' : '1rem',
                 borderRadius: '6px',
                 border: `1px solid ${brandColors.neutral[200]}`,
                 minHeight: '80px',
@@ -730,13 +769,13 @@ export default function ProfessionalPreviewStatic() {
                 <div style={{
                   fontWeight: '600',
                   color: brandColors.neutral[900],
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   marginBottom: '0.5rem'
                 }}>
                   Credit Card
                 </div>
                 <div style={{
-                  fontSize: '0.75rem',
+                  fontSize: isMobile ? '0.7rem' : '0.75rem',
                   color: brandColors.neutral[600],
                   lineHeight: '1.4'
                 }}>
@@ -749,7 +788,7 @@ export default function ProfessionalPreviewStatic() {
               {/* PayPal */}
               <div style={{
                 backgroundColor: brandColors.white,
-                padding: '1rem',
+                padding: isMobile ? '0.75rem' : '1rem',
                 borderRadius: '6px',
                 border: `1px solid ${brandColors.neutral[200]}`,
                 minHeight: '80px',
@@ -760,13 +799,13 @@ export default function ProfessionalPreviewStatic() {
                 <div style={{
                   fontWeight: '600',
                   color: brandColors.neutral[900],
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   marginBottom: '0.5rem'
                 }}>
                   PayPal
                 </div>
                 <div style={{
-                  fontSize: '0.75rem',
+                  fontSize: isMobile ? '0.7rem' : '0.75rem',
                   color: brandColors.neutral[600],
                   lineHeight: '1.4'
                 }}>
@@ -777,7 +816,7 @@ export default function ProfessionalPreviewStatic() {
               {/* Check */}
               <div style={{
                 backgroundColor: brandColors.white,
-                padding: '1rem',
+                padding: isMobile ? '0.75rem' : '1rem',
                 borderRadius: '6px',
                 border: `1px solid ${brandColors.neutral[200]}`,
                 minHeight: '80px',
@@ -788,13 +827,13 @@ export default function ProfessionalPreviewStatic() {
                 <div style={{
                   fontWeight: '600',
                   color: brandColors.neutral[900],
-                  fontSize: '0.875rem',
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
                   marginBottom: '0.5rem'
                 }}>
                   Check
                 </div>
                 <div style={{
-                  fontSize: '0.75rem',
+                  fontSize: isMobile ? '0.7rem' : '0.75rem',
                   color: brandColors.neutral[600],
                   lineHeight: '1.4'
                 }}>
@@ -805,61 +844,28 @@ export default function ProfessionalPreviewStatic() {
             </div>
           </div>
 
-          {/* Notes & Terms */}
+          {/* Notes */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '1.5rem',
+            textAlign: 'center',
             marginBottom: '2rem'
           }}>
-            <div>
-              <h3 style={{
-                fontSize: '0.875rem',
-                fontWeight: '700',
-                color: brandColors.neutral[700],
-                marginBottom: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>
-                Notes
-              </h3>
-              <div style={{
-                padding: '1rem',
-                backgroundColor: brandColors.neutral[50],
-                borderRadius: '8px',
-                border: `1px solid ${brandColors.neutral[200]}`,
-                fontSize: '0.875rem',
-                color: brandColors.neutral[700],
-                whiteSpace: 'pre-line',
-                lineHeight: '1.6'
-              }}>
-                {mockInvoiceData.notes}
-              </div>
-            </div>
-
-            <div>
-              <h3 style={{
-                fontSize: '0.875rem',
-                fontWeight: '700',
-                color: brandColors.neutral[700],
-                marginBottom: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>
-                Terms & Conditions
-              </h3>
-              <div style={{
-                padding: '1rem',
-                backgroundColor: brandColors.neutral[50],
-                borderRadius: '8px',
-                border: `1px solid ${brandColors.neutral[200]}`,
-                fontSize: '0.875rem',
-                color: brandColors.neutral[700],
-                whiteSpace: 'pre-line',
-                lineHeight: '1.6'
-              }}>
-                {mockInvoiceData.termsAndConditions}
-              </div>
+            <h3 style={{
+              fontSize: isMobile ? '0.8rem' : '0.875rem',
+              fontWeight: '700',
+              color: brandColors.neutral[700],
+              marginBottom: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Notes
+            </h3>
+            <div style={{
+              fontSize: isMobile ? '0.8rem' : '0.875rem',
+              color: brandColors.neutral[700],
+              whiteSpace: 'pre-line',
+              lineHeight: '1.6'
+            }}>
+              {mockInvoiceData.notes}
             </div>
           </div>
 
@@ -868,14 +874,12 @@ export default function ProfessionalPreviewStatic() {
             borderTop: `1px solid ${brandColors.neutral[200]}`,
             paddingTop: '1.5rem',
             textAlign: 'center',
-            fontSize: '0.75rem',
+            fontSize: isMobile ? '0.7rem' : '0.75rem',
             color: brandColors.neutral[400]
           }}>
             Thank you for your business! • Generated by InvoiceIt
           </div>
         </div>
-
-        {/* NO ACTION BUTTONS - This is the key difference for gallery! */}
       </div>
     </div>
   )

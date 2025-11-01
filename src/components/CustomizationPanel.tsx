@@ -50,10 +50,9 @@ interface CustomizationPanelProps {
 }
 
 const FONTS = [
-  { value: 'Inter', label: 'Inter', preview: 'Inter' },
-  { value: 'Roboto', label: 'Roboto', preview: 'Roboto' },
-  { value: 'Lora', label: 'Lora', preview: 'Lora' },
-  { value: 'Poppins', label: 'Poppins', preview: 'Poppins' }
+  { value: 'Helvetica', label: 'Helvetica', preview: 'Helvetica' },
+  { value: 'Times-Roman', label: 'Times Roman', preview: 'Times-Roman' },
+  { value: 'Courier', label: 'Courier', preview: 'Courier' }
 ]
 
 export default function CustomizationPanel({ 
@@ -76,7 +75,7 @@ export default function CustomizationPanel({
     logo_url: '',
     primary_color: brandColors.primary[600],
     accent_color: brandColors.primary[500],
-    font_family: 'Inter',
+    font_family: 'Helvetica',
     background_colors: {
       main_background: brandColors.primary[50],
       card_background: brandColors.white,

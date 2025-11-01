@@ -482,7 +482,7 @@ export default function ProfessionalInvoicePreviewPage() {
               fontWeight: 800,
               color: templateSettings?.primary_color || brandColors.primary[700],
               margin: 0,
-              fontFamily: templateSettings?.font_family || 'Inter, sans-serif'
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
             }}>
               {(templateSettings?.company_name || profileFallback?.company_name || 'INVOICE').toString()}
             </h1>
