@@ -4,6 +4,7 @@ import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import StatusButton from '../components/StatusButton'
+import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
 import { 
   ArrowLeft, 
   Edit, 
@@ -60,6 +61,7 @@ export default function ExpensePreviewPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { setLoading: setGlobalLoading } = useLoading()
+  const { currencySymbol } = useGlobalCurrency()
   const [expense, setExpense] = useState<Expense | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
@@ -126,7 +128,7 @@ export default function ExpensePreviewPage() {
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [user, navigate, location])
+  }, [user, navigate, location, setGlobalLoading])
 
   const loadExpense = async (expenseId: string) => {
     if (!user) return
@@ -192,7 +194,7 @@ export default function ExpensePreviewPage() {
   }
 
   const formatAmount = (amount: number) => {
-    return `$${amount.toFixed(2)}`
+    return `${currencySymbol}${amount.toFixed(2)}`
   }
 
   const formatDate = (dateString: string) => {
@@ -305,40 +307,7 @@ export default function ExpensePreviewPage() {
           paddingBottom: isMobile ? '0.875rem' : '1rem',
           borderBottom: `1px solid ${brandColors.neutral[200]}`
         }}>
-          <button
-            onClick={() => navigate('/invoices')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: isMobile ? '36px' : '40px',
-              height: isMobile ? '36px' : '40px',
-              backgroundColor: isMobile ? brandColors.neutral[900] : 'transparent',
-              border: isMobile ? 'none' : `1px solid ${brandColors.neutral[300]}`,
-              borderRadius: isMobile ? '8px' : '10px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'
-            }}
-            onMouseEnter={(e) => {
-              if (!isMobile) {
-                e.currentTarget.style.backgroundColor = brandColors.neutral[50]
-                e.currentTarget.style.borderColor = brandColors.neutral[400]
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isMobile) {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.borderColor = brandColors.neutral[300]
-              }
-            }}
-          >
-            <ArrowLeft 
-              size={isMobile ? 18 : 20} 
-              color={isMobile ? brandColors.white : brandColors.neutral[600]} 
-              strokeWidth={isMobile ? 2.5 : 2}
-            />
-          </button>
+          <div></div>
 
           <h1 style={{
             fontSize: isMobile ? '1.125rem' : '1.5rem',
@@ -367,7 +336,6 @@ export default function ExpensePreviewPage() {
             backgroundColor: brandColors.white,
             borderRadius: isMobile ? '12px' : '16px',
             border: `1px solid ${brandColors.neutral[200]}`,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             padding: isMobile ? '1.5rem' : '2rem',
             textAlign: 'center'
           }}>
@@ -441,7 +409,6 @@ export default function ExpensePreviewPage() {
               backgroundColor: brandColors.white,
               borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{
@@ -507,7 +474,6 @@ export default function ExpensePreviewPage() {
               backgroundColor: brandColors.white,
               borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{
@@ -594,7 +560,6 @@ export default function ExpensePreviewPage() {
               backgroundColor: brandColors.white,
               borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{
@@ -627,7 +592,6 @@ export default function ExpensePreviewPage() {
               backgroundColor: brandColors.white,
               borderRadius: isMobile ? '12px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
               padding: isMobile ? '1.25rem' : '1.5rem'
             }}>
               <h3 style={{

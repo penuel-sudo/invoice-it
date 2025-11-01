@@ -14,6 +14,7 @@ interface DownloadButtonProps {
   user: any
   template?: string
   templateSettings?: any
+  paymentMethods?: any[]
   onDownload?: () => void
   style?: React.CSSProperties
   size?: 'sm' | 'md' | 'lg'
@@ -25,6 +26,7 @@ export default function DownloadButton({
   user,
   template = 'default',
   templateSettings,
+  paymentMethods = [],
   onDownload,
   style,
   size = 'md',

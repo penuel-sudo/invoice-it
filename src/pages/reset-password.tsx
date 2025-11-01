@@ -84,37 +84,6 @@ export default function ResetPasswordPage() {
       padding: window.innerWidth < 768 ? '1.5rem' : '2rem',
       fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
-      {/* Back Button */}
-      <button
-            onClick={() => navigate('/auth/login')}
-        style={{
-          position: 'absolute',
-          top: '1.5rem',
-          left: '1.5rem',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: brandColors.neutral[600],
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontSize: '0.875rem',
-          fontWeight: '500',
-          fontFamily: 'Poppins, sans-serif',
-          padding: '0.5rem',
-          borderRadius: '8px',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = brandColors.neutral[100]
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-        }}
-      >
-        <ArrowLeft size={16} />
-        Back to Login
-      </button>
 
       {/* Main Content */}
       <div style={{

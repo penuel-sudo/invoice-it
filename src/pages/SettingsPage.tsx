@@ -485,22 +485,7 @@ export default function SettingsPage() {
             maxWidth: '100%',
             margin: '0 auto'
           }}>
-            {!isMobile && (
-              <button
-                onClick={() => navigate('/dashboard')}
-                style={{
-                  padding: '0.5rem',
-                  backgroundColor: brandColors.neutral[100],
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <ArrowLeft size={20} color={brandColors.neutral[600]} />
-              </button>
-            )}
+            {!isMobile && <div></div>}
             <h1 style={{
               fontSize: isMobile ? '1.25rem' : '1.5rem',
               fontWeight: '600',

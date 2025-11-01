@@ -10,6 +10,7 @@ import StatusButton from '../components/StatusButton'
 // StatusLogic removed - StatusButton handles validation internally
 import { supabase } from '../lib/supabaseClient'
 import { format } from 'date-fns'
+import { getCurrencySymbol } from '../lib/currencyUtils'
 import { 
   FileText, 
   TrendingUp, 
@@ -102,12 +103,13 @@ export default function DashboardPage() {
   }
 
   // Helper functions from TransactionPage
-  const formatAmount = (amount: number, type: string) => {
-    if (amount === null || amount === undefined) return `${currencySymbol}0.00`
-    const formatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
-    }).format(amount)
+  const formatAmount = (amount: number, type: string, currencyCode?: string) => {
+    if (amount === null || amount === undefined) {
+      const symbol = currencyCode ? getCurrencySymbol(currencyCode) : currencySymbol
+      return `${symbol}0.00`
+    }
+    const symbol = currencyCode ? getCurrencySymbol(currencyCode) : currencySymbol
+    const formatted = `${symbol}${amount.toFixed(2)}`
     return type === 'invoice' ? `+${formatted}` : `-${formatted}`
   }
 
@@ -182,7 +184,7 @@ export default function DashboardPage() {
         
         // Fallback: Query tables directly
         const [invoicesData, expensesData] = await Promise.all([
-          supabase.from('invoices').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+          supabase.from('invoices').select('*, clients!invoices_client_id_fkey(name)').eq('user_id', user.id).order('created_at', { ascending: false }),
           supabase.from('expenses').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
         ])
         
@@ -200,7 +202,8 @@ export default function DashboardPage() {
           status: invoice.status,
           issue_date: invoice.issue_date,
           total_amount: invoice.total_amount,
-          client_name: 'Client', // You might want to join with clients table
+          currency_code: invoice.currency_code,
+          client_name: invoice.clients?.name || 'Client',
           created_at: invoice.created_at
         }))
         
@@ -209,7 +212,9 @@ export default function DashboardPage() {
           type: 'expense' as const,
           status: expense.status,
           issue_date: expense.expense_date,
+          expense_date: expense.expense_date,
           total_amount: expense.total_amount,
+          currency_code: expense.currency_code,
           description: expense.description || 'Expense',
           category: expense.category || 'Expense',
           created_at: expense.created_at
@@ -237,8 +242,10 @@ export default function DashboardPage() {
           status: dbTransaction.status,
           issue_date: dbTransaction.transaction_date,
           total_amount: dbTransaction.amount,
+          currency_code: dbTransaction.currency_code,
           client_name: isInvoice ? dbTransaction.client_name : undefined,
           description: isExpense ? dbTransaction.client_name : undefined,
+          expense_date: isExpense ? dbTransaction.expense_date : undefined,
           created_at: dbTransaction.created_at
         }
       })
@@ -1019,7 +1026,7 @@ export default function DashboardPage() {
                       {transaction.type === 'invoice' 
                         ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
                         : (transaction.category || 'Expense')
-                      } • {transaction.issue_date ? formatDate(transaction.issue_date) : 'No Date'}
+                      } • {(transaction.type === 'invoice' ? transaction.issue_date : transaction.expense_date) ? formatDate(transaction.type === 'invoice' ? transaction.issue_date! : transaction.expense_date!) : 'No Date'}
                     </p>
                   </div>
                 </div>
@@ -1032,7 +1039,7 @@ export default function DashboardPage() {
                       color: transaction.type === 'invoice' ? brandColors.success[600] : brandColors.error[600],
                       margin: 0
                     }}>
-                      {formatAmount(transaction.total_amount, transaction.type)}
+                      {formatAmount(transaction.total_amount, transaction.type, transaction.currency_code)}
                     </p>
                     <StatusButton 
                       status={transaction.status} 

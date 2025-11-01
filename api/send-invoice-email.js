@@ -150,7 +150,7 @@ ${displayBusinessName}
               text-align: center;
             }
             .btn-primary { background: #16a34a; color: #ffffff !important; }
-            .btn-secondary { background: transparent; color: #16a34a !important; border: 2px solid #16a34a; }
+            .btn-secondary { background: transparent; color: #16a34a !important; border: 2px solidrgb(136, 243, 175); }
             .footer { 
               text-align: center; 
               color: #6b7280; 

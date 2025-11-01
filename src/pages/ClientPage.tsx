@@ -238,27 +238,7 @@ export default function ClientPage() {
         top: 0,
         zIndex: 10
       }}>
-        <button
-          onClick={() => navigate('/dashboard')}
-          style={{
-            padding: isMobile ? '0.625rem' : '0.5rem',
-            backgroundColor: isMobile ? brandColors.neutral[900] : brandColors.neutral[100],
-            border: 'none',
-            borderRadius: isMobile ? '10px' : '8px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            color: isMobile ? 'white' : brandColors.neutral[600],
-            fontSize: '0.875rem',
-            fontWeight: isMobile ? '600' : '500',
-            boxShadow: isMobile ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <ArrowLeft size={isMobile ? 18 : 16} strokeWidth={isMobile ? 2.5 : 2} />
-          {isMobile ? '' : 'Back'}
-        </button>
+        <div></div>
         
         <h1 style={{
           fontSize: isMobile ? '1.125rem' : '1.25rem',

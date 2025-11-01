@@ -101,35 +101,6 @@ export default function NotFoundPage() {
             {user ? 'Go to Dashboard' : 'Go to Home'}
           </button>
 
-          <button
-            onClick={() => window.history.back()}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'transparent',
-              color: brandColors.neutral[600],
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.75rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              fontFamily: 'Poppins, sans-serif'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = brandColors.neutral[100]
-              e.currentTarget.style.color = brandColors.neutral[700]
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = brandColors.neutral[600]
-            }}
-          >
-            <ArrowLeft size={14} />
-            Go Back
-          </button>
         </div>
       </div>
     </div>

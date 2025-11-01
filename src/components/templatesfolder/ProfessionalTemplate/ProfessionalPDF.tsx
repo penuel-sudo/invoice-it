@@ -335,9 +335,10 @@ interface ProfessionalPDFProps {
   invoiceData: ProfessionalInvoiceFormData
   user: any
   templateSettings?: any
+  paymentMethods?: any[]
 }
 
-export default function ProfessionalPDF({ invoiceData, user, templateSettings }: ProfessionalPDFProps) {
+export default function ProfessionalPDF({ invoiceData, user, templateSettings, paymentMethods = [] }: ProfessionalPDFProps) {
   const hasShipTo = invoiceData.shipToName || invoiceData.shipToAddress
   
   // Get the mapped font for PDF (with fallback migration for old font names)
@@ -362,9 +363,6 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
   const companyTaxId = templateSettings?.tax_id || ''
   const companyRegistration = templateSettings?.registration_number || ''
   const logoUrl = templateSettings?.logo_url || user?.user_metadata?.avatar_url || ''
-  
-  // Get payment methods from user profile
-  const paymentMethods = user?.payment_methods || []
   
   return (
     <Document>

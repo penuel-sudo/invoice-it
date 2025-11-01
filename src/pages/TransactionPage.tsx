@@ -6,6 +6,7 @@ import { Layout } from '../components/layout'
 import { supabase } from '../lib/supabaseClient'
 import StatusButton from '../components/StatusButton'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
+import { getCurrencySymbol } from '../lib/currencyUtils'
 import { TransactionService, type TransactionData } from '../services/transactionService'
 import { 
   ArrowLeft, 
@@ -349,9 +350,10 @@ export default function TransactionPage() {
     setShowBulkActions(false)
   }
 
-  const formatAmount = (amount: number | undefined, type: string) => {
-    if (!amount || isNaN(amount)) return type === 'invoice' ? `+${currencySymbol}0.00` : `-${currencySymbol}0.00`
-    const formatted = `${currencySymbol}${amount.toFixed(2)}`
+  const formatAmount = (amount: number | undefined, type: string, currencyCode?: string) => {
+    const symbol = currencyCode ? getCurrencySymbol(currencyCode) : currencySymbol
+    if (!amount || isNaN(amount)) return type === 'invoice' ? `+${symbol}0.00` : `-${symbol}0.00`
+    const formatted = `${symbol}${amount.toFixed(2)}`
     return type === 'invoice' ? `+${formatted}` : `-${formatted}`
   }
 
@@ -393,27 +395,7 @@ export default function TransactionPage() {
           top: 0,
           zIndex: 10
         }}>
-          {!isMobile && (
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                padding: '0.5rem',
-                backgroundColor: brandColors.neutral[100],
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: brandColors.neutral[600],
-                fontSize: '0.875rem',
-                fontWeight: '500'
-              }}
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-          )}
+          {!isMobile && <div></div>}
           
           <h1 style={{
             fontSize: window.innerWidth < 768 ? '1.125rem' : '1.25rem',
@@ -838,7 +820,7 @@ export default function TransactionPage() {
                         {transaction.type === 'invoice' 
                           ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
                           : (transaction.category || 'Expense')
-                        } • {transaction.issue_date ? formatDate(transaction.issue_date) : 'No Date'}
+                        } • {(transaction.type === 'invoice' ? transaction.issue_date : transaction.expense_date) ? formatDate(transaction.type === 'invoice' ? transaction.issue_date : transaction.expense_date!) : 'No Date'}
                         {/* Template Badge */}
                         {transaction.type === 'invoice' && transaction.template && (
                           <span style={{
@@ -877,7 +859,7 @@ export default function TransactionPage() {
                         margin: 0,
                         whiteSpace: 'nowrap'
                       }}>
-                        {formatAmount(transaction.total_amount, transaction.type)}
+                        {formatAmount(transaction.total_amount, transaction.type, transaction.currency_code)}
                       </p>
                       <StatusButton 
                         status={transaction.status} 

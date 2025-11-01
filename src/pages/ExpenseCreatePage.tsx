@@ -337,21 +337,7 @@ export default function ExpenseCreatePage() {
           top: 0,
           zIndex: 10
         }}>
-          <button
-            onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <ArrowLeft size={20} color={brandColors.neutral[600]} />
-          </button>
+          <div></div>
           
           <h1 style={{
             fontSize: '1.125rem',
@@ -373,7 +359,6 @@ export default function ExpenseCreatePage() {
             borderRadius: isMobile ? '12px' : '16px',
             padding: isMobile ? '1.25rem' : '1.5rem',
             marginBottom: isMobile ? '1rem' : '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <div style={{
@@ -589,7 +574,6 @@ export default function ExpenseCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <div style={{
@@ -710,7 +694,6 @@ export default function ExpenseCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <div style={{
@@ -852,7 +835,6 @@ export default function ExpenseCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <h2 style={{
@@ -898,7 +880,6 @@ export default function ExpenseCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`
           }}>
             <div style={{
@@ -1039,7 +1020,6 @@ export default function ExpenseCreatePage() {
             backgroundColor: brandColors.white,
             padding: '0.75rem',
             borderRadius: '16px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             border: `1px solid ${brandColors.neutral[100]}`,
             maxWidth: '100%',
             overflowX: 'auto'
