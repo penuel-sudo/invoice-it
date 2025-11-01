@@ -58,20 +58,15 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
           e.currentTarget.style.backgroundColor = 'transparent'
         }}
       >
-        <div style={{
-          width: '36px',
-          height: '36px',
-          backgroundColor: brandColors.primary[600],
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '20px',
-          fontWeight: 'bold',
-          color: brandColors.white
-        }}>
-          📄
-        </div>
+        <img 
+          src="/logo.svg" 
+          alt="invoice-it logo"
+          style={{
+            width: '36px',
+            height: '36px',
+            objectFit: 'contain'
+          }}
+        />
         <span style={{
           fontSize: '18px',
           fontWeight: '700',
@@ -171,7 +166,7 @@ export default function Sidebar({ onSettingsOpen }: SidebarProps) {
 
       {/* Profile Dropdown - Fixed at Bottom */}
       <div style={{
-        padding: '0.5rem 0.5rem',
+        padding: '0.1rem 0.5rem 0.1rem 0.5rem',
         borderTop: `1px solid ${brandColors.neutral[200]}`,
         marginTop: 'auto'
       }}>

@@ -513,7 +513,7 @@ export default function Register() {
               color: brandColors.neutral[500],
               fontWeight: '500'
             }}>
-              OR
+              Or
             </span>
             <div style={{
               flexGrow: 1,

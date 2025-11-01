@@ -26,24 +26,24 @@ const getPDFFont = (fontFamily?: string): string => {
 const styles = StyleSheet.create({
   page: {
     width: '100%',
+    height: '100%',
     backgroundColor: '#f0fdf4', // Matches preview gradient background
     fontFamily: 'Helvetica',
     fontSize: 10,
     paddingTop: 20,
     paddingBottom: 20,
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingLeft: 20,
+    paddingRight: 20,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'flex-start'
   },
   container: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 15,
-    maxWidth: 550,
     width: '100%',
-    margin: '0 auto'
+    maxWidth: '100%'
   },
   
   // Header Section
@@ -163,12 +163,7 @@ const styles = StyleSheet.create({
   clientInfo: {
     fontSize: 9,
     color: '#6b7280',
-    marginBottom: 4,
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  clientInfoText: {
-    marginLeft: 4
+    marginBottom: 4
   },
   
   // Items Table
@@ -468,28 +463,24 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
               <View style={styles.addressCard}>
                 <Text style={styles.clientName}>{invoiceData.clientName}</Text>
                 {invoiceData.clientCompanyName && (
-                  <View style={styles.clientInfo}>
-                    <Text>🏢</Text>
-                    <Text style={styles.clientInfoText}>{invoiceData.clientCompanyName}</Text>
-                  </View>
+                  <Text style={styles.clientInfo}>
+                    🏢 {invoiceData.clientCompanyName}
+                  </Text>
                 )}
                 {invoiceData.clientEmail && (
-                  <View style={styles.clientInfo}>
-                    <Text>✉️</Text>
-                    <Text style={styles.clientInfoText}>{invoiceData.clientEmail}</Text>
-                  </View>
+                  <Text style={styles.clientInfo}>
+                    ✉️ {invoiceData.clientEmail}
+                  </Text>
                 )}
                 {invoiceData.clientPhone && (
-                  <View style={styles.clientInfo}>
-                    <Text>📞</Text>
-                    <Text style={styles.clientInfoText}>{invoiceData.clientPhone}</Text>
-                  </View>
+                  <Text style={styles.clientInfo}>
+                    📞 {invoiceData.clientPhone}
+                  </Text>
                 )}
                 {invoiceData.clientAddress && (
-                  <View style={styles.clientInfo}>
-                    <Text>📍</Text>
-                    <Text style={styles.clientInfoText}>{invoiceData.clientAddress}</Text>
-                  </View>
+                  <Text style={styles.clientInfo}>
+                    📍 {invoiceData.clientAddress}
+                  </Text>
                 )}
               </View>
             </View>
@@ -499,10 +490,9 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
               <View style={styles.addressColumn}>
                 <Text style={styles.addressTitle}>Ship To</Text>
                 <View style={styles.addressCardShip}>
-                  <View style={styles.clientInfo}>
-                    <Text>🚚</Text>
-                    <Text style={{ ...styles.clientName, marginLeft: 4 }}>{invoiceData.shipToName}</Text>
-                  </View>
+                  <Text style={styles.clientName}>
+                    🚚 {invoiceData.shipToName}
+                  </Text>
                   {invoiceData.shipToAddress && (
                     <Text style={{ fontSize: 9, color: '#374151', marginBottom: 2 }}>
                       {invoiceData.shipToAddress}
@@ -630,7 +620,7 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings }:
           
           {/* Payment Terms & Information */}
           {(paymentMethods.length > 0 || invoiceData.termsAndConditions) && (
-            <View style={styles.paymentSection}>
+            <View style={styles.paymentSection} wrap={false}>
               <Text style={styles.paymentTitle}>Payment Terms & Information</Text>
               
               {invoiceData.termsAndConditions && (

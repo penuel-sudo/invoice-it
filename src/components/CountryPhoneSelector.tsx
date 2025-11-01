@@ -36,7 +36,7 @@ interface CountryPhoneSelectorProps {
 }
 
 export default function CountryPhoneSelector({
-  value = { countryCode: 'US', phoneNumber: '' },
+  value = { countryCode: 'NG', phoneNumber: '' },
   onChange,
   placeholder = '9175551234',
   disabled = false,
@@ -105,15 +105,23 @@ export default function CountryPhoneSelector({
     }
   }, [value.phoneNumber])
 
-  // Set initial country from value
+  // Set initial country from value or cache
   useEffect(() => {
-    if (value.countryCode && !selectedCountry) {
-      const country = countriesData.find(c => c.code === value.countryCode)
+    if (!selectedCountry) {
+      // First, try to get from cached selection
+      const cachedCountryCode = localStorage.getItem('invoice-it:country_code')
+      
+      // If we have a cached value, use it; otherwise use value prop; otherwise default to NG
+      const countryCodeToUse = cachedCountryCode || value.countryCode || 'NG'
+      
+      const country = countriesData.find(c => c.code === countryCodeToUse)
       if (country) {
         setSelectedCountry(country)
+        // Cache it
+        localStorage.setItem('invoice-it:country_code', country.code)
       }
     }
-  }, [value.countryCode, selectedCountry])
+  }, [value.countryCode, selectedCountry, countriesData])
 
   // Validate phone number when it changes
   useEffect(() => {
@@ -183,11 +191,11 @@ export default function CountryPhoneSelector({
         if (country) return country
       }
 
-      // Fallback to US
-      return countriesData.find(c => c.code === 'US') || countriesData[0]
+      // Fallback to NG
+      return countriesData.find(c => c.code === 'NG') || countriesData[0]
     } catch (error) {
-      // Fallback to US
-      return countriesData.find(c => c.code === 'US') || countriesData[0]
+      // Fallback to NG
+      return countriesData.find(c => c.code === 'NG') || countriesData[0]
     }
   }
 
@@ -207,6 +215,9 @@ export default function CountryPhoneSelector({
     setSelectedCountry(country)
     setIsDropdownOpen(false)
     setSearchQuery('')
+    
+    // Cache the selected country
+    localStorage.setItem('invoice-it:country_code', country.code)
     
     const countryInfo = getCountryInfo(country.code)
     onChange({
@@ -300,7 +311,7 @@ export default function CountryPhoneSelector({
                 fontFamily: 'Poppins, sans-serif',
                 color: selectedCountry ? brandColors.neutral[900] : brandColors.neutral[500]
               }}>
-                {selectedCountry ? `+${selectedCountry.phoneCode}` : '+1'}
+                {selectedCountry ? `+${selectedCountry.phoneCode}` : '+234'}
               </span>
             </div>
             <ChevronDown 

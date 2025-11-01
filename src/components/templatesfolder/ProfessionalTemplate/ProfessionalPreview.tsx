@@ -514,7 +514,7 @@ export default function ProfessionalInvoicePreviewPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
               {avatarUrl && (templateSettings?.template_settings?.show_logo !== false) && (
-                <img src={avatarUrl} alt="Company Logo" style={{ maxHeight: '60px', maxWidth: '60px', borderRadius: '50%', objectFit: 'cover' }} />
+                <img src={avatarUrl} alt="Company Logo" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} />
               )}
               <StatusButton status={dbStatus} size="sm" />
             </div>
