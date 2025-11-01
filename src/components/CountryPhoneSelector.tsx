@@ -72,27 +72,6 @@ export default function CountryPhoneSelector({
     []
   )
 
-  // Default to US on mount if no country selected
-  useEffect(() => {
-    if (!selectedCountry) {
-      const usCountry = countriesData.find(c => c.code === 'US')
-      if (usCountry) {
-        setSelectedCountry(usCountry)
-        const countryInfo = getCountryInfo('US')
-            onChange({
-          countryCode: 'US',
-              phoneNumber: phoneNumber,
-              isValid: false,
-              countryName: countryInfo?.name,
-              phonePrefix: countryInfo?.phoneCode,
-              languageCode: countryInfo?.language,
-              currencyCode: countryInfo?.currency,
-              timezone: countryInfo?.timezone
-            })
-          }
-        }
-  }, [])
-
   // Check if mobile on mount and resize
   useEffect(() => {
     const checkMobile = () => {
@@ -118,6 +97,13 @@ export default function CountryPhoneSelector({
     
     return () => window.removeEventListener('resize', updateContainerWidth)
   }, [])
+
+  // Sync phone number state with prop value
+  useEffect(() => {
+    if (value.phoneNumber !== undefined && value.phoneNumber !== phoneNumber) {
+      setPhoneNumber(value.phoneNumber)
+    }
+  }, [value.phoneNumber])
 
   // Set initial country from value
   useEffect(() => {
