@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
 import { brandColors } from '../../stylings'
 
 interface TemplateGalleryProps {
@@ -15,8 +13,6 @@ export default function TemplateGallery({
   subtitle = "Select the perfect template for your invoice. Each template is designed to make your invoices look professional and stand out.",
   style 
 }: TemplateGalleryProps) {
-  const navigate = useNavigate()
-  
   return (
     <div style={{
       minHeight: '100vh',
@@ -30,41 +26,22 @@ export default function TemplateGallery({
       }}>
         {/* Header */}
         <div style={{
-          position: 'sticky',
-          top: 0,
-          backgroundColor: 'white',
-          borderBottom: `1px solid ${brandColors.neutral[200]}`,
-          padding: '1rem',
-          zIndex: 100,
+          textAlign: 'center',
           marginBottom: '3rem'
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            maxWidth: '1200px',
-            margin: '0 auto'
+          <h1 style={{
+            fontSize: '2.5rem',
+            fontWeight: '700',
+            color: brandColors.neutral[900],
+            marginBottom: '1rem',
+            background: `linear-gradient(135deg, ${brandColors.primary[600]} 0%, ${brandColors.success[600]} 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
           }}>
-            <button
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <div style={{ flex: 1, textAlign: 'center' }}>
-              <h1 style={{
-                fontSize: '2.5rem',
-                fontWeight: '700',
-                color: brandColors.neutral[900],
-                marginBottom: '1rem',
-                background: `linear-gradient(135deg, ${brandColors.primary[600]} 0%, ${brandColors.success[600]} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                margin: 0
-              }}>
-                {title}
-              </h1>
-              <p style={{
+            {title}
+          </h1>
+          <p style={{
             fontSize: '1.125rem',
             color: brandColors.neutral[600],
             maxWidth: '600px',
@@ -73,8 +50,6 @@ export default function TemplateGallery({
           }}>
             {subtitle}
           </p>
-            </div>
-          </div>
         </div>
 
         {/* Template Grid */}

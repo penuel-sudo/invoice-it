@@ -64,8 +64,13 @@ export default function InvoiceCreatePage() {
   // Store all payment methods from profiles for localStorage operations
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethod[]>([])
   
-  // Load invoice data from URL parameter or state
+  // Track if we've already loaded initial data to prevent overwriting user changes
+  const hasLoadedInitialData = useRef(false)
+  
+  // Load invoice data from URL parameter or state - only once on mount
   useEffect(() => {
+    if (hasLoadedInitialData.current) return
+    
     const loadInvoiceData = async () => {
       // First check URL parameter for invoice number
       const invoiceNumber = getInvoiceFromUrl(searchParams)
@@ -90,6 +95,7 @@ export default function InvoiceCreatePage() {
             if (savedData && savedData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in localStorage')
               setFormData(savedData)
+              hasLoadedInitialData.current = true
               setLoading(false)
               return
             }
@@ -98,6 +104,7 @@ export default function InvoiceCreatePage() {
             if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in state')
               setFormData(location.state.invoiceData)
+              hasLoadedInitialData.current = true
               setLoading(false)
               return
             }
@@ -126,6 +133,7 @@ export default function InvoiceCreatePage() {
               grandTotal: data.total_amount || 0
             }
             setFormData(invoiceFormData)
+            hasLoadedInitialData.current = true
           }
         } catch (error) {
           console.error('Error loading invoice:', error)
@@ -137,15 +145,14 @@ export default function InvoiceCreatePage() {
       } else if (location.state?.invoiceData) {
         // Fallback to state data
         setFormData(location.state.invoiceData)
+        hasLoadedInitialData.current = true
         // Update URL to include invoice number
         if (location.state.invoiceData.invoiceNumber) {
-          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber })
+          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber }, { replace: true })
         }
       } else {
-        // Update URL with current invoice number if available
-        if (formData.invoiceNumber) {
-          setSearchParams({ invoice: formData.invoiceNumber })
-        }
+        // No invoice to load, mark as loaded
+        hasLoadedInitialData.current = true
       }
     }
 
@@ -233,12 +240,15 @@ export default function InvoiceCreatePage() {
     invoiceStorage.saveDraftDebouncedDefault(dataToSave)
   }, [formData, allPaymentMethods])
 
-  // Update URL when invoice number changes
+  // Update URL when invoice number changes - but don't trigger loadInvoiceData
   useEffect(() => {
-    if (formData.invoiceNumber) {
-      setSearchParams({ invoice: formData.invoiceNumber })
+    if (formData.invoiceNumber && !loading) {
+      const currentInvoice = getInvoiceFromUrl(searchParams)
+      if (currentInvoice !== formData.invoiceNumber) {
+        setSearchParams({ invoice: formData.invoiceNumber }, { replace: true })
+      }
     }
-  }, [formData.invoiceNumber, setSearchParams])
+  }, [formData.invoiceNumber])
 
   const addItem = () => {
     const newItem: InvoiceItem = {
