@@ -395,7 +395,25 @@ export default function TransactionPage() {
           top: 0,
           zIndex: 10
         }}>
-          {!isMobile && <div></div>}
+          {isMobile ? (
+            <button
+              onClick={() => navigate(-1)}
+              style={{
+                padding: '0.5rem',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <ArrowLeft size={20} color={brandColors.neutral[600]} />
+            </button>
+          ) : (
+            <div></div>
+          )}
           
           <h1 style={{
             fontSize: window.innerWidth < 768 ? '1.125rem' : '1.25rem',

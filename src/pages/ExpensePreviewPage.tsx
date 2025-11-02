@@ -304,8 +304,13 @@ export default function ExpensePreviewPage() {
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: isMobile ? '1.5rem' : '2rem',
+          padding: isMobile ? '0.875rem 1rem' : '1rem 2rem',
           paddingBottom: isMobile ? '0.875rem' : '1rem',
-          borderBottom: `1px solid ${brandColors.neutral[200]}`
+          backgroundColor: 'white',
+          borderBottom: `1px solid ${brandColors.neutral[200]}`,
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
         }}>
           <div></div>
 

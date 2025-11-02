@@ -487,8 +487,7 @@ export default function InvoiceCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <div 
               style={{
@@ -697,8 +696,7 @@ export default function InvoiceCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <div style={{
               display: 'flex',
@@ -812,8 +810,7 @@ export default function InvoiceCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <div style={{
               display: 'flex',
@@ -1034,8 +1031,7 @@ export default function InvoiceCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <h2 style={{
               fontSize: '1rem',
@@ -1070,8 +1066,7 @@ export default function InvoiceCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '1.5rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <div style={{
               display: 'flex',
@@ -1262,8 +1257,7 @@ export default function InvoiceCreatePage() {
             borderRadius: '16px',
             padding: '1.5rem',
             marginBottom: '2rem',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
             <h2 style={{
               fontSize: '1rem',
@@ -1352,8 +1346,7 @@ export default function InvoiceCreatePage() {
           backgroundColor: brandColors.white,
           padding: '0.75rem',
             borderRadius: '16px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`,
+            border: `1px solid ${brandColors.neutral[200]}`,
             maxWidth: '100%',
           overflowX: 'auto'
         }}>

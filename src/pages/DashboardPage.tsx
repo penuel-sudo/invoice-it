@@ -341,8 +341,7 @@ export default function DashboardPage() {
               backgroundColor: brandColors.white,
               borderRadius: '16px',
               padding: '1.5rem',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
-              border: `1px solid ${brandColors.neutral[100]}`,
+              border: `1px solid ${brandColors.neutral[200]}`,
               minHeight: '180px',
           position: 'relative',
               overflow: 'hidden',
@@ -661,19 +660,16 @@ export default function DashboardPage() {
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[100]}`,
+                border: `1px solid ${brandColors.neutral[200]}`,
                 cursor: 'pointer',
                 borderRadius: '14px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
                 transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                e.currentTarget.style.borderColor = brandColors.primary[200]
+                e.currentTarget.style.borderColor = brandColors.primary[300]
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
-                e.currentTarget.style.borderColor = brandColors.neutral[100]
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
               }}
             >
               <div style={{
@@ -706,19 +702,16 @@ export default function DashboardPage() {
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[100]}`,
+                border: `1px solid ${brandColors.neutral[200]}`,
                 cursor: 'pointer',
                 borderRadius: '14px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                e.currentTarget.style.borderColor = brandColors.success[200]
+                e.currentTarget.style.borderColor = brandColors.success[300]
             }}
             onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
-                e.currentTarget.style.borderColor = brandColors.neutral[100]
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
               }}
             >
               <div style={{
@@ -751,19 +744,16 @@ export default function DashboardPage() {
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[100]}`,
+                border: `1px solid ${brandColors.neutral[200]}`,
                 cursor: 'pointer',
                 borderRadius: '14px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                e.currentTarget.style.borderColor = brandColors.primary[200]
+                e.currentTarget.style.borderColor = brandColors.primary[300]
             }}
             onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
-                e.currentTarget.style.borderColor = brandColors.neutral[100]
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
               }}
             >
               <div style={{
@@ -796,19 +786,16 @@ export default function DashboardPage() {
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[100]}`,
+                border: `1px solid ${brandColors.neutral[200]}`,
                 cursor: 'pointer',
                 borderRadius: '14px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                e.currentTarget.style.borderColor = brandColors.error[200]
+                e.currentTarget.style.borderColor = brandColors.error[300]
             }}
             onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
-                e.currentTarget.style.borderColor = brandColors.neutral[100]
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
               }}
             >
               <div style={{
@@ -841,19 +828,16 @@ export default function DashboardPage() {
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[100]}`,
+                border: `1px solid ${brandColors.neutral[200]}`,
                 cursor: 'pointer',
                 borderRadius: '14px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                e.currentTarget.style.borderColor = brandColors.primary[200]
+                e.currentTarget.style.borderColor = brandColors.primary[300]
             }}
             onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
-                e.currentTarget.style.borderColor = brandColors.neutral[100]
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
               }}
             >
               <div style={{
@@ -886,19 +870,16 @@ export default function DashboardPage() {
                 gap: '0.625rem',
                 padding: '1.125rem 0.75rem',
                 backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[100]}`,
+                border: `1px solid ${brandColors.neutral[200]}`,
                 cursor: 'pointer',
                 borderRadius: '14px',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                e.currentTarget.style.borderColor = brandColors.warning[200]
+                e.currentTarget.style.borderColor = brandColors.warning[300]
             }}
             onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'
-                e.currentTarget.style.borderColor = brandColors.neutral[100]
+                e.currentTarget.style.borderColor = brandColors.neutral[200]
               }}
             >
               <div style={{
@@ -973,19 +954,16 @@ export default function DashboardPage() {
                   padding: '0.875rem 1rem',
                   backgroundColor: brandColors.white,
                   borderRadius: '12px',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-                  border: `1px solid ${brandColors.neutral[100]}`,
+                  border: `1px solid ${brandColors.neutral[200]}`,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
                 onClick={() => navigate(`/invoices?tab=${transaction.type === 'invoice' ? 'invoices' : 'expenses'}`)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.08)'
-                  e.currentTarget.style.borderColor = brandColors.neutral[200]
+                  e.currentTarget.style.borderColor = brandColors.primary[300]
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)'
-                  e.currentTarget.style.borderColor = brandColors.neutral[100]
+                  e.currentTarget.style.borderColor = brandColors.neutral[200]
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

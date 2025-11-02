@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Home, FileText, Layout, Plus, Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { brandColors } from '../../stylings'
@@ -18,6 +19,41 @@ interface BottomNavProps {
 export default function BottomNav({ isNotificationVisible = false, onNotificationToggle }: BottomNavProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const [isVisible, setIsVisible] = useState(true)
+
+  // Scroll detection for dynamic visibility (except on dashboard)
+  useEffect(() => {
+    const isDashboard = location.pathname === '/dashboard'
+    if (isDashboard) {
+      setIsVisible(true)
+      return
+    }
+
+    let lastScrollY = window.scrollY
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      
+      // Show when scrolling down, hide when scrolling up
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down - show nav
+        setIsVisible(true)
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up - hide nav
+        setIsVisible(false)
+      }
+      
+      // Always show if near top of page
+      if (currentScrollY < 50) {
+        setIsVisible(true)
+      }
+      
+      lastScrollY = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [location.pathname])
 
   return (
     <>
@@ -29,7 +65,7 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
       
       <nav style={{
         position: 'fixed',
-        bottom: 0,
+        bottom: isVisible ? 0 : '-100px',
         left: 0,
         right: 0,
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -41,7 +77,8 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
         justifyContent: 'space-around',
         gap: '0.5rem',
         zIndex: 50,
-        boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.05)'
+        boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.05)',
+        transition: 'bottom 0.3s ease-in-out'
       }}>
         {/* Left Items (Home & Invoices) */}
         {navigationItems.slice(0, 2).map((item) => {
