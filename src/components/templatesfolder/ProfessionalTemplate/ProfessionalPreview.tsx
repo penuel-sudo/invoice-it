@@ -175,7 +175,36 @@ export default function ProfessionalInvoicePreviewPage() {
               }
               setInvoiceData(professionalData)
               setIsFromDatabase(false)
+              
+              // Load payment methods from state data
+              if (stateData.paymentMethods && Array.isArray(stateData.paymentMethods) && stateData.paymentMethods.length > 0) {
+                console.log('  ✅ Using payment methods from state:', stateData.paymentMethods.length)
+                setPaymentMethods(stateData.paymentMethods)
+              } else if (user && stateData.selectedPaymentMethodIds && stateData.selectedPaymentMethodIds.length > 0) {
+                // Load payment methods from profiles
+                try {
+                  const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('payment_methods')
+                    .eq('id', user.id)
+                    .single()
+
+                  if (profileData?.payment_methods) {
+                    const allPaymentMethods = profileData.payment_methods || []
+                    const selectedIds = stateData.selectedPaymentMethodIds || []
+                    const selectedPaymentMethods = allPaymentMethods.filter((method: any) => 
+                      selectedIds.includes(method.id)
+                    )
+                    console.log('  ✅ Loaded payment methods from profiles:', selectedPaymentMethods.length)
+                    setPaymentMethods(selectedPaymentMethods)
+                  }
+                } catch (error) {
+                  console.error('Error loading payment methods:', error)
+                }
+              }
+              
               setLoading(false)
+              setGlobalLoading(false)
               return
             }
             
@@ -205,8 +234,12 @@ export default function ProfessionalInvoicePreviewPage() {
               setIsFromDatabase(false)
               setDbStatus('draft')
               
-              // Load payment methods for localStorage data
-              if (user) {
+              // Use paymentMethods directly from savedData if available, otherwise load from profiles
+              if ((savedData as any).paymentMethods && Array.isArray((savedData as any).paymentMethods) && (savedData as any).paymentMethods.length > 0) {
+                console.log('  ✅ Using payment methods from localStorage:', (savedData as any).paymentMethods.length)
+                setPaymentMethods((savedData as any).paymentMethods)
+              } else if (user && (savedData as any).selectedPaymentMethodIds && Array.isArray((savedData as any).selectedPaymentMethodIds) && (savedData as any).selectedPaymentMethodIds.length > 0) {
+                // Load payment methods from profiles if IDs are available
                 try {
                   const { data: profileData, error: profileError } = await supabase
                     .from('profiles')
@@ -220,14 +253,18 @@ export default function ProfessionalInvoicePreviewPage() {
                     const selectedPaymentMethods = allPaymentMethods.filter((method: any) => 
                       selectedIds.includes(method.id)
                     )
+                    console.log('  ✅ Loaded payment methods from profiles:', selectedPaymentMethods.length)
                     setPaymentMethods(selectedPaymentMethods)
                   }
                 } catch (error) {
                   console.error('Error loading payment methods:', error)
                 }
+              } else {
+                console.log('  ⚠️ No payment methods found in localStorage and no selectedPaymentMethodIds')
               }
               
               setLoading(false)
+              setGlobalLoading(false)
               return
             }
             
@@ -324,12 +361,17 @@ export default function ProfessionalInvoicePreviewPage() {
       } else if (location.state?.invoiceData) {
         // From create page (via state, not URL)
         console.log('  📦 Loading invoice from location.state (create → preview flow)')
-        setInvoiceData({ ...(location.state.invoiceData as any), template: 'professional' } as any)
+        const stateData = location.state.invoiceData as any
+        setInvoiceData({ ...stateData, template: 'professional' } as any)
         setIsFromDatabase(false)
         setDbStatus('draft') // Default status for new invoices
         
-        // Load payment methods for localStorage data
-        if (user) {
+        // Use paymentMethods directly from invoiceData if available, otherwise load from profiles
+        if (stateData.paymentMethods && Array.isArray(stateData.paymentMethods) && stateData.paymentMethods.length > 0) {
+          console.log('  ✅ Using payment methods from invoiceData:', stateData.paymentMethods.length)
+          setPaymentMethods(stateData.paymentMethods)
+        } else if (user && stateData.selectedPaymentMethodIds && stateData.selectedPaymentMethodIds.length > 0) {
+          // Load payment methods from profiles if IDs are available
           try {
             const { data: profileData, error: profileError } = await supabase
               .from('profiles')
@@ -339,15 +381,18 @@ export default function ProfessionalInvoicePreviewPage() {
 
             if (profileData?.payment_methods) {
               const allPaymentMethods = profileData.payment_methods || []
-              const selectedIds = location.state.invoiceData.selectedPaymentMethodIds || []
+              const selectedIds = stateData.selectedPaymentMethodIds || []
               const selectedPaymentMethods = allPaymentMethods.filter((method: any) => 
                 selectedIds.includes(method.id)
               )
+              console.log('  ✅ Loaded payment methods from profiles:', selectedPaymentMethods.length)
               setPaymentMethods(selectedPaymentMethods)
             }
           } catch (error) {
             console.error('Error loading payment methods:', error)
           }
+        } else {
+          console.log('  ⚠️ No payment methods found in invoiceData and no selectedPaymentMethodIds')
         }
       } else {
         // No invoice number in URL and no state data
@@ -1071,7 +1116,7 @@ export default function ProfessionalInvoicePreviewPage() {
         </div>
 
         {/* Payment Terms & Information */}
-        {paymentMethods.length > 0 && (
+        {(paymentMethods.length > 0 || invoiceData.termsAndConditions) && (
           <div style={{
             backgroundColor: brandColors.neutral[50],
             borderRadius: '8px',
@@ -1090,10 +1135,10 @@ export default function ProfessionalInvoicePreviewPage() {
               Payment Terms & Information
             </h3>
             
-            <div style={{
-              marginBottom: '1rem'
-            }}>
-
+            {invoiceData.termsAndConditions && (
+              <div style={{
+                marginBottom: '1rem'
+              }}>
                 <div style={{
                   fontSize: '0.875rem',
                   color: brandColors.neutral[600],
@@ -1103,7 +1148,9 @@ export default function ProfessionalInvoicePreviewPage() {
                   {invoiceData.termsAndConditions}
                 </div>
               </div>
+            )}
             {/* Payment Methods Grid */}
+            {paymentMethods.length > 0 && (
             <div style={{
               display: 'grid',
               gridTemplateColumns: window.innerWidth < 768 
@@ -1181,6 +1228,7 @@ export default function ProfessionalInvoicePreviewPage() {
                 )
               })}
             </div>
+            )}
           </div>
         )}
 

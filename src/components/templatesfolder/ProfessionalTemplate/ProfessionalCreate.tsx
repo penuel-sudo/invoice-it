@@ -659,9 +659,15 @@ export default function ProfessionalInvoiceCreatePage() {
       return
     }
 
+    // Get selected payment methods from allPaymentMethods
+    const selectedPaymentMethods = allPaymentMethods.filter(method => 
+      formData.selectedPaymentMethodIds?.includes(method.id)
+    )
+
     const previewData = {
       ...formData,
-      items: validItems
+      items: validItems,
+      paymentMethods: selectedPaymentMethods // Include payment methods in preview data
     }
 
     navigate(`/invoice/preview/professional?invoice=${formData.invoiceNumber}`, {

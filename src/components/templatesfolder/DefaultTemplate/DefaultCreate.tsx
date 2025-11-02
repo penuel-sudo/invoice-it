@@ -69,10 +69,22 @@ export default function InvoiceCreatePage() {
   
   // Load invoice data from URL parameter or state - only once on mount
   useEffect(() => {
-    if (hasLoadedInitialData.current) return
+    if (hasLoadedInitialData.current || !user) return
     
     const loadInvoiceData = async () => {
-      // First check URL parameter for invoice number
+      // First check state data (from preview/edit navigation)
+      if (location.state?.invoiceData) {
+        console.log('Found invoice in state')
+        setFormData(location.state.invoiceData)
+        hasLoadedInitialData.current = true
+        // Update URL to include invoice number
+        if (location.state.invoiceData.invoiceNumber) {
+          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber }, { replace: true })
+        }
+        return
+      }
+
+      // Then check URL parameter for invoice number
       const invoiceNumber = getInvoiceFromUrl(searchParams)
       
       if (invoiceNumber) {
@@ -83,27 +95,18 @@ export default function InvoiceCreatePage() {
             .from('invoices')
             .select('*')
             .eq('invoice_number', invoiceNumber)
-            .eq('user_id', user?.id)
+            .eq('user_id', user.id)
             .single()
 
           if (error) {
             console.error('Error loading invoice from database:', error)
-            console.log('Invoice not found in database, checking localStorage and state...')
+            console.log('Invoice not found in database, checking localStorage...')
             
             // Check localStorage for this invoice number
             const savedData = invoiceStorage.getDraftDefault()
             if (savedData && savedData.invoiceNumber === invoiceNumber) {
               console.log('Found invoice in localStorage')
               setFormData(savedData)
-              hasLoadedInitialData.current = true
-              setLoading(false)
-              return
-            }
-            
-            // Check state data
-            if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
-              console.log('Found invoice in state')
-              setFormData(location.state.invoiceData)
               hasLoadedInitialData.current = true
               setLoading(false)
               return
@@ -142,24 +145,22 @@ export default function InvoiceCreatePage() {
         } finally {
           setLoading(false)
         }
-      } else if (location.state?.invoiceData) {
-        // Fallback to state data
-        setFormData(location.state.invoiceData)
-        hasLoadedInitialData.current = true
-        // Update URL to include invoice number
-        if (location.state.invoiceData.invoiceNumber) {
-          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber }, { replace: true })
-        }
       } else {
-        // No invoice to load, mark as loaded
+        // No invoice to load, check localStorage for any saved draft
+        const savedData = invoiceStorage.getDraftDefault()
+        if (savedData) {
+          console.log('Loading saved draft from localStorage')
+          setFormData(savedData)
+          if (savedData.invoiceNumber) {
+            setSearchParams({ invoice: savedData.invoiceNumber }, { replace: true })
+          }
+        }
         hasLoadedInitialData.current = true
       }
     }
 
-    if (user) {
-      loadInvoiceData()
-    }
-  }, [searchParams, location.state, navigate, user])
+    loadInvoiceData()
+  }, []) // Only run once on mount - removed searchParams dependency
 
   const [isSaving, setIsSaving] = useState(false)
 
@@ -242,13 +243,13 @@ export default function InvoiceCreatePage() {
 
   // Update URL when invoice number changes - but don't trigger loadInvoiceData
   useEffect(() => {
-    if (formData.invoiceNumber && !loading) {
+    if (formData.invoiceNumber && !loading && hasLoadedInitialData.current) {
       const currentInvoice = getInvoiceFromUrl(searchParams)
       if (currentInvoice !== formData.invoiceNumber) {
         setSearchParams({ invoice: formData.invoiceNumber }, { replace: true })
       }
     }
-  }, [formData.invoiceNumber])
+  }, [formData.invoiceNumber, loading])
 
   const addItem = () => {
     const newItem: InvoiceItem = {

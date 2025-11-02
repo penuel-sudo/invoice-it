@@ -45,7 +45,40 @@ export default function InvoicePreviewPage() {
 
   useEffect(() => {
     const loadInvoiceData = async () => {
-      // First check URL parameter for invoice number
+      if (!user) return
+
+      // PRIORITY 1: Check state data first (from create page navigation)
+      if (location.state?.invoiceData) {
+        console.log('Found invoice in state (create → preview flow)')
+        setInvoiceData(location.state.invoiceData)
+        setIsFromDatabase(false)
+        setDbStatus('draft')
+        // Update URL to include invoice number
+        if (location.state.invoiceData.invoiceNumber) {
+          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber }, { replace: true })
+        }
+        return
+      }
+
+      // PRIORITY 2: Check localStorage
+      const savedData = invoiceStorage.getDraftDefault()
+      if (savedData) {
+        console.log('Found invoice in localStorage')
+        // Check if URL matches localStorage invoice number
+        const invoiceNumber = getInvoiceFromUrl(searchParams)
+        if (!invoiceNumber || savedData.invoiceNumber === invoiceNumber) {
+          setInvoiceData(savedData)
+          setIsFromDatabase(false)
+          setDbStatus('draft')
+          // Update URL to include invoice number
+          if (savedData.invoiceNumber) {
+            setSearchParams({ invoice: savedData.invoiceNumber }, { replace: true })
+          }
+          return
+        }
+      }
+
+      // PRIORITY 3: Check URL parameter and load from database
       const invoiceNumber = getInvoiceFromUrl(searchParams)
       
       if (invoiceNumber && !loading) {
@@ -72,33 +105,11 @@ export default function InvoicePreviewPage() {
               )
             `)
             .eq('invoice_number', invoiceNumber)
-            .eq('user_id', user?.id)
+            .eq('user_id', user.id)
             .single()
 
           if (invoiceError) {
-            console.log('Invoice not found in database, checking localStorage and state...')
-            
-            // Check state data first (from create page navigation)
-            if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
-              console.log('Found invoice in state (create → preview flow)')
-              setInvoiceData(location.state.invoiceData)
-              setIsFromDatabase(false)
-              setLoading(false)
-              return
-            }
-            
-            // Check localStorage for this invoice number
-            const savedData = invoiceStorage.getDraftDefault()
-            if (savedData && savedData.invoiceNumber === invoiceNumber) {
-              console.log('Found invoice in localStorage')
-              setInvoiceData(savedData)
-              setIsFromDatabase(false)
-              setLoading(false)
-              return
-            }
-            
-            // If not found anywhere, show error
-            console.log('Invoice not found anywhere')
+            console.log('Invoice not found in database')
             toast.error('Invoice not found')
             navigate('/invoices')
             return
@@ -109,7 +120,7 @@ export default function InvoicePreviewPage() {
             const { data: profileData, error: profileError } = await supabase
               .from('profiles')
               .select('payment_methods')
-              .eq('id', user?.id)
+              .eq('id', user.id)
               .single()
 
             const allPaymentMethods = profileData?.payment_methods || []
@@ -158,36 +169,15 @@ export default function InvoicePreviewPage() {
         } finally {
           setLoading(false)
         }
-      } else if (location.state?.invoiceData) {
-        // Fallback to state data
-        setInvoiceData(location.state.invoiceData)
-        setIsFromDatabase(false)
-        // Update URL to include invoice number
-        if (location.state.invoiceData.invoiceNumber) {
-          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber })
-        }
       } else {
-        // Try to get data from localStorage
-        const savedData = invoiceStorage.getDraftDefault()
-        if (savedData) {
-          // For localStorage data: payment methods are already filtered
-          setInvoiceData(savedData)
-          setIsFromDatabase(false)
-          // Update URL to include invoice number
-          if (savedData.invoiceNumber) {
-            setSearchParams({ invoice: savedData.invoiceNumber })
-          }
-        } else {
-          // If no data, redirect back to create page
-          navigate('/invoice/create/default')
-        }
+        // No invoice number in URL and no state/localStorage - redirect to create
+        console.log('No invoice data found, redirecting to create')
+        navigate('/invoice/create/default')
       }
     }
 
-    if (user) {
-      loadInvoiceData()
-    }
-  }, [searchParams, location.state, navigate, user])
+    loadInvoiceData()
+  }, [location.state, navigate, user]) // Removed searchParams dependency to prevent re-loading
 
   // Set status based on data source
   useEffect(() => {
