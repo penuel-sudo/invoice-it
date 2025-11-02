@@ -939,34 +939,20 @@ export default function TransactionPage() {
                           }}>
                             {/* View */}
                             <button
-                              onClick={(e) => {
+                              onMouseDown={(e) => {
                                 e.preventDefault()
-                                e.stopPropagation()
-                                setShowTransactionDropdown(null)
-                                
                                 if (transaction.type === 'invoice') {
                                   // Simple navigation: use template and invoice_number from transaction
-                                  const template = transaction.template || 'default'
+                                  const template = transaction.template
                                   const invoiceNumber = transaction.invoice_number
                                   
                                   if (invoiceNumber) {
                                     navigate(`/invoice/preview/${template}?invoice=${invoiceNumber}`)
-                                  } else {
-                                    console.error('Invoice number missing for transaction:', transaction.id)
-                                    toast.error('Invoice number not found')
-                                  }
-                                } else if (transaction.type === 'expense') {
-                                  // Navigate to expense preview with expense ID
-                                  if (transaction.id) {
-                                    navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
-                                  } else {
-                                    console.error('Expense ID missing for transaction:', transaction.id)
-                                    toast.error('Expense ID not found')
                                   }
                                 } else {
-                                  console.error('Unknown transaction type:', transaction.type)
-                                  toast.error('Unknown transaction type')
+                                  navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
                                 }
+                                setShowTransactionDropdown(null)
                               }}
                               style={{
                                 width: '100%',
