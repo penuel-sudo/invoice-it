@@ -359,7 +359,11 @@ export default function ExpenseCreatePage() {
           top: 0,
           zIndex: 10
         }}>
-          <div></div>
+          <button
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft size={20} />
+          </button>
           
           <h1 style={{
             fontSize: '1.125rem',

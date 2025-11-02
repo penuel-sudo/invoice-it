@@ -286,6 +286,40 @@ export default function InvoicePreviewPage() {
       padding: window.innerWidth < 768 ? '1rem 0.5rem' : '2rem 1rem', // Mobile responsive padding
       position: 'relative'
     }}>
+      {/* Header */}
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'white',
+        borderBottom: `1px solid ${brandColors.neutral[200]}`,
+        padding: '1rem',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: '1rem'
+      }}>
+        <button
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <h1 style={{
+          fontSize: '1.125rem',
+          fontWeight: '600',
+          color: brandColors.neutral[900],
+          margin: 0,
+          flex: 1,
+          textAlign: 'center'
+        }}>
+          Invoice Preview
+        </h1>
+        <div style={{ width: '20px' }}></div>
+      </div>
+
       {/* Background Pattern */}
       <div style={{
         position: 'absolute',

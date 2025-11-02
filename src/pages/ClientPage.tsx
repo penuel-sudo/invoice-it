@@ -238,7 +238,11 @@ export default function ClientPage() {
         top: 0,
         zIndex: 10
       }}>
-        <div></div>
+        <button
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={20} />
+        </button>
         
         <h1 style={{
           fontSize: isMobile ? '1.125rem' : '1.25rem',

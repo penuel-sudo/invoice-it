@@ -119,7 +119,11 @@ export default function ProfilePage() {
           zIndex: 10
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div></div>
+            <button
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft size={20} />
+            </button>
             <h1 style={{
               fontSize: '1.125rem',
               fontWeight: '600',

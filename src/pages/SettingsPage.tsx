@@ -485,7 +485,11 @@ export default function SettingsPage() {
             maxWidth: '100%',
             margin: '0 auto'
           }}>
-            {!isMobile && <div></div>}
+            <button
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft size={20} />
+            </button>
             <h1 style={{
               fontSize: isMobile ? '1.25rem' : '1.5rem',
               fontWeight: '600',

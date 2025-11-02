@@ -706,19 +706,9 @@ export default function ProfessionalInvoiceCreatePage() {
           zIndex: 10
         }}>
           <button
-            onClick={() => navigate('/dashboard')}
-            style={{
-              padding: '0.5rem',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
+            onClick={() => navigate(-1)}
           >
-            <ArrowLeft size={20} color={brandColors.neutral[600]} />
+            <ArrowLeft size={20} />
           </button>
           
           <h1 style={{
