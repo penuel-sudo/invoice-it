@@ -943,7 +943,8 @@ export default function TransactionPage() {
                                 e.preventDefault()
                                 if (transaction.type === 'invoice') {
                                   // Simple navigation: use template and invoice_number from transaction
-                                  const template = transaction.template
+                                  // Default to 'default' if template is null/undefined/empty
+                                  const template = transaction.template || 'default'
                                   const invoiceNumber = transaction.invoice_number
                                   
                                   if (invoiceNumber) {

@@ -109,7 +109,31 @@ export default function InvoicePreviewPage() {
             .single()
 
           if (invoiceError) {
-            console.log('Invoice not found in database')
+            console.log('Invoice not found in database, checking localStorage and state...')
+            
+            // Check state data (from create page navigation)
+            if (location.state?.invoiceData && location.state.invoiceData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in state (create → preview flow)')
+              setInvoiceData(location.state.invoiceData)
+              setIsFromDatabase(false)
+              setDbStatus('draft')
+              setLoading(false)
+              return
+            }
+            
+            // Check localStorage for this invoice number
+            const savedData = invoiceStorage.getDraftDefault()
+            if (savedData && savedData.invoiceNumber === invoiceNumber) {
+              console.log('Found invoice in localStorage')
+              setInvoiceData(savedData)
+              setIsFromDatabase(false)
+              setDbStatus('draft')
+              setLoading(false)
+              return
+            }
+            
+            // If not found anywhere, show error and redirect
+            console.log('Invoice not found anywhere')
             toast.error('Invoice not found')
             navigate('/invoices')
             return
