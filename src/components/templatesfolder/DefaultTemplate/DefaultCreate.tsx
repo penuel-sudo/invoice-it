@@ -45,20 +45,51 @@ export default function InvoiceCreatePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   
   const [formData, setFormData] = useState<InvoiceFormData>(() => {
+    // Only use Default template's localStorage key, never generic or professional
     const savedData = invoiceStorage.getDraftDefault()
     if (savedData) {
       return savedData
     }
-    return invoiceStorage.getDraftWithFallback()
+    // Return fresh default data, don't use getDraftWithFallback which uses generic key
+    return {
+      clientName: '',
+      clientEmail: '',
+      clientAddress: '',
+      clientPhone: '',
+      clientCompanyName: '',
+      invoiceNumber: '',
+      invoiceDate: new Date().toISOString().split('T')[0],
+      dueDate: '',
+      items: [
+        {
+          id: Date.now().toString(),
+          description: '',
+          quantity: 1,
+          unitPrice: 0,
+          taxRate: 0,
+          lineTotal: 0
+        }
+      ],
+      notes: '',
+      subtotal: 0,
+      taxTotal: 0,
+      grandTotal: 0,
+      currency: 'USD',
+      currencySymbol: '$'
+    }
   })
   const [loading, setLoading] = useState(false)
   const { currency: globalCurrency, currencySymbol: globalCurrencySymbol, setCurrency } = useInvoiceCurrency(formData.currency)
   const itemsContainerRef = useRef<HTMLDivElement>(null)
   const lastItemRef = useRef<HTMLDivElement>(null)
   const [userDefaults, setUserDefaults] = useState<{ 
-    paymentMethods: PaymentMethod[]
+    paymentMethods: PaymentMethod[],
+    defaultCurrency: string,
+    defaultCurrencySymbol: string
   }>({
-    paymentMethods: []
+    paymentMethods: [],
+    defaultCurrency: 'USD',
+    defaultCurrencySymbol: '$'
   })
 
   // Store all payment methods from profiles for localStorage operations
@@ -187,7 +218,9 @@ export default function InvoiceCreatePage() {
           const paymentMethods = data.payment_methods || []
           
           setUserDefaults({
-            paymentMethods: paymentMethods
+            paymentMethods: paymentMethods,
+            defaultCurrency: currencyCode,
+            defaultCurrencySymbol: currencySymbol
           })
 
           // Store all payment methods for localStorage operations
@@ -1129,7 +1162,7 @@ export default function InvoiceCreatePage() {
                 color: brandColors.neutral[500],
                 marginTop: '0.5rem'
               }}>
-                Default: {globalCurrencySymbol} {globalCurrency}
+                Default: {userDefaults.defaultCurrencySymbol} {userDefaults.defaultCurrency}
               </p>
             </div>
           </div>

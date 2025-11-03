@@ -60,7 +60,7 @@ export default function DownloadButton({
           updateStatus: true 
         })
       } else {
-        result = await saveInvoiceToDatabase(invoiceData, user, { 
+        result = await saveInvoiceToDatabase(invoiceData, user, templateSettings, { 
           status: 'pending',
           updateStatus: true 
         })
