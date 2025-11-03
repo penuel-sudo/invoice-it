@@ -194,11 +194,11 @@ export default function SendButton({
           { status: 'pending', updateStatus: true }
         )
       } else {
-        // IMPORTANT: third arg is templateSettings, fourth is options
+        // For default template, pass undefined for templateSettings to use options correctly
         result = await saveInvoiceToDatabase(
           invoiceData,
           userData,
-          templateSettings,
+          undefined,
           { status: 'pending', updateStatus: true }
         )
       }
