@@ -175,7 +175,7 @@ export default function RecurringInvoicesPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
+            padding: window.innerWidth < 768 ? '1rem' : '1rem',
             backgroundColor: brandColors.white,
             borderBottom: `1px solid ${brandColors.neutral[200]}`,
             position: 'sticky',

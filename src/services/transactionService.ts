@@ -26,6 +26,7 @@ export interface TransactionData {
   receipt_url?: string
   receipt_filename?: string
   // Client fields
+  client_id?: string
   client_name?: string
   client_email?: string
   client_phone?: string
@@ -152,6 +153,7 @@ export class TransactionService {
           currency_code: invoice.currency_code,
           selected_payment_method_ids: invoice.selected_payment_method_ids,
           // Client fields
+          client_id: invoice.client_id,
           client_name: invoice.clients?.name,
           client_email: invoice.clients?.email,
           client_phone: invoice.clients?.phone,
