@@ -138,12 +138,17 @@ export async function createRecurringInvoice(
     )
 
     // 5. Build invoice snapshot (store all invoice data)
+    // Deep copy template_settings to ensure full structure is preserved
+    const templateSettings = invoice.template_settings 
+      ? JSON.parse(JSON.stringify(invoice.template_settings)) // Deep clone
+      : null
+    
     const invoiceSnapshot = {
       base_invoice_number: invoice.invoice_number, // Store the original invoice number for display
       invoice_number_pattern: 'INV-{YYYY}-{MM}-{####}', // Pattern for generating new invoices
       template: invoice.template || 'default', // Dynamic template
-      template_data: invoice.template_data || null,
-      template_settings: invoice.template_settings || null,
+      template_data: invoice.template_data ? JSON.parse(JSON.stringify(invoice.template_data)) : null, // Deep clone
+      template_settings: templateSettings, // Full structure with nested template_settings
       currency_code: invoice.currency_code || 'USD',
       notes: invoice.notes || '',
       selected_payment_method_ids: invoice.selected_payment_method_ids || [],

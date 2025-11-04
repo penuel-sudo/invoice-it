@@ -310,6 +310,7 @@ BEGIN
       new_due_date := new_issue_date + (recurring_record.invoice_snapshot->>'payment_terms_days')::INTEGER || ' days'::INTERVAL;
       
       -- Create new invoice (template is dynamic - from snapshot)
+      -- Extract template_settings as JSONB (preserves full nested structure)
       INSERT INTO public.invoices (
         user_id,
         client_id,
@@ -339,12 +340,15 @@ BEGIN
         (recurring_record.invoice_snapshot->>'subtotal')::NUMERIC,
         (recurring_record.invoice_snapshot->>'tax_amount')::NUMERIC,
         (recurring_record.invoice_snapshot->>'total_amount')::NUMERIC,
-        recurring_record.invoice_snapshot->>'notes',
+        COALESCE(recurring_record.invoice_snapshot->>'notes', ''),
         invoice_template,
-        recurring_record.invoice_snapshot->'template_data',
-        recurring_record.invoice_snapshot->'template_settings',
-        recurring_record.invoice_snapshot->>'currency_code',
-        ARRAY(SELECT jsonb_array_elements_text(recurring_record.invoice_snapshot->'selected_payment_method_ids')),
+        COALESCE(recurring_record.invoice_snapshot->'template_data', '{}'::jsonb),
+        COALESCE(recurring_record.invoice_snapshot->'template_settings', '{}'::jsonb), -- Preserves full nested structure
+        COALESCE(recurring_record.invoice_snapshot->>'currency_code', 'USD'),
+        COALESCE(
+          ARRAY(SELECT jsonb_array_elements_text(recurring_record.invoice_snapshot->'selected_payment_method_ids')),
+          ARRAY[]::TEXT[]
+        ),
         recurring_record.id,
         NOW(),
         NOW()
