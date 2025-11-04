@@ -62,11 +62,10 @@ export default function ProfessionalInvoiceCreatePage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
   
-  // Helper function for responsive grid
-  const getResponsiveGrid = (minWidth: number = 250) => {
+  // Helper function for responsive grid - use simple responsive like DefaultCreate
+  const getResponsiveGrid = (columns: number = 1) => {
     if (isMobile) return '1fr' // Mobile: single column
-    if (window.innerWidth < 1024) return `repeat(auto-fit, minmax(${minWidth}px, 1fr))` // Tablet: auto-fit
-    return `repeat(auto-fit, minmax(${minWidth}px, 1fr))` // Desktop: auto-fit
+    return `repeat(${columns}, 1fr)` // Desktop: specified columns
   }
   
   // Generate default invoice number
@@ -828,7 +827,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: getResponsiveGrid(250),
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
                 gap: '1rem'
               }}>
                 <div>
@@ -853,7 +852,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       borderRadius: '8px',
                       fontSize: '0.875rem',
                       backgroundColor: brandColors.white,
-                      color: brandColors.neutral[900]
+                      color: brandColors.neutral[900],
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -879,7 +880,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -905,7 +908,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -931,7 +936,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -959,7 +966,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       fontSize: '0.875rem',
                       outline: 'none',
                       resize: 'vertical',
-                      fontFamily: 'inherit'
+                      fontFamily: 'inherit',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -971,7 +980,10 @@ export default function ProfessionalInvoiceCreatePage() {
               backgroundColor: brandColors.white,
               borderRadius: '12px',
               padding: '1.5rem',
-              border: `1px solid ${brandColors.neutral[200]}`
+              border: `1px solid ${brandColors.neutral[200]}`,
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box'
             }}
             onClick={cleanupEmptyLastItem}>
               <div style={{
@@ -993,7 +1005,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: getResponsiveGrid(250),
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
                 gap: '1rem'
               }}>
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -1017,7 +1029,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1043,7 +1057,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1069,7 +1085,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1095,7 +1113,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1121,7 +1141,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1147,7 +1169,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1159,7 +1183,10 @@ export default function ProfessionalInvoiceCreatePage() {
               backgroundColor: brandColors.white,
               borderRadius: '12px',
               padding: '1.5rem',
-              border: `1px solid ${brandColors.neutral[200]}`
+              border: `1px solid ${brandColors.neutral[200]}`,
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box'
             }}
             onClick={cleanupEmptyLastItem}>
               <div style={{
@@ -1181,7 +1208,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: getResponsiveGrid(200),
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
                 gap: '1rem'
               }}>
                 <div>
@@ -1204,7 +1231,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1229,7 +1258,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1254,7 +1285,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1281,7 +1314,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1308,7 +1343,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       border: `1px solid ${brandColors.neutral[300]}`,
                       borderRadius: '8px',
                       fontSize: '0.875rem',
-                      outline: 'none'
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -1352,7 +1389,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       backgroundSize: '1.5em 1.5em',
                       paddingRight: '2.5rem',
                       boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = brandColors.primary[500]
@@ -1387,7 +1426,10 @@ export default function ProfessionalInvoiceCreatePage() {
               backgroundColor: brandColors.white,
               borderRadius: '12px',
               padding: '1.5rem',
-              border: `1px solid ${brandColors.neutral[200]}`
+              border: `1px solid ${brandColors.neutral[200]}`,
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box'
             }}>
               <div style={{
                 display: 'flex',
@@ -1434,12 +1476,14 @@ export default function ProfessionalInvoiceCreatePage() {
               <div ref={itemsContainerRef} style={{ 
                 overflowX: 'auto',
                 width: '100%',
-                maxWidth: '100%'
+                maxWidth: '100%',
+                boxSizing: 'border-box'
               }}>
                 <table style={{
                   width: '100%',
                   borderCollapse: 'collapse',
-                  minWidth: window.innerWidth < 768 ? '600px' : '800px'
+                  minWidth: isMobile ? '600px' : '800px',
+                  boxSizing: 'border-box'
                 }}>
                   <thead>
                     <tr>
@@ -1542,7 +1586,9 @@ export default function ProfessionalInvoiceCreatePage() {
                               border: `1px solid ${brandColors.neutral[300]}`,
                               borderRadius: '6px',
                               fontSize: '0.875rem',
-                              outline: 'none'
+                              outline: 'none',
+                              boxSizing: 'border-box',
+                              maxWidth: '100%'
                             }}
                           />
                         </td>
@@ -1572,7 +1618,9 @@ export default function ProfessionalInvoiceCreatePage() {
                               borderRadius: '6px',
                               fontSize: '0.875rem',
                               outline: 'none',
-                              textAlign: 'right'
+                              textAlign: 'right',
+                              boxSizing: 'border-box',
+                              maxWidth: '100%'
                             }}
                           />
                         </td>
@@ -1590,7 +1638,9 @@ export default function ProfessionalInvoiceCreatePage() {
                               borderRadius: '6px',
                               fontSize: '0.875rem',
                               outline: 'none',
-                              textAlign: 'center'
+                              textAlign: 'center',
+                              boxSizing: 'border-box',
+                              maxWidth: '100%'
                             }}
                           />
                         </td>
@@ -1608,7 +1658,9 @@ export default function ProfessionalInvoiceCreatePage() {
                               borderRadius: '6px',
                               fontSize: '0.875rem',
                               outline: 'none',
-                              textAlign: 'center'
+                              textAlign: 'center',
+                              boxSizing: 'border-box',
+                              maxWidth: '100%'
                             }}
                           />
                         </td>
@@ -1866,7 +1918,10 @@ export default function ProfessionalInvoiceCreatePage() {
               backgroundColor: brandColors.white,
               borderRadius: '12px',
               padding: '1.5rem',
-              border: `1px solid ${brandColors.neutral[200]}`
+              border: `1px solid ${brandColors.neutral[200]}`,
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box'
             }}
             onClick={cleanupEmptyLastItem}>
               <div style={{
@@ -1966,7 +2021,10 @@ export default function ProfessionalInvoiceCreatePage() {
               backgroundColor: brandColors.white,
               borderRadius: '12px',
               padding: '1.5rem',
-              border: `1px solid ${brandColors.neutral[200]}`
+              border: `1px solid ${brandColors.neutral[200]}`,
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box'
             }}
             onClick={cleanupEmptyLastItem}>
               <div style={{
@@ -2014,7 +2072,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       fontSize: '0.875rem',
                       outline: 'none',
                       resize: 'vertical',
-                      fontFamily: 'inherit'
+                      fontFamily: 'inherit',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>
@@ -2042,7 +2102,9 @@ export default function ProfessionalInvoiceCreatePage() {
                       fontSize: '0.875rem',
                       outline: 'none',
                       resize: 'vertical',
-                      fontFamily: 'inherit'
+                      fontFamily: 'inherit',
+                      boxSizing: 'border-box',
+                      maxWidth: '100%'
                     }}
                   />
                 </div>

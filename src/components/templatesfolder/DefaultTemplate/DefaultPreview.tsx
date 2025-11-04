@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../../lib/useAuth'
 import { brandColors } from '../../../stylings'
@@ -42,6 +42,7 @@ export default function InvoicePreviewPage() {
   const [dbStatus, setDbStatus] = useState<string>('draft')
   const [loading, setLoading] = useState(false)
   const [isFromDatabase, setIsFromDatabase] = useState(false)
+  const hasUpdatedUrlRef = useRef(false)
 
   useEffect(() => {
     const loadInvoiceData = async () => {
@@ -222,10 +223,15 @@ export default function InvoicePreviewPage() {
     }
   }, [invoiceData, isFromDatabase])
 
-  // Update URL when invoice data changes
+  // Update URL when invoice data changes - but only if URL doesn't already match
+  // This prevents re-navigation when using back button
   useEffect(() => {
     if (invoiceData?.invoiceNumber) {
-      setSearchParams({ invoice: invoiceData.invoiceNumber })
+      const currentInvoice = getInvoiceFromUrl(searchParams)
+      // Only update URL if it doesn't match (prevents navigation loop)
+      if (currentInvoice !== invoiceData.invoiceNumber) {
+        setSearchParams({ invoice: invoiceData.invoiceNumber }, { replace: true })
+      }
     }
   }, [invoiceData?.invoiceNumber, setSearchParams])
 
