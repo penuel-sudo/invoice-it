@@ -668,7 +668,6 @@ export default function ProfessionalInvoiceCreatePage() {
         minHeight: '100vh',
         width: '100%',
         maxWidth: '100vw',
-        overflowX: 'hidden',
         overflowY: 'auto'
       }}>
         {/* Header */}

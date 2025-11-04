@@ -175,7 +175,7 @@ export default function RecurringInvoicesPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '1rem',
+            padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
             backgroundColor: brandColors.white,
             borderBottom: `1px solid ${brandColors.neutral[200]}`,
             position: 'sticky',
@@ -183,53 +183,43 @@ export default function RecurringInvoicesPage() {
             zIndex: 10
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button
-              onClick={() => navigate(-1)}
-              style={{
-                padding: '0.5rem',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <ArrowLeft size={20} color={brandColors.neutral[600]} />
-            </button>
-            <div>
-              <h1
-                style={{
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  color: brandColors.neutral[900],
-                  margin: 0
-                }}
-              >
-                Recurring Invoices
-              </h1>
-              <p
-                style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[500],
-                  margin: '0.25rem 0 0 0'
-                }}
-              >
-                Manage your recurring invoice schedules
-              </p>
-            </div>
-          </div>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <ArrowLeft size={window.innerWidth < 768 ? 20 : 24} color={brandColors.neutral[600]} />
+          </button>
+          
+          <h1
+            style={{
+              fontSize: window.innerWidth < 768 ? '1.125rem' : '1.5rem',
+              fontWeight: '600',
+              color: brandColors.neutral[900],
+              margin: 0
+            }}
+          >
+            Recurring Invoices
+          </h1>
+          
+          <div style={{ width: window.innerWidth < 768 ? '40px' : '48px' }}></div> {/* Spacer for centering */}
         </div>
 
         {/* Filters */}
         <div
           style={{
-            padding: '1rem',
+            padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
             borderBottom: `1px solid ${brandColors.neutral[200]}`,
             display: 'flex',
-            gap: '0.5rem',
+            gap: window.innerWidth < 768 ? '0.5rem' : '0.75rem',
             overflowX: 'auto'
           }}
         >
@@ -238,12 +228,12 @@ export default function RecurringInvoicesPage() {
               key={filterOption}
               onClick={() => setFilter(filterOption)}
               style={{
-                padding: '0.5rem 1rem',
+                padding: window.innerWidth < 768 ? '0.5rem 1rem' : '0.75rem 1.5rem',
                 backgroundColor: filter === filterOption ? brandColors.primary[600] : brandColors.neutral[100],
                 color: filter === filterOption ? brandColors.white : brandColors.neutral[700],
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: '0.875rem',
+                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
                 fontWeight: '500',
                 cursor: 'pointer',
                 textTransform: 'capitalize',
@@ -267,7 +257,7 @@ export default function RecurringInvoicesPage() {
         </div>
 
         {/* Content */}
-        <div style={{ padding: '1rem' }}>
+        <div style={{ padding: window.innerWidth < 768 ? '1rem' : '1.5rem' }}>
           {loading ? (
             <div
               style={{
@@ -319,12 +309,12 @@ export default function RecurringInvoicesPage() {
                     key={invoice.id}
                     style={{
                       backgroundColor: brandColors.white,
-                      borderRadius: '12px',
+                      borderRadius: window.innerWidth < 768 ? '12px' : '16px',
                       border: `1px solid ${brandColors.neutral[200]}`,
-                      padding: '1.5rem',
+                      padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '1rem'
+                      gap: window.innerWidth < 768 ? '0.75rem' : '1rem'
                     }}
                   >
                     {/* Header */}
@@ -399,41 +389,77 @@ export default function RecurringInvoicesPage() {
                       style={{
                         display: 'grid',
                         gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)',
-                        gap: '1rem',
-                        padding: '1rem',
+                        gap: window.innerWidth < 768 ? '0.75rem' : '1rem',
+                        padding: window.innerWidth < 768 ? '0.75rem' : '1rem',
                         backgroundColor: brandColors.neutral[50],
                         borderRadius: '8px'
                       }}
                     >
                       <div>
-                        <p style={{ fontSize: '0.75rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
                           Frequency
                         </p>
-                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: brandColors.neutral[900], margin: 0 }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
                           {getFrequencyLabel(invoice.frequency)}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: '0.75rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
                           Next Generation
                         </p>
-                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: brandColors.neutral[900], margin: 0 }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
                           {new Date(invoice.next_generation_date).toLocaleDateString()}
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: '0.75rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
                           Generated Count
                         </p>
-                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: brandColors.neutral[900], margin: 0 }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
                           {invoice.total_generated_count} invoices
                         </p>
                       </div>
                       <div>
-                        <p style={{ fontSize: '0.75rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
                           Auto-send
                         </p>
-                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: brandColors.neutral[900], margin: 0 }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
                           {invoice.auto_send ? 'Yes' : 'No'}
                         </p>
                       </div>
