@@ -1136,9 +1136,9 @@ export default function ProfessionalInvoicePreviewPage() {
             </h3>
             
             {invoiceData.termsAndConditions && (
-              <div style={{
-                marginBottom: '1rem'
-              }}>
+            <div style={{
+              marginBottom: '1rem'
+            }}>
                 <div style={{
                   fontSize: '0.875rem',
                   color: brandColors.neutral[600],
