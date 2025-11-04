@@ -266,6 +266,11 @@ DECLARE
   year_str TEXT;
   month_str TEXT;
   invoice_template TEXT;
+  base_invoice_num TEXT;
+  invoice_prefix TEXT;
+  invoice_format TEXT;
+  date_part TEXT;
+  timestamp_part TEXT;
 BEGIN
   -- Find all active recurring invoices due for generation today
   FOR recurring_record IN
@@ -291,19 +296,41 @@ BEGIN
         invoice_template := 'default';
       END IF;
       
-      -- Generate new invoice number
-      -- Format: INV-YYYY-MM-####
-      year_str := EXTRACT(YEAR FROM recurring_record.next_generation_date)::TEXT;
-      month_str := LPAD(EXTRACT(MONTH FROM recurring_record.next_generation_date)::TEXT, 2, '0');
+      -- Generate new invoice number using the same format as base invoice
+      -- Get base invoice number from snapshot
+      base_invoice_num := recurring_record.invoice_snapshot->>'base_invoice_number';
       
-      -- Get sequence number (count of invoices generated this month for this user)
-      SELECT COALESCE(MAX(CAST(SUBSTRING(invoice_number FROM '(\d+)$') AS INTEGER)), 0) + 1
-      INTO sequence_num
-      FROM public.invoices
-      WHERE user_id = recurring_record.user_id
-        AND invoice_number LIKE 'INV-' || year_str || '-' || month_str || '-%';
-      
-      new_invoice_number := 'INV-' || year_str || '-' || month_str || '-' || LPAD(sequence_num::TEXT, 4, '0');
+      -- Detect format pattern from base invoice number
+      IF base_invoice_num LIKE 'INV-%' AND base_invoice_num ~ '^INV-\d+$' THEN
+        -- Professional format: INV-{timestamp} (e.g., INV-706319)
+        -- Generate new timestamp-based number (last 6 digits of current timestamp)
+        timestamp_part := SUBSTRING(FLOOR(EXTRACT(EPOCH FROM NOW()) * 1000)::TEXT FROM '\d{6}$');
+        new_invoice_number := 'INV-' || timestamp_part;
+      ELSIF base_invoice_num ~ '^\d{8}-\d+$' THEN
+        -- Default format: YYYYMMDD-{timestamp} (e.g., 20241225-123456)
+        -- Extract date part (YYYYMMDD) from generation date
+        date_part := TO_CHAR(recurring_record.next_generation_date, 'YYYYMMDD');
+        -- Generate timestamp part (last 6 digits of current timestamp)
+        timestamp_part := SUBSTRING(FLOOR(EXTRACT(EPOCH FROM NOW()) * 1000)::TEXT FROM '\d{6}$');
+        new_invoice_number := date_part || '-' || timestamp_part;
+      ELSIF base_invoice_num LIKE 'INV-%-%-%' THEN
+        -- Format: INV-YYYY-MM-#### (old pattern format)
+        year_str := EXTRACT(YEAR FROM recurring_record.next_generation_date)::TEXT;
+        month_str := LPAD(EXTRACT(MONTH FROM recurring_record.next_generation_date)::TEXT, 2, '0');
+        
+        -- Get sequence number (count of invoices generated this month for this user)
+        SELECT COALESCE(MAX(CAST(SUBSTRING(invoice_number FROM '(\d+)$') AS INTEGER)), 0) + 1
+        INTO sequence_num
+        FROM public.invoices
+        WHERE user_id = recurring_record.user_id
+          AND invoice_number LIKE 'INV-' || year_str || '-' || month_str || '-%';
+        
+        new_invoice_number := 'INV-' || year_str || '-' || month_str || '-' || LPAD(sequence_num::TEXT, 4, '0');
+      ELSE
+        -- Fallback: Use timestamp-based format (Professional style)
+        timestamp_part := SUBSTRING(FLOOR(EXTRACT(EPOCH FROM NOW()) * 1000)::TEXT FROM '\d{6}$');
+        new_invoice_number := 'INV-' || timestamp_part;
+      END IF;
       
       -- Set dates
       new_issue_date := recurring_record.next_generation_date;

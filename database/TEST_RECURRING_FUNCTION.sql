@@ -46,6 +46,17 @@ SELECT
   invoice_snapshot->'template_settings'->'background_colors'->>'main_background' as main_bg,
   invoice_snapshot->>'currency_code' as currency,
   invoice_snapshot->>'base_invoice_number' as base_invoice,
+  -- Check invoice number format detection
+  CASE 
+    WHEN invoice_snapshot->>'base_invoice_number' LIKE 'INV-%' 
+      AND invoice_snapshot->>'base_invoice_number' ~ '^INV-\d+$' 
+      THEN 'Professional: INV-{timestamp}'
+    WHEN invoice_snapshot->>'base_invoice_number' ~ '^\d{8}-\d+$' 
+      THEN 'Default: YYYYMMDD-{timestamp}'
+    WHEN invoice_snapshot->>'base_invoice_number' LIKE 'INV-%-%-%' 
+      THEN 'Legacy: INV-YYYY-MM-####'
+    ELSE 'Unknown format'
+  END as detected_format,
   next_generation_date,
   status,
   auto_create,
@@ -77,6 +88,21 @@ SELECT
   i.status,
   i.created_at,
   i.currency_code,
+  -- Check invoice number format matches base invoice
+  r.invoice_snapshot->>'base_invoice_number' as base_invoice_number,
+  CASE 
+    WHEN r.invoice_snapshot->>'base_invoice_number' LIKE 'INV-%' 
+      AND r.invoice_snapshot->>'base_invoice_number' ~ '^INV-\d+$' 
+      AND i.invoice_number LIKE 'INV-%'
+      THEN '✓ Format matches (Professional)'
+    WHEN r.invoice_snapshot->>'base_invoice_number' ~ '^\d{8}-\d+$' 
+      AND i.invoice_number ~ '^\d{8}-\d+$'
+      THEN '✓ Format matches (Default)'
+    WHEN r.invoice_snapshot->>'base_invoice_number' LIKE 'INV-%-%-%' 
+      AND i.invoice_number LIKE 'INV-%-%-%'
+      THEN '✓ Format matches (Legacy)'
+    ELSE '✗ Format mismatch!'
+  END as format_match_status,
   -- Check template_settings in generated invoice
   CASE 
     WHEN i.template_settings IS NULL THEN 'MISSING template_settings'
@@ -90,6 +116,7 @@ SELECT
   c.name as client_name
 FROM invoices i
 JOIN clients c ON c.id = i.client_id
+LEFT JOIN recurring_invoices r ON r.id = i.recurring_invoice_id
 WHERE i.recurring_invoice_id IS NOT NULL
   AND i.created_at >= NOW() - INTERVAL '5 minutes'
 ORDER BY i.created_at DESC;
@@ -180,4 +207,5 @@ ORDER BY created_at DESC;
 --      (SELECT template_settings FROM invoices WHERE id = base_invoice_id)::jsonb
 --    )
 --    WHERE id = 'recurring-id'::UUID;
+
 
