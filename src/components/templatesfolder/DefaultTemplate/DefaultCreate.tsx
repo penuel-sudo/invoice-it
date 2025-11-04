@@ -507,7 +507,7 @@ export default function InvoiceCreatePage() {
             color: brandColors.neutral[900],
             margin: 0
           }}>
-            New Invoice
+            Default Invoice
           </h1>
           
           <div style={{ width: '40px' }}></div> {/* Spacer for centering */}

@@ -697,7 +697,9 @@ export default function ProfessionalInvoiceCreatePage() {
         backgroundColor: brandColors.white,
         minHeight: '100vh',
         width: '100%',
-        overflow: isMobile ? 'auto' : 'hidden'
+        maxWidth: '100vw',
+        overflowX: 'hidden',
+        overflowY: 'auto'
       }}>
         {/* Header */}
         <div style={{
@@ -712,9 +714,30 @@ export default function ProfessionalInvoiceCreatePage() {
           zIndex: 10
         }}>
           <button
-            onClick={() => navigate(-1)}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              navigate(-1)
+            }}
+            style={{
+              padding: '0.5rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = brandColors.neutral[100]
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }}
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={20} color={brandColors.neutral[600]} />
           </button>
           
           <h1 style={{
@@ -753,11 +776,19 @@ export default function ProfessionalInvoiceCreatePage() {
         </div>
 
         {/* Form Content */}
-        <div style={{ padding: '1rem' }}>
+        <div style={{ 
+          padding: '1rem',
+          width: '100%',
+          maxWidth: '100vw',
+          boxSizing: 'border-box'
+        }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr',
-            gap: '1.5rem'
+            gap: '1.5rem',
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box'
           }}>
             
             {/* Client Information Section */}
@@ -767,7 +798,10 @@ export default function ProfessionalInvoiceCreatePage() {
               padding: '1.5rem',
               marginBottom: '1.5rem',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-              border: `1px solid ${brandColors.neutral[100]}`
+              border: `1px solid ${brandColors.neutral[100]}`,
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box'
             }}
             onClick={cleanupEmptyLastItem}>
               <div style={{
@@ -1612,7 +1646,10 @@ export default function ProfessionalInvoiceCreatePage() {
               backgroundColor: brandColors.white,
               borderRadius: '12px',
               padding: '1.5rem',
-              border: `1px solid ${brandColors.neutral[200]}`
+              border: `1px solid ${brandColors.neutral[200]}`,
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box'
             }}
             onClick={cleanupEmptyLastItem}>
               <div style={{
@@ -1634,7 +1671,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
                 gap: '1.5rem'
               }}>
                 {/* Left column - Additional charges */}

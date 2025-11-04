@@ -1,4 +1,4 @@
-import { Home, FileText, Plus, DollarSign, Users, Layout } from 'lucide-react'
+import { Home, FileText, Plus, DollarSign, Users, Layout, Repeat } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { brandColors, typographyPresets } from '../../stylings'
 import ProfileDropdown from '../ProfileDropdown'
@@ -6,6 +6,7 @@ import ProfileDropdown from '../ProfileDropdown'
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
   { id: 'invoices', label: 'Transactions', icon: FileText, path: '/invoices' },
+  { id: 'recurring', label: 'Recurring', icon: Repeat, path: '/recurring' },
   { id: 'templates', label: 'Templates', icon: Layout, path: '/templates' },
   { id: 'clients', label: 'Clients', icon: Users, path: '/clients' },
   { id: 'expenses', label: 'Expenses', icon: DollarSign, path: '/expense/new' }

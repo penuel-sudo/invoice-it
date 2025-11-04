@@ -20,18 +20,23 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
   const location = useLocation()
   const navigate = useNavigate()
   const [isVisible, setIsVisible] = useState(true)
+  const [isToggledHidden, setIsToggledHidden] = useState(false)
 
   // Scroll detection for dynamic visibility (except on dashboard)
   useEffect(() => {
     const isDashboard = location.pathname === '/dashboard'
     if (isDashboard) {
       setIsVisible(true)
+      setIsToggledHidden(false)
       return
     }
 
     let lastScrollY = window.scrollY
 
     const handleScroll = () => {
+      // Don't apply scroll behavior if toggled hidden
+      if (isToggledHidden) return
+      
       const currentScrollY = window.scrollY
       
       // Show when scrolling down, hide when scrolling up
@@ -53,6 +58,27 @@ export default function BottomNav({ isNotificationVisible = false, onNotificatio
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [location.pathname, isToggledHidden])
+
+  // Click/tap toggle behavior (except on dashboard)
+  useEffect(() => {
+    const isDashboard = location.pathname === '/dashboard'
+    if (isDashboard) return
+
+    const handleClick = (e: MouseEvent) => {
+      // Don't toggle if clicking on nav buttons or inside nav
+      const target = e.target as HTMLElement
+      if (target.closest('nav') || target.closest('button')) {
+        return
+      }
+      
+      setIsToggledHidden(prev => !prev)
+      setIsVisible(prev => !prev)
+    }
+
+    // Add click listener to document (excluding nav buttons)
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
   }, [location.pathname])
 
   return (

@@ -29,7 +29,8 @@ import {
   CheckCircle,
   Clock,
   AlertTriangle,
-  FileText as FileTextIcon
+  FileText as FileTextIcon,
+  Repeat
 } from 'lucide-react'
 import { useLoading } from '../contexts/LoadingContext'
 
@@ -70,7 +71,7 @@ export default function DashboardPage() {
     if (autoSlideInterval) clearInterval(autoSlideInterval)
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % 3)
-    }, 40000) // 40 seconds
+    }, 2000) // 40 seconds
     setAutoSlideInterval(interval)
   }
 
@@ -99,7 +100,7 @@ export default function DashboardPage() {
     setTouchEnd(0)
     
     // Restart auto-slide after user interaction
-    setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
+    setTimeout(() => startAutoSlide(), 5000) // 10 seconds delay before restarting
   }
 
   // Helper functions from TransactionPage
@@ -692,47 +693,90 @@ export default function DashboardPage() {
               </span>
             </button>
 
-            {/* View Invoices */}
-            <button
-              onClick={() => navigate('/invoices?tab=invoice')}
-              style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-                gap: '0.625rem',
-                padding: '1.125rem 0.75rem',
-                backgroundColor: brandColors.white,
-                border: `1px solid ${brandColors.neutral[200]}`,
-                cursor: 'pointer',
-                borderRadius: '14px',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = brandColors.success[300]
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = brandColors.neutral[200]
-              }}
-            >
-              <div style={{
-                width: '44px',
-                height: '44px',
-                backgroundColor: brandColors.success[100],
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <FileText size={22} color={brandColors.success[600]} />
-              </div>
-              <span style={{
-                fontSize: '0.7rem',
-                fontWeight: '500',
-                color: brandColors.neutral[700]
-              }}>
-                Invoices
-              </span>
-            </button>
+            {/* Recurring Invoices (Mobile only - replaces Invoices) */}
+            {window.innerWidth < 768 ? (
+              <button
+                onClick={() => navigate('/recurring')}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  padding: '1.125rem 0.75rem',
+                  backgroundColor: brandColors.white,
+                  border: `1px solid ${brandColors.neutral[200]}`,
+                  cursor: 'pointer',
+                  borderRadius: '14px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = brandColors.success[300]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = brandColors.neutral[200]
+                }}
+              >
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: brandColors.success[100],
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Repeat size={22} color={brandColors.success[600]} />
+                </div>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: '500',
+                  color: brandColors.neutral[700]
+                }}>
+                  Recurring
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/invoices?tab=invoice')}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  padding: '1.125rem 0.75rem',
+                  backgroundColor: brandColors.white,
+                  border: `1px solid ${brandColors.neutral[200]}`,
+                  cursor: 'pointer',
+                  borderRadius: '14px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = brandColors.success[300]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = brandColors.neutral[200]
+                }}
+              >
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: brandColors.success[100],
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <FileText size={22} color={brandColors.success[600]} />
+                </div>
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: '500',
+                  color: brandColors.neutral[700]
+                }}>
+                  Invoices
+                </span>
+              </button>
+            )}
 
             {/* Clients */}
             <button
