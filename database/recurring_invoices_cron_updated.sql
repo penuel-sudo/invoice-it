@@ -1,10 +1,16 @@
 -- ============================================
--- RECURRING INVOICES AUTO-GENERATION FUNCTION
+-- RECURRING INVOICES AUTO-GENERATION FUNCTION (UPDATED)
 -- ============================================
+-- This is the UPDATED version that includes auto-send functionality
 -- Run this SQL in your Supabase SQL Editor
--- This creates the function that generates recurring invoices daily
+-- 
+-- REQUIREMENTS:
+-- 1. Run recurring_invoices_auto_send.sql first to create the send function
+-- 2. Enable pg_net extension (for HTTP calls) OR use Supabase Edge Functions
+-- 3. Make sure pg_cron extension is enabled
+-- ============================================
 
--- 1. Create the function to generate recurring invoices
+-- 1. Create the function to generate recurring invoices daily
 CREATE OR REPLACE FUNCTION public.generate_recurring_invoices()
 RETURNS void
 LANGUAGE plpgsql
@@ -146,14 +152,39 @@ BEGIN
         updated_at = NOW()
       WHERE id = recurring_record.id;
       
-      -- Auto-send email if enabled (trigger notification for email service)
+      -- Auto-send email if enabled
+      -- This calls the send function which:
+      -- 1. Sends email to client via API
+      -- 2. Creates notification in database (app + browser)
       IF recurring_record.auto_send = true THEN
-        PERFORM pg_notify('recurring_invoice_generated', json_build_object(
-          'invoice_id', new_invoice_id,
-          'user_id', recurring_record.user_id,
-          'client_id', recurring_record.client_id,
-          'template', invoice_template -- Pass template dynamically
-        )::text);
+        PERFORM public.send_recurring_invoice_email(
+          new_invoice_id,
+          recurring_record.user_id,
+          recurring_record.client_id
+        );
+      ELSE
+        -- Even if auto-send is disabled, create a notification that invoice was generated
+        INSERT INTO public.notifications (
+          user_id,
+          type,
+          title,
+          message,
+          status,
+          metadata
+        ) VALUES (
+          recurring_record.user_id,
+          'info',
+          'Invoice Generated',
+          format('Invoice #%s was automatically generated', new_invoice_number),
+          'pending',
+          jsonb_build_object(
+            'invoice_id', new_invoice_id,
+            'invoice_number', new_invoice_number,
+            'client_id', recurring_record.client_id,
+            'recurring_invoice_id', recurring_record.id,
+            'auto_generated', true
+          )
+        );
       END IF;
       
       -- Check if recurring should be cancelled
@@ -186,8 +217,9 @@ SELECT cron.schedule(
 -- 2. It generates invoices for all active recurring invoices where next_generation_date <= today
 -- 3. Template is read dynamically from invoice_snapshot (not hardcoded)
 -- 4. New invoices are created with status 'pending'
--- 5. If auto_send is enabled, it triggers a notification (you'll need to handle email sending)
--- 6. The function automatically calculates the next generation date based on frequency
+-- 5. If auto_send is enabled, it sends email and creates notification
+-- 6. If auto_send is disabled, it still creates a notification that invoice was generated
+-- 7. The function automatically calculates the next generation date based on frequency
 -- ============================================
 
 -- To test the function manually:

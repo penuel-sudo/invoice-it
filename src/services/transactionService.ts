@@ -17,6 +17,7 @@ export interface TransactionData {
   template_settings?: any
   currency_code?: string
   selected_payment_method_ids?: string[]
+  recurring_invoice_id?: string | null
   // Expense fields
   category?: string
   expense_date?: string
@@ -66,6 +67,7 @@ export class TransactionService {
           template_settings,
           currency_code,
           selected_payment_method_ids,
+          recurring_invoice_id,
           created_at,
           updated_at,
           clients!inner(
@@ -152,6 +154,7 @@ export class TransactionService {
           template_settings: invoice.template_settings,
           currency_code: invoice.currency_code,
           selected_payment_method_ids: invoice.selected_payment_method_ids,
+          recurring_invoice_id: invoice.recurring_invoice_id,
           // Client fields
           client_id: invoice.client_id,
           client_name: invoice.clients?.name,

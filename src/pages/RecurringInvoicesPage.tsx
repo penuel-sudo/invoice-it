@@ -24,6 +24,7 @@ import {
   cancelRecurringInvoice,
   type RecurringInvoice
 } from '../lib/recurring/recurringService'
+import { getCurrencySymbol } from '../lib/currencyUtils'
 
 export default function RecurringInvoicesPage() {
   const { user } = useAuth()
@@ -303,6 +304,11 @@ export default function RecurringInvoicesPage() {
                 const StatusIcon = statusBadge.icon
                 const invoiceSnapshot = invoice.invoice_snapshot || {}
                 const totalAmount = parseFloat(invoiceSnapshot.total_amount || '0')
+                // Get currency_code from joined base invoice (preferred) or fallback to snapshot
+                const currencyCode = (invoice as any).invoices?.currency_code || invoiceSnapshot.currency_code || 'USD'
+                const currencySymbol = getCurrencySymbol(currencyCode)
+                // Get base invoice number from joined data or fallback
+                const baseInvoiceNumber = (invoice as any).invoices?.invoice_number || invoiceSnapshot.base_invoice_number || 'N/A'
 
                 return (
                   <div
@@ -339,7 +345,7 @@ export default function RecurringInvoicesPage() {
                             color: brandColors.neutral[900], 
                             margin: 0 
                           }}>
-                            Invoice #{invoiceSnapshot.invoice_number_pattern || 'INV-####'}
+                            Invoice #{baseInvoiceNumber}
                           </h3>
                           <div
                             style={{
@@ -379,7 +385,7 @@ export default function RecurringInvoicesPage() {
                             margin: 0
                           }}
                         >
-                          ${totalAmount.toFixed(2)}
+                          {currencySymbol}{totalAmount.toFixed(2)}
                         </p>
                       </div>
                     </div>

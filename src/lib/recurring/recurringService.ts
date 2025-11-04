@@ -20,6 +20,10 @@ export interface RecurringInvoice {
   updated_at: string
   last_generated_at: string | null
   total_generated_count: number
+  // Joined fields
+  base_invoice?: {
+    invoice_number: string
+  }
 }
 
 export interface RecurringSettings {
@@ -135,7 +139,8 @@ export async function createRecurringInvoice(
 
     // 5. Build invoice snapshot (store all invoice data)
     const invoiceSnapshot = {
-      invoice_number_pattern: 'INV-{YYYY}-{MM}-{####}',
+      base_invoice_number: invoice.invoice_number, // Store the original invoice number for display
+      invoice_number_pattern: 'INV-{YYYY}-{MM}-{####}', // Pattern for generating new invoices
       template: invoice.template || 'default', // Dynamic template
       template_data: invoice.template_data || null,
       template_settings: invoice.template_settings || null,
@@ -208,6 +213,10 @@ export async function getRecurringInvoices(userId: string): Promise<{
           name,
           email,
           company_name
+        ),
+        invoices!recurring_invoices_base_invoice_id_fkey (
+          invoice_number,
+          currency_code
         )
       `)
       .eq('user_id', userId)
