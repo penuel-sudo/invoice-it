@@ -466,7 +466,6 @@ export default function SettingsPage() {
     <Layout hideBottomNav={false}>
       <div style={{
         minHeight: '100vh',
-        backgroundColor: brandColors.neutral[50],
         paddingBottom: '2rem'
       }}>
         {/* Header */}
@@ -533,7 +532,7 @@ export default function SettingsPage() {
                     padding: isMobile ? '0.75rem 1.25rem' : '0.875rem 1.5rem',
                     backgroundColor: isActive ? brandColors.primary[600] : 'white',
                     color: isActive ? 'white' : brandColors.neutral[700],
-                    border: `1px solid ${isActive ? brandColors.primary[600] : brandColors.neutral[200]}`,
+                    border: isActive ? `2px solid ${brandColors.primary[600]}` : `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '12px',
                     cursor: 'pointer',
                     display: 'flex',
@@ -543,8 +542,7 @@ export default function SettingsPage() {
                     fontWeight: isActive ? '600' : '500',
                     transition: 'all 0.2s ease',
                     whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    boxShadow: isActive ? '0 2px 8px rgba(22, 163, 74, 0.2)' : '0 1px 3px rgba(0, 0, 0, 0.1)'
+                    flexShrink: 0
                   }}
                 >
                   <Icon size={isMobile ? 16 : 18} />
@@ -559,8 +557,7 @@ export default function SettingsPage() {
             backgroundColor: 'white',
             borderRadius: isMobile ? '16px' : '20px',
             padding: isMobile ? '1.5rem' : '2rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${brandColors.neutral[100]}`
+            border: `1px solid ${brandColors.neutral[200]}`
           }}>
               {/* Profile Tab */}
               {activeTab === 'profile' && (
@@ -596,8 +593,7 @@ export default function SettingsPage() {
                         style={{
                           width: isMobile ? '100px' : '150px',
                           height: isMobile ? '100px' : '150px',
-                          border: `3px solid ${brandColors.white}`,
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          border: `2px solid ${brandColors.neutral[300]}`,
                           flexShrink: 0
                         }}
                       />

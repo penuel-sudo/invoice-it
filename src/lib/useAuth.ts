@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
+import { initializeCountryCache, clearCountryCache } from './countryCache'
 
 interface AuthState {
   user: User | null
@@ -24,6 +25,11 @@ export function useAuth() {
           console.error('Error getting session:', error)
         } else {
           console.log('Initial session loaded:', session ? 'User logged in' : 'No session')
+          // Initialize country cache if user is already logged in
+          if (session?.user) {
+            console.log('User already logged in, initializing country cache')
+            initializeCountryCache()
+          }
         }
         setAuthState({
           user: session?.user ?? null,
@@ -55,6 +61,13 @@ export function useAuth() {
         // Handle sign out
         if (event === 'SIGNED_OUT') {
           console.log('User signed out')
+          clearCountryCache()
+        }
+        
+        // Initialize country cache when user logs in
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('User signed in, initializing country cache')
+          initializeCountryCache()
         }
         
         setAuthState({

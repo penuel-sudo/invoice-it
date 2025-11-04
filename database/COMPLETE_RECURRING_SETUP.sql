@@ -1,16 +1,255 @@
 -- ============================================
--- RECURRING INVOICES AUTO-GENERATION FUNCTION (UPDATED)
+-- COMPLETE RECURRING INVOICES SETUP
 -- ============================================
--- This is the UPDATED version that includes auto-send functionality
 -- Run this SQL in your Supabase SQL Editor
--- 
--- REQUIREMENTS:
--- 1. Run recurring_invoices_auto_send.sql first to create the send function
--- 2. Enable pg_net extension (for HTTP calls) OR use Supabase Edge Functions
--- 3. Make sure pg_cron extension is enabled
+-- This includes:
+-- 1. pg_net extension setup with proper permissions
+-- 2. Auto-send email function
+-- 3. Cron function for generating recurring invoices
 -- ============================================
 
--- 1. Create the function to generate recurring invoices daily
+-- Step 1: Enable pg_net extension and grant permissions
+CREATE EXTENSION IF NOT EXISTS pg_net;
+
+GRANT USAGE ON SCHEMA net TO postgres, anon, authenticated, service_role;
+
+GRANT ALL ON ALL TABLES IN SCHEMA net TO postgres, anon, authenticated, service_role;
+
+GRANT ALL ON ALL ROUTINES IN SCHEMA net TO postgres, anon, authenticated, service_role;
+
+GRANT ALL ON ALL SEQUENCES IN SCHEMA net TO postgres, anon, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA net GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA net GRANT ALL ON ROUTINES TO postgres, anon, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA net GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role;
+
+-- ============================================
+-- Step 2: Auto-Send Email Function
+-- ============================================
+
+CREATE OR REPLACE FUNCTION public.send_recurring_invoice_email(
+  p_invoice_id UUID,
+  p_user_id UUID,
+  p_client_id UUID
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  invoice_record RECORD;
+  client_record RECORD;
+  user_profile RECORD;
+  email_api_url TEXT;
+  email_response JSONB;
+  client_email TEXT;
+  invoice_data JSONB;
+  user_data JSONB;
+  http_status_code INTEGER;
+  http_content TEXT;
+BEGIN
+  -- Get email API URL from environment or use default
+  email_api_url := COALESCE(
+    current_setting('app.email_api_url', true),
+    'https://invoice-it.org/api/send-invoice-email' -- UPDATE THIS WITH YOUR API URL
+  );
+
+  -- Fetch invoice data
+  SELECT 
+    i.*,
+    i.template_data,
+    i.template_settings,
+    i.currency_code
+  INTO invoice_record
+  FROM public.invoices i
+  WHERE i.id = p_invoice_id;
+
+  IF NOT FOUND THEN
+    RAISE WARNING 'Invoice % not found', p_invoice_id;
+    RETURN;
+  END IF;
+
+  -- Fetch client data (for email)
+  SELECT email, name, company_name
+  INTO client_record
+  FROM public.clients
+  WHERE id = p_client_id;
+
+  IF NOT FOUND OR client_record.email IS NULL THEN
+    RAISE WARNING 'Client % not found or has no email', p_client_id;
+    -- Still create notification that email failed
+    INSERT INTO public.notifications (
+      user_id,
+      type,
+      title,
+      message,
+      status,
+      metadata
+    ) VALUES (
+      p_user_id,
+      'error',
+      'Auto-send Failed',
+      'Failed to send invoice: Client email not found',
+      'pending',
+      jsonb_build_object(
+        'invoice_id', p_invoice_id,
+        'client_id', p_client_id,
+        'error', 'client_email_missing'
+      )
+    );
+    RETURN;
+  END IF;
+
+  client_email := client_record.email;
+
+  -- Fetch user profile data
+  SELECT full_name, company_name
+  INTO user_profile
+  FROM public.profiles
+  WHERE id = p_user_id;
+
+  -- Build invoice data for API
+  invoice_data := jsonb_build_object(
+    'invoiceNumber', invoice_record.invoice_number,
+    'issueDate', invoice_record.issue_date,
+    'dueDate', invoice_record.due_date,
+    'subtotal', invoice_record.subtotal,
+    'taxAmount', invoice_record.tax_amount,
+    'totalAmount', invoice_record.total_amount,
+    'currencyCode', invoice_record.currency_code,
+    'notes', invoice_record.notes,
+    'clientName', client_record.name,
+    'clientEmail', client_email,
+    'template', invoice_record.template,
+    'templateData', invoice_record.template_data,
+    'templateSettings', invoice_record.template_settings
+  );
+
+  -- Build user data for API
+  user_data := jsonb_build_object(
+    'id', p_user_id,
+    'fullName', COALESCE(user_profile.full_name, ''),
+    'businessName', COALESCE(user_profile.company_name, '')
+  );
+
+  -- Call email API via HTTP (using pg_net)
+  BEGIN
+    -- pg_net.http_post returns a table with: id, status_code, content, headers, created
+    -- We need to extract status_code and content fields
+    SELECT status_code, content
+    INTO http_status_code, http_content
+    FROM net.http_post(
+      url := email_api_url,
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json'
+      ),
+      body := jsonb_build_object(
+        'to', client_email,
+        'invoiceData', invoice_data,
+        'userData', user_data,
+        'clientName', client_record.name,
+        'greetingMessage', NULL,
+        'businessName', COALESCE(user_profile.company_name, '')
+      )::text
+    );
+
+    -- Parse the response content as JSON
+    IF http_status_code = 200 THEN
+      -- Try to parse as JSON, fallback to text if not JSON
+      BEGIN
+        email_response := http_content::jsonb;
+      EXCEPTION WHEN OTHERS THEN
+        email_response := jsonb_build_object('success', true, 'message', http_content);
+      END;
+    ELSE
+      -- Error response
+      email_response := jsonb_build_object(
+        'statusCode', http_status_code,
+        'error', http_content,
+        'success', false
+      );
+    END IF;
+
+    -- Check if email was sent successfully
+    IF http_status_code = 200 OR (email_response->>'success')::boolean = true THEN
+      -- Email sent successfully - create success notification
+      INSERT INTO public.notifications (
+        user_id,
+        type,
+        title,
+        message,
+        status,
+        metadata
+      ) VALUES (
+        p_user_id,
+        'success',
+        'Invoice Sent',
+        format('Invoice #%s sent to %s', invoice_record.invoice_number, client_email),
+        'pending',
+        jsonb_build_object(
+          'invoice_id', p_invoice_id,
+          'invoice_number', invoice_record.invoice_number,
+          'client_id', p_client_id,
+          'client_name', client_record.name,
+          'client_email', client_email,
+          'auto_sent', true
+        )
+      );
+    ELSE
+      -- Email failed - create error notification
+      INSERT INTO public.notifications (
+        user_id,
+        type,
+        title,
+        message,
+        status,
+        metadata
+      ) VALUES (
+        p_user_id,
+        'error',
+        'Auto-send Failed',
+        format('Failed to send invoice #%s: %s', invoice_record.invoice_number, COALESCE(email_response->>'error', 'Unknown error')),
+        'pending',
+        jsonb_build_object(
+          'invoice_id', p_invoice_id,
+          'invoice_number', invoice_record.invoice_number,
+          'client_id', p_client_id,
+          'error', email_response
+        )
+      );
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    -- HTTP call failed - create error notification
+    INSERT INTO public.notifications (
+      user_id,
+      type,
+      title,
+      message,
+      status,
+      metadata
+    ) VALUES (
+      p_user_id,
+      'error',
+      'Auto-send Failed',
+      format('Failed to send invoice #%s: %s', invoice_record.invoice_number, SQLERRM),
+      'pending',
+      jsonb_build_object(
+        'invoice_id', p_invoice_id,
+        'invoice_number', invoice_record.invoice_number,
+        'client_id', p_client_id,
+        'error', SQLERRM
+      )
+    );
+  END;
+END;
+$$;
+
+-- ============================================
+-- Step 3: Cron Function for Generating Invoices
+-- ============================================
+
 CREATE OR REPLACE FUNCTION public.generate_recurring_invoices()
 RETURNS void
 LANGUAGE plpgsql
@@ -82,9 +321,9 @@ BEGIN
         tax_amount,
         total_amount,
         notes,
-        template, -- Uses variable (dynamic)
-        template_data, -- From snapshot
-        template_settings, -- From snapshot
+        template,
+        template_data,
+        template_settings,
         currency_code,
         selected_payment_method_ids,
         recurring_invoice_id,
@@ -94,14 +333,14 @@ BEGIN
         recurring_record.user_id,
         recurring_record.client_id,
         new_invoice_number,
-        'pending', -- New invoices start as pending
+        'pending',
         new_issue_date,
         new_due_date,
         (recurring_record.invoice_snapshot->>'subtotal')::NUMERIC,
         (recurring_record.invoice_snapshot->>'tax_amount')::NUMERIC,
         (recurring_record.invoice_snapshot->>'total_amount')::NUMERIC,
         recurring_record.invoice_snapshot->>'notes',
-        invoice_template, -- Dynamic variable (not hardcoded)
+        invoice_template,
         recurring_record.invoice_snapshot->'template_data',
         recurring_record.invoice_snapshot->'template_settings',
         recurring_record.invoice_snapshot->>'currency_code',
@@ -153,9 +392,6 @@ BEGIN
       WHERE id = recurring_record.id;
       
       -- Auto-send email if enabled
-      -- This calls the send function which:
-      -- 1. Sends email to client via API
-      -- 2. Creates notification in database (app + browser)
       IF recurring_record.auto_send = true THEN
         PERFORM public.send_recurring_invoice_email(
           new_invoice_id,
@@ -203,7 +439,11 @@ BEGIN
 END;
 $$;
 
--- 2. Schedule the cron job (runs daily at 2 AM UTC)
+-- ============================================
+-- Step 4: Schedule the Cron Job
+-- ============================================
+
+-- Schedule the cron job (runs daily at 2 AM UTC)
 -- Note: Make sure pg_cron extension is enabled in Supabase
 SELECT cron.schedule(
   'generate-recurring-invoices-daily',
@@ -213,6 +453,7 @@ SELECT cron.schedule(
 
 -- ============================================
 -- NOTES:
+-- ============================================
 -- 1. The function runs daily at 2 AM UTC
 -- 2. It generates invoices for all active recurring invoices where next_generation_date <= today
 -- 3. Template is read dynamically from invoice_snapshot (not hardcoded)
@@ -224,6 +465,13 @@ SELECT cron.schedule(
 
 -- To test the function manually:
 -- SELECT public.generate_recurring_invoices();
+
+-- To test the send function manually:
+-- SELECT public.send_recurring_invoice_email(
+--   'invoice-id'::UUID,
+--   'user-id'::UUID,
+--   'client-id'::UUID
+-- );
 
 -- To unschedule the cron job:
 -- SELECT cron.unschedule('generate-recurring-invoices-daily');

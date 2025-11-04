@@ -470,7 +470,6 @@ export default function TransactionPage() {
                     backgroundColor: 'white',
                     border: `1px solid ${brandColors.neutral[200]}`,
                     borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                     zIndex: 50,
                     minWidth: '180px'
                   }}>
@@ -638,20 +637,20 @@ export default function TransactionPage() {
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     flex: 1,
-                    boxShadow: activeTab === tab.id ? '0 4px 12px rgba(22, 163, 74, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                    border: activeTab === tab.id ? `2px solid ${brandColors.primary[600]}` : `1px solid ${brandColors.neutral[200]}`,
                     backdropFilter: 'blur(10px)',
                     minHeight: window.innerWidth < 768 ? '44px' : 'auto'
                   }}
                   onMouseEnter={(e) => {
                     if (activeTab !== tab.id) {
                       e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
+                      e.currentTarget.style.border = `2px solid ${brandColors.neutral[300]}`
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (activeTab !== tab.id) {
                       e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+                      e.currentTarget.style.border = `1px solid ${brandColors.neutral[200]}`
                     }
                   }}
                 >
@@ -695,19 +694,18 @@ export default function TransactionPage() {
                   padding: '1rem 2rem',
                   backgroundColor: brandColors.primary[600],
                   color: brandColors.white,
-                  border: 'none',
                   borderRadius: '12px',
                   fontSize: '0.875rem',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
+                  border: `2px solid ${brandColors.primary[600]}`,
                   transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(22, 163, 74, 0.4)'
+                  e.currentTarget.style.border = `2px solid ${brandColors.primary[700]}`
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)'
+                  e.currentTarget.style.border = `2px solid ${brandColors.primary[600]}`
                 }}
               >
                 {activeTab === 'expenses' ? 'Create Your First Expense' : 'Create Your First Invoice'}
@@ -727,11 +725,10 @@ export default function TransactionPage() {
                   padding: window.innerWidth < 768 ? '0.875rem' : '1rem',
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   borderRadius: window.innerWidth < 768 ? '12px' : '16px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                   border: `1px solid ${brandColors.neutral[200]}`,
                   cursor: bulkMode ? 'pointer' : 'pointer',
                   backdropFilter: 'blur(10px)',
-                  transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+                  transition: 'background-color 0.2s ease, border 0.2s ease',
                   position: 'relative',
                   zIndex: showTransactionDropdown === transaction.id ? 1000 : index + 1,
                   minHeight: window.innerWidth < 768 ? '60px' : 'auto'
@@ -754,13 +751,13 @@ export default function TransactionPage() {
                 onMouseEnter={(e) => {
                   if (!bulkMode) {
                     e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.12)'
+                    e.currentTarget.style.border = `2px solid ${brandColors.neutral[300]}`
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!bulkMode) {
                     e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)'
+                    e.currentTarget.style.border = `1px solid ${brandColors.neutral[200]}`
                   }
                 }}
                 >
@@ -937,8 +934,7 @@ export default function TransactionPage() {
                             backgroundColor: brandColors.white,
                             border: `1px solid ${brandColors.neutral[200]}`,
                             borderRadius: '12px',
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                              zIndex: 10000,
+                            zIndex: 10000,
                             width: '160px',
                             padding: '0.5rem 0',
                             overflow: 'hidden'

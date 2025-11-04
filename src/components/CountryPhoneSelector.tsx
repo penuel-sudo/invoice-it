@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { brandColors,  } from '../stylings'
 import { ChevronDown, Search, Phone } from 'lucide-react'
-import countries from 'country-list'
 import {  isValidPhoneNumber,  } from 'libphonenumber-js'
-import { getCountryInfo, getCountryFlag, getCountryFlagEmoji,  } from '../lib/countryUtils'
+import { getCountryInfo } from '../lib/countryUtils'
+import { getCachedCountriesData, initializeCountryCache } from '../lib/countryCache'
 
 interface CountryData {
   code: string
@@ -57,20 +57,17 @@ export default function CountryPhoneSelector({
   const mainContainerRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Memoize countries data for performance
-  const countriesData = useMemo<CountryData[]>(() => 
-    countries.getData().map(country => {
-    const countryInfo = getCountryInfo(country.code)
-    return {
-      code: country.code,
-      name: country.name,
-      phoneCode: countryInfo?.phoneCode || '',
-      flag: getCountryFlag(country.code),
-      flagEmoji: getCountryFlagEmoji(country.code)
+  // Use cached countries data (loaded once on user login)
+  // If cache is not initialized, initialize it now as fallback
+  const countriesData = useMemo<CountryData[]>(() => {
+    const cached = getCachedCountriesData()
+    if (cached.length > 0) {
+      return cached as CountryData[]
     }
-    }).filter(country => country.phoneCode && country.phoneCode.length > 0),
-    []
-  )
+    // Fallback: initialize cache if not already done
+    initializeCountryCache()
+    return getCachedCountriesData() as CountryData[]
+  }, [])
 
   // Check if mobile on mount and resize
   useEffect(() => {
