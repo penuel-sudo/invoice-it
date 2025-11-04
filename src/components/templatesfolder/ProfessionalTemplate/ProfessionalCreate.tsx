@@ -50,23 +50,6 @@ export default function ProfessionalInvoiceCreatePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  
-  // Responsive state management
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-  
-  // Helper function for responsive grid - use simple responsive like DefaultCreate
-  const getResponsiveGrid = (columns: number = 1) => {
-    if (isMobile) return '1fr' // Mobile: single column
-    return `repeat(${columns}, 1fr)` // Desktop: specified columns
-  }
   
   // Generate default invoice number
   const generateInvoiceNumber = () => {
@@ -827,7 +810,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)',
                 gap: '1rem'
               }}>
                 <div>
@@ -1005,7 +988,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)',
                 gap: '1rem'
               }}>
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -1208,7 +1191,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(3, 1fr)',
                 gap: '1rem'
               }}>
                 <div>
@@ -1482,7 +1465,7 @@ export default function ProfessionalInvoiceCreatePage() {
                 <table style={{
                   width: '100%',
                   borderCollapse: 'collapse',
-                  minWidth: isMobile ? '600px' : '800px',
+                  minWidth: window.innerWidth < 768 ? '600px' : '800px',
                   boxSizing: 'border-box'
                 }}>
                   <thead>
@@ -1723,7 +1706,7 @@ export default function ProfessionalInvoiceCreatePage() {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
                 gap: '1.5rem'
               }}>
                 {/* Left column - Additional charges */}

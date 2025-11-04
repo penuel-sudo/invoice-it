@@ -256,13 +256,13 @@ export default function CustomizationPanel({
               position: 'fixed',
               top: 0,
               right: 0,
-              width: '400px',
+              width: window.innerWidth < 768 ? '100%' : '400px',
               height: '100vh',
               backgroundColor: brandColors.white,
               boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.1)',
               zIndex: 1001,
               overflowY: 'auto',
-              padding: '2rem'
+              padding: window.innerWidth < 768 ? '1rem' : '2rem'
             }}
           >
             {/* Header */}
