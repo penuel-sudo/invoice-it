@@ -71,7 +71,7 @@ export default function DashboardPage() {
     if (autoSlideInterval) clearInterval(autoSlideInterval)
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % 3)
-    }, 2000) // 40 seconds
+    }, 3000) // 30 seconds
     setAutoSlideInterval(interval)
   }
 
@@ -100,7 +100,7 @@ export default function DashboardPage() {
     setTouchEnd(0)
     
     // Restart auto-slide after user interaction
-    setTimeout(() => startAutoSlide(), 5000) // 10 seconds delay before restarting
+    setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
   }
 
   // Helper functions from TransactionPage

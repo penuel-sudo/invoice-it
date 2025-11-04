@@ -44,22 +44,42 @@ export default function InvoiceCreatePage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   
+  // Generate invoice number with new format (not INV-)
+  const generateInvoiceNumber = () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const timestamp = Date.now().toString().slice(-6)
+    return `${year}${month}${day}-${timestamp}`
+  }
+
+  // Calculate due date (one month from invoice date)
+  const calculateDueDate = (invoiceDate: string) => {
+    if (!invoiceDate) return ''
+    const date = new Date(invoiceDate)
+    date.setMonth(date.getMonth() + 1)
+    return date.toISOString().split('T')[0]
+  }
+  
   const [formData, setFormData] = useState<InvoiceFormData>(() => {
     // Only use Default template's localStorage key, never generic or professional
     const savedData = invoiceStorage.getDraftDefault()
     if (savedData) {
       return savedData
     }
-    // Return fresh default data, don't use getDraftWithFallback which uses generic key
+    // Return fresh default data with initial values
+    const invoiceDate = new Date().toISOString().split('T')[0]
+    const dueDate = calculateDueDate(invoiceDate)
     return {
       clientName: '',
       clientEmail: '',
       clientAddress: '',
       clientPhone: '',
       clientCompanyName: '',
-      invoiceNumber: '',
-      invoiceDate: new Date().toISOString().split('T')[0],
-      dueDate: '',
+      invoiceNumber: generateInvoiceNumber(),
+      invoiceDate: invoiceDate,
+      dueDate: dueDate,
       items: [
         {
           id: Date.now().toString(),
@@ -179,12 +199,23 @@ export default function InvoiceCreatePage() {
       } else {
         // No invoice to load, check localStorage for any saved draft
         const savedData = invoiceStorage.getDraftDefault()
-        if (savedData) {
+        if (savedData && savedData.invoiceNumber && savedData.clientName) {
+          // Only load if there's actual data (not just initial values)
           console.log('Loading saved draft from localStorage')
           setFormData(savedData)
           if (savedData.invoiceNumber) {
             setSearchParams({ invoice: savedData.invoiceNumber }, { replace: true })
           }
+        } else {
+          // No saved draft, ensure initial values are set
+          const invoiceDate = new Date().toISOString().split('T')[0]
+          const dueDate = calculateDueDate(invoiceDate)
+          setFormData(prev => ({
+            ...prev,
+            invoiceNumber: prev.invoiceNumber || generateInvoiceNumber(),
+            invoiceDate: prev.invoiceDate || invoiceDate,
+            dueDate: prev.dueDate || dueDate
+          }))
         }
         hasLoadedInitialData.current = true
       }
@@ -258,6 +289,16 @@ export default function InvoiceCreatePage() {
       grandTotal
     }))
   }, [formData.items])
+
+  // Auto-update due date when invoice date changes
+  useEffect(() => {
+    if (formData.invoiceDate && hasLoadedInitialData.current) {
+      const newDueDate = calculateDueDate(formData.invoiceDate)
+      if (newDueDate !== formData.dueDate) {
+        setFormData(prev => ({ ...prev, dueDate: newDueDate }))
+      }
+    }
+  }, [formData.invoiceDate])
 
   // Auto-save form data to localStorage
   useEffect(() => {
@@ -423,11 +464,43 @@ export default function InvoiceCreatePage() {
       }
 
       // Use shared save function - handles all validation, saving, and localStorage clearing
-      const result = await saveInvoiceToDatabase(saveData, user, { status: 'draft' })
+      const result = await saveInvoiceToDatabase(saveData, user, undefined, { status: 'draft' })
       
       if (result.success) {
-        // Reset form to default state (like the original function did)
-        setFormData(invoiceStorage.getDraftWithFallback())
+        // Reset form to empty state with initial values (like ProfessionalCreate)
+        const invoiceDate = new Date().toISOString().split('T')[0]
+        const dueDate = calculateDueDate(invoiceDate)
+        setFormData({
+          clientName: '',
+          clientEmail: '',
+          clientAddress: '',
+          clientPhone: '',
+          clientCompanyName: '',
+          invoiceNumber: generateInvoiceNumber(),
+          invoiceDate: invoiceDate,
+          dueDate: dueDate,
+          items: [
+            {
+              id: Date.now().toString(),
+              description: '',
+              quantity: 1,
+              unitPrice: 0,
+              taxRate: 0,
+              lineTotal: 0
+            }
+          ],
+          notes: '',
+          subtotal: 0,
+          taxTotal: 0,
+          grandTotal: 0,
+          currency: userDefaults.defaultCurrency || 'USD',
+          currencySymbol: userDefaults.defaultCurrencySymbol || '$',
+          selectedPaymentMethodIds: userDefaults.paymentMethods.map((m: PaymentMethod) => m.id)
+        })
+        // Clear URL params
+        setSearchParams({})
+        hasLoadedInitialData.current = false
+        toast.success('Invoice saved successfully!')
       }
     } catch (error) {
       console.error('Error in handleSave:', error)
