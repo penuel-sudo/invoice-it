@@ -384,7 +384,6 @@ export default function TransactionPage() {
     <Layout hideBottomNav={false}>
       <div style={{
         minHeight: '100vh',
-        background: `linear-gradient(135deg, ${brandColors.primary[50]} 0%, ${brandColors.neutral[50]} 100%)`,
         width: '100%',
         maxWidth: '100vw',
         overflow: 'hidden'
@@ -630,7 +629,6 @@ export default function TransactionPage() {
                     padding: window.innerWidth < 768 ? '0.875rem 1rem' : '1rem 2rem',
                     backgroundColor: activeTab === tab.id ? brandColors.primary[600] : 'rgba(255, 255, 255, 0.8)',
                     color: activeTab === tab.id ? brandColors.white : brandColors.neutral[700],
-                    border: 'none',
                     borderRadius: window.innerWidth < 768 ? '12px' : '16px',
                     fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem',
                     fontWeight: '600',
