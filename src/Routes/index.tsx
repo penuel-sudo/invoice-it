@@ -18,6 +18,7 @@ import ResetPasswordPage from '../pages/reset-password'
 import ProfilePage from '../pages/ProfilePage'
 import SettingsPage from '../pages/SettingsPage'
 import ClientPage from '../pages/ClientPage'
+import RecurringInvoicesPage from '../pages/RecurringInvoicesPage'
 import NotFoundPage from '../pages/NotFoundPage'
 
 
@@ -123,6 +124,14 @@ export const router = createBrowserRouter([
     element: (
       <AuthWrapper requireAuth={true}>
         <ClientPage />
+      </AuthWrapper>
+    )
+  },
+  {
+    path: '/recurring',
+    element: (
+      <AuthWrapper requireAuth={true}>
+        <RecurringInvoicesPage />
       </AuthWrapper>
     )
   },

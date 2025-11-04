@@ -20,13 +20,15 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   ChevronDown,
-  Clock
+  Clock,
+  Repeat
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLoading } from '../contexts/LoadingContext'
 import { format } from 'date-fns'
 // StatusLogic removed - StatusButton handles validation internally
 import OverdueDetector from '../components/OverdueDetector'
+import MakeRecurringModal from '../components/recurring/MakeRecurringModal'
 
 // Use TransactionData from service
 type Transaction = TransactionData
@@ -54,6 +56,10 @@ export default function TransactionPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const topbarDropdownRef = useRef<HTMLDivElement>(null)
   const transactionDropdownRef = useRef<HTMLDivElement>(null)
+  
+  // Recurring modal state
+  const [showRecurringModal, setShowRecurringModal] = useState(false)
+  const [selectedInvoiceForRecurring, setSelectedInvoiceForRecurring] = useState<Transaction | null>(null)
 
 
   // Check if mobile
@@ -1054,6 +1060,51 @@ export default function TransactionPage() {
                               </>
                             )}
                             
+                            {/* Make Recurring - Only for invoices */}
+                            {transaction.type === 'invoice' && (
+                              <>
+                                {/* Separator */}
+                                <div style={{
+                                  height: '1px',
+                                  backgroundColor: brandColors.neutral[200],
+                                  margin: '0.5rem 0'
+                                }} />
+                                
+                                <button
+                                  onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    setSelectedInvoiceForRecurring(transaction)
+                                    setShowRecurringModal(true)
+                                    setShowTransactionDropdown(null)
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    padding: '0.875rem 1rem',
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '500',
+                                    color: brandColors.primary[600],
+                                    transition: 'background-color 0.2s ease',
+                                    textAlign: 'left'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = brandColors.primary[50]
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent'
+                                  }}
+                                >
+                                  <Repeat size={16} color={brandColors.primary[600]} />
+                                  Make Recurring
+                                </button>
+                              </>
+                            )}
+                            
                             {/* Separator */}
                             <div style={{
                               height: '1px',
@@ -1106,6 +1157,24 @@ export default function TransactionPage() {
           )}
         </div>
       </div>
+      
+      {/* Recurring Modal */}
+      {showRecurringModal && selectedInvoiceForRecurring && user && (
+        <MakeRecurringModal
+          invoiceId={selectedInvoiceForRecurring.id}
+          invoiceData={selectedInvoiceForRecurring}
+          user={user}
+          isOpen={showRecurringModal}
+          onClose={() => {
+            setShowRecurringModal(false)
+            setSelectedInvoiceForRecurring(null)
+          }}
+          onSuccess={() => {
+            // Refresh transactions after successful setup
+            loadTransactions()
+          }}
+        />
+      )}
     </Layout>
   )
 }
