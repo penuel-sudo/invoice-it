@@ -299,13 +299,6 @@ export default function ProfessionalInvoiceCreatePage() {
         }
       } else if (location.state?.invoiceData) {
         setFormData(location.state.invoiceData)
-        if (location.state.invoiceData.invoiceNumber) {
-          setSearchParams({ invoice: location.state.invoiceData.invoiceNumber })
-        }
-      } else {
-        if (formData.invoiceNumber) {
-          setSearchParams({ invoice: formData.invoiceNumber })
-        }
       }
     }
 
@@ -435,12 +428,7 @@ export default function ProfessionalInvoiceCreatePage() {
     invoiceStorage.saveDraftDebouncedProfessional(dataToSave)
   }, [formData, allPaymentMethods])
 
-  // Update URL when invoice number changes (like Default)
-  useEffect(() => {
-    if (formData.invoiceNumber && !loading) {
-      setSearchParams({ invoice: formData.invoiceNumber })
-    }
-  }, [formData.invoiceNumber, setSearchParams])
+  // URL is only updated in preview, not in create component
 
   // Add item
   const addItem = () => {
@@ -1460,13 +1448,13 @@ export default function ProfessionalInvoiceCreatePage() {
                 overflowX: 'auto',
                 width: '100%',
                 maxWidth: '100%',
+                WebkitOverflowScrolling: 'touch',
                 boxSizing: 'border-box'
               }}>
                 <table style={{
                   width: '100%',
                   borderCollapse: 'collapse',
-                  minWidth: window.innerWidth < 768 ? '600px' : '800px',
-                  boxSizing: 'border-box'
+                  minWidth: window.innerWidth < 768 ? '600px' : '800px'
                 }}>
                   <thead>
                     <tr>

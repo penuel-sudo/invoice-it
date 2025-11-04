@@ -328,10 +328,27 @@ export default function RecurringInvoicesPage() {
                     }}
                   >
                     {/* Header */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                          <h3 style={{ fontSize: '1rem', fontWeight: '600', color: brandColors.neutral[900], margin: 0 }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'flex-start',
+                      flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+                      gap: window.innerWidth < 768 ? '0.75rem' : '0'
+                    }}>
+                      <div style={{ flex: 1, width: '100%' }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.75rem', 
+                          marginBottom: '0.5rem',
+                          flexWrap: 'wrap'
+                        }}>
+                          <h3 style={{ 
+                            fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem', 
+                            fontWeight: '600', 
+                            color: brandColors.neutral[900], 
+                            margin: 0 
+                          }}>
                             Invoice #{invoiceSnapshot.invoice_number_pattern || 'INV-####'}
                           </h3>
                           <div
@@ -344,21 +361,29 @@ export default function RecurringInvoicesPage() {
                               color: statusBadge.color,
                               borderRadius: '12px',
                               fontSize: '0.75rem',
-                              fontWeight: '600'
+                              fontWeight: '600',
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             <StatusIcon size={12} />
                             {statusBadge.label}
                           </div>
                         </div>
-                        <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: 0 }}>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem', 
+                          color: brandColors.neutral[600], 
+                          margin: 0 
+                        }}>
                           {(invoice as any).clients?.name || 'Client Name'}
                         </p>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{ 
+                        textAlign: window.innerWidth < 768 ? 'left' : 'right',
+                        width: window.innerWidth < 768 ? '100%' : 'auto'
+                      }}>
                         <p
                           style={{
-                            fontSize: '1.25rem',
+                            fontSize: window.innerWidth < 768 ? '1rem' : '1.25rem',
                             fontWeight: '700',
                             color: brandColors.primary[600],
                             margin: 0
@@ -415,7 +440,12 @@ export default function RecurringInvoicesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      gap: '0.5rem', 
+                      flexWrap: 'wrap',
+                      flexDirection: window.innerWidth < 768 ? 'column' : 'row'
+                    }}>
                       {invoice.status === 'active' && (
                         <button
                           onClick={() => handlePause(invoice.id)}
@@ -430,8 +460,10 @@ export default function RecurringInvoicesPage() {
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             gap: '0.5rem',
-                            transition: 'all 0.2s ease'
+                            transition: 'all 0.2s ease',
+                            width: window.innerWidth < 768 ? '100%' : 'auto'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = brandColors.warning[100]
@@ -458,8 +490,10 @@ export default function RecurringInvoicesPage() {
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             gap: '0.5rem',
-                            transition: 'all 0.2s ease'
+                            transition: 'all 0.2s ease',
+                            width: window.innerWidth < 768 ? '100%' : 'auto'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = brandColors.success[100]
@@ -485,8 +519,10 @@ export default function RecurringInvoicesPage() {
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
+                          justifyContent: 'center',
                           gap: '0.5rem',
-                          transition: 'all 0.2s ease'
+                          transition: 'all 0.2s ease',
+                          width: window.innerWidth < 768 ? '100%' : 'auto'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = brandColors.primary[100]
@@ -512,8 +548,10 @@ export default function RecurringInvoicesPage() {
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             gap: '0.5rem',
-                            transition: 'all 0.2s ease'
+                            transition: 'all 0.2s ease',
+                            width: window.innerWidth < 768 ? '100%' : 'auto'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = brandColors.error[100]

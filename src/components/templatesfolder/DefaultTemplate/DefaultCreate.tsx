@@ -315,15 +315,7 @@ export default function InvoiceCreatePage() {
     invoiceStorage.saveDraftDebouncedDefault(dataToSave)
   }, [formData, allPaymentMethods])
 
-  // Update URL when invoice number changes - but don't trigger loadInvoiceData
-  useEffect(() => {
-    if (formData.invoiceNumber && !loading && hasLoadedInitialData.current) {
-      const currentInvoice = getInvoiceFromUrl(searchParams)
-      if (currentInvoice !== formData.invoiceNumber) {
-        setSearchParams({ invoice: formData.invoiceNumber }, { replace: true })
-      }
-    }
-  }, [formData.invoiceNumber, loading])
+  // URL is only updated in preview, not in create component
 
   const addItem = () => {
     const newItem: InvoiceItem = {
