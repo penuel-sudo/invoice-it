@@ -9,8 +9,12 @@
 -- ============================================
 
 -- Step 1: Enable pg_net extension and grant permissions
+-- Note: pg_net may need to be enabled in Supabase Dashboard first
+-- Go to Database > Extensions and enable "pg_net" if it's not already enabled
+
 CREATE EXTENSION IF NOT EXISTS pg_net;
 
+-- Grant permissions to use pg_net
 GRANT USAGE ON SCHEMA net TO postgres, anon, authenticated, service_role;
 
 GRANT ALL ON ALL TABLES IN SCHEMA net TO postgres, anon, authenticated, service_role;
@@ -24,6 +28,10 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA net GRANT ALL ON TABLES TO 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA net GRANT ALL ON ROUTINES TO postgres, anon, authenticated, service_role;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA net GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role;
+
+-- Verify pg_net is installed and check available functions
+-- Run this to check: SELECT * FROM pg_extension WHERE extname = 'pg_net';
+-- If pg_net is not available, you may need to use Supabase Edge Functions instead
 
 -- ============================================
 -- Step 2: Auto-Send Email Function
@@ -147,22 +155,23 @@ BEGIN
   -- Call email API via HTTP (using pg_net)
   BEGIN
     -- pg_net.http_post returns a table with: id, status_code, content, headers, created
-    -- We need to extract status_code and content fields
+    -- Note: Check if pg_net is enabled in Supabase Dashboard > Database > Extensions
+    -- If pg_net is not available, this will fail and create an error notification
     SELECT status_code, content
     INTO http_status_code, http_content
     FROM net.http_post(
-      url := email_api_url,
-      headers := jsonb_build_object(
+      email_api_url,  -- url (text)
+      jsonb_build_object(
         'Content-Type', 'application/json'
-      ),
-      body := jsonb_build_object(
+      ),  -- headers (jsonb)
+      jsonb_build_object(
         'to', client_email,
         'invoiceData', invoice_data,
         'userData', user_data,
         'clientName', client_record.name,
         'greetingMessage', NULL,
         'businessName', COALESCE(user_profile.company_name, '')
-      )::text
+      )::text  -- body (text)
     );
 
     -- Parse the response content as JSON
@@ -291,11 +300,29 @@ DECLARE
   timestamp_part TEXT;
   notification_prefs JSONB;
   should_notify_created BOOLEAN;
+  item_json JSONB;
 BEGIN
   -- Find all active recurring invoices due for generation today
   FOR recurring_record IN
     SELECT 
-      r.*,
+      r.id,
+      r.user_id,
+      r.base_invoice_id,
+      r.client_id,
+      r.frequency,
+      r.start_date,
+      r.end_date,
+      r.max_occurrences,
+      r.next_generation_date,
+      r.auto_create,
+      r.auto_send,
+      r.status,
+      r.invoice_snapshot::jsonb as invoice_snapshot,
+      r.items_snapshot::jsonb as items_snapshot,
+      r.created_at,
+      r.updated_at,
+      r.last_generated_at,
+      r.total_generated_count,
       i.subtotal,
       i.tax_amount,
       i.total_amount
@@ -354,7 +381,7 @@ BEGIN
       
       -- Set dates
       new_issue_date := recurring_record.next_generation_date;
-      new_due_date := new_issue_date + (recurring_record.invoice_snapshot->>'payment_terms_days')::INTEGER || ' days'::INTERVAL;
+      new_due_date := new_issue_date + (recurring_record.invoice_snapshot->>'payment_terms_days')::INTEGER * INTERVAL '1 day';
       
       -- Create new invoice (template is dynamic - from snapshot)
       -- Extract template_settings as JSONB (preserves full nested structure)
@@ -403,8 +430,8 @@ BEGIN
       RETURNING id INTO new_invoice_id;
       
       -- Create invoice items from snapshot
-      FOR invoice_item IN
-        SELECT * FROM jsonb_array_elements(recurring_record.items_snapshot) AS item
+      FOR item_json IN
+        SELECT value FROM jsonb_array_elements(recurring_record.items_snapshot)
       LOOP
         INSERT INTO public.invoice_items (
           invoice_id,
@@ -417,12 +444,12 @@ BEGIN
           created_at
         ) VALUES (
           new_invoice_id,
-          invoice_item->>'description',
-          (invoice_item->>'quantity')::NUMERIC(10, 2),
-          (invoice_item->>'unit_price')::NUMERIC(10, 2),
-          COALESCE((invoice_item->>'tax_rate')::NUMERIC(5, 2), 0),
-          COALESCE((invoice_item->>'discount')::NUMERIC(5, 2), 0),
-          (invoice_item->>'line_total')::NUMERIC(10, 2),
+          item_json->>'description',
+          (item_json->>'quantity')::NUMERIC(10, 2),
+          (item_json->>'unit_price')::NUMERIC(10, 2),
+          COALESCE((item_json->>'tax_rate')::NUMERIC(5, 2), 0),
+          COALESCE((item_json->>'discount')::NUMERIC(5, 2), 0),
+          (item_json->>'line_total')::NUMERIC(10, 2),
           NOW()
         );
       END LOOP;
