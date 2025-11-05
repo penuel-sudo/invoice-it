@@ -220,7 +220,7 @@ ${displayBusinessName}
     
     const { data, error } = await resend.emails.send({
       from: `${displayBusinessName} <${verifiedFromAddress}>`,
-      replyTo: verifiedFromAddress,
+      replyTo: [ to ],
       to: [ to ],
       subject: invoiceSubject,
       text: textContent,
