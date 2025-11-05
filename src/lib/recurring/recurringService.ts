@@ -144,8 +144,7 @@ export async function createRecurringInvoice(
       : null
     
     const invoiceSnapshot = {
-      base_invoice_number: invoice.invoice_number, // Store the original invoice number for display
-      invoice_number_pattern: 'INV-{YYYY}-{MM}-{####}', // Pattern for generating new invoices
+      base_invoice_number: invoice.invoice_number, // Store the original invoice number - cron function will detect format from this
       template: invoice.template || 'default', // Dynamic template
       template_data: invoice.template_data ? JSON.parse(JSON.stringify(invoice.template_data)) : null, // Deep clone
       template_settings: templateSettings, // Full structure with nested template_settings

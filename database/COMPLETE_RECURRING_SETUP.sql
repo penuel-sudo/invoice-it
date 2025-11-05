@@ -49,6 +49,8 @@ DECLARE
   user_data JSONB;
   http_status_code INTEGER;
   http_content TEXT;
+  notification_prefs JSONB;
+  should_notify BOOLEAN;
 BEGIN
   -- Get email API URL from environment or use default
   email_api_url := COALESCE(
@@ -79,13 +81,14 @@ BEGIN
 
   IF NOT FOUND OR client_record.email IS NULL THEN
     RAISE WARNING 'Client % not found or has no email', p_client_id;
-    -- Still create notification that email failed
+    -- Still create notification that email failed (always create errors)
     INSERT INTO public.notifications (
       user_id,
       type,
       title,
       message,
       status,
+      is_read,
       metadata
     ) VALUES (
       p_user_id,
@@ -93,6 +96,7 @@ BEGIN
       'Auto-send Failed',
       'Failed to send invoice: Client email not found',
       'pending',
+      false,
       jsonb_build_object(
         'invoice_id', p_invoice_id,
         'client_id', p_client_id,
@@ -104,11 +108,17 @@ BEGIN
 
   client_email := client_record.email;
 
-  -- Fetch user profile data
-  SELECT full_name, company_name
+  -- Fetch user profile data and notification preferences
+  SELECT full_name, company_name, notification_preferences
   INTO user_profile
   FROM public.profiles
   WHERE id = p_user_id;
+  
+  -- Check notification preferences
+  notification_prefs := COALESCE(user_profile.notification_preferences, '{"enabled": true, "invoice_sent": true}'::jsonb);
+  -- Check if notifications are enabled and invoice_sent preference is enabled
+  should_notify := COALESCE((notification_prefs->>'enabled')::boolean, true) 
+                   AND COALESCE((notification_prefs->>'invoice_sent')::boolean, true);
 
   -- Build invoice data for API
   invoice_data := jsonb_build_object(
@@ -174,37 +184,42 @@ BEGIN
 
     -- Check if email was sent successfully
     IF http_status_code = 200 OR (email_response->>'success')::boolean = true THEN
-      -- Email sent successfully - create success notification
-      INSERT INTO public.notifications (
-        user_id,
-        type,
-        title,
-        message,
-        status,
-        metadata
-      ) VALUES (
-        p_user_id,
-        'success',
-        'Invoice Sent',
-        format('Invoice #%s sent to %s', invoice_record.invoice_number, client_email),
-        'pending',
-        jsonb_build_object(
-          'invoice_id', p_invoice_id,
-          'invoice_number', invoice_record.invoice_number,
-          'client_id', p_client_id,
-          'client_name', client_record.name,
-          'client_email', client_email,
-          'auto_sent', true
-        )
-      );
+      -- Email sent successfully - create success notification (if preference enabled)
+      IF should_notify THEN
+        INSERT INTO public.notifications (
+          user_id,
+          type,
+          title,
+          message,
+          status,
+          is_read,
+          metadata
+        ) VALUES (
+          p_user_id,
+          'success',
+          'Invoice Sent',
+          format('Invoice #%s sent to %s', invoice_record.invoice_number, client_email),
+          'pending',
+          false,
+          jsonb_build_object(
+            'invoice_id', p_invoice_id,
+            'invoice_number', invoice_record.invoice_number,
+            'client_id', p_client_id,
+            'client_name', client_record.name,
+            'client_email', client_email,
+            'auto_sent', true
+          )
+        );
+      END IF;
     ELSE
-      -- Email failed - create error notification
+      -- Email failed - create error notification (always create errors)
       INSERT INTO public.notifications (
         user_id,
         type,
         title,
         message,
         status,
+        is_read,
         metadata
       ) VALUES (
         p_user_id,
@@ -212,6 +227,7 @@ BEGIN
         'Auto-send Failed',
         format('Failed to send invoice #%s: %s', invoice_record.invoice_number, COALESCE(email_response->>'error', 'Unknown error')),
         'pending',
+        false,
         jsonb_build_object(
           'invoice_id', p_invoice_id,
           'invoice_number', invoice_record.invoice_number,
@@ -221,13 +237,14 @@ BEGIN
       );
     END IF;
   EXCEPTION WHEN OTHERS THEN
-    -- HTTP call failed - create error notification
+    -- HTTP call failed - create error notification (always create errors)
     INSERT INTO public.notifications (
       user_id,
       type,
       title,
       message,
       status,
+      is_read,
       metadata
     ) VALUES (
       p_user_id,
@@ -235,6 +252,7 @@ BEGIN
       'Auto-send Failed',
       format('Failed to send invoice #%s: %s', invoice_record.invoice_number, SQLERRM),
       'pending',
+      false,
       jsonb_build_object(
         'invoice_id', p_invoice_id,
         'invoice_number', invoice_record.invoice_number,
@@ -271,6 +289,8 @@ DECLARE
   invoice_format TEXT;
   date_part TEXT;
   timestamp_part TEXT;
+  notification_prefs JSONB;
+  should_notify_created BOOLEAN;
 BEGIN
   -- Find all active recurring invoices due for generation today
   FOR recurring_record IN
@@ -364,9 +384,9 @@ BEGIN
         'pending',
         new_issue_date,
         new_due_date,
-        (recurring_record.invoice_snapshot->>'subtotal')::NUMERIC,
-        (recurring_record.invoice_snapshot->>'tax_amount')::NUMERIC,
-        (recurring_record.invoice_snapshot->>'total_amount')::NUMERIC,
+        (recurring_record.invoice_snapshot->>'subtotal')::NUMERIC(10, 2),
+        COALESCE((recurring_record.invoice_snapshot->>'tax_amount')::NUMERIC(10, 2), 0),
+        (recurring_record.invoice_snapshot->>'total_amount')::NUMERIC(10, 2),
         COALESCE(recurring_record.invoice_snapshot->>'notes', ''),
         invoice_template,
         COALESCE(recurring_record.invoice_snapshot->'template_data', '{}'::jsonb),
@@ -398,11 +418,11 @@ BEGIN
         ) VALUES (
           new_invoice_id,
           invoice_item->>'description',
-          (invoice_item->>'quantity')::NUMERIC,
-          (invoice_item->>'unit_price')::NUMERIC,
-          (invoice_item->>'tax_rate')::NUMERIC,
-          (invoice_item->>'discount')::NUMERIC,
-          (invoice_item->>'line_total')::NUMERIC,
+          (invoice_item->>'quantity')::NUMERIC(10, 2),
+          (invoice_item->>'unit_price')::NUMERIC(10, 2),
+          COALESCE((invoice_item->>'tax_rate')::NUMERIC(5, 2), 0),
+          COALESCE((invoice_item->>'discount')::NUMERIC(5, 2), 0),
+          (invoice_item->>'line_total')::NUMERIC(10, 2),
           NOW()
         );
       END LOOP;
@@ -422,6 +442,16 @@ BEGIN
         updated_at = NOW()
       WHERE id = recurring_record.id;
       
+      -- Check user notification preferences for invoice_created
+      SELECT notification_preferences
+      INTO notification_prefs
+      FROM public.profiles
+      WHERE id = recurring_record.user_id;
+      
+      notification_prefs := COALESCE(notification_prefs, '{"enabled": true, "invoice_created": true}'::jsonb);
+      should_notify_created := COALESCE((notification_prefs->>'enabled')::boolean, true) 
+                               AND COALESCE((notification_prefs->>'invoice_created')::boolean, true);
+      
       -- Auto-send email if enabled
       IF recurring_record.auto_send = true THEN
         PERFORM public.send_recurring_invoice_email(
@@ -429,29 +459,34 @@ BEGIN
           recurring_record.user_id,
           recurring_record.client_id
         );
+        -- Note: send_recurring_invoice_email() will create notification if invoice_sent preference enabled
       ELSE
-        -- Even if auto-send is disabled, create a notification that invoice was generated
-        INSERT INTO public.notifications (
-          user_id,
-          type,
-          title,
-          message,
-          status,
-          metadata
-        ) VALUES (
-          recurring_record.user_id,
-          'info',
-          'Invoice Generated',
-          format('Invoice #%s was automatically generated', new_invoice_number),
-          'pending',
-          jsonb_build_object(
-            'invoice_id', new_invoice_id,
-            'invoice_number', new_invoice_number,
-            'client_id', recurring_record.client_id,
-            'recurring_invoice_id', recurring_record.id,
-            'auto_generated', true
-          )
-        );
+        -- Even if auto-send is disabled, create a notification that invoice was generated (if preference enabled)
+        IF should_notify_created THEN
+          INSERT INTO public.notifications (
+            user_id,
+            type,
+            title,
+            message,
+            status,
+            is_read,
+            metadata
+          ) VALUES (
+            recurring_record.user_id,
+            'info',
+            'Invoice Generated',
+            format('Invoice #%s was automatically generated', new_invoice_number),
+            'pending',
+            false,
+            jsonb_build_object(
+              'invoice_id', new_invoice_id,
+              'invoice_number', new_invoice_number,
+              'client_id', recurring_record.client_id,
+              'recurring_invoice_id', recurring_record.id,
+              'auto_generated', true
+            )
+          );
+        END IF;
       END IF;
       
       -- Check if recurring should be cancelled
@@ -474,24 +509,32 @@ $$;
 -- Step 4: Schedule the Cron Job
 -- ============================================
 
--- Schedule the cron job (runs daily at 2 AM UTC)
+-- Schedule the cron job (runs every 2 minutes for testing)
 -- Note: Make sure pg_cron extension is enabled in Supabase
+-- TODO: Change back to daily schedule: '0 2 * * *' (2 AM UTC daily) after testing
 SELECT cron.schedule(
   'generate-recurring-invoices-daily',
-  '0 2 * * *', -- 2 AM UTC daily
+  '*/2 * * * *', -- Every 2 minutes (for testing)
   $$SELECT public.generate_recurring_invoices()$$
 );
 
 -- ============================================
 -- NOTES:
 -- ============================================
--- 1. The function runs daily at 2 AM UTC
+-- 1. The function runs every 2 minutes (for testing) - Change to '0 2 * * *' for daily at 2 AM UTC
 -- 2. It generates invoices for all active recurring invoices where next_generation_date <= today
 -- 3. Template is read dynamically from invoice_snapshot (not hardcoded)
--- 4. New invoices are created with status 'pending'
--- 5. If auto_send is enabled, it sends email and creates notification
--- 6. If auto_send is disabled, it still creates a notification that invoice was generated
--- 7. The function automatically calculates the next generation date based on frequency
+-- 4. Invoice number format is detected from base_invoice_number and replicated
+-- 5. New invoices are created with status 'pending'
+-- 6. All data types match exact schema (NUMERIC(10,2), NUMERIC(5,2), etc.)
+-- 7. User notification preferences are respected:
+--    - invoice_created: Controls if "Invoice Generated" notification is created
+--    - invoice_sent: Controls if "Invoice Sent" notification is created (via send function)
+--    - Error notifications are always created (important for user awareness)
+-- 8. If auto_send is enabled, it calls the email API and creates notification (if preference enabled)
+-- 9. If auto_send is disabled, it creates "Invoice Generated" notification (if preference enabled)
+-- 10. The function automatically calculates the next generation date based on frequency
+-- 11. Replicates frontend behavior: Same API endpoint, same notification structure, same data
 -- ============================================
 
 -- To test the function manually:
