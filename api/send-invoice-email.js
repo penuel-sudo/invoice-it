@@ -14,23 +14,11 @@ export default async function handler(req, res) {
       userData, 
       clientName,
       greetingMessage,
-      businessName
+      businessName,
+      userEmail
     } = req.body;
 
-    // Debug logging
-    console.log('Received data:', {
-      to: !!to,
-      invoiceData: !!invoiceData,
-      userData: !!userData,
-      clientName: !!clientName,
-      greetingMessage: !!greetingMessage,
-      businessName: !!businessName,
-      toValue: to,
-      clientNameValue: clientName,
-      greetingMessageValue: greetingMessage,
-      businessNameValue: businessName
-    });
-
+    // Validation
     if (!to || !invoiceData) {
       const missing = [];
       if (!to) missing.push('to');
@@ -41,187 +29,244 @@ export default async function handler(req, res) {
       });
     }
 
-    // Helper function to get currency symbol (if not available in data)
+    // Helper function to get currency symbol
     function getCurrencySymbol(code) {
       const symbols = {
         'USD': '$', 'EUR': '€', 'GBP': '£', 'NGN': '₦', 'CAD': 'C$',
         'AUD': 'A$', 'JPY': '¥', 'INR': '₹', 'ZAR': 'R'
-      }
-      return symbols[code] || '$'
+      };
+      return symbols[code] || '$';
     }
     
-    // Format sender info early for use in HTML template
-    const userFullName_ = userData?.fullName || userData?.full_name || ''
-    const businessName_ = businessName || userData?.businessName || userData?.company_name || ''
-    const displayBusinessName = businessName_ || 'Invoice It'
-    // Simplified sender name - just business name for better deliverability
-    const displaySenderName = displayBusinessName
-    const fullClientName = clientName || 'there'
+    // Format sender info
+    const userFullName = userData?.fullName || userData?.full_name || '';
+    const businessName_ = businessName || userData?.businessName || userData?.company_name || '';
+    const displayBusinessName = businessName_ || 'Invoice It';
+    const fullClientName = clientName || 'there';
     
-    // Get currency symbol from invoice data or default to $
+    // Get currency symbol
     const currencySymbol = invoiceData?.currencySymbol 
       ? invoiceData.currencySymbol 
-      : (invoiceData?.currency_code 
-        ? getCurrencySymbol(invoiceData.currency_code) 
-        : '$')
+      : getCurrencySymbol(invoiceData?.currencyCode || invoiceData?.currency_code || 'USD');
     
-    // Default greeting with full client name
-    const defaultGreeting = `Hi ${fullClientName},`
-    const finalGreeting = greetingMessage || defaultGreeting
+    // Default greeting
+    const defaultGreeting = `Hi ${fullClientName},`;
+    const finalGreeting = greetingMessage || defaultGreeting;
 
+    // Format due date
+    const formattedDueDate = new Date(invoiceData.dueDate).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
+    // Format amount
+    const totalAmount = (invoiceData.total || invoiceData.grandTotal || 0).toFixed(2);
+
+    // Text content
     const textContent = `
 ${finalGreeting}
 
-Your invoice #${invoiceData.invoiceNumber} for ${currencySymbol}${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)} is ready.
+Your invoice #${invoiceData.invoiceNumber} for ${currencySymbol}${totalAmount} is ready.
+
+Due Date: ${formattedDueDate}
 
 Please review the details and complete the payment at your convenience.
 
 Thank you for your business,
 ${displayBusinessName}
-    `;
+    `.trim();
 
+    // Bulletproof HTML email template (100% compatible with all email clients)
     const emailHtml = `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <title>Invoice ${invoiceData.invoiceNumber}</title>
-          <style>
-            body {
-              margin: 0;
-              background: #f6f9fc;
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
-              color: #0f172a;
-            }
-            .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
-            .header {
-              background: #ffffff;
-              border-bottom: 1px solid #e5e7eb;
-              border-radius: 12px 12px 0 0;
-              padding: 20px 24px;
-              text-align: left;
-            }
-            .brand {
-              display: inline-block;
-              font-weight: 700; font-size: 18px; color: #16a34a;
-            }
-            .card {
-              background: #ffffff;
-              border: 1px solid #e5e7eb;
-              border-top: none;
-              border-radius: 0 0 12px 12px;
-              padding: 24px;
-              box-shadow: 0 1px 2px rgba(16,24,40,0.04);
-            }
-            .greeting { font-size: 16px; margin: 0 0 12px 0; color: #111827; }
-            .lead { font-size: 14px; margin: 0 0 20px 0; color: #374151; line-height: 1.6; }
-            .meta {
-              background: #f9fafb; border: 1px solid #eef2f7; border-radius: 10px; padding: 20px; margin: 16px 0 20px 0;
-            }
-            .meta-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 0; font-size: 14px; }
-            .meta-key { color: #9ca3af; font-size: 13px; font-weight: 500; }
-            .invoice-number-row { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
-            .invoice-number-value { color: #9ca3af; font-size: 12px; font-weight: 400; text-align: left; }
-            .amount-row { margin: 24px 0; text-align: center; }
-            .amount { font-size: 36px; font-weight: 800; color: #16a34a; text-align: center; display: block; margin: 0; }
-            .due-date-row { margin-top: 20px; display: flex; justify-content: flex-end; }
-            .due-date-label { color: #6b7280; font-size: 12px; font-weight: 400; margin-right: 8px; }
-            .due-date-value { color: #111827; font-size: 13px; font-weight: 500; text-align: right; }
-            .cta-wrapper { margin-top: 24px; }
-            .cta-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 0 auto;
-            }
-            .cta-table td { padding: 0; text-align: center; }
-            .cta-table td:first-child { padding-right: 8px; }
-            .cta-table td:last-child { padding-left: 8px; }
-            .btn { 
-              display: inline-block; 
-              text-decoration: none; 
-              padding: 12px 24px; 
-              border-radius: 8px; 
-              font-weight: 600; 
-              font-size: 14px;
-              width: 100%;
-              box-sizing: border-box;
-              text-align: center;
-            }
-            .btn-primary { background: #16a34a; color: #ffffff !important; }
-            .btn-secondary { background: transparent; color: #16a34a !important; border: 2px solidrgb(136, 243, 175); }
-            .footer { 
-              text-align: center; 
-              color: #6b7280; 
-              font-size: 12px; 
-              padding: 24px 8px 8px 8px;
-              line-height: 1.6;
-            }
-            @media (max-width: 480px) { 
-              .invoice-number-row { flex-direction: column; gap: 8px; align-items: flex-start; }
-              .invoice-number-value { text-align: left; }
-              .due-date-value { text-align: left; }
-              .amount-row { margin: 20px 0; }
-              .amount { font-size: 32px; }
-              .cta-table td:first-child { padding-right: 6px; }
-              .cta-table td:last-child { padding-left: 6px; }
-              .btn { padding: 10px 16px; font-size: 13px; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <span class="brand">${displayBusinessName}</span>
-            </div>
-            <div class="card">
-              <p class="greeting">${finalGreeting}</p>
-              <p class="lead">Your invoice is ready for review.</p>
-
-              <div class="meta">
-                <div class="invoice-number-row">
-                  <span class="invoice-number-value">#${invoiceData.invoiceNumber}</span>
-                  <span class="due-date-value">${new Date(invoiceData.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                </div>
-                <div class="amount-row">
-                  <span class="amount">${currencySymbol}${(invoiceData.total || invoiceData.grandTotal || 0).toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div class="cta-wrapper">
-                <table class="cta-table" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td width="48%">
-                      <a class="btn btn-secondary" href="#">View Invoice</a>
-                    </td>
-                    <td width="4%">&nbsp;</td>
-                    <td width="48%">
-                      <a class="btn btn-primary" href="#">Pay Now</a>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            </div>
-            <div class="footer">
-              <p style="margin: 0;">Thank you for your business. If you have any questions, please reply to this email.</p>
-            </div>
-          </div>
-        </body>
-      </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Invoice ${invoiceData.invoiceNumber}</title>
+  <!--[if mso]>
+  <style type="text/css">
+    body, table, td { font-family: Arial, sans-serif !important; }
+  </style>
+  <![endif]-->
+</head>
+<body style="margin: 0; padding: 0; background-color: #f0fdf4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  
+  <!-- Wrapper Table -->
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        
+        <!-- Main Container -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 16px;" align="center">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #16a34a; padding: 32px 32px 28px 32px; text-align: center; border-radius: 16px 16px 0 0;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="text-align: center;">
+                    <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">${displayBusinessName}</h1>
+                    <p style="margin: 0; font-size: 13px; font-weight: 500; color: rgba(255, 255, 255, 0.9); text-transform: uppercase; letter-spacing: 0.5px;">Professional Invoicing</p>
+                  </td>
+                </tr>
+              </table>
+              <!-- Header accent line -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top: 20px;">
+                <tr>
+                  <td style="height: 4px; background-color: #22c55e;"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px 32px;">
+              
+              <!-- Greeting -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <p style="margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #111827;">${finalGreeting}</p>
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #4b5563; line-height: 1.7;">Your invoice is ready for review. We appreciate your business and look forward to continuing our partnership.</p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Invoice Card -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; margin-bottom: 32px;">
+                <!-- Card top accent -->
+                <tr>
+                  <td colspan="2" style="height: 4px; background-color: #22c55e; border-radius: 10px 10px 0 0;"></td>
+                </tr>
+                <!-- Card content -->
+                <tr>
+                  <td style="padding: 24px 28px;">
+                    
+                    <!-- Invoice Header Row -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 20px;">
+                      <tr>
+                        <td style="vertical-align: middle;">
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                              <td style="background-color: rgba(22, 163, 74, 0.1); border: 1px solid rgba(22, 163, 74, 0.2); border-radius: 6px; padding: 6px 12px;">
+                                <span style="font-size: 14px; font-weight: 600; color: #16a34a;">#${invoiceData.invoiceNumber}</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td style="text-align: right; vertical-align: middle;">
+                          <span style="font-size: 13px; color: #6b7280;">Due: </span>
+                          <span style="font-size: 13px; font-weight: 600; color: #111827;">${formattedDueDate}</span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Amount Section -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="text-align: center; padding: 24px 0;">
+                          <p style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; font-weight: 600;">Amount Due</p>
+                          <p style="margin: 0; font-size: 48px; font-weight: 900; color: #16a34a; letter-spacing: -1px; line-height: 1;">${currencySymbol}${totalAmount}</p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- CTA Buttons -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <!-- View Invoice Button -->
+                  <td width="48%" style="padding-right: 6px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background-color: #ffffff; border: 2px solid #86efac; border-radius: 10px; text-align: center;">
+                          <a href="#" style="display: block; padding: 14px 20px; font-size: 15px; font-weight: 600; color: #16a34a; text-decoration: none;">View Invoice</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  
+                  <!-- Spacer -->
+                  <td width="4%"></td>
+                  
+                  <!-- Pay Now Button -->
+                  <td width="48%" style="padding-left: 6px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background-color: #16a34a; border-radius: 10px; text-align: center;">
+                          <a href="#" style="display: block; padding: 14px 20px; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none;">Pay Now</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Divider -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
+                <tr>
+                  <td style="height: 1px; background-color: #e5e7eb;"></td>
+                </tr>
+              </table>
+              
+              <!-- Help Section -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.5px;">Need Help?</p>
+                    <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.6;">If you have any questions about this invoice, please don't hesitate to reply to this email. We're here to help!</p>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 32px; text-align: center; border-top: 1px solid #e5e7eb; border-radius: 0 0 16px 16px;">
+              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6b7280; line-height: 1.7;">
+                Thank you for your business. This is an automated invoice notification.<br>
+                If you have any questions, please reply to this email.
+              </p>
+              <p style="margin: 0; font-size: 11px; color: #9ca3af;">Powered by Invoice It</p>
+            </td>
+          </tr>
+          
+        </table>
+        <!-- End Main Container -->
+        
+      </td>
+    </tr>
+  </table>
+  <!-- End Wrapper -->
+  
+</body>
+</html>
     `;
 
+    // Email configuration
     const verifiedFromAddress = process.env.RESEND_FROM || 'invoices@mail.invoice-it.org';
-    // Subject line without payment-related words - just indicates it's from the business
     const invoiceSubject = `Invoice #${invoiceData.invoiceNumber} from ${displayBusinessName}`;
     
-    // Generate a unique list ID for mailing list header (format similar to example)
-    const listId = `${invoiceData.invoiceNumber || Date.now()}-${displayBusinessName.toLowerCase().replace(/\s+/g, '-')}.list-id.mail.invoice-it.org`
+    // List ID for email headers
+    const listId = `${invoiceData.invoiceNumber || Date.now()}-${displayBusinessName.toLowerCase().replace(/\s+/g, '-')}.list-id.mail.invoice-it.org`;
     
+    // Reply-to email
+    const replyToEmail = userEmail || userData?.email || verifiedFromAddress;
+    
+    // Send email via Resend
     const { data, error } = await resend.emails.send({
       from: `${displayBusinessName} <${verifiedFromAddress}>`,
-      replyTo: [ to ],
-      to: [ to ],
+      replyTo: [replyToEmail],
+      to: [to],
       subject: invoiceSubject,
       text: textContent,
       html: emailHtml,
@@ -236,16 +281,18 @@ ${displayBusinessName}
 
     if (error) {
       console.error('Resend error:', error);
+      
       if (error.statusCode === 403 && error.name === 'validation_error') {
-        const verifiedEmail = process.env.RESEND_VERIFIED_EMAIL || verifiedFromAddress || 'your verified email';
+        const verifiedEmail = process.env.RESEND_VERIFIED_EMAIL || verifiedFromAddress;
         return res.status(403).json({
           error: 'Email sending is restricted in test mode',
-          message: `Resend only allows sending to your verified email address (${verifiedEmail}) in test mode. To send to other recipients, please verify a domain at resend.com/domains and update the "from" address to use your verified domain.`,
+          message: `Resend only allows sending to your verified email address (${verifiedEmail}) in test mode. To send to other recipients, verify a domain at resend.com/domains.`,
           type: 'domain_verification_required',
           verifiedEmail,
           helpUrl: 'https://resend.com/domains'
         });
       }
+      
       return res.status(500).json({
         error: error.message || 'Failed to send email',
         details: error
@@ -257,6 +304,7 @@ ${displayBusinessName}
       messageId: data.id,
       message: 'Email sent successfully'
     });
+    
   } catch (err) {
     console.error('Email send error:', err);
     return res.status(500).json({
