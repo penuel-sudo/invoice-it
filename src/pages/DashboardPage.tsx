@@ -71,7 +71,7 @@ export default function DashboardPage() {
     if (autoSlideInterval) clearInterval(autoSlideInterval)
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % 3)
-    }, 3000) // 30 seconds
+    }, 4000) // 40 seconds
     setAutoSlideInterval(interval)
   }
 

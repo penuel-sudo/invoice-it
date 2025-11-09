@@ -98,8 +98,9 @@ export default function SendButton({
           userData: {
             ...(userData || { id: '' }),
             fullName: profile.full_name,
-            businessName: profile.business_name
+          businessName: profile.business_name
           },
+        userEmail: userData?.email || userData?.user_metadata?.email || null,
           clientName: messageData.clientName || invoiceData?.clientName || 'Client',
           greetingMessage: messageData.greetingMessage || null,
           businessName: messageData.businessName || null
