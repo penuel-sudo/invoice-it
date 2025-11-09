@@ -814,6 +814,12 @@ export default function TransactionPage() {
                           ? (transaction.client_name || 'Client')
                           : (transaction.description || 'Expense')
                         }
+                        {transaction.type === 'invoice' && transaction.template && (
+                          <>
+                            {' • '}
+                            {transaction.template.charAt(0).toUpperCase() + transaction.template.slice(1)}
+                          </>
+                        )}
                       </p>
                       <p style={{
                         fontSize: window.innerWidth < 768 ? '0.8rem' : '0.75rem',
@@ -826,21 +832,6 @@ export default function TransactionPage() {
                           ? (transaction.invoice_number ? `#${transaction.invoice_number}` : 'Invoice')
                           : (transaction.category || 'Expense')
                         } • {(transaction.type === 'invoice' ? transaction.issue_date : transaction.expense_date) ? formatDate(transaction.type === 'invoice' ? transaction.issue_date : transaction.expense_date!) : 'No Date'}
-                        {/* Template Badge */}
-                        {transaction.type === 'invoice' && transaction.template && (
-                          <span style={{
-                            fontSize: '0.75rem',
-                            fontWeight: '500',
-                            padding: '0.125rem 0.375rem',
-                            borderRadius: '0.25rem',
-                            backgroundColor: transaction.template === 'professional' ? brandColors.primary[100] : brandColors.neutral[100],
-                            color: transaction.template === 'professional' ? brandColors.primary[700] : brandColors.neutral[700],
-                            textTransform: 'capitalize',
-                            marginLeft: '0.5rem'
-                          }}>
-                            {transaction.template}
-                          </span>
-                        )}
                       </p>
                     </div>
                   </div>
