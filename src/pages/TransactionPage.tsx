@@ -808,17 +808,45 @@ export default function TransactionPage() {
                         color: brandColors.neutral[900],
                         margin: '0 0 0.125rem 0',
                         wordBreak: 'break-word',
-                        lineHeight: '1.3'
+                        lineHeight: '1.3',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
                       }}>
-                        {transaction.type === 'invoice' 
-                          ? (transaction.client_name || 'Client')
-                          : (transaction.description || 'Expense')
-                        }
+                        <span>
+                          {transaction.type === 'invoice' 
+                            ? (transaction.client_name || 'Client')
+                            : (transaction.description || 'Expense')
+                          }
+                        </span>
                         {transaction.type === 'invoice' && transaction.template && (
-                          <>
-                            {' • '}
-                            {transaction.template.charAt(0).toUpperCase() + transaction.template.slice(1)}
-                          </>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            textTransform: 'capitalize',
+                            color: transaction.template === 'professional'
+                              ? brandColors.primary[700]
+                              : brandColors.neutral[700],
+                            backgroundColor: transaction.template === 'professional'
+                              ? brandColors.primary[100]
+                              : brandColors.neutral[100],
+                            padding: '0.1rem 0.5rem 0.1rem 0.4rem',
+                            borderRadius: '0.35rem',
+                            lineHeight: 1.2
+                          }}>
+                            <span style={{
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              backgroundColor: transaction.template === 'professional'
+                                ? brandColors.primary[600]
+                                : brandColors.neutral[500],
+                              marginRight: '0.4rem'
+                            }} />
+                            {transaction.template}
+                          </span>
                         )}
                       </p>
                       <p style={{
