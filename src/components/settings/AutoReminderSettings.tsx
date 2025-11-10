@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { AutoReminderSettingsData, REMINDER_SCHEDULE_OPTIONS, REMINDER_TONE_PRESETS } from '../../types/autoReminders'
 import { brandColors } from '../../stylings'
 
@@ -16,6 +17,20 @@ export default function AutoReminderSettings({
   saving,
   hasChanges
 }: AutoReminderSettingsProps) {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  )
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window === 'undefined') return
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const currentTone = REMINDER_TONE_PRESETS[settings.tone]
 
   const handleToggle = (key: keyof AutoReminderSettingsData) => {
@@ -45,14 +60,21 @@ export default function AutoReminderSettings({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: isMobile ? '1rem' : '1.5rem',
+        padding: isMobile ? '0.5rem' : '0'
+      }}
+    >
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem',
-          padding: '1.5rem',
-          borderRadius: '16px',
+          gap: isMobile ? '0.75rem' : '1rem',
+          padding: isMobile ? '1.25rem' : '1.5rem',
+          borderRadius: isMobile ? '14px' : '16px',
           border: `1px solid ${brandColors.neutral[200]}`,
           backgroundColor: brandColors.white
         }}
@@ -60,15 +82,17 @@ export default function AutoReminderSettings({
         <div
           style={{
             display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: isMobile ? '0.75rem' : 0
           }}
         >
           <div>
             <h2
               style={{
                 margin: 0,
-                fontSize: '1.25rem',
+                fontSize: isMobile ? '1.05rem' : '1.25rem',
                 fontWeight: 600,
                 color: brandColors.neutral[900]
               }}
@@ -79,7 +103,7 @@ export default function AutoReminderSettings({
               style={{
                 margin: '0.25rem 0 0 0',
                 color: brandColors.neutral[600],
-                fontSize: '0.875rem'
+                fontSize: isMobile ? '0.8rem' : '0.875rem'
               }}
             >
               These settings apply to every invoice unless you turn reminders off for a specific one.
@@ -89,8 +113,8 @@ export default function AutoReminderSettings({
             style={{
               position: 'relative',
               display: 'inline-block',
-              width: '52px',
-              height: '28px',
+              width: isMobile ? '48px' : '52px',
+              height: isMobile ? '26px' : '28px',
               cursor: 'pointer'
             }}
           >
@@ -132,21 +156,21 @@ export default function AutoReminderSettings({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '1.5rem'
+          gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr',
+          gap: isMobile ? '1rem' : '1.5rem'
         }}
       >
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '1.5rem'
+            gap: isMobile ? '1rem' : '1.5rem'
           }}
         >
           <section
             style={{
-              padding: '1.5rem',
-              borderRadius: '16px',
+              padding: isMobile ? '1.1rem' : '1.5rem',
+              borderRadius: isMobile ? '14px' : '16px',
               border: `1px solid ${brandColors.neutral[200]}`,
               backgroundColor: brandColors.white,
               opacity: settings.enabled ? 1 : 0.5,
@@ -181,8 +205,8 @@ export default function AutoReminderSettings({
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '0.75rem',
-                    padding: '1rem',
-                    borderRadius: '12px',
+                    padding: isMobile ? '0.85rem' : '1rem',
+                    borderRadius: isMobile ? '12px' : '12px',
                     border: `1px solid ${
                       settings.schedule.includes(option.key) ? brandColors.primary[200] : brandColors.neutral[200]
                     }`,
@@ -198,8 +222,8 @@ export default function AutoReminderSettings({
                     checked={settings.schedule.includes(option.key)}
                     onChange={() => handleScheduleToggle(option.key)}
                     style={{
-                      width: '18px',
-                      height: '18px',
+                      width: isMobile ? '16px' : '18px',
+                      height: isMobile ? '16px' : '18px',
                       marginTop: '0.25rem',
                       accentColor: brandColors.primary[600],
                       cursor: 'pointer'
@@ -208,7 +232,7 @@ export default function AutoReminderSettings({
                   <div>
                     <div
                       style={{
-                        fontSize: '0.95rem',
+                        fontSize: isMobile ? '0.85rem' : '0.95rem',
                         fontWeight: 600,
                         color: brandColors.neutral[900],
                         marginBottom: '0.25rem'
@@ -218,7 +242,7 @@ export default function AutoReminderSettings({
                     </div>
                     <div
                       style={{
-                        fontSize: '0.8rem',
+                        fontSize: isMobile ? '0.75rem' : '0.8rem',
                         color: brandColors.neutral[600]
                       }}
                     >
@@ -290,13 +314,13 @@ export default function AutoReminderSettings({
                   type="button"
                   style={{
                     borderRadius: '12px',
-                    padding: '1rem',
+                    padding: isMobile ? '0.85rem' : '1rem',
                     border: settings.tone === key
                       ? `2px solid ${brandColors.primary[500]}`
                       : `1px solid ${brandColors.neutral[200]}`,
                     backgroundColor: settings.tone === key ? brandColors.primary[50] : brandColors.neutral[50],
                     color: brandColors.neutral[900],
-                    fontSize: '0.875rem',
+                    fontSize: isMobile ? '0.8rem' : '0.875rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
@@ -363,10 +387,11 @@ export default function AutoReminderSettings({
 
         <aside
           style={{
-            padding: '1.5rem',
-            borderRadius: '16px',
+            padding: isMobile ? '1.1rem' : '1.5rem',
+            borderRadius: isMobile ? '14px' : '16px',
             border: `1px solid ${brandColors.neutral[200]}`,
-            backgroundColor: brandColors.white
+            backgroundColor: brandColors.white,
+            height: 'fit-content'
           }}
         >
           <div
@@ -449,7 +474,8 @@ export default function AutoReminderSettings({
       <div
         style={{
           display: 'flex',
-          justifyContent: 'flex-end'
+          justifyContent: isMobile ? 'center' : 'flex-end',
+          padding: isMobile ? '0 0.25rem' : 0
         }}
       >
         <button
@@ -457,7 +483,8 @@ export default function AutoReminderSettings({
           onClick={onSave}
           disabled={saving || !hasChanges || (settings.enabled && settings.schedule.length === 0)}
           style={{
-            padding: '0.875rem 1.5rem',
+            width: isMobile ? '100%' : 'auto',
+            padding: isMobile ? '0.85rem 1.25rem' : '0.875rem 1.5rem',
             fontSize: '0.9rem',
             fontWeight: 600,
             borderRadius: '10px',
@@ -469,7 +496,7 @@ export default function AutoReminderSettings({
                 : brandColors.primary[600],
             color: brandColors.white,
             transition: 'background-color 0.2s ease',
-            minWidth: '160px'
+            minWidth: isMobile ? 'auto' : '160px'
           }}
         >
           {saving ? 'Saving...' : 'Save defaults'}

@@ -260,7 +260,7 @@ ${displayBusinessName}
     const listId = `${invoiceData.invoiceNumber || Date.now()}-${displayBusinessName.toLowerCase().replace(/\s+/g, '-')}.list-id.mail.invoice-it.org`;
     
     // Reply-to email
-    const replyToEmail = userEmail || userData?.email || verifiedFromAddress;
+    const replyToEmail = userData?.email || userData?.user?.email || userEmail || verifiedFromAddress;
     
     // Send email via Resend
     const { data, error } = await resend.emails.send({
