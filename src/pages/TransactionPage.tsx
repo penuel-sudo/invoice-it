@@ -29,6 +29,7 @@ import { format } from 'date-fns'
 // StatusLogic removed - StatusButton handles validation internally
 import OverdueDetector from '../components/OverdueDetector'
 import MakeRecurringModal from '../components/recurring/MakeRecurringModal'
+import AutoReminderInvoiceModal from '../components/autoreminder/AutoReminderInvoiceModal'
 
 // Use TransactionData from service
 type Transaction = TransactionData
@@ -60,6 +61,8 @@ export default function TransactionPage() {
   // Recurring modal state
   const [showRecurringModal, setShowRecurringModal] = useState(false)
   const [selectedInvoiceForRecurring, setSelectedInvoiceForRecurring] = useState<Transaction | null>(null)
+  const [showAutoReminderModal, setShowAutoReminderModal] = useState(false)
+  const [selectedInvoiceForAutoReminder, setSelectedInvoiceForAutoReminder] = useState<Transaction | null>(null)
 
 
   // Check if mobile
@@ -1076,6 +1079,39 @@ export default function TransactionPage() {
                             {/* Make Recurring - Only for invoices */}
                             {transaction.type === 'invoice' && (
                               <>
+                                <button
+                                  onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    setSelectedInvoiceForAutoReminder(transaction)
+                                    setShowAutoReminderModal(true)
+                                    setShowTransactionDropdown(null)
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    padding: '0.875rem 1rem',
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '500',
+                                    color: brandColors.primary[700],
+                                    transition: 'background-color 0.2s ease',
+                                    textAlign: 'left'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = brandColors.primary[50]
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent'
+                                  }}
+                                >
+                                  <Clock size={16} color={brandColors.primary[600]} />
+                                  Auto Reminders
+                                </button>
+
                                 {/* Separator */}
                                 <div style={{
                                   height: '1px',
@@ -1171,6 +1207,25 @@ export default function TransactionPage() {
         </div>
       </div>
       
+      {/* Auto Reminder Modal */}
+      {showAutoReminderModal && selectedInvoiceForAutoReminder && user && (
+        <AutoReminderInvoiceModal
+          isOpen={showAutoReminderModal}
+          invoiceId={selectedInvoiceForAutoReminder.id}
+          invoiceNumber={selectedInvoiceForAutoReminder.invoice_number}
+          userId={user.id}
+          onClose={() => {
+            setShowAutoReminderModal(false)
+            setSelectedInvoiceForAutoReminder(null)
+          }}
+          onOpenSettings={() => {
+            setShowAutoReminderModal(false)
+            setSelectedInvoiceForAutoReminder(null)
+            navigate('/settings?tab=auto-reminders')
+          }}
+        />
+      )}
+
       {/* Recurring Modal */}
       {showRecurringModal && selectedInvoiceForRecurring && user && (
         <MakeRecurringModal

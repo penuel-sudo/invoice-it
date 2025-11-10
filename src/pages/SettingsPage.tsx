@@ -11,6 +11,7 @@ import {
   DollarSign, 
   CreditCard, 
   Bell, 
+  Clock,
   Palette, 
   Save, 
   Loader2,
@@ -22,6 +23,15 @@ import PaymentMethodManager from '../components/PaymentMethodManager'
 import NotificationSettings from '../components/NotificationSettings'
 import AvatarUpload from '../components/AvatarUpload'
 import type { PaymentMethod, PaymentMethodType } from '../lib/storage/invoiceStorage'
+import AutoReminderSettings from '../components/settings/AutoReminderSettings'
+import {
+  DEFAULT_AUTO_REMINDER_SETTINGS,
+  type AutoReminderSettingsData
+} from '../types/autoReminders'
+import {
+  fetchAutoReminderSettings,
+  saveAutoReminderSettings
+} from '../services/autoReminderService'
 
 interface NotificationPreferences {
   enabled: boolean
@@ -77,13 +87,21 @@ export default function SettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'profile' | 'currency' | 'payment' | 'notifications' | 'appearance'>(
+  const [activeTab, setActiveTab] = useState<
+    'profile' | 'currency' | 'payment' | 'notifications' | 'auto-reminders' | 'appearance'
+  >(
     (searchParams.get('tab') as any) || 'profile'
   )
   const { currency, currencySymbol } = useGlobalCurrency()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [hasChanges, setHasChanges] = useState(false)
   const [originalProfileData, setOriginalProfileData] = useState<ProfileData | null>(null)
+  const [autoReminderSettings, setAutoReminderSettings] =
+    useState<AutoReminderSettingsData>(DEFAULT_AUTO_REMINDER_SETTINGS)
+  const [originalAutoReminderSettings, setOriginalAutoReminderSettings] =
+    useState<AutoReminderSettingsData | null>(null)
+  const [autoReminderSaving, setAutoReminderSaving] = useState(false)
+  const [autoReminderHasChanges, setAutoReminderHasChanges] = useState(false)
 
   // Responsive state management
   useEffect(() => {
@@ -186,6 +204,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (user) {
       loadProfileData()
+      loadAutoReminderDefaults()
       
       // Check if user is new (created today) and show welcome message
       const userCreatedAt = new Date(user.created_at)
@@ -205,6 +224,46 @@ export default function SettingsPage() {
       }
     }
   }, [user])
+  const loadAutoReminderDefaults = async () => {
+    if (!user) return
+
+    try {
+      const settings = await fetchAutoReminderSettings(user.id)
+      setAutoReminderSettings(settings)
+      setOriginalAutoReminderSettings(settings)
+      setAutoReminderHasChanges(false)
+    } catch (error) {
+      console.error('Error loading auto reminder defaults:', error)
+      toast.error('Failed to load auto reminder defaults')
+    }
+  }
+
+  const handleAutoReminderChange = (settings: AutoReminderSettingsData) => {
+    setAutoReminderSettings(settings)
+    if (originalAutoReminderSettings) {
+      setAutoReminderHasChanges(JSON.stringify(settings) !== JSON.stringify(originalAutoReminderSettings))
+    } else {
+      setAutoReminderHasChanges(true)
+    }
+  }
+
+  const handleSaveAutoReminderSettings = async () => {
+    if (!user) return
+
+    try {
+      setAutoReminderSaving(true)
+      await saveAutoReminderSettings(user.id, autoReminderSettings)
+      setOriginalAutoReminderSettings(autoReminderSettings)
+      setAutoReminderHasChanges(false)
+      toast.success('Auto reminder defaults saved')
+    } catch (error) {
+      console.error('Error saving auto reminder defaults:', error)
+      toast.error('Failed to save auto reminder defaults')
+    } finally {
+      setAutoReminderSaving(false)
+    }
+  }
+
 
 
   const loadProfileData = async () => {
@@ -456,6 +515,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
+    { id: 'auto-reminders', label: 'Auto Reminders', icon: Clock },
     { id: 'currency', label: 'Currency', icon: DollarSign },
     { id: 'payment', label: 'Payment', icon: CreditCard },
     { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -1010,6 +1070,17 @@ export default function SettingsPage() {
                     )}
                   </div>
                 </div>
+              )}
+
+              {/* Auto Reminders Tab */}
+              {activeTab === 'auto-reminders' && (
+                <AutoReminderSettings
+                  settings={autoReminderSettings}
+                  onChange={handleAutoReminderChange}
+                  onSave={handleSaveAutoReminderSettings}
+                  saving={autoReminderSaving}
+                  hasChanges={autoReminderHasChanges}
+                />
               )}
 
               {/* Currency Tab */}

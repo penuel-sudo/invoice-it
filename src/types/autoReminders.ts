@@ -9,11 +9,25 @@ export interface AutoReminderSettingsData {
   tone: ReminderToneKey
 }
 
+export interface InvoiceReminderOverrideData {
+  remindersEnabled: boolean
+  schedule: ReminderScheduleKey[]
+  tone: ReminderToneKey
+  attachPdf: boolean
+}
+
 export const DEFAULT_AUTO_REMINDER_SETTINGS: AutoReminderSettingsData = {
   enabled: false,
   attachPdf: false,
   schedule: ['3_days_before', 'on_due_date', '7_days_after'],
   tone: 'friendly'
+}
+
+export const DEFAULT_INVOICE_REMINDER_OVERRIDE: InvoiceReminderOverrideData = {
+  remindersEnabled: true,
+  schedule: ['3_days_before', 'on_due_date', '7_days_after'],
+  tone: 'friendly',
+  attachPdf: false
 }
 
 export const REMINDER_SCHEDULE_SEQUENCE: ReminderScheduleKey[] = [
@@ -77,5 +91,12 @@ export const REMINDER_TONE_PRESETS: Record<
     intro: 'Invoice #{{invoiceNumber}} totaling {{amountDue}} is currently {{statusTrigger}}. Please take care of this payment as soon as possible.',
     followUp: 'If payment has already been sent, please disregard this reminder. Otherwise, kindly confirm the expected payment date.'
   }
+}
+
+export const normalizeReminderSchedule = (
+  schedule: ReminderScheduleKey[] | undefined | null
+): ReminderScheduleKey[] => {
+  const input = Array.isArray(schedule) ? schedule : []
+  return REMINDER_SCHEDULE_SEQUENCE.filter((key) => input.includes(key))
 }
 
