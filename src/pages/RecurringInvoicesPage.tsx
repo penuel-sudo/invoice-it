@@ -32,19 +32,6 @@ export default function RecurringInvoicesPage() {
   const [recurringInvoices, setRecurringInvoices] = useState<RecurringInvoice[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'paused' | 'cancelled'>('all')
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
-  )
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (typeof window === 'undefined') return
-      setIsMobile(window.innerWidth < 768)
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   useEffect(() => {
     if (user) {
@@ -174,13 +161,11 @@ export default function RecurringInvoicesPage() {
   }
 
   return (
-    <Layout hideBottomNav={!isMobile}>
+    <Layout hideBottomNav={true}>
       <div
         style={{
           minHeight: '100vh',
-          background: isMobile
-            ? 'linear-gradient(180deg, #f8fafc 0%, #ffffff 35%)'
-            : 'linear-gradient(135deg, rgba(240,253,244,0.9), #ffffff)',
+          backgroundColor: brandColors.white,
           width: '100%',
           maxWidth: '100vw'
         }}
@@ -191,7 +176,7 @@ export default function RecurringInvoicesPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: isMobile ? '0.9rem 1rem' : '1rem 1.5rem',
+            padding: window.innerWidth < 768 ? '1rem' : '1rem',
             backgroundColor: brandColors.white,
             borderBottom: `1px solid ${brandColors.neutral[200]}`,
             position: 'sticky',
@@ -212,12 +197,12 @@ export default function RecurringInvoicesPage() {
               justifyContent: 'center'
             }}
           >
-            <ArrowLeft size={isMobile ? 20 : 24} color={brandColors.neutral[600]} />
+            <ArrowLeft size={window.innerWidth < 768 ? 20 : 24} color={brandColors.neutral[600]} />
           </button>
           
           <h1
             style={{
-              fontSize: isMobile ? '1.1rem' : '1.5rem',
+              fontSize: window.innerWidth < 768 ? '1.125rem' : '1.5rem',
               fontWeight: '600',
               color: brandColors.neutral[900],
               margin: 0
@@ -226,60 +211,71 @@ export default function RecurringInvoicesPage() {
             Recurring Invoices
           </h1>
           
-          <div style={{ width: isMobile ? '40px' : '48px' }}></div> {/* Spacer for centering */}
+          <div style={{ width: window.innerWidth < 768 ? '40px' : '48px' }}></div> {/* Spacer for centering */}
         </div>
 
         {/* Filters */}
         <div
           style={{
-            width: '100%',
-            maxWidth: isMobile ? '100%' : '1100px',
-            margin: '0 auto'
+            padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
+            borderBottom: `1px solid ${brandColors.neutral[200]}`,
+            display: 'flex',
+            gap: window.innerWidth < 768 ? '0.5rem' : '0.75rem',
+            overflowX: 'auto'
           }}
         >
-          <div
-            style={{
-              padding: isMobile ? '0.9rem 1rem' : '1.25rem 1.5rem',
-              borderBottom: `1px solid ${brandColors.neutral[200]}`,
-              display: 'flex',
-              gap: isMobile ? '0.5rem' : '0.75rem',
-              overflowX: 'auto'
-            }}
-          >
-            {(['all', 'active', 'paused', 'cancelled'] as const).map((filterOption) => (
-              <button
-                key={filterOption}
-                onClick={() => setFilter(filterOption)}
-                style={{
-                  padding: isMobile ? '0.5rem 1rem' : '0.75rem 1.4rem',
-                  backgroundColor: filter === filterOption ? brandColors.primary[600] : brandColors.neutral[100],
-                  color: filter === filterOption ? brandColors.white : brandColors.neutral[700],
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: isMobile ? '0.85rem' : '1rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  if (filter !== filterOption) {
-                    e.currentTarget.style.backgroundColor = brandColors.neutral[200]
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (filter !== filterOption) {
-                    e.currentTarget.style.backgroundColor = brandColors.neutral[100]
-                  }
-                }}
-              >
-                {filterOption === 'all' ? 'All' : filterOption}
-              </button>
-            ))}
-          </div>
+          {(['all', 'active', 'paused', 'cancelled'] as const).map((filterOption) => (
+            <button
+              key={filterOption}
+              onClick={() => setFilter(filterOption)}
+              style={{
+                padding: window.innerWidth < 768 ? '0.5rem 1rem' : '0.75rem 1.5rem',
+                backgroundColor: filter === filterOption ? brandColors.primary[600] : brandColors.neutral[100],
+                color: filter === filterOption ? brandColors.white : brandColors.neutral[700],
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                textTransform: 'capitalize',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (filter !== filterOption) {
+                  e.currentTarget.style.backgroundColor = brandColors.neutral[200]
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (filter !== filterOption) {
+                  e.currentTarget.style.backgroundColor = brandColors.neutral[100]
+                }
+              }}
+            >
+              {filterOption === 'all' ? 'All' : filterOption}
+            </button>
+          ))}
+        </div>
 
-          {filteredInvoices.length === 0 ? (
+        {/* Content */}
+        <div style={{ padding: window.innerWidth < 768 ? '1rem' : '1.5rem' }}>
+          {loading ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '4rem 2rem',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}
+            >
+              <Loader2 size={32} color={brandColors.primary[600]} style={{ animation: 'spin 1s linear infinite' }} />
+              <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600] }}>
+                Loading recurring invoices...
+              </p>
+            </div>
+          ) : filteredInvoices.length === 0 ? (
             <div
               style={{
                 display: 'flex',
@@ -302,7 +298,7 @@ export default function RecurringInvoicesPage() {
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: isMobile ? '1rem' : '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {filteredInvoices.map((invoice) => {
                 const statusBadge = getStatusBadge(invoice.status)
                 const StatusIcon = statusBadge.icon
@@ -319,14 +315,12 @@ export default function RecurringInvoicesPage() {
                     key={invoice.id}
                     style={{
                       backgroundColor: brandColors.white,
-                      borderRadius: isMobile ? '12px' : '16px',
+                      borderRadius: window.innerWidth < 768 ? '12px' : '16px',
                       border: `1px solid ${brandColors.neutral[200]}`,
-                      padding: isMobile ? '1rem' : '1.5rem',
+                      padding: window.innerWidth < 768 ? '1rem' : '1.5rem',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: isMobile ? '0.75rem' : '1rem',
-                      boxShadow: isMobile ? '0 8px 16px rgba(15, 118, 110, 0.06)' : '0 12px 22px rgba(15, 118, 110, 0.08)',
-                      borderImage: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(236,254,255,0.3)) 1'
+                      gap: window.innerWidth < 768 ? '0.75rem' : '1rem'
                     }}
                   >
                     {/* Header */}
@@ -334,8 +328,8 @@ export default function RecurringInvoicesPage() {
                       display: 'flex', 
                       justifyContent: 'space-between', 
                       alignItems: 'flex-start',
-                      flexDirection: isMobile ? 'column' : 'row',
-                      gap: isMobile ? '0.75rem' : '0'
+                      flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+                      gap: window.innerWidth < 768 ? '0.75rem' : '0'
                     }}>
                       <div style={{ flex: 1, width: '100%' }}>
                         <div style={{ 
@@ -346,7 +340,7 @@ export default function RecurringInvoicesPage() {
                           flexWrap: 'wrap'
                         }}>
                           <h3 style={{ 
-                            fontSize: isMobile ? '0.9rem' : '1rem', 
+                            fontSize: window.innerWidth < 768 ? '0.875rem' : '1rem', 
                             fontWeight: '600', 
                             color: brandColors.neutral[900], 
                             margin: 0 
@@ -372,7 +366,7 @@ export default function RecurringInvoicesPage() {
                           </div>
                         </div>
                         <p style={{ 
-                          fontSize: isMobile ? '0.78rem' : '0.875rem', 
+                          fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem', 
                           color: brandColors.neutral[600], 
                           margin: 0 
                         }}>
@@ -380,12 +374,12 @@ export default function RecurringInvoicesPage() {
                         </p>
                       </div>
                       <div style={{ 
-                        textAlign: isMobile ? 'left' : 'right',
-                        width: isMobile ? '100%' : 'auto'
+                        textAlign: window.innerWidth < 768 ? 'left' : 'right',
+                        width: window.innerWidth < 768 ? '100%' : 'auto'
                       }}>
                         <p
                           style={{
-                            fontSize: isMobile ? '1.05rem' : '1.25rem',
+                            fontSize: window.innerWidth < 768 ? '1rem' : '1.25rem',
                             fontWeight: '700',
                             color: brandColors.primary[600],
                             margin: 0
@@ -400,81 +394,79 @@ export default function RecurringInvoicesPage() {
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                        gap: isMobile ? '0.75rem' : '1rem',
-                        padding: isMobile ? '0.75rem' : '1rem',
+                        gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)',
+                        gap: window.innerWidth < 768 ? '0.75rem' : '1rem',
+                        padding: window.innerWidth < 768 ? '0.75rem' : '1rem',
                         backgroundColor: brandColors.neutral[50],
-                        borderRadius: '12px'
+                        borderRadius: '8px'
                       }}
                     >
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.35rem'
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.35rem'
-                          }}
-                        >
-                          <Clock size={14} color={brandColors.neutral[500]} />
-                          <span
-                            style={{
-                              fontSize: isMobile ? '0.7rem' : '0.75rem', 
-                              color: brandColors.neutral[500]
-                            }}
-                          >
-                            Frequency
-                          </span>
-                        </div>
-                        <p
-                          style={{
-                            fontSize: isMobile ? '0.78rem' : '0.875rem', 
-                            color: brandColors.neutral[700],
-                            margin: 0,
-                            fontWeight: 600
-                          }}
-                        >
+                      <div>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
+                          Frequency
+                        </p>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
                           {getFrequencyLabel(invoice.frequency)}
                         </p>
                       </div>
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.35rem'
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.35rem'
-                          }}
-                        >
-                          <Repeat size={14} color={brandColors.neutral[500]} />
-                          <span
-                            style={{
-                              fontSize: isMobile ? '0.7rem' : '0.75rem', 
-                              color: brandColors.neutral[500]
-                            }}
-                          >
-                            Total sent
-                          </span>
-                        </div>
-                        <p
-                          style={{
-                            fontSize: isMobile ? '0.78rem' : '0.875rem', 
-                            color: brandColors.neutral[700],
-                            margin: 0,
-                            fontWeight: 600
-                          }}
-                        >
-                          {invoice.total_generated_count}
+                      <div>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
+                          Next Generation
+                        </p>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
+                          {new Date(invoice.next_generation_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
+                          Generated Count
+                        </p>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
+                          {invoice.total_generated_count} invoices
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.7rem' : '0.75rem', 
+                          color: brandColors.neutral[600], 
+                          margin: '0 0 0.25rem 0' 
+                        }}>
+                          Auto-send
+                        </p>
+                        <p style={{ 
+                          fontSize: window.innerWidth < 768 ? '0.8rem' : '0.875rem', 
+                          fontWeight: '600', 
+                          color: brandColors.neutral[900], 
+                          margin: 0 
+                        }}>
+                          {invoice.auto_send ? 'Yes' : 'No'}
                         </p>
                       </div>
                     </div>
@@ -484,7 +476,7 @@ export default function RecurringInvoicesPage() {
                       display: 'flex', 
                       gap: '0.5rem', 
                       flexWrap: 'wrap',
-                      flexDirection: isMobile ? 'column' : 'row'
+                      flexDirection: window.innerWidth < 768 ? 'column' : 'row'
                     }}>
                       {invoice.status === 'active' && (
                         <button
@@ -503,7 +495,7 @@ export default function RecurringInvoicesPage() {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             transition: 'all 0.2s ease',
-                            width: isMobile ? '100%' : 'auto'
+                            width: window.innerWidth < 768 ? '100%' : 'auto'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = brandColors.warning[100]
@@ -533,7 +525,7 @@ export default function RecurringInvoicesPage() {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             transition: 'all 0.2s ease',
-                            width: isMobile ? '100%' : 'auto'
+                            width: window.innerWidth < 768 ? '100%' : 'auto'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = brandColors.success[100]
@@ -562,7 +554,7 @@ export default function RecurringInvoicesPage() {
                           justifyContent: 'center',
                           gap: '0.5rem',
                           transition: 'all 0.2s ease',
-                          width: isMobile ? '100%' : 'auto'
+                          width: window.innerWidth < 768 ? '100%' : 'auto'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = brandColors.primary[100]
@@ -591,7 +583,7 @@ export default function RecurringInvoicesPage() {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             transition: 'all 0.2s ease',
-                            width: isMobile ? '100%' : 'auto'
+                            width: window.innerWidth < 768 ? '100%' : 'auto'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = brandColors.error[100]
@@ -615,4 +607,3 @@ export default function RecurringInvoicesPage() {
     </Layout>
   )
 }
-
