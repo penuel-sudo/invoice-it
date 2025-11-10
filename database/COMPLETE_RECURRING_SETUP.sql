@@ -532,6 +532,7 @@ DECLARE
   email_response JSONB;
   notification_prefs JSONB;
   should_notify BOOLEAN;
+  request_type TEXT;
 BEGIN
   -- Process pending email requests (only recent ones, within last hour)
   FOR pending_record IN
@@ -574,19 +575,66 @@ BEGIN
           );
         END IF;
 
+        request_type := COALESCE(pending_record.request_type, 'recurring');
+
         -- Check if email was sent successfully
         IF response_record.status_code = 200 AND (
           (email_response->>'success')::boolean = true OR
           (email_response->>'messageId') IS NOT NULL OR
           (email_response->>'id') IS NOT NULL
         ) THEN
-          -- Email sent successfully - update invoice status to 'pending'
-          UPDATE public.invoices
-          SET status = 'pending', updated_at = NOW()
-          WHERE id = pending_record.invoice_id;
+          IF request_type = 'recurring' THEN
+            -- Email sent successfully - update invoice status to 'pending'
+            UPDATE public.invoices
+            SET status = 'pending', updated_at = NOW()
+            WHERE id = pending_record.invoice_id;
 
-          -- Create success notification (if preference enabled)
-          IF should_notify THEN
+            -- Create success notification (if preference enabled)
+            IF should_notify THEN
+              INSERT INTO public.notifications (
+                user_id,
+                type,
+                title,
+                message,
+                is_read,
+                metadata
+              ) VALUES (
+                pending_record.user_id,
+                'success',
+                'Invoice Sent',
+                format('Invoice #%s sent to %s', pending_record.invoice_number, pending_record.client_email),
+                false,
+                jsonb_build_object(
+                  'invoice_id', pending_record.invoice_id,
+                  'invoice_number', pending_record.invoice_number,
+                  'client_id', pending_record.client_id,
+                  'client_name', pending_record.client_name,
+                  'client_email', pending_record.client_email,
+                  'auto_sent', true
+                )
+              );
+            END IF;
+          ELSE
+            -- Reminder email succeeded
+            IF pending_record.reminder_log_id IS NOT NULL THEN
+              UPDATE public.invoice_reminder_log
+              SET status = 'sent',
+                  sent_at = NOW(),
+                  payload = COALESCE(payload, '{}'::jsonb) || jsonb_build_object(
+                    'response', email_response,
+                    'processed_at', NOW()
+                  )
+              WHERE id = pending_record.reminder_log_id;
+            END IF;
+          END IF;
+        ELSE
+          IF request_type = 'recurring' THEN
+            -- Email failed - update invoice back to draft
+            UPDATE public.invoices
+            SET status = 'draft', updated_at = NOW()
+            WHERE id = pending_record.invoice_id;
+
+            -- Create error notification (always create errors)
             INSERT INTO public.notifications (
               user_id,
               type,
@@ -596,54 +644,37 @@ BEGIN
               metadata
             ) VALUES (
               pending_record.user_id,
-              'success',
-              'Invoice Sent',
-              format('Invoice #%s sent to %s', pending_record.invoice_number, pending_record.client_email),
+              'error',
+              'Auto-send Failed',
+              format('Failed to send invoice #%s: HTTP %s - %s', 
+                pending_record.invoice_number, 
+                response_record.status_code,
+                COALESCE(email_response->>'error', response_record.content, 'Unknown error')
+              ),
               false,
               jsonb_build_object(
                 'invoice_id', pending_record.invoice_id,
                 'invoice_number', pending_record.invoice_number,
                 'client_id', pending_record.client_id,
-                'client_name', pending_record.client_name,
-                'client_email', pending_record.client_email,
-                'auto_sent', true
+                'http_status_code', response_record.status_code,
+                'http_content', response_record.content,
+                'api_response', email_response,
+                'error', COALESCE(email_response->>'error', response_record.content, 'Request failed')
               )
             );
+          ELSE
+            -- Reminder email failed
+            IF pending_record.reminder_log_id IS NOT NULL THEN
+              UPDATE public.invoice_reminder_log
+              SET status = 'failed',
+                  payload = COALESCE(payload, '{}'::jsonb) || jsonb_build_object(
+                    'error', COALESCE(email_response->>'error', response_record.content, 'Request failed'),
+                    'http_status_code', response_record.status_code,
+                    'processed_at', NOW()
+                  )
+              WHERE id = pending_record.reminder_log_id;
+            END IF;
           END IF;
-        ELSE
-          -- Email failed - update invoice back to draft
-          UPDATE public.invoices
-          SET status = 'draft', updated_at = NOW()
-          WHERE id = pending_record.invoice_id;
-
-          -- Create error notification (always create errors)
-          INSERT INTO public.notifications (
-            user_id,
-            type,
-            title,
-            message,
-            is_read,
-            metadata
-          ) VALUES (
-            pending_record.user_id,
-            'error',
-            'Auto-send Failed',
-            format('Failed to send invoice #%s: HTTP %s - %s', 
-              pending_record.invoice_number, 
-              response_record.status_code,
-              COALESCE(email_response->>'error', response_record.content, 'Unknown error')
-            ),
-            false,
-            jsonb_build_object(
-              'invoice_id', pending_record.invoice_id,
-              'invoice_number', pending_record.invoice_number,
-              'client_id', pending_record.client_id,
-              'http_status_code', response_record.status_code,
-              'http_content', response_record.content,
-              'api_response', email_response,
-              'error', COALESCE(email_response->>'error', response_record.content, 'Request failed')
-            )
-          );
         END IF;
 
         -- Mark as processed
@@ -669,33 +700,47 @@ BEGIN
       AND created_at <= NOW() - INTERVAL '1 hour'
   LOOP
     BEGIN
-      -- Update invoice back to draft
-      UPDATE public.invoices
-      SET status = 'draft', updated_at = NOW()
-      WHERE id = pending_record.invoice_id;
+      request_type := COALESCE(pending_record.request_type, 'recurring');
 
-      -- Create timeout notification
-      INSERT INTO public.notifications (
-        user_id,
-        type,
-        title,
-        message,
-        is_read,
-        metadata
-      ) VALUES (
-        pending_record.user_id,
-        'error',
-        'Auto-send Timeout',
-        format('Email sending timed out for invoice #%s', pending_record.invoice_number),
-        false,
-        jsonb_build_object(
-          'invoice_id', pending_record.invoice_id,
-          'invoice_number', pending_record.invoice_number,
-          'client_id', pending_record.client_id,
-          'error', 'Request timed out after 1 hour'
-        )
-      );
+      IF request_type = 'recurring' THEN
+        -- Update invoice back to draft
+        UPDATE public.invoices
+        SET status = 'draft', updated_at = NOW()
+        WHERE id = pending_record.invoice_id;
 
+        -- Create timeout notification
+        INSERT INTO public.notifications (
+          user_id,
+          type,
+          title,
+          message,
+          is_read,
+          metadata
+        ) VALUES (
+          pending_record.user_id,
+          'error',
+          'Auto-send Timeout',
+          format('Email sending timed out for invoice #%s', pending_record.invoice_number),
+          false,
+          jsonb_build_object(
+            'invoice_id', pending_record.invoice_id,
+            'invoice_number', pending_record.invoice_number,
+            'client_id', pending_record.client_id,
+            'error', 'Request timed out after 1 hour'
+          )
+        );
+      ELSE
+        IF pending_record.reminder_log_id IS NOT NULL THEN
+          UPDATE public.invoice_reminder_log
+          SET status = 'failed',
+              payload = COALESCE(payload, '{}'::jsonb) || jsonb_build_object(
+                'error', 'Request timed out after 1 hour',
+                'processed_at', NOW()
+              )
+          WHERE id = pending_record.reminder_log_id;
+        END IF;
+      END IF;
+ 
       -- Mark as processed
       UPDATE public.pending_email_requests
       SET processed = TRUE, processed_at = NOW()

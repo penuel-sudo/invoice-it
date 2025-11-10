@@ -1,6 +1,40 @@
 import { Resend } from 'resend';
+import { REMINDER_MESSAGES } from '../src/types/autoReminders';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const escapeHtml = (str = '') =>
+  str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const splitLines = (lines) =>
+  lines
+    .flatMap((line) =>
+      String(line || '')
+        .split(/\r?\n/)
+        .map((segment) => segment.trim())
+        .filter(Boolean)
+    );
+
+const formatHtmlParagraphs = (lines) =>
+  splitLines(lines)
+    .map((line, idx, arr) => {
+      const marginBottom = idx === arr.length - 1 ? 28 : 16;
+      return `<p style="margin: 0 0 ${marginBottom}px 0; font-size: 15px; color: #4b5563; line-height: 1.7;">${escapeHtml(line)}</p>`;
+    })
+    .join('');
+
+const formatTemplate = (template, values) => {
+  if (!template) return '';
+  return Object.entries(values).reduce(
+    (acc, [key, val]) => acc.replace(new RegExp(`{{${key}}}`, 'g'), val ?? ''),
+    template
+  );
+};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,7 +49,9 @@ export default async function handler(req, res) {
       clientName,
       greetingMessage,
       businessName,
-      userEmail
+      userEmail,
+      type = 'invoice',
+      reminderContext
     } = req.body;
 
     // Validation
@@ -63,19 +99,60 @@ export default async function handler(req, res) {
     // Format amount
     const totalAmount = (invoiceData.total || invoiceData.grandTotal || 0).toFixed(2);
 
-    // Text content
-    const textContent = `
-${finalGreeting}
+    const placeholders = {
+      clientName: fullClientName,
+      invoiceNumber: invoiceData.invoiceNumber,
+      amountDue: `${currencySymbol}${totalAmount}`,
+      dueDate: formattedDueDate,
+      businessName: displayBusinessName
+    };
 
-Your invoice #${invoiceData.invoiceNumber} for ${currencySymbol}${totalAmount} is ready.
+    const isReminder = type === 'reminder';
+    const reminderKey = reminderContext?.reminderKey || 'on_due_date';
+    const reminderTone = reminderContext?.tone || 'friendly';
 
-Due Date: ${formattedDueDate}
+    let messageLines = [];
+    let emailSubject = `Invoice #${invoiceData.invoiceNumber} from ${displayBusinessName}`;
 
-Please review the details and complete the payment at your convenience.
+    if (isReminder) {
+      const tonePresets = REMINDER_MESSAGES[reminderTone] || REMINDER_MESSAGES.friendly;
+      const messageTemplate = tonePresets[reminderKey] || tonePresets['on_due_date'];
+      const introLine = formatTemplate(messageTemplate.intro, placeholders);
+      const followUpLine = messageTemplate.followUp ? formatTemplate(messageTemplate.followUp, placeholders) : '';
+      messageLines = [introLine];
+      if (followUpLine) {
+        messageLines.push(followUpLine);
+      }
+      emailSubject = formatTemplate(messageTemplate.subject, placeholders);
+    } else {
+      const defaultInvoiceMessage = 'Your invoice is ready for review. We appreciate your business and look forward to continuing our partnership.';
+      messageLines = [defaultInvoiceMessage];
+    }
 
-Thank you for your business,
-${displayBusinessName}
-    `.trim();
+    if (!messageLines.length) {
+      messageLines = [
+        'Your invoice is ready for review. We appreciate your business and look forward to continuing our partnership.'
+      ];
+    }
+
+    const messageHtml = formatHtmlParagraphs(messageLines);
+
+    const textSections = [
+      finalGreeting,
+      '',
+      ...splitLines(messageLines)
+    ];
+
+    textSections.push(
+      '',
+      `Amount Due: ${currencySymbol}${totalAmount}`,
+      `Due Date: ${formattedDueDate}`,
+      '',
+      'Thank you for your business,',
+      displayBusinessName
+    );
+
+    const textContent = textSections.join('\n');
 
     // Bulletproof HTML email template (100% compatible with all email clients)
     const emailHtml = `
@@ -131,7 +208,7 @@ ${displayBusinessName}
                 <tr>
                   <td>
                     <p style="margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #111827;">${finalGreeting}</p>
-                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #4b5563; line-height: 1.7;">Your invoice is ready for review. We appreciate your business and look forward to continuing our partnership.</p>
+                    ${messageHtml}
                   </td>
                 </tr>
               </table>
@@ -254,7 +331,6 @@ ${displayBusinessName}
 
     // Email configuration
     const verifiedFromAddress = process.env.RESEND_FROM || 'invoices@mail.invoice-it.org';
-    const invoiceSubject = `Invoice #${invoiceData.invoiceNumber} from ${displayBusinessName}`;
     
     // List ID for email headers
     const listId = `${invoiceData.invoiceNumber || Date.now()}-${displayBusinessName.toLowerCase().replace(/\s+/g, '-')}.list-id.mail.invoice-it.org`;
@@ -267,7 +343,7 @@ ${displayBusinessName}
       from: `${displayBusinessName} <${verifiedFromAddress}>`,
       replyTo: [replyToEmail],
       to: [to],
-      subject: invoiceSubject,
+      subject: emailSubject,
       text: textContent,
       html: emailHtml,
       headers: {
