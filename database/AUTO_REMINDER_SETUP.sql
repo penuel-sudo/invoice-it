@@ -247,15 +247,20 @@ begin
     foreach v_key in array v_schedule loop
       if v_key = '3_days_before' then
         v_target_date := v_invoice.due_date - 3;
+        if v_target_date <> current_date then
+          continue;
+        end if;
       elsif v_key = 'on_due_date' then
         v_target_date := v_invoice.due_date;
+        if current_date < v_target_date then
+          continue;
+        end if;
       elsif v_key = '7_days_after' then
         v_target_date := v_invoice.due_date + 7;
+        if current_date < v_target_date then
+          continue;
+        end if;
       else
-        continue;
-      end if;
-
-      if v_target_date <> current_date then
         continue;
       end if;
 

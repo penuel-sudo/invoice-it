@@ -533,6 +533,7 @@ DECLARE
   notification_prefs JSONB;
   should_notify BOOLEAN;
   request_type TEXT;
+  reminder_log_record RECORD;
 BEGIN
   -- Process pending email requests (only recent ones, within last hour)
   FOR pending_record IN
@@ -625,6 +626,41 @@ BEGIN
                     'processed_at', NOW()
                   )
               WHERE id = pending_record.reminder_log_id;
+
+              IF should_notify THEN
+                SELECT reminder_key, user_id
+                INTO reminder_log_record
+                FROM public.invoice_reminder_log
+                WHERE id = pending_record.reminder_log_id;
+
+                INSERT INTO public.notifications (
+                  user_id,
+                  type,
+                  title,
+                  message,
+                  is_read,
+                  metadata
+                ) VALUES (
+                  pending_record.user_id,
+                  'success',
+                  'Reminder Sent',
+                  format('Reminder (%s) sent to %s for invoice #%s',
+                    COALESCE(reminder_log_record.reminder_key, 'auto'),
+                    pending_record.client_email,
+                    pending_record.invoice_number
+                  ),
+                  false,
+                  jsonb_build_object(
+                    'invoice_id', pending_record.invoice_id,
+                    'invoice_number', pending_record.invoice_number,
+                    'client_id', pending_record.client_id,
+                    'client_name', pending_record.client_name,
+                    'client_email', pending_record.client_email,
+                    'reminder_log_id', pending_record.reminder_log_id,
+                    'reminder_key', reminder_log_record.reminder_key
+                  )
+                );
+              END IF;
             END IF;
           END IF;
         ELSE

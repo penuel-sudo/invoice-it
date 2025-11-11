@@ -26,53 +26,22 @@ export default function OverdueDetector({
       setLoading(true)
       console.log('Checking overdue invoices for user:', userId)
 
-      // Get all pending invoices where due_date < today (overdue)
-      const today = new Date().toISOString().split('T')[0] // Get today's date in YYYY-MM-DD format
-      
+      // Read invoices already marked overdue
       const { data: overdueInvoices, error: fetchError } = await supabase
         .from('invoices')
-        .select(`
-          id,
-          due_date,
-          issue_date,
-          status
-        `)
+        .select('id')
         .eq('user_id', userId)
-        .eq('status', 'pending')
-        .lt('due_date', today) // due_date < today (overdue)
+        .eq('status', 'overdue')
 
       if (fetchError) {
         console.error('Error fetching overdue invoices:', fetchError)
         return
       }
 
-      if (!overdueInvoices || overdueInvoices.length === 0) {
-        console.log('No overdue invoices found')
-        setOverdueCount(0)
-        onOverdueUpdate?.(0)
-        return
-      }
-
-      console.log(`Found ${overdueInvoices.length} overdue invoices`)
-
-      // Update invoice statuses to overdue
-      const invoiceIds = overdueInvoices.map(inv => inv.id)
-      const { error: updateInvoiceError } = await supabase
-        .from('invoices')
-        .update({ 
-          status: 'overdue',
-          updated_at: new Date().toISOString()
-        })
-        .in('id', invoiceIds)
-
-      if (updateInvoiceError) {
-        console.error('Error updating invoice statuses:', updateInvoiceError)
-        return
-      }
-
-      console.log(`Successfully updated ${overdueInvoices.length} invoices to overdue status`)
-      setOverdueCount(overdueInvoices.length)
-      onOverdueUpdate?.(overdueInvoices.length)
+      const count = overdueInvoices?.length ?? 0
+      console.log(`Overdue invoices detected: ${count}`)
+      setOverdueCount(count)
+      onOverdueUpdate?.(count)
     } catch (error) {
       console.error('Error in checkOverdueInvoices:', error)
     } finally {
