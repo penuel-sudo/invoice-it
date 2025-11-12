@@ -469,6 +469,22 @@ export default function ProfessionalInvoicePreviewPage() {
 
   const hasShipTo = invoiceData.shipToName || invoiceData.shipToAddress
 
+  // Helper variables for customization
+  const fontFamily = templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+  const primaryColor = templateSettings?.primary_color || brandColors.primary[700]
+  const accentColor = templateSettings?.accent_color || brandColors.primary[500]
+  
+  // Helper function to add opacity to hex color
+  const addOpacity = (hex: string, opacity: number): string => {
+    // Remove # if present
+    const cleanHex = hex.replace('#', '')
+    // Convert to RGB
+    const r = parseInt(cleanHex.substring(0, 2), 16)
+    const g = parseInt(cleanHex.substring(2, 4), 16)
+    const b = parseInt(cleanHex.substring(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -518,8 +534,12 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           marginBottom: '3rem',
           paddingBottom: '2rem',
-          borderBottom: `2px solid ${brandColors.neutral[200]}`,
-          position: 'relative'
+          padding: '1.5rem',
+          backgroundColor: templateSettings?.background_colors?.header_background || 'transparent',
+          borderRadius: '8px',
+          borderBottom: `2px solid ${addOpacity(primaryColor, 0.12)}`,
+          position: 'relative',
+          fontFamily: fontFamily
         }}>
           <div style={{ textAlign: 'center' }}>
             <h1 style={{
@@ -532,7 +552,7 @@ export default function ProfessionalInvoicePreviewPage() {
               {(templateSettings?.company_name || profileFallback?.company_name || 'INVOICE').toString()}
             </h1>
             {(templateSettings?.tagline || profileFallback?.tagline) && (templateSettings?.template_settings?.show_tagline !== false) && (
-              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: brandColors.neutral[600] }}>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: brandColors.neutral[600], fontFamily: fontFamily }}>
                 {(templateSettings?.tagline || profileFallback?.tagline) as string}
               </p>
             )}
@@ -541,17 +561,17 @@ export default function ProfessionalInvoicePreviewPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '1.25rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
               {(templateSettings?.website || profileFallback?.website) && (templateSettings?.template_settings?.show_website !== false) && (
-                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0', fontFamily: fontFamily }}>
                   {(templateSettings?.website || profileFallback?.website) as string}
                 </p>
               )}
               {(templateSettings?.tax_id || profileFallback?.tax_id) && (templateSettings?.template_settings?.show_tax_id !== false) && (
-                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0' }}>
+                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0', fontFamily: fontFamily }}>
                   Tax ID: {(templateSettings?.tax_id || profileFallback?.tax_id) as string}
                 </p>
               )}
               {(templateSettings?.registration_number || profileFallback?.registration_number) && (templateSettings?.template_settings?.show_registration !== false) && (
-                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: 0 }}>
+                <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: 0, fontFamily: fontFamily }}>
                   Reg: {(templateSettings?.registration_number || profileFallback?.registration_number) as string}
                 </p>
               )}
@@ -574,27 +594,30 @@ export default function ProfessionalInvoicePreviewPage() {
               flexWrap: 'wrap',
               gap: '0.75rem',
               padding: '0.75rem',
-              backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[50],
+              backgroundColor: templateSettings?.background_colors?.form_background || templateSettings?.background_colors?.section_background || brandColors.neutral[50],
               borderRadius: '8px',
               marginBottom: '1.5rem',
-              position: 'relative'
+              position: 'relative',
+              fontFamily: fontFamily
             }}>
           
           <div style={{ minWidth: '120px', flex: '1' }}>
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
-              color: brandColors.neutral[500],
+              color: addOpacity(primaryColor, 0.5),
               marginBottom: '0.25rem',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              fontFamily: fontFamily
             }}>
               Invoice Number
             </div>
             <div style={{
               fontSize: '1rem',
               fontWeight: '600',
-              color: brandColors.neutral[900]
+              color: brandColors.neutral[900],
+              fontFamily: fontFamily
             }}>
               {invoiceData.invoiceNumber}
             </div>
@@ -604,17 +627,19 @@ export default function ProfessionalInvoicePreviewPage() {
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
-              color: brandColors.neutral[500],
+              color: addOpacity(primaryColor, 0.5),
               marginBottom: '0.25rem',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              fontFamily: fontFamily
             }}>
               Issue Date
             </div>
             <div style={{
               fontSize: '1rem',
               fontWeight: '600',
-              color: brandColors.neutral[900]
+              color: brandColors.neutral[900],
+              fontFamily: fontFamily
             }}>
               {new Date(invoiceData.invoiceDate).toLocaleDateString('en-US', {
                 month: 'short',
@@ -628,17 +653,19 @@ export default function ProfessionalInvoicePreviewPage() {
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
-              color: brandColors.neutral[500],
+              color: addOpacity(primaryColor, 0.5),
               marginBottom: '0.25rem',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              fontFamily: fontFamily
             }}>
               Due Date
             </div>
             <div style={{
               fontSize: '1rem',
               fontWeight: '600',
-              color: brandColors.error[600]
+              color: brandColors.error[600],
+              fontFamily: fontFamily
             }}>
               {new Date(invoiceData.dueDate).toLocaleDateString('en-US', {
                 month: 'short',
@@ -653,17 +680,19 @@ export default function ProfessionalInvoicePreviewPage() {
               <div style={{
                 fontSize: '0.75rem',
                 fontWeight: '600',
-                color: brandColors.neutral[500],
+                color: addOpacity(primaryColor, 0.5),
                 marginBottom: '0.25rem',
                 textTransform: 'uppercase',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.05em',
+                fontFamily: fontFamily
               }}>
                 PO Number
               </div>
               <div style={{
                 fontSize: '1rem',
                 fontWeight: '600',
-                color: brandColors.neutral[900]
+                color: brandColors.neutral[900],
+                fontFamily: fontFamily
               }}>
                 {invoiceData.poNumber}
               </div>
@@ -675,17 +704,19 @@ export default function ProfessionalInvoicePreviewPage() {
               <div style={{
                 fontSize: '0.75rem',
                 fontWeight: '600',
-                color: brandColors.neutral[500],
+                color: addOpacity(primaryColor, 0.5),
                 marginBottom: '0.25rem',
                 textTransform: 'uppercase',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.05em',
+                fontFamily: fontFamily
               }}>
                 Tax ID / VAT
               </div>
               <div style={{
                 fontSize: '1rem',
                 fontWeight: '600',
-                color: brandColors.neutral[900]
+                color: brandColors.neutral[900],
+                fontFamily: fontFamily
               }}>
                 {invoiceData.taxId}
               </div>
@@ -709,10 +740,11 @@ export default function ProfessionalInvoicePreviewPage() {
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
-              color: templateSettings?.primary_color || brandColors.neutral[700],
+              color: primaryColor,
               marginBottom: '1rem',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              fontFamily: fontFamily
             }}>
               Bill To
             </h3>
@@ -726,7 +758,8 @@ export default function ProfessionalInvoicePreviewPage() {
                 fontSize: '1.125rem',
                 fontWeight: '700',
                 color: brandColors.neutral[900],
-                marginBottom: '0.75rem'
+                marginBottom: '0.75rem',
+                fontFamily: fontFamily
               }}>
                 {invoiceData.clientName}
               </div>
@@ -791,10 +824,11 @@ export default function ProfessionalInvoicePreviewPage() {
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
-              color: templateSettings?.primary_color || brandColors.neutral[700],
+              color: primaryColor,
                 marginBottom: '1rem',
                 textTransform: 'uppercase',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.05em',
+                fontFamily: fontFamily
               }}>
                 Ship To
               </h3>
@@ -802,7 +836,7 @@ export default function ProfessionalInvoicePreviewPage() {
                 padding: '1.25rem',
                 backgroundColor: templateSettings?.background_colors?.section_background || brandColors.primary[50],
                 borderRadius: '8px',
-                border: `1px solid ${templateSettings?.primary_color || brandColors.primary[200]}`
+                border: `1px solid ${addOpacity(primaryColor, 0.25)}`
               }}>
                 <div style={{
                   fontSize: '1.125rem',
@@ -849,14 +883,15 @@ export default function ProfessionalInvoicePreviewPage() {
         </div>
 
         {/* Line Items Table */}
-        <div style={{ marginBottom: '2rem', overflowX: 'auto' }}>
+        <div style={{ marginBottom: '2rem', overflowX: 'auto', fontFamily: fontFamily }}>
           <h3 style={{
             fontSize: '0.875rem',
             fontWeight: '700',
-            color: brandColors.neutral[700],
+            color: primaryColor,
             marginBottom: '1rem',
             textTransform: 'uppercase',
-            letterSpacing: '0.05em'
+            letterSpacing: '0.05em',
+            fontFamily: fontFamily
           }}>
             Items
           </h3>
@@ -867,16 +902,17 @@ export default function ProfessionalInvoicePreviewPage() {
             <thead>
               <tr style={{
                 backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[100],
-                borderBottom: `2px solid ${brandColors.neutral[300]}`
+                borderBottom: `2px solid ${addOpacity(primaryColor, 0.25)}`
               }}>
                 <th style={{
                   textAlign: 'left',
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
-                  color: brandColors.neutral[700],
+                  color: primaryColor,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
+                  letterSpacing: '0.05em',
+                  fontFamily: fontFamily
                 }}>
                   Description
                 </th>
@@ -885,9 +921,10 @@ export default function ProfessionalInvoicePreviewPage() {
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
-                  color: brandColors.neutral[700],
+                  color: primaryColor,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
+                  letterSpacing: '0.05em',
+                  fontFamily: fontFamily
                 }}>
                   Qty
                 </th>
@@ -896,9 +933,10 @@ export default function ProfessionalInvoicePreviewPage() {
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
-                  color: brandColors.neutral[700],
+                  color: primaryColor,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
+                  letterSpacing: '0.05em',
+                  fontFamily: fontFamily
                 }}>
                   Unit Price
                 </th>
@@ -908,9 +946,10 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.75rem',
                     fontWeight: '700',
-                    color: brandColors.neutral[700],
+                    color: primaryColor,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
+                    letterSpacing: '0.05em',
+                    fontFamily: fontFamily
                   }}>
                     Disc %
                   </th>
@@ -921,9 +960,10 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.75rem',
                     fontWeight: '700',
-                    color: brandColors.neutral[700],
+                    color: primaryColor,
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
+                    letterSpacing: '0.05em',
+                    fontFamily: fontFamily
                   }}>
                     Tax %
                   </th>
@@ -933,9 +973,10 @@ export default function ProfessionalInvoicePreviewPage() {
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
-                  color: brandColors.neutral[700],
+                  color: primaryColor,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
+                  letterSpacing: '0.05em',
+                  fontFamily: fontFamily
                 }}>
                   Total
                 </th>
@@ -952,7 +993,8 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[900],
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    fontFamily: fontFamily
                   }}>
                     {item.description}
                   </td>
@@ -960,7 +1002,8 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[700],
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    fontFamily: fontFamily
                   }}>
                     {item.quantity.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                   </td>
@@ -968,7 +1011,8 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
                     color: brandColors.neutral[700],
-                    textAlign: 'right'
+                    textAlign: 'right',
+                    fontFamily: fontFamily
                   }}>
                     {invoiceData.currencySymbol}{item.unitPrice.toFixed(2)}
                   </td>
@@ -976,8 +1020,9 @@ export default function ProfessionalInvoicePreviewPage() {
                     <td style={{
                       padding: '0.75rem 0.5rem',
                       fontSize: '0.875rem',
-                      color: item.discount > 0 ? brandColors.error[600] : brandColors.neutral[400],
-                      textAlign: 'center'
+                      color: item.discount > 0 ? accentColor : brandColors.neutral[400],
+                      textAlign: 'center',
+                      fontFamily: fontFamily
                     }}>
                       {item.discount > 0 ? `${item.discount}%` : '-'}
                     </td>
@@ -987,7 +1032,8 @@ export default function ProfessionalInvoicePreviewPage() {
                       padding: '0.75rem 0.5rem',
                       fontSize: '0.875rem',
                       color: brandColors.neutral[700],
-                      textAlign: 'center'
+                      textAlign: 'center',
+                      fontFamily: fontFamily
                     }}>
                       {item.taxRate > 0 ? `${item.taxRate}%` : '-'}
                     </td>
@@ -997,7 +1043,8 @@ export default function ProfessionalInvoicePreviewPage() {
                     fontSize: '0.875rem',
                     fontWeight: '600',
                     color: brandColors.neutral[900],
-                    textAlign: 'right'
+                    textAlign: 'right',
+                    fontFamily: fontFamily
                   }}>
                     {invoiceData.currencySymbol}{item.lineTotal.toFixed(2)}
                   </td>
@@ -1011,21 +1058,23 @@ export default function ProfessionalInvoicePreviewPage() {
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          marginBottom: '3rem'
+          marginBottom: '3rem',
+          fontFamily: fontFamily
         }}>
           <div style={{
             minWidth: '350px',
-            backgroundColor: brandColors.neutral[50],
+            backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[50],
             borderRadius: '8px',
             padding: '1.5rem',
-            border: `1px solid ${brandColors.neutral[200]}`
+            border: `1px solid ${addOpacity(primaryColor, 0.19)}`
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               marginBottom: '0.75rem',
               fontSize: '0.875rem',
-              color: brandColors.neutral[700]
+              color: primaryColor,
+              fontFamily: fontFamily
             }}>
               <span>Subtotal:</span>
               <span>{invoiceData.currencySymbol}{invoiceData.subtotal.toFixed(2)}</span>
@@ -1037,7 +1086,8 @@ export default function ProfessionalInvoicePreviewPage() {
                 justifyContent: 'space-between',
                 marginBottom: '0.75rem',
                 fontSize: '0.875rem',
-                color: brandColors.error[600]
+                color: accentColor,
+                fontFamily: fontFamily
               }}>
                 <span>Discount:</span>
                 <span>-{invoiceData.currencySymbol}{invoiceData.discountAmount.toFixed(2)}</span>
@@ -1050,7 +1100,8 @@ export default function ProfessionalInvoicePreviewPage() {
                 justifyContent: 'space-between',
                 marginBottom: '0.75rem',
                 fontSize: '0.875rem',
-                color: brandColors.neutral[700]
+                color: primaryColor,
+                fontFamily: fontFamily
               }}>
                 <span>Shipping:</span>
                 <span>{invoiceData.currencySymbol}{invoiceData.shippingCost.toFixed(2)}</span>
@@ -1063,7 +1114,8 @@ export default function ProfessionalInvoicePreviewPage() {
                 justifyContent: 'space-between',
                 marginBottom: '0.75rem',
                 fontSize: '0.875rem',
-                color: brandColors.neutral[700]
+                color: primaryColor,
+                fontFamily: fontFamily
               }}>
                 <span>Tax:</span>
                 <span>{invoiceData.currencySymbol}{invoiceData.taxTotal.toFixed(2)}</span>
@@ -1071,14 +1123,15 @@ export default function ProfessionalInvoicePreviewPage() {
             )}
 
             <div style={{
-              borderTop: `2px solid ${brandColors.neutral[300]}`,
+              borderTop: `2px solid ${addOpacity(primaryColor, 0.25)}`,
               paddingTop: '1rem',
               marginTop: '1rem',
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '1.25rem',
               fontWeight: '700',
-              color: brandColors.neutral[900]
+              color: primaryColor,
+              fontFamily: fontFamily
             }}>
               <span>Total:</span>
               <span>{invoiceData.currencySymbol}{invoiceData.grandTotal.toFixed(2)}</span>
@@ -1091,21 +1144,23 @@ export default function ProfessionalInvoicePreviewPage() {
                   justifyContent: 'space-between',
                   marginTop: '0.75rem',
                   fontSize: '0.875rem',
-                  color: brandColors.success[600]
+                  color: accentColor,
+                  fontFamily: fontFamily
                 }}>
                   <span>Amount Paid:</span>
                   <span>-{invoiceData.currencySymbol}{invoiceData.amountPaid.toFixed(2)}</span>
                 </div>
 
                 <div style={{
-                  borderTop: `2px solid ${brandColors.primary[300]}`,
+                  borderTop: `2px solid ${addOpacity(primaryColor, 0.38)}`,
                   paddingTop: '1rem',
                   marginTop: '1rem',
                   display: 'flex',
                   justifyContent: 'space-between',
                   fontSize: '1.5rem',
                   fontWeight: '700',
-                  color: brandColors.primary[600]
+                  color: primaryColor,
+                  fontFamily: fontFamily
                 }}>
                   <span>Balance Due:</span>
                   <span>{invoiceData.currencySymbol}{invoiceData.balanceDue.toFixed(2)}</span>
@@ -1118,19 +1173,21 @@ export default function ProfessionalInvoicePreviewPage() {
         {/* Payment Terms & Information */}
         {(paymentMethods.length > 0 || invoiceData.termsAndConditions) && (
           <div style={{
-            backgroundColor: brandColors.neutral[50],
+            backgroundColor: templateSettings?.background_colors?.section_background || brandColors.neutral[50],
             borderRadius: '8px',
             padding: '1.5rem',
             marginBottom: '2rem',
-            border: `1px solid ${brandColors.neutral[200]}`
+            border: `1px solid ${addOpacity(primaryColor, 0.19)}`,
+            fontFamily: fontFamily
           }}>
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
-              color: brandColors.neutral[700],
+              color: primaryColor,
               marginBottom: '1rem',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              fontFamily: fontFamily
             }}>
               Payment Terms & Information
             </h3>
@@ -1143,7 +1200,8 @@ export default function ProfessionalInvoicePreviewPage() {
                   fontSize: '0.875rem',
                   color: brandColors.neutral[600],
                   lineHeight: '1.6',
-                  whiteSpace: 'pre-line'
+                  whiteSpace: 'pre-line',
+                  fontFamily: fontFamily
                 }}>
                   {invoiceData.termsAndConditions}
                 </div>
@@ -1165,27 +1223,30 @@ export default function ProfessionalInvoicePreviewPage() {
                 const details = method.details as any
                 return (
                   <div key={method.id} style={{
-                    backgroundColor: brandColors.white,
+                    backgroundColor: templateSettings?.background_colors?.card_background || brandColors.white,
                     padding: '1rem',
                     borderRadius: '6px',
-                    border: `1px solid ${brandColors.neutral[200]}`,
+                    border: `1px solid ${addOpacity(primaryColor, 0.19)}`,
                     minHeight: '80px',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    fontFamily: fontFamily
                   }}>
                     <div style={{
                       fontWeight: '600',
-                      color: brandColors.neutral[900],
+                      color: primaryColor,
                       fontSize: '0.875rem',
-                      marginBottom: '0.5rem'
+                      marginBottom: '0.5rem',
+                      fontFamily: fontFamily
                     }}>
                       {method.label}
                     </div>
                     <div style={{
                       fontSize: '0.75rem',
                       color: brandColors.neutral[600],
-                      lineHeight: '1.4'
+                      lineHeight: '1.4',
+                      fontFamily: fontFamily
                     }}>
                       {method.type === 'bank_local_us' && details && (
                         <div>
@@ -1236,15 +1297,17 @@ export default function ProfessionalInvoicePreviewPage() {
         {invoiceData.notes && (
           <div style={{
             textAlign: 'center',
-            marginBottom: '2rem'
+            marginBottom: '2rem',
+            fontFamily: fontFamily
           }}>
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
-              color: brandColors.neutral[700],
+              color: primaryColor,
               marginBottom: '0.75rem',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              fontFamily: fontFamily
             }}>
               Notes
             </h3>
@@ -1252,7 +1315,8 @@ export default function ProfessionalInvoicePreviewPage() {
               fontSize: '0.875rem',
               color: brandColors.neutral[700],
               whiteSpace: 'pre-line',
-              lineHeight: '1.6'
+              lineHeight: '1.6',
+              fontFamily: fontFamily
             }}>
               {invoiceData.notes}
             </div>

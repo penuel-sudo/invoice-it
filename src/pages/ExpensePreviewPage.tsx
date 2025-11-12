@@ -136,9 +136,16 @@ export default function ExpensePreviewPage() {
     try {
       setGlobalLoading(true)
       
-      const { data, error } = await supabase
+      // Load expense with client info
+      const { data: expenseData, error } = await supabase
         .from('expenses')
-        .select('*')
+        .select(`
+          *,
+          clients (
+            name,
+            company_name
+          )
+        `)
         .eq('id', expenseId)
         .eq('user_id', user.id)
         .single()
@@ -150,7 +157,22 @@ export default function ExpensePreviewPage() {
         return
       }
 
-      setExpense(data)
+      // Transform data to include client_name
+      const expense = {
+        ...expenseData,
+        client_name: expenseData.clients && Array.isArray(expenseData.clients) && expenseData.clients.length > 0
+          ? (expenseData.clients[0].company_name || expenseData.clients[0].name)
+          : expenseData.clients && !Array.isArray(expenseData.clients)
+          ? (expenseData.clients.company_name || expenseData.clients.name)
+          : undefined
+      }
+      
+      // Remove the nested clients object
+      if (expense.clients) {
+        delete expense.clients
+      }
+
+      setExpense(expense)
     } catch (error) {
       console.error('Error loading expense:', error)
       toast.error('Failed to load expense')

@@ -89,19 +89,49 @@ export default function ClientPage() {
 
     try {
       setGlobalLoading(true)
-      const { data, error } = await supabase
+      
+      // Load all clients
+      const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Error loading clients:', error)
+      if (clientsError) {
+        console.error('Error loading clients:', clientsError)
         toast.error('Failed to load clients')
         return
       }
 
-      setClients(data || [])
+      // Load all overdue invoices (status = 'overdue')
+      const { data: overdueInvoices, error: invoicesError } = await supabase
+        .from('invoices')
+        .select('client_id, id')
+        .eq('user_id', user.id)
+        .eq('status', 'overdue')
+
+      if (invoicesError) {
+        console.error('Error loading overdue invoices:', invoicesError)
+        // Continue even if invoice loading fails
+      }
+
+      // Count overdue invoices per client
+      const overdueCounts: Record<string, number> = {}
+      if (overdueInvoices) {
+        overdueInvoices.forEach(invoice => {
+          if (invoice.client_id) {
+            overdueCounts[invoice.client_id] = (overdueCounts[invoice.client_id] || 0) + 1
+          }
+        })
+      }
+
+      // Add overdue_count to each client
+      const clientsWithOverdue = (clientsData || []).map(client => ({
+        ...client,
+        overdue_count: overdueCounts[client.id] || 0
+      }))
+
+      setClients(clientsWithOverdue)
     } catch (error) {
       console.error('Error loading clients:', error)
       toast.error('Failed to load clients')

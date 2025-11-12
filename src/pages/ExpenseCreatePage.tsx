@@ -1002,7 +1002,7 @@ export default function ExpenseCreatePage() {
                     color: brandColors.neutral[500],
                     margin: 0
                   }}>
-                    {(formData.receipt_file?.size || 0 / 1024 / 1024).toFixed(2)} MB
+                    {formData.receipt_file?.size ? ((formData.receipt_file.size / 1024 / 1024).toFixed(2)) : '0.00'} MB
                   </p>
                 </div>
                 <button

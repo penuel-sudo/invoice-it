@@ -10,7 +10,7 @@
 
 ### Key Tables
 - `public.recurring_invoices`: Stores the master schedule and JSON snapshots used when cloning invoices/items.
-- `public.pending_email_requests`: Tracks each asynchronous HTTP request sent via `pg_net`.
+- `public.pending_email_requests`: Tracks each asynchronous HTTP request sent via `pg_net` (now includes `request_type`, `payload`, and optional `reminder_log_id`).
 - `public.invoices`: Receives the newly generated invoice records (initial status `draft`).
 - `public.invoice_items`: Cloned line items for each generated invoice.
 - `public.notifications`: Stores success/failure notifications according to user preferences.
@@ -39,21 +39,17 @@
    - Loads client info; skips if missing email.
    - Pulls user profile + primary email (`auth.users`) to set the reply-to address.
    - Builds a payload that mirrors the frontend’s `/api/send-invoice-email` call, including the correct currency symbol.
-   - Executes `net.http_post` (asynchronous, 30s timeout) and records the `request_id` in `pending_email_requests`.
+   - Executes `net.http_post` (asynchronous, 30s timeout) and records the `request_id` in `pending_email_requests` with `request_type = 'recurring'`.
    - Moves invoices to a temporary `sending` status.
    - Logs an error notification if the HTTP call itself fails.
 
 5. **Response Processor** – `public.process_email_responses()`
    - Iterates over unprocessed `pending_email_requests` from the last hour.
    - Reads `net._http_response` using each stored `request_id`.
-   - On HTTP `200` with a successful payload:
-     - Sets invoice status to `pending`.
-     - Sends a “Invoice Sent” notification when allowed.
-   - On failure or missing success indicators:
-     - Reverts invoice to `draft`.
-     - Creates an error notification detailing status code and message.
-   - Marks the request row as processed.
-   - Cleans up processed rows older than 24 hours and times out entries older than one hour with a dedicated notification.
+   - Branches on `request_type`:
+     - `recurring`: original behavior—set invoice status to `pending`, create success or failure notifications, and revert to `draft` on failure/timeouts.
+     - `reminder`: triggered by auto-reminder jobs. Updates the related `invoice_reminder_log` row to `sent`/`failed`, stores the response payload, and posts a “Reminder Sent”/error notification without altering invoice status.
+   - Marks the request row as processed and cleans up processed rows older than 24 hours, timing out entries older than one hour with a dedicated notification.
 
 6. **Cron Scheduling**
    - `generate-recurring-invoices-daily`: runs at `0 2 * * *` (2 AM UTC).
@@ -67,12 +63,12 @@
    - Sets status `draft`, logs notifications, and advances schedule metadata.
 3. Every five minutes, `send_recurring_invoice_emails()`:
    - Grabs recent draft invoices with `auto_send = true`.
-   - Calls the API via `pg_net` and writes to `pending_email_requests`.
+   - Calls the API via `pg_net` and writes to `pending_email_requests` (tagged `request_type='recurring'`).
    - Sets invoice status to `sending`.
 4. Every five minutes, `process_email_responses()`:
    - Polls `net._http_response` for each pending request.
-   - Updates invoice status (`pending` on success / `draft` on failure).
-   - Inserts success/error/timeout notifications.
+   - Updates invoice status for recurring sends (`pending` on success / `draft` on failure) and handles reminder logs separately based on `request_type`.
+   - Inserts success/error/timeout notifications appropriate to each request type.
    - Cleans up old request rows.
 
 ### Frontend Integration Notes
@@ -83,7 +79,7 @@
 
 ### Operational Tips
 - **Testing:** Run each function manually (`SELECT public.generate_recurring_invoices();` etc.) after deploying the SQL script.
-- **Monitoring:** Check Supabase logs for warnings emitted by the functions and view `pending_email_requests` for stuck records.
+- **Monitoring:** Check Supabase logs for warnings emitted by the functions and view `pending_email_requests` for stuck records (filter by `request_type` to differentiate recurring vs reminder jobs).
 - **Common Issues:**
   - Missing client email prevents auto-send (logged as warning).
   - Domain verification or API failures show up as error notifications and keep invoice in `draft`.
@@ -94,6 +90,8 @@
 - Ensure `pg_cron` extension is enabled in the project.
 - Confirm environment variables for `/api/send-invoice-email` (e.g., `RESEND_API_KEY`, `RESEND_FROM`) are set in the hosting environment.
 - Verify cron jobs are present (`SELECT * FROM cron.job;`) and remove any obsolete schedules if needed.
+
+
 
 
 

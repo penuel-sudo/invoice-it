@@ -128,43 +128,131 @@ alter table public.auto_reminder_settings enable row level security;
 alter table public.invoice_reminder_overrides enable row level security;
 alter table public.invoice_reminder_log enable row level security;
 
-create policy "Users read own auto reminders"
-on public.auto_reminder_settings
-for select using (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'auto_reminder_settings'
+      and policyname = 'Users read own auto reminders'
+  ) then
+    create policy "Users read own auto reminders"
+    on public.auto_reminder_settings
+    for select using (auth.uid() = user_id);
+  end if;
+end;
+$$;
 
-create policy "Users upsert own auto reminders"
-on public.auto_reminder_settings
-for insert with check (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'auto_reminder_settings'
+      and policyname = 'Users upsert own auto reminders'
+  ) then
+    create policy "Users upsert own auto reminders"
+    on public.auto_reminder_settings
+    for insert with check (auth.uid() = user_id);
+  end if;
+end;
+$$;
 
-create policy "Users update own auto reminders"
-on public.auto_reminder_settings
-for update using (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'auto_reminder_settings'
+      and policyname = 'Users update own auto reminders'
+  ) then
+    create policy "Users update own auto reminders"
+    on public.auto_reminder_settings
+    for update using (auth.uid() = user_id);
+  end if;
+end;
+$$;
 
-create policy "Users read invoice overrides they own"
-on public.invoice_reminder_overrides
-for select using (
-  auth.uid() = (select user_id from public.invoices where id = invoice_id)
-);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'invoice_reminder_overrides'
+      and policyname = 'Users read invoice overrides they own'
+  ) then
+    create policy "Users read invoice overrides they own"
+    on public.invoice_reminder_overrides
+    for select using (
+      auth.uid() = (select user_id from public.invoices where id = invoice_id)
+    );
+  end if;
+end;
+$$;
 
-create policy "Users upsert invoice overrides they own"
-on public.invoice_reminder_overrides
-for insert with check (
-  auth.uid() = (select user_id from public.invoices where id = invoice_id)
-);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'invoice_reminder_overrides'
+      and policyname = 'Users upsert invoice overrides they own'
+  ) then
+    create policy "Users upsert invoice overrides they own"
+    on public.invoice_reminder_overrides
+    for insert with check (
+      auth.uid() = (select user_id from public.invoices where id = invoice_id)
+    );
+  end if;
+end;
+$$;
 
-create policy "Users update invoice overrides they own"
-on public.invoice_reminder_overrides
-for update using (
-  auth.uid() = (select user_id from public.invoices where id = invoice_id)
-);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'invoice_reminder_overrides'
+      and policyname = 'Users update invoice overrides they own'
+  ) then
+    create policy "Users update invoice overrides they own"
+    on public.invoice_reminder_overrides
+    for update using (
+      auth.uid() = (select user_id from public.invoices where id = invoice_id)
+    );
+  end if;
+end;
+$$;
 
-create policy "Users read own reminder log entries"
-on public.invoice_reminder_log
-for select using (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'invoice_reminder_log'
+      and policyname = 'Users read own reminder log entries'
+  ) then
+    create policy "Users read own reminder log entries"
+    on public.invoice_reminder_log
+    for select using (auth.uid() = user_id);
+  end if;
+end;
+$$;
 
-create policy "Users insert own reminder log entries"
-on public.invoice_reminder_log
-for insert with check (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'invoice_reminder_log'
+      and policyname = 'Users insert own reminder log entries'
+  ) then
+    create policy "Users insert own reminder log entries"
+    on public.invoice_reminder_log
+    for insert with check (auth.uid() = user_id);
+  end if;
+end;
+$$;
 
 -- ============================================
 -- Section 3: Reminder Queue Function
@@ -516,7 +604,7 @@ $$;
 
 select cron.schedule(
   'queue-invoice-reminder-emails',
-  '*/10 * * * *',
+  '*/2 * * * *', -- TEMP for QA (production: '*/10 * * * *')
   $$
     select public.queue_invoice_reminder_emails();
   $$
@@ -536,7 +624,7 @@ $$;
 
 select cron.schedule(
   'auto-reminders-hourly',
-  '10 * * * *',
+  '*/2 * * * *', -- TEMP for QA (production: '10 * * * *')
   $$
     select public.process_invoice_auto_reminders();
   $$
