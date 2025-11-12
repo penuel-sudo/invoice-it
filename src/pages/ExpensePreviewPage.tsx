@@ -5,6 +5,7 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import StatusButton from '../components/StatusButton'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
+import { getCurrencySymbol } from '../lib/currencyUtils'
 import { 
   ArrowLeft, 
   Edit, 
@@ -49,6 +50,7 @@ interface Expense {
   is_tax_deductible: boolean
   tax_rate: number
   tax_amount: number
+  currency_code?: string
   receipt_url?: string
   receipt_filename?: string
   receipt_size?: number
@@ -61,7 +63,7 @@ export default function ExpensePreviewPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { setLoading: setGlobalLoading } = useLoading()
-  const { currencySymbol } = useGlobalCurrency()
+  const { currencySymbol: userDefaultCurrencySymbol } = useGlobalCurrency()
   const [expense, setExpense] = useState<Expense | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
@@ -106,6 +108,7 @@ export default function ExpensePreviewPage() {
           is_tax_deductible: expenseData.is_tax_deductible,
           tax_rate: parseFloat(expenseData.tax_rate),
           tax_amount: expenseData.is_tax_deductible ? (parseFloat(expenseData.amount) * parseFloat(expenseData.tax_rate) / 100) : 0,
+          currency_code: expenseData.currency_code,
           receipt_url: expenseData.receipt_url,
           receipt_filename: expenseData.receipt_filename,
           receipt_size: expenseData.receipt_file?.size,
@@ -194,7 +197,9 @@ export default function ExpensePreviewPage() {
   }
 
   const formatAmount = (amount: number) => {
-    return `${currencySymbol}${amount.toFixed(2)}`
+    const expenseCurrency = expense?.currency_code
+    const symbol = expenseCurrency ? getCurrencySymbol(expenseCurrency) : userDefaultCurrencySymbol
+    return `${symbol}${amount.toFixed(2)}`
   }
 
   const formatDate = (dateString: string) => {

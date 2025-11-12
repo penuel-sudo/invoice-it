@@ -11,6 +11,7 @@ import StatusButton from '../components/StatusButton'
 import { supabase } from '../lib/supabaseClient'
 import { format } from 'date-fns'
 import { getCurrencySymbol } from '../lib/currencyUtils'
+import { batchConvert } from '../lib/currencyConversion'
 import { 
   FileText, 
   TrendingUp, 
@@ -54,7 +55,9 @@ export default function DashboardPage() {
     overdue: 0,
     draft: 0,
     thisMonthCount: 0,
-    thisMonthRevenue: 0
+    thisMonthRevenue: 0,
+    thisMonthExpenses: 0,
+    thisMonthProfit: 0
   })
 
   // Handle swipe gestures
@@ -133,23 +136,57 @@ export default function DashboardPage() {
   }, [])
 
 
-  // Calculate real stats from invoices
+  // Calculate real stats from invoices and expenses
   const calculateStats = async () => {
     if (!user) return
 
     try {
-      const { data: invoices, error } = await supabase
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const startOfMonthISO = startOfMonth.toISOString()
+
+      // Load invoices with currency
+      const { data: invoices, error: invoicesError } = await supabase
         .from('invoices')
-        .select('status, total_amount, created_at')
+        .select('status, total_amount, created_at, currency_code')
         .eq('user_id', user.id)
 
-      if (error) {
-        console.error('Error loading stats:', error)
+      if (invoicesError) {
+        console.error('Error loading invoices:', invoicesError)
         return
       }
 
-      const now = new Date()
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      // Load expenses for current month with currency
+      const { data: expenses, error: expensesError } = await supabase
+        .from('expenses')
+        .select('amount, expense_date, currency_code')
+        .eq('user_id', user.id)
+        .gte('expense_date', startOfMonthISO.split('T')[0])
+
+      if (expensesError) {
+        console.error('Error loading expenses:', expensesError)
+      }
+
+      // Calculate invoice stats
+      const thisMonthInvoices = invoices?.filter(inv => new Date(inv.created_at) >= startOfMonth) || []
+      const thisMonthPaidInvoices = thisMonthInvoices.filter(inv => inv.status === 'paid')
+      
+      // Convert income amounts to user's default currency
+      const incomeAmounts = thisMonthPaidInvoices.map(inv => ({
+        amount: inv.total_amount || 0,
+        currency: inv.currency_code || currency || 'USD'
+      }))
+      const thisMonthIncome = await batchConvert(incomeAmounts, currency || 'USD')
+      
+      // Convert expense amounts to user's default currency
+      const expenseAmounts = (expenses || []).map(exp => ({
+        amount: exp.amount || 0,
+        currency: exp.currency_code || currency || 'USD'
+      }))
+      const thisMonthExpenses = await batchConvert(expenseAmounts, currency || 'USD')
+      
+      // Calculate profit
+      const thisMonthProfit = thisMonthIncome - thisMonthExpenses
 
       const calculated = {
         total: invoices?.length || 0,
@@ -157,10 +194,10 @@ export default function DashboardPage() {
         pending: invoices?.filter(inv => inv.status === 'pending').length || 0,
         overdue: invoices?.filter(inv => inv.status === 'overdue').length || 0,
         draft: invoices?.filter(inv => inv.status === 'draft').length || 0,
-        thisMonthCount: invoices?.filter(inv => new Date(inv.created_at) >= startOfMonth).length || 0,
-        thisMonthRevenue: invoices
-          ?.filter(inv => new Date(inv.created_at) >= startOfMonth && inv.status === 'paid')
-          .reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0
+        thisMonthCount: thisMonthInvoices.length,
+        thisMonthRevenue: thisMonthIncome,
+        thisMonthExpenses: thisMonthExpenses,
+        thisMonthProfit: thisMonthProfit
       }
 
       setStats(calculated)
@@ -578,26 +615,82 @@ export default function DashboardPage() {
             </div>
             <div style={{
                     width: '100%',
-                    padding: '1rem',
-                    backgroundColor: brandColors.success[50],
-                    borderRadius: '12px',
-              textAlign: 'center'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
             }}>
-              <p style={{
-                      fontSize: '1.5rem',
-                fontWeight: '700',
-                      color: brandColors.success[600],
-                margin: '0 0 0.25rem 0'
+              {/* Income */}
+              <div style={{
+                padding: '0.875rem',
+                backgroundColor: brandColors.success[50],
+                borderRadius: '10px',
+                textAlign: 'center'
               }}>
-                      {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
-              </p>
-              <p style={{
-                      fontSize: '0.75rem',
-                color: brandColors.neutral[600],
-                margin: 0
+                <p style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  color: brandColors.success[600],
+                  margin: '0 0 0.25rem 0'
+                }}>
+                  {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
+                </p>
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  margin: 0
+                }}>
+                  Income
+                </p>
+              </div>
+
+              {/* Expenses */}
+              <div style={{
+                padding: '0.875rem',
+                backgroundColor: brandColors.error[50],
+                borderRadius: '10px',
+                textAlign: 'center'
               }}>
-                      Revenue Collected
-              </p>
+                <p style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  color: brandColors.error[600],
+                  margin: '0 0 0.25rem 0'
+                }}>
+                  {currencySymbol}{(stats.thisMonthExpenses || 0).toLocaleString()}
+                </p>
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  margin: 0
+                }}>
+                  Expenses
+                </p>
+              </div>
+
+              {/* Profit */}
+              <div style={{
+                padding: '0.875rem',
+                backgroundColor: stats.thisMonthProfit >= 0 ? brandColors.primary[50] : brandColors.warning[50],
+                borderRadius: '10px',
+                textAlign: 'center',
+                border: `2px solid ${stats.thisMonthProfit >= 0 ? brandColors.primary[200] : brandColors.warning[200]}`
+              }}>
+                <p style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '700',
+                  color: stats.thisMonthProfit >= 0 ? brandColors.primary[600] : brandColors.warning[600],
+                  margin: '0 0 0.25rem 0'
+                }}>
+                  {currencySymbol}{(stats.thisMonthProfit || 0).toLocaleString()}
+                </p>
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[600],
+                  margin: 0
+                }}>
+                  Profit
+                </p>
+              </div>
             </div>
           </div>
               </div>
