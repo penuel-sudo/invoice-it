@@ -186,14 +186,20 @@ export async function batchConvert(
   amounts: Array<{ amount: number; currency: string }>,
   targetCurrency: string
 ): Promise<number> {
+  // Handle empty array
+  if (!amounts || amounts.length === 0) {
+    return 0
+  }
+
   // Group by currency to minimize API calls
   const currencyGroups: Record<string, number> = {}
   
   amounts.forEach(({ amount, currency }) => {
-    if (currency === targetCurrency) {
+    const currencyCode = currency || targetCurrency // Fallback to target if missing
+    if (currencyCode === targetCurrency) {
       currencyGroups[targetCurrency] = (currencyGroups[targetCurrency] || 0) + amount
     } else {
-      currencyGroups[currency] = (currencyGroups[currency] || 0) + amount
+      currencyGroups[currencyCode] = (currencyGroups[currencyCode] || 0) + amount
     }
   })
 
@@ -203,11 +209,20 @@ export async function batchConvert(
       if (currency === targetCurrency) {
         return totalAmount
       }
-      const rate = await getExchangeRate(currency, targetCurrency)
-      return totalAmount * rate
+      try {
+        const rate = await getExchangeRate(currency, targetCurrency)
+        console.log(`Converting ${totalAmount} ${currency} to ${targetCurrency} at rate ${rate}`)
+        return totalAmount * rate
+      } catch (error) {
+        console.error(`Error converting ${currency} to ${targetCurrency}:`, error)
+        // Return amount as-is if conversion fails
+        return totalAmount
+      }
     })
   )
 
-  return conversions.reduce((sum, converted) => sum + converted, 0)
+  const total = conversions.reduce((sum, converted) => sum + converted, 0)
+  console.log(`Batch conversion result: ${total} ${targetCurrency}`)
+  return total
 }
 

@@ -172,18 +172,46 @@ export default function DashboardPage() {
       const thisMonthPaidInvoices = thisMonthInvoices.filter(inv => inv.status === 'paid')
       
       // Convert income amounts to user's default currency
-      const incomeAmounts = thisMonthPaidInvoices.map(inv => ({
-        amount: inv.total_amount || 0,
-        currency: inv.currency_code || currency || 'USD'
-      }))
-      const thisMonthIncome = await batchConvert(incomeAmounts, currency || 'USD')
+      const incomeAmounts = thisMonthPaidInvoices.map(inv => {
+        const invCurrency = (inv as any).currency_code || (inv as any).currency || currency || 'USD'
+        return {
+          amount: inv.total_amount || 0,
+          currency: invCurrency
+        }
+      })
+      
+      console.log('📊 Dashboard: Converting income amounts:', incomeAmounts, 'to', currency || 'USD')
+      let thisMonthIncome = 0
+      try {
+        if (incomeAmounts.length > 0) {
+          thisMonthIncome = await batchConvert(incomeAmounts, currency || 'USD')
+        }
+      } catch (error) {
+        console.error('Error converting income amounts:', error)
+        // Fallback: sum without conversion
+        thisMonthIncome = thisMonthPaidInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0)
+      }
       
       // Convert expense amounts to user's default currency
-      const expenseAmounts = (expenses || []).map(exp => ({
-        amount: exp.amount || 0,
-        currency: exp.currency_code || currency || 'USD'
-      }))
-      const thisMonthExpenses = await batchConvert(expenseAmounts, currency || 'USD')
+      const expenseAmounts = (expenses || []).map(exp => {
+        const expCurrency = (exp as any).currency_code || currency || 'USD'
+        return {
+          amount: exp.amount || 0,
+          currency: expCurrency
+        }
+      })
+      
+      console.log('📊 Dashboard: Converting expense amounts:', expenseAmounts, 'to', currency || 'USD')
+      let thisMonthExpenses = 0
+      try {
+        if (expenseAmounts.length > 0) {
+          thisMonthExpenses = await batchConvert(expenseAmounts, currency || 'USD')
+        }
+      } catch (error) {
+        console.error('Error converting expense amounts:', error)
+        // Fallback: sum without conversion
+        thisMonthExpenses = (expenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
+      }
       
       // Calculate profit
       const thisMonthProfit = thisMonthIncome - thisMonthExpenses
