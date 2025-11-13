@@ -181,6 +181,13 @@ export default function SendButton({
       user_id: invoiceData.user_id || userData?.id
     })
 
+    // Check current status - don't update if already 'overdue' or 'paid'
+    const currentStatus = invoiceData.status || 'draft'
+    if (currentStatus === 'overdue' || currentStatus === 'paid') {
+      console.log('⚠️ [SEND BUTTON] Status is already', currentStatus, '- skipping status update')
+      return
+    }
+
     try {
       // Use template-specific save function
       console.log('📋 [SEND BUTTON] Using template-specific save function for status update...')

@@ -612,7 +612,7 @@ export default function DashboardPage() {
             {currentSlide === 2 && (
               <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
                 <h3 style={{
-                  fontSize: '0.875rem',
+                  fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
                   fontWeight: '600',
                   color: brandColors.neutral[600],
                   margin: '0 0 1.5rem 0',
@@ -623,114 +623,110 @@ export default function DashboardPage() {
                   justifyContent: 'center',
                   gap: '0.5rem'
                 }}>
-                  <Calendar size={16} color={brandColors.primary[600]} />
+                  <Calendar size={window.innerWidth < 768 ? 14 : 16} color={brandColors.primary[600]} />
                   This Month
                 </h3>
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '1.25rem',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  width: '100%'
                 }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <p style={{
-                      fontSize: '3rem',
+                  {/* Income and Expenses Row */}
+                  <div style={{
+                    width: '100%',
+                    padding: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+                    backgroundColor: brandColors.neutral[50],
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.75rem'
+                  }}>
+                    {/* Income */}
+                    <div style={{
+                      flex: 1,
+                      textAlign: 'center'
+                    }}>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '1rem' : '1.25rem',
+                        fontWeight: '700',
+                        color: brandColors.success[600],
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
+                      </p>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '0.65rem' : '0.75rem',
+                        color: brandColors.neutral[600],
+                        margin: 0
+                      }}>
+                        Income
+                      </p>
+                    </div>
+
+                    {/* Minus Sign */}
+                    <div style={{
+                      fontSize: window.innerWidth < 768 ? '1.25rem' : '1.5rem',
                       fontWeight: '700',
-                      color: brandColors.primary[600],
+                      color: brandColors.neutral[400],
+                      lineHeight: 1
+                    }}>
+                      −
+                    </div>
+
+                    {/* Expenses */}
+                    <div style={{
+                      flex: 1,
+                      textAlign: 'center'
+                    }}>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '1rem' : '1.25rem',
+                        fontWeight: '700',
+                        color: brandColors.error[600],
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        {currencySymbol}{(stats.thisMonthExpenses || 0).toLocaleString()}
+                      </p>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '0.65rem' : '0.75rem',
+                        color: brandColors.neutral[600],
+                        margin: 0
+                      }}>
+                        Expenses
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Profit - Prominent */}
+                  <div style={{
+                    width: '100%',
+                    padding: window.innerWidth < 768 ? '1rem' : '1.25rem',
+                    backgroundColor: stats.thisMonthProfit >= 0 ? brandColors.primary[50] : brandColors.warning[50],
+                    borderRadius: '10px',
+                    textAlign: 'center',
+                    border: `2px solid ${stats.thisMonthProfit >= 0 ? brandColors.primary[200] : brandColors.warning[200]}`
+                  }}>
+                    <p style={{
+                      fontSize: window.innerWidth < 768 ? '1.75rem' : '2rem',
+                      fontWeight: '700',
+                      color: stats.thisMonthProfit >= 0 ? brandColors.primary[600] : brandColors.warning[600],
                       margin: '0 0 0.25rem 0',
                       lineHeight: 1
                     }}>
-                      {stats.thisMonthCount}
-              </p>
-              <p style={{
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: brandColors.neutral[600],
-                margin: 0
-              }}>
-                      Invoices Created
-              </p>
-            </div>
-            <div style={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.75rem'
-            }}>
-              {/* Income */}
-              <div style={{
-                padding: '0.875rem',
-                backgroundColor: brandColors.success[50],
-                borderRadius: '10px',
-                textAlign: 'center'
-              }}>
-                <p style={{
-                  fontSize: '1.25rem',
-                  fontWeight: '700',
-                  color: brandColors.success[600],
-                  margin: '0 0 0.25rem 0'
-                }}>
-                  {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
-                </p>
-                <p style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[600],
-                  margin: 0
-                }}>
-                  Income
-                </p>
-              </div>
-
-              {/* Expenses */}
-              <div style={{
-                padding: '0.875rem',
-                backgroundColor: brandColors.error[50],
-                borderRadius: '10px',
-                textAlign: 'center'
-              }}>
-                <p style={{
-                  fontSize: '1.25rem',
-                  fontWeight: '700',
-                  color: brandColors.error[600],
-                  margin: '0 0 0.25rem 0'
-                }}>
-                  {currencySymbol}{(stats.thisMonthExpenses || 0).toLocaleString()}
-                </p>
-                <p style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[600],
-                  margin: 0
-                }}>
-                  Expenses
-                </p>
-              </div>
-
-              {/* Profit */}
-              <div style={{
-                padding: '0.875rem',
-                backgroundColor: stats.thisMonthProfit >= 0 ? brandColors.primary[50] : brandColors.warning[50],
-                borderRadius: '10px',
-                textAlign: 'center',
-                border: `2px solid ${stats.thisMonthProfit >= 0 ? brandColors.primary[200] : brandColors.warning[200]}`
-              }}>
-                <p style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '700',
-                  color: stats.thisMonthProfit >= 0 ? brandColors.primary[600] : brandColors.warning[600],
-                  margin: '0 0 0.25rem 0'
-                }}>
-                  {currencySymbol}{(stats.thisMonthProfit || 0).toLocaleString()}
-                </p>
-                <p style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[600],
-                  margin: 0
-                }}>
-                  Profit
-                </p>
-              </div>
-            </div>
-          </div>
+                      {currencySymbol}{(stats.thisMonthProfit || 0).toLocaleString()}
+                    </p>
+                    <p style={{
+                      fontSize: window.innerWidth < 768 ? '0.7rem' : '0.875rem',
+                      fontWeight: '600',
+                      color: brandColors.neutral[600],
+                      margin: 0
+                    }}>
+                      Profit
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
         </div>

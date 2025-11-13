@@ -42,40 +42,49 @@ export default function DownloadButton({
       // Show loading state
       toast.loading('Generating PDF...', { id: 'pdf-generation' })
       
-      // Update invoice status to 'pending' using shared save function
+      // Check current status - don't update if already 'overdue' or 'paid'
+      const currentStatus = (invoiceData as any).status || 'draft'
+      const shouldUpdateStatus = currentStatus !== 'overdue' && currentStatus !== 'paid'
+      
       console.log('🔄 [DOWNLOAD BUTTON] Starting status update...')
       console.log('📊 [DOWNLOAD BUTTON] Current invoiceData:', {
         invoiceNumber: invoiceData.invoiceNumber,
-        status: (invoiceData as any).status,
-        user_id: user.id
+        status: currentStatus,
+        user_id: user.id,
+        willUpdateStatus: shouldUpdateStatus
       })
 
-      // Use template-specific save function
-      console.log('📋 [DOWNLOAD BUTTON] Using template-specific save function for status update...')
-      
-      let result
-      if (template === 'professional') {
-        result = await saveProfessionalInvoice(invoiceData, user, templateSettings, { 
-          status: 'pending',
-          updateStatus: true 
-        })
+      // Only update status if not 'overdue' or 'paid'
+      if (shouldUpdateStatus) {
+        // Use template-specific save function
+        console.log('📋 [DOWNLOAD BUTTON] Using template-specific save function for status update...')
+        
+        let result
+        if (template === 'professional') {
+          result = await saveProfessionalInvoice(invoiceData, user, templateSettings, { 
+            status: 'pending',
+            updateStatus: true 
+          })
+        } else {
+          // For default template, pass undefined for templateSettings to use options correctly
+          result = await saveInvoiceToDatabase(invoiceData, user, undefined, { 
+            status: 'pending',
+            updateStatus: true 
+          })
+        }
+        
+        if (result.success) {
+          console.log('✅ [DOWNLOAD BUTTON] Invoice saved successfully via shared function')
+          // Update the invoiceData object with new IDs
+          ;(invoiceData as any).id = result.invoiceId
+          ;(invoiceData as any).clientId = result.clientId
+          ;(invoiceData as any).status = 'pending'
+        } else {
+          console.error('❌ [DOWNLOAD BUTTON] Failed to save invoice:', result.error)
+          toast.error(`Failed to save invoice: ${result.error}`)
+        }
       } else {
-        // For default template, pass undefined for templateSettings to use options correctly
-        result = await saveInvoiceToDatabase(invoiceData, user, undefined, { 
-          status: 'pending',
-          updateStatus: true 
-        })
-      }
-      
-      if (result.success) {
-        console.log('✅ [DOWNLOAD BUTTON] Invoice saved successfully via shared function')
-        // Update the invoiceData object with new IDs
-        ;(invoiceData as any).id = result.invoiceId
-        ;(invoiceData as any).clientId = result.clientId
-        ;(invoiceData as any).status = 'pending'
-      } else {
-        console.error('❌ [DOWNLOAD BUTTON] Failed to save invoice:', result.error)
-        toast.error(`Failed to save invoice: ${result.error}`)
+        console.log('⚠️ [DOWNLOAD BUTTON] Status is already', currentStatus, '- skipping status update')
       }
       
       // Get the correct PDF template based on template name
