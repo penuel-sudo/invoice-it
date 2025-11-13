@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
-  const [autoSlideInterval, setAutoSlideInterval] = useState<NodeJS.Timeout | null>(null)
+  const autoSlideIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const [stats, setStats] = useState({
     total: 0,
     paid: 0,
@@ -71,22 +71,28 @@ export default function DashboardPage() {
 
   // Auto-slide functionality
   const startAutoSlide = () => {
-    if (autoSlideInterval) clearInterval(autoSlideInterval)
+    // Clear any existing interval first
+    stopAutoSlide()
+    
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % 3)
-    }, 4000) // 40 seconds
-    setAutoSlideInterval(interval)
+    }, 5000) // 5 seconds between slides
+    
+    autoSlideIntervalRef.current = interval
   }
 
   const stopAutoSlide = () => {
-    if (autoSlideInterval) {
-      clearInterval(autoSlideInterval)
-      setAutoSlideInterval(null)
+    if (autoSlideIntervalRef.current) {
+      clearInterval(autoSlideIntervalRef.current)
+      autoSlideIntervalRef.current = null
     }
   }
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return
+    
+    // Stop auto-slide on any interaction
+    stopAutoSlide()
     
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
@@ -102,8 +108,7 @@ export default function DashboardPage() {
     setTouchStart(0)
     setTouchEnd(0)
     
-    // Restart auto-slide after user interaction
-    setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
+    // Don't restart automatically - let user control it
   }
 
   // Helper functions from TransactionPage
@@ -345,14 +350,18 @@ export default function DashboardPage() {
     if (user) {
       calculateStats()
       loadTransactions()
-      startAutoSlide() // Start auto-sliding when component mounts
     }
+  }, [user])
+
+  // Start auto-slide only once on mount
+  useEffect(() => {
+    startAutoSlide()
     
     // Cleanup auto-slide on unmount
     return () => {
       stopAutoSlide()
     }
-  }, [user])
+  }, []) // Empty dependency array - only run once
 
   if (!user) { return null } // AuthWrapper handles redirection
 
@@ -399,7 +408,8 @@ export default function DashboardPage() {
           position: 'relative'
         }}>
           {/* Carousel Container */}
-          <div 
+          <div
+            onMouseEnter={() => stopAutoSlide()} // Stop on hover
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -736,10 +746,10 @@ export default function DashboardPage() {
               <button
                 key={index}
                 onClick={() => {
+                  stopAutoSlide() // Stop on click
                   setCurrentSlide(index)
-                  stopAutoSlide()
-                  setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
                 }}
+                onMouseEnter={() => stopAutoSlide()} // Stop on hover
                 style={{
                   width: currentSlide === index ? '24px' : '8px',
                   height: '8px',
