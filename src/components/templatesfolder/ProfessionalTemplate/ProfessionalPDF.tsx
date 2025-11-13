@@ -530,40 +530,76 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
                   fontFamily: pdfFont
                 }}>{invoiceData.clientName}</Text>
                 {invoiceData.clientCompanyName && (
-                  <Text style={{
-                    ...styles.clientInfo,
-                    color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
-                    fontFamily: pdfFont
-                  }}>
-                    🏢 {invoiceData.clientCompanyName}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginBottom: 4 }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      🏢{' '}
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      {invoiceData.clientCompanyName}
+                    </Text>
+                  </View>
                 )}
                 {invoiceData.clientEmail && (
-                  <Text style={{
-                    ...styles.clientInfo,
-                    color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
-                    fontFamily: pdfFont
-                  }}>
-                    ✉️ {invoiceData.clientEmail}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginBottom: 4 }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      ✉️{' '}
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      {invoiceData.clientEmail}
+                    </Text>
+                  </View>
                 )}
                 {invoiceData.clientPhone && (
-                  <Text style={{
-                    ...styles.clientInfo,
-                    color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
-                    fontFamily: pdfFont
-                  }}>
-                    📞 {invoiceData.clientPhone}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginBottom: 4 }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      📞{' '}
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      {invoiceData.clientPhone}
+                    </Text>
+                  </View>
                 )}
                 {invoiceData.clientAddress && (
-                  <Text style={{
-                    ...styles.clientInfo,
-                    color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
-                    fontFamily: pdfFont
-                  }}>
-                    📍 {invoiceData.clientAddress}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      📍{' '}
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#6b7280',
+                      fontFamily: pdfFont
+                    }}>
+                      {invoiceData.clientAddress}
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -581,13 +617,22 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
                   backgroundColor: templateSettings?.background_colors?.section_background || '#f0fdf4',
                   borderColor: templateSettings?.primary_color || '#bbf7d0'
                 }}>
-                  <Text style={{
-                    ...styles.clientName,
-                    color: templateSettings?.primary_color || templateSettings?.accent_color || '#111827',
-                    fontFamily: pdfFont
-                  }}>
-                    🚚 {invoiceData.shipToName}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                    <Text style={{
+                      ...styles.clientName,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#111827',
+                      fontFamily: pdfFont
+                    }}>
+                      🚚{' '}
+                    </Text>
+                    <Text style={{
+                      ...styles.clientName,
+                      color: templateSettings?.primary_color || templateSettings?.accent_color || '#111827',
+                      fontFamily: pdfFont
+                    }}>
+                      {invoiceData.shipToName}
+                    </Text>
+                  </View>
                   {invoiceData.shipToAddress && (
                     <Text style={{ 
                       fontSize: 9, 
