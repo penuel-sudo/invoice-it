@@ -161,65 +161,92 @@ export default function DashboardPage() {
         return
       }
 
+      // Get user's default currency (ensure we have it)
+      const userCurrency = currency || 'USD'
+      
       // Load expenses for current month with currency
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      const endOfMonthISO = endOfMonth.toISOString().split('T')[0]
+      
       const { data: expenses, error: expensesError } = await supabase
         .from('expenses')
         .select('amount, expense_date, currency_code')
         .eq('user_id', user.id)
         .gte('expense_date', startOfMonthISO.split('T')[0])
+        .lte('expense_date', endOfMonthISO)
 
       if (expensesError) {
         console.error('Error loading expenses:', expensesError)
       }
 
-      // Calculate invoice stats
-      const thisMonthInvoices = invoices?.filter(inv => new Date(inv.created_at) >= startOfMonth) || []
+      // Calculate invoice stats - filter by created_at for current month
+      const thisMonthInvoices = invoices?.filter(inv => {
+        const invDate = new Date(inv.created_at)
+        return invDate >= startOfMonth && invDate <= endOfMonth
+      }) || []
       const thisMonthPaidInvoices = thisMonthInvoices.filter(inv => inv.status === 'paid')
       
-      // Convert income amounts to user's default currency
-      const incomeAmounts = thisMonthPaidInvoices.map(inv => {
-        const invCurrency = (inv as any).currency_code || (inv as any).currency || currency || 'USD'
-        return {
-          amount: inv.total_amount || 0,
-          currency: invCurrency
-        }
-      })
+      // Prepare income amounts for conversion (only paid invoices from this month)
+      const incomeAmounts = thisMonthPaidInvoices
+        .filter(inv => inv.total_amount > 0) // Only non-zero amounts
+        .map(inv => {
+          const invCurrency = inv.currency_code || userCurrency
+          return {
+            amount: inv.total_amount || 0,
+            currency: invCurrency
+          }
+        })
       
-      console.log('📊 Dashboard: Converting income amounts:', incomeAmounts, 'to', currency || 'USD')
+      console.log('📊 Dashboard: Converting income amounts:', incomeAmounts, 'to', userCurrency)
+      
+      // Convert income amounts to user's default currency - NO FALLBACK, must convert
       let thisMonthIncome = 0
-      try {
-        if (incomeAmounts.length > 0) {
-          thisMonthIncome = await batchConvert(incomeAmounts, currency || 'USD')
+      if (incomeAmounts.length > 0) {
+        try {
+          thisMonthIncome = await batchConvert(incomeAmounts, userCurrency)
+          console.log('✅ Dashboard: Converted income:', thisMonthIncome, userCurrency)
+        } catch (error) {
+          console.error('❌ Error converting income amounts:', error)
+          // Don't use fallback - throw error or return 0
+          thisMonthIncome = 0
         }
-      } catch (error) {
-        console.error('Error converting income amounts:', error)
-        // Fallback: sum without conversion
-        thisMonthIncome = thisMonthPaidInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0)
       }
       
-      // Convert expense amounts to user's default currency
-      const expenseAmounts = (expenses || []).map(exp => {
-        const expCurrency = (exp as any).currency_code || currency || 'USD'
-        return {
-          amount: exp.amount || 0,
-          currency: expCurrency
-        }
-      })
+      // Prepare expense amounts for conversion (only expenses from this month)
+      const expenseAmounts = (expenses || [])
+        .filter(exp => exp.amount > 0) // Only non-zero amounts
+        .map(exp => {
+          const expCurrency = exp.currency_code || userCurrency
+          return {
+            amount: exp.amount || 0,
+            currency: expCurrency
+          }
+        })
       
-      console.log('📊 Dashboard: Converting expense amounts:', expenseAmounts, 'to', currency || 'USD')
+      console.log('📊 Dashboard: Converting expense amounts:', expenseAmounts, 'to', userCurrency)
+      
+      // Convert expense amounts to user's default currency - NO FALLBACK, must convert
       let thisMonthExpenses = 0
-      try {
-        if (expenseAmounts.length > 0) {
-          thisMonthExpenses = await batchConvert(expenseAmounts, currency || 'USD')
+      if (expenseAmounts.length > 0) {
+        try {
+          thisMonthExpenses = await batchConvert(expenseAmounts, userCurrency)
+          console.log('✅ Dashboard: Converted expenses:', thisMonthExpenses, userCurrency)
+        } catch (error) {
+          console.error('❌ Error converting expense amounts:', error)
+          // Don't use fallback - throw error or return 0
+          thisMonthExpenses = 0
         }
-      } catch (error) {
-        console.error('Error converting expense amounts:', error)
-        // Fallback: sum without conversion
-        thisMonthExpenses = (expenses || []).reduce((sum, exp) => sum + (exp.amount || 0), 0)
       }
       
-      // Calculate profit
+      // Calculate profit (only after proper conversion)
       const thisMonthProfit = thisMonthIncome - thisMonthExpenses
+      
+      console.log('📊 Dashboard: Final calculations:', {
+        income: thisMonthIncome,
+        expenses: thisMonthExpenses,
+        profit: thisMonthProfit,
+        currency: userCurrency
+      })
 
       const calculated = {
         total: invoices?.length || 0,
