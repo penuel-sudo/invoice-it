@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { REMINDER_MESSAGES } from '../src/types/autoReminders';
+import { REMINDER_MESSAGES } from './reminderMessages.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
