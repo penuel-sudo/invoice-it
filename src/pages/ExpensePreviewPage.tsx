@@ -66,6 +66,7 @@ export default function ExpensePreviewPage() {
   const { currencySymbol: userDefaultCurrencySymbol } = useGlobalCurrency()
   const [expense, setExpense] = useState<Expense | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [loadingExpense, setLoadingExpense] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -126,6 +127,7 @@ export default function ExpensePreviewPage() {
       if (expenseId) {
         loadExpense(expenseId)
       } else {
+        // Navigate to invoices page if no expense ID found
         navigate('/invoices')
       }
     }, 100)
@@ -137,28 +139,81 @@ export default function ExpensePreviewPage() {
     if (!user) return
 
     try {
+      setLoadingExpense(true)
       setGlobalLoading(true)
       
-      const { data, error } = await supabase
+      // Query expenses table directly
+      const { data: expenseData, error: expenseError } = await supabase
         .from('expenses')
         .select('*')
         .eq('id', expenseId)
         .eq('user_id', user.id)
         .single()
 
-      if (error) {
-        console.error('Error loading expense:', error)
-        toast.error('Failed to load expense: ' + error.message)
+      if (expenseError) {
+        console.error('Error loading expense:', expenseError)
+        toast.error('Failed to load expense: ' + expenseError.message)
         navigate('/invoices')
         return
       }
 
-      setExpense(data)
+      if (!expenseData) {
+        console.error('Expense not found')
+        toast.error('Expense not found')
+        navigate('/invoices')
+        return
+      }
+
+      // Load client name if client_id exists
+      let clientName: string | undefined = undefined
+      if (expenseData.client_id) {
+        try {
+          const { data: clientData } = await supabase
+            .from('clients')
+            .select('name, company_name')
+            .eq('id', expenseData.client_id)
+            .eq('user_id', user.id)
+            .single()
+          
+          if (clientData) {
+            clientName = clientData.name || clientData.company_name || undefined
+          }
+        } catch (clientError) {
+          console.warn('Could not load client name:', clientError)
+          // Continue without client name
+        }
+      }
+
+      // Transform the data to match Expense interface
+      const transformedExpense: Expense = {
+        id: expenseData.id,
+        description: expenseData.description,
+        category: expenseData.category,
+        amount: parseFloat(expenseData.amount.toString()),
+        status: expenseData.status as 'spent' | 'expense',
+        expense_date: expenseData.expense_date,
+        notes: expenseData.notes || undefined,
+        client_id: expenseData.client_id || undefined,
+        client_name: clientName,
+        payment_method: expenseData.payment_method,
+        is_tax_deductible: expenseData.is_tax_deductible,
+        tax_rate: parseFloat(expenseData.tax_rate?.toString() || '0'),
+        tax_amount: parseFloat(expenseData.tax_amount?.toString() || '0'),
+        currency_code: expenseData.currency_code || undefined,
+        receipt_url: expenseData.receipt_url || undefined,
+        receipt_filename: expenseData.receipt_filename || undefined,
+        receipt_size: expenseData.receipt_size || undefined,
+        created_at: expenseData.created_at,
+        updated_at: expenseData.updated_at || undefined
+      }
+
+      setExpense(transformedExpense)
     } catch (error) {
       console.error('Error loading expense:', error)
       toast.error('Failed to load expense')
       navigate('/invoices')
     } finally {
+      setLoadingExpense(false)
       setGlobalLoading(false)
     }
   }
@@ -243,7 +298,8 @@ export default function ExpensePreviewPage() {
 
   if (!user) return null
 
-  if (!expense) {
+  // Don't show "not found" while still loading
+  if (!expense && !authLoading && !loadingExpense) {
     return (
       <Layout>
         <div style={{
