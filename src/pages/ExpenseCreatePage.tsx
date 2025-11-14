@@ -25,6 +25,7 @@ import { supabase } from '../lib/supabaseClient'
 import { useLoading } from '../contexts/LoadingContext'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
 import { CURRENCIES, getCurrencySymbol } from '../lib/currencyUtils'
+import { expenseStorage } from '../lib/storage/expenseStorage'
 
 interface ExpenseFormData {
   description: string
@@ -94,6 +95,7 @@ export default function ExpenseCreatePage() {
   const [errors, setErrors] = useState<Partial<ExpenseFormData>>({})
   const [clients, setClients] = useState<Client[]>([])
   const [currencySymbol, setCurrencySymbol] = useState<string>(userDefaultCurrencySymbol || '$')
+  const hasLoadedInitialData = { current: false }
 
   useEffect(() => {
     // Check if mobile
@@ -107,8 +109,11 @@ export default function ExpenseCreatePage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Load expense data from preview/edit navigation
+  // Load expense data - Priority: location.state > localStorage > default
   useEffect(() => {
+    if (hasLoadedInitialData.current || !user) return
+
+    // Priority 1: Load from location.state (from preview/edit navigation)
     if (location.state?.expenseData) {
       const expenseData = location.state.expenseData
       const expenseCurrency = expenseData.currency_code || userDefaultCurrency || 'USD'
@@ -128,8 +133,41 @@ export default function ExpenseCreatePage() {
         receipt_filename: expenseData.receipt_filename || ''
       })
       setCurrencySymbol(getCurrencySymbol(expenseCurrency))
+      hasLoadedInitialData.current = true
+      return
     }
-  }, [location.state, userDefaultCurrency])
+
+    // Priority 2: Load from localStorage (unsaved draft)
+    const savedDraft = expenseStorage.getDraft()
+    if (savedDraft) {
+      console.log('Loading expense draft from localStorage')
+      const expenseCurrency = savedDraft.currency_code || userDefaultCurrency || 'USD'
+      setFormData({
+        description: savedDraft.description || '',
+        category: savedDraft.category || '',
+        amount: savedDraft.amount || '',
+        expense_date: savedDraft.expense_date || new Date().toISOString().split('T')[0],
+        notes: savedDraft.notes || '',
+        client_id: savedDraft.client_id || '',
+        payment_method: savedDraft.payment_method || 'cash',
+        is_tax_deductible: savedDraft.is_tax_deductible || false,
+        tax_rate: savedDraft.tax_rate || '0',
+        currency_code: expenseCurrency,
+        receipt_file: undefined, // File objects can't be stored in localStorage
+        receipt_url: savedDraft.receipt_url || '',
+        receipt_filename: savedDraft.receipt_filename || ''
+      })
+      setCurrencySymbol(getCurrencySymbol(expenseCurrency))
+      hasLoadedInitialData.current = true
+    }
+  }, [location.state, userDefaultCurrency, user])
+
+  // Auto-save form data to localStorage
+  useEffect(() => {
+    if (!hasLoadedInitialData.current) return
+    
+    expenseStorage.saveDraftDebounced(formData)
+  }, [formData])
 
   useEffect(() => {
     if (user) {
@@ -329,15 +367,44 @@ export default function ExpenseCreatePage() {
 
       console.log('Saving expense with data:', expenseData)
 
-      const { error } = await supabase
+      const { data: savedExpense, error } = await supabase
         .from('expenses')
         .insert(expenseData)
+        .select('id, expense_number')
+        .single()
 
       if (error) {
         console.error('Error saving expense:', error)
         toast.error('Failed to save expense: ' + error.message)
         return
       }
+
+      if (!savedExpense) {
+        console.error('Error: Expense saved but no data returned')
+        toast.error('Failed to save expense')
+        return
+      }
+
+      console.log('✅ Expense saved successfully:', savedExpense.expense_number)
+
+      // Clear form and localStorage after successful save
+      setFormData({
+        description: '',
+        category: '',
+        amount: '',
+        expense_date: new Date().toISOString().split('T')[0],
+        notes: '',
+        client_id: '',
+        payment_method: 'cash',
+        is_tax_deductible: false,
+        tax_rate: '0',
+        currency_code: userDefaultCurrency || 'USD',
+        receipt_file: undefined,
+        receipt_url: '',
+        receipt_filename: ''
+      })
+      expenseStorage.clearDraft()
+      hasLoadedInitialData.current = false
 
       toast.success('Expense saved successfully!')
       navigate('/invoices')
@@ -1059,7 +1126,7 @@ export default function ExpenseCreatePage() {
                     color: brandColors.neutral[500],
                     margin: 0
                   }}>
-                    {(formData.receipt_file?.size || 0 / 1024 / 1024).toFixed(2)} MB
+                    {formData.receipt_file?.size ? `${(formData.receipt_file.size / 1024 / 1024).toFixed(2)} MB` : '0.00 MB'}
                   </p>
                 </div>
                 <button
