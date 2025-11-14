@@ -582,17 +582,20 @@ export default function ProfessionalInvoiceCreatePage() {
       const result = await saveProfessionalInvoice(saveData, user, latestTemplateSettings, { status: 'draft' })
       
       if (result.success) {
-        // Clear localStorage draft after successful save
+        // Clear localStorage FIRST - delete the saved invoice data
         invoiceStorage.clearDraftProfessional()
         
-        // Reset form to default state (same as DefaultCreate)
+        // Generate new invoice number
+        const newInvoiceNumber = generateInvoiceNumber()
+        
+        // Reset form to empty state with new invoice number
         setFormData({
           clientName: '',
           clientEmail: '',
           clientAddress: '',
           clientPhone: '',
           clientCompanyName: '',
-          invoiceNumber: generateInvoiceNumber(),
+          invoiceNumber: newInvoiceNumber,
           invoiceDate: new Date().toISOString().split('T')[0],
           dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           poNumber: '',
@@ -625,6 +628,7 @@ export default function ProfessionalInvoiceCreatePage() {
           currencySymbol: '$',
           selectedPaymentMethodIds: []
         })
+        
         // Clear URL params
         setSearchParams({})
         toast.success('Invoice saved successfully!')

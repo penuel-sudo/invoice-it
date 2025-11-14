@@ -973,7 +973,8 @@ export default function TransactionPage() {
                                     navigate(`/invoice/preview/${template}?invoice=${invoiceNumber}`)
                                   }
                                 } else {
-                                  navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
+                                  // Pass expenseId in both state and URL for reliability
+                                  navigate(`/expense/preview?id=${transaction.id}`, { state: { expenseId: transaction.id } })
                                 }
                                 setShowTransactionDropdown(null)
                               }}

@@ -124,9 +124,21 @@ export default function ExpensePreviewPage() {
       // Get expense ID from location state or URL params
       const expenseId = location.state?.expenseId || new URLSearchParams(location.search).get('id')
       
+      console.log('🔍 [EXPENSE PREVIEW] Loading expense:', {
+        expenseId,
+        hasState: !!location.state,
+        stateKeys: location.state ? Object.keys(location.state) : [],
+        searchParams: location.search,
+        pathname: location.pathname
+      })
+      
       if (expenseId) {
+        console.log('✅ [EXPENSE PREVIEW] Found expenseId, loading expense:', expenseId)
         loadExpense(expenseId)
       } else {
+        console.error('❌ [EXPENSE PREVIEW] No expense ID found in state or URL, redirecting to invoices')
+        console.error('   Location state:', location.state)
+        console.error('   URL search:', location.search)
         // Navigate to invoices page if no expense ID found
         navigate('/invoices')
       }
@@ -136,11 +148,16 @@ export default function ExpensePreviewPage() {
   }, [user, navigate, location, setGlobalLoading])
 
   const loadExpense = async (expenseId: string) => {
-    if (!user) return
+    if (!user) {
+      console.error('❌ [EXPENSE PREVIEW] No user, cannot load expense')
+      return
+    }
 
     try {
       setLoadingExpense(true)
       setGlobalLoading(true)
+      
+      console.log('📥 [EXPENSE PREVIEW] Loading expense from DB:', expenseId)
       
       // Query expenses table directly
       const { data: expenseData, error: expenseError } = await supabase
@@ -151,18 +168,20 @@ export default function ExpensePreviewPage() {
         .single()
 
       if (expenseError) {
-        console.error('Error loading expense:', expenseError)
+        console.error('❌ [EXPENSE PREVIEW] Error loading expense:', expenseError)
         toast.error('Failed to load expense: ' + expenseError.message)
         navigate('/invoices')
         return
       }
 
       if (!expenseData) {
-        console.error('Expense not found')
+        console.error('❌ [EXPENSE PREVIEW] Expense not found in database')
         toast.error('Expense not found')
         navigate('/invoices')
         return
       }
+
+      console.log('✅ [EXPENSE PREVIEW] Expense loaded successfully:', expenseData.id)
 
       // Load client name if client_id exists
       let clientName: string | undefined = undefined
