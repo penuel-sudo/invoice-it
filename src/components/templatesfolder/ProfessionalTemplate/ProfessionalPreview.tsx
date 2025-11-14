@@ -48,16 +48,9 @@ export default function ProfessionalInvoicePreviewPage() {
     if (!user) return
     
     try {
-      // First try to load from localStorage for unsaved invoices
-      const savedCustomizations = localStorage.getItem('professional_template_customizations')
-      if (savedCustomizations) {
-        const customizations = JSON.parse(savedCustomizations)
-        setTemplateSettings(customizations)
-        return
-      }
-      
-      // If no localStorage, try to load from database for saved invoices
       const invoiceNumber = getInvoiceFromUrl(searchParams)
+      
+      // PRIORITY 1: Load from database for saved invoices (invoice-specific)
       if (invoiceNumber) {
         const { data: invoiceData, error } = await supabase
           .from('invoices')
@@ -67,10 +60,26 @@ export default function ProfessionalInvoicePreviewPage() {
           .single()
           
         if (!error && invoiceData?.template_settings) {
+          console.log('✅ [PREVIEW] Loaded template_settings from database for invoice:', invoiceNumber)
           setTemplateSettings(invoiceData.template_settings)
           return
         }
       }
+      
+      // PRIORITY 2: Only use localStorage for unsaved/draft invoices (no invoice number in URL)
+      // This is for invoices that haven't been saved to database yet
+      if (!invoiceNumber) {
+        const savedCustomizations = localStorage.getItem('professional_template_customizations')
+        if (savedCustomizations) {
+          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (unsaved invoice)')
+          const customizations = JSON.parse(savedCustomizations)
+          setTemplateSettings(customizations)
+          return
+        }
+      }
+      
+      // PRIORITY 3: No settings found - will use defaults in component
+      console.log('⚠️ [PREVIEW] No template_settings found, using defaults')
     } catch (error) {
       console.error('Error loading template settings:', error)
     }
