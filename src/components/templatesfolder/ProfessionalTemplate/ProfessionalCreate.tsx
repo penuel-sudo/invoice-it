@@ -193,6 +193,74 @@ export default function ProfessionalInvoiceCreatePage() {
     loadTemplateSettings()
   }, [user])
   
+  // Listen for invoice saved event (from PDF download or Send button)
+  useEffect(() => {
+    const handleInvoiceSaved = (event: CustomEvent) => {
+      const savedInvoiceNumber = event.detail?.invoiceNumber
+      
+      // Only clear/reset if the saved invoice matches current form's invoice number
+      if (savedInvoiceNumber === formData.invoiceNumber) {
+        console.log('🧹 [CREATE] Invoice saved via PDF/Send, clearing form...')
+        
+        // Clear localStorage
+        invoiceStorage.clearDraftProfessional()
+        
+        // Generate new invoice number
+        const newInvoiceNumber = generateInvoiceNumber()
+        
+        // Reset form to empty state with new invoice number
+        setFormData({
+          clientName: '',
+          clientEmail: '',
+          clientAddress: '',
+          clientPhone: '',
+          clientCompanyName: '',
+          invoiceNumber: newInvoiceNumber,
+          invoiceDate: new Date().toISOString().split('T')[0],
+          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          poNumber: '',
+          taxId: '',
+          shipToName: '',
+          shipToAddress: '',
+          shipToCity: '',
+          shipToState: '',
+          shipToZip: '',
+          shipToCountry: '',
+          items: [{
+            id: Date.now().toString(),
+            description: '',
+            quantity: 1,
+            unitPrice: 0,
+            discount: 0,
+            taxRate: 0,
+            lineTotal: 0
+          }],
+          notes: '',
+          termsAndConditions: '',
+          subtotal: 0,
+          discountAmount: 0,
+          shippingCost: 0,
+          taxTotal: 0,
+          grandTotal: 0,
+          amountPaid: 0,
+          balanceDue: 0,
+          currency: 'USD',
+          currencySymbol: '$',
+          selectedPaymentMethodIds: []
+        })
+        
+        // Clear URL params
+        setSearchParams({})
+      }
+    }
+    
+    window.addEventListener('professionalInvoiceSaved', handleInvoiceSaved as EventListener)
+    
+    return () => {
+      window.removeEventListener('professionalInvoiceSaved', handleInvoiceSaved as EventListener)
+    }
+  }, [formData.invoiceNumber, setSearchParams])
+  
   // Load invoice data from URL parameter or state
   useEffect(() => {
     const loadInvoiceData = async () => {
