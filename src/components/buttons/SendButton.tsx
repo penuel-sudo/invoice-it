@@ -107,8 +107,23 @@ export default function SendButton({
         })
       })
 
-      // Parse response
-      const result = await response.json()
+      // Parse response - handle both JSON and non-JSON responses
+      let result: any
+      try {
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('application/json')) {
+          result = await response.json()
+        } else {
+          // API returned non-JSON (likely HTML error page)
+          const text = await response.text()
+          console.error('API returned non-JSON response:', text.substring(0, 200))
+          throw new Error(`Server error: API returned invalid response. Status: ${response.status}`)
+        }
+      } catch (parseError: any) {
+        // If JSON parsing fails, it means API returned HTML/text error
+        console.error('Failed to parse API response:', parseError)
+        throw new Error(`Failed to communicate with server. Please check your API endpoint.`)
+      }
 
       // Check if response is ok
       if (!response.ok) {
