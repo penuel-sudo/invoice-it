@@ -193,74 +193,6 @@ export default function ProfessionalInvoiceCreatePage() {
     loadTemplateSettings()
   }, [user])
   
-  // Listen for invoice saved event (from PDF download or Send button)
-  useEffect(() => {
-    const handleInvoiceSaved = (event: CustomEvent) => {
-      const savedInvoiceNumber = event.detail?.invoiceNumber
-      
-      // Only clear/reset if the saved invoice matches current form's invoice number
-      if (savedInvoiceNumber === formData.invoiceNumber) {
-        console.log('🧹 [CREATE] Invoice saved via PDF/Send, clearing form...')
-        
-        // Clear localStorage
-        invoiceStorage.clearDraftProfessional()
-        
-        // Generate new invoice number
-        const newInvoiceNumber = generateInvoiceNumber()
-        
-        // Reset form to empty state with new invoice number
-        setFormData({
-          clientName: '',
-          clientEmail: '',
-          clientAddress: '',
-          clientPhone: '',
-          clientCompanyName: '',
-          invoiceNumber: newInvoiceNumber,
-          invoiceDate: new Date().toISOString().split('T')[0],
-          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          poNumber: '',
-          taxId: '',
-          shipToName: '',
-          shipToAddress: '',
-          shipToCity: '',
-          shipToState: '',
-          shipToZip: '',
-          shipToCountry: '',
-          items: [{
-            id: Date.now().toString(),
-            description: '',
-            quantity: 1,
-            unitPrice: 0,
-            discount: 0,
-            taxRate: 0,
-            lineTotal: 0
-          }],
-          notes: '',
-          termsAndConditions: '',
-          subtotal: 0,
-          discountAmount: 0,
-          shippingCost: 0,
-          taxTotal: 0,
-          grandTotal: 0,
-          amountPaid: 0,
-          balanceDue: 0,
-          currency: 'USD',
-          currencySymbol: '$',
-          selectedPaymentMethodIds: []
-        })
-        
-        // Clear URL params
-        setSearchParams({})
-      }
-    }
-    
-    window.addEventListener('professionalInvoiceSaved', handleInvoiceSaved as EventListener)
-    
-    return () => {
-      window.removeEventListener('professionalInvoiceSaved', handleInvoiceSaved as EventListener)
-    }
-  }, [formData.invoiceNumber, setSearchParams])
-  
   // Load invoice data from URL parameter or state
   useEffect(() => {
     const loadInvoiceData = async () => {
@@ -622,48 +554,20 @@ export default function ProfessionalInvoiceCreatePage() {
         items: validItems
       }
 
-      // Check if invoice already exists in database
-      let existingInvoice = null
-      if (saveData.invoiceNumber) {
-        const { data } = await supabase
-          .from('invoices')
-          .select('id, template_settings')
-          .eq('invoice_number', saveData.invoiceNumber)
-          .eq('user_id', user.id)
-          .single()
-        existingInvoice = data
-      }
-      
-      // Only use localStorage customization for NEW invoices (not existing ones)
-      // For existing invoices, saveProfessionalInvoice will preserve their existing template_settings
-      let latestTemplateSettings = undefined
-      if (!existingInvoice) {
-        // New invoice - use localStorage if available
+      // Load latest customization from localStorage and pass to DB save
       const savedCustomizationsRaw = localStorage.getItem('professional_template_customizations')
-        latestTemplateSettings = savedCustomizationsRaw ? JSON.parse(savedCustomizationsRaw) : undefined
-        console.log('📝 [CREATE] New invoice - using localStorage customization:', !!latestTemplateSettings)
-      } else {
-        // Existing invoice - don't pass templateSettings (will preserve existing DB settings)
-        console.log('📝 [CREATE] Existing invoice - preserving database template_settings')
-      }
-      
+      const latestTemplateSettings = savedCustomizationsRaw ? JSON.parse(savedCustomizationsRaw) : undefined
       const result = await saveProfessionalInvoice(saveData, user, latestTemplateSettings, { status: 'draft' })
       
       if (result.success) {
-        // Clear localStorage FIRST - delete the saved invoice data
-        invoiceStorage.clearDraftProfessional()
-        
-        // Generate new invoice number
-        const newInvoiceNumber = generateInvoiceNumber()
-        
-        // Reset form to empty state with new invoice number
+        // Reset form to default state (same as DefaultCreate)
         setFormData({
           clientName: '',
           clientEmail: '',
           clientAddress: '',
           clientPhone: '',
           clientCompanyName: '',
-          invoiceNumber: newInvoiceNumber,
+          invoiceNumber: generateInvoiceNumber(),
           invoiceDate: new Date().toISOString().split('T')[0],
           dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           poNumber: '',
@@ -696,7 +600,6 @@ export default function ProfessionalInvoiceCreatePage() {
           currencySymbol: '$',
           selectedPaymentMethodIds: []
         })
-        
         // Clear URL params
         setSearchParams({})
         toast.success('Invoice saved successfully!')

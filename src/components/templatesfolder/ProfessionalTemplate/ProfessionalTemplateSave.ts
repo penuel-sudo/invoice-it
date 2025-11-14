@@ -209,7 +209,6 @@ export const saveProfessionalInvoice = async (
     // Step 2: Save invoice (UPDATE existing or INSERT new)
     console.log('📋 [PROFESSIONAL TEMPLATE SAVE] Step 2: Saving invoice...')
     let invoiceId: string
-    let isNewInvoice = false
     
     // Check if invoice already exists (including template_settings to preserve it)
     const { data: existingInvoice } = await supabase
@@ -310,10 +309,8 @@ export const saveProfessionalInvoice = async (
 
       invoiceId = updatedInvoice.id
       console.log('✅ [PROFESSIONAL TEMPLATE SAVE] Invoice updated successfully')
-      isNewInvoice = false
     } else {
       console.log('🆕 [PROFESSIONAL TEMPLATE SAVE] Creating new invoice...')
-      isNewInvoice = true
       // Create new invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
@@ -433,14 +430,6 @@ export const saveProfessionalInvoice = async (
     // Step 4: Clear localStorage draft
     console.log('🧹 [PROFESSIONAL TEMPLATE SAVE] Step 4: Clearing localStorage draft...')
     invoiceStorage.clearDraftProfessional()
-
-    // Dispatch event if this is a new invoice (so Create page can clear/reset form)
-    if (isNewInvoice) {
-      window.dispatchEvent(new CustomEvent('professionalInvoiceSaved', {
-        detail: { invoiceNumber: formData.invoiceNumber }
-      }))
-      console.log('📢 [PROFESSIONAL TEMPLATE SAVE] Dispatched invoiceSaved event for new invoice')
-    }
 
     // Mark save as complete
     saveInProgress.delete(saveKey)
