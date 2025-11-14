@@ -2175,8 +2175,17 @@ export default function ProfessionalInvoiceCreatePage() {
         isOpen={isCustomizationOpen}
         onClose={() => setIsCustomizationOpen(false)}
         onSave={async (data) => {
-          // Clean data to ensure only valid CustomizationData fields are saved
-          // This prevents old/extra fields from being saved to the database
+          // Save the EXACT data from the panel - don't clean it for localStorage
+          // Only clean when saving to database to remove extra fields
+          // For localStorage, we want to preserve all user selections exactly as they are
+          console.log('💾 [CUSTOMIZATION] Saving to localStorage:', data)
+          
+          // Always save to localStorage for preview purposes - use data directly
+          localStorage.setItem('professional_template_customizations', JSON.stringify(data))
+          setCustomizationData(data)
+          setTemplateSettings(data)
+          
+          // Clean data only for database saves (to remove extra fields)
           const cleanData = {
             // Company Details
             company_name: data.company_name || '',
@@ -2210,11 +2219,6 @@ export default function ProfessionalInvoiceCreatePage() {
               show_registration: data.template_settings?.show_registration ?? true
             }
           }
-          
-          // Always save to localStorage for preview purposes
-          localStorage.setItem('professional_template_customizations', JSON.stringify(cleanData))
-          setCustomizationData(cleanData)
-          setTemplateSettings(cleanData)
           
           // If invoice already exists in database, save customization to database too
           if (formData.invoiceNumber) {
