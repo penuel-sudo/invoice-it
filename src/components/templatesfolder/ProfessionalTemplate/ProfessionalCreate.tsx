@@ -582,6 +582,9 @@ export default function ProfessionalInvoiceCreatePage() {
       const result = await saveProfessionalInvoice(saveData, user, latestTemplateSettings, { status: 'draft' })
       
       if (result.success) {
+        // Clear localStorage draft after successful save
+        invoiceStorage.clearDraftProfessional()
+        
         // Reset form to default state (same as DefaultCreate)
         setFormData({
           clientName: '',
