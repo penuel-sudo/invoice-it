@@ -49,9 +49,23 @@ export default function ProfessionalInvoicePreviewPage() {
     
     try {
       const invoiceNumber = getInvoiceFromUrl(searchParams)
+      const hasStateData = !!location.state?.invoiceData
       
-      // PRIORITY 1: Load from database for saved invoices (invoice-specific)
-      if (invoiceNumber) {
+      // PRIORITY 1: For NEW invoices (from create page via location.state), use localStorage
+      // This means the invoice hasn't been saved to DB yet
+      if (hasStateData) {
+        const savedCustomizations = localStorage.getItem('professional_template_customizations')
+        if (savedCustomizations) {
+          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (new invoice from create page)')
+          const customizations = JSON.parse(savedCustomizations)
+          setTemplateSettings(customizations)
+          return
+        }
+      }
+      
+      // PRIORITY 2: Load from database for saved invoices (invoice-specific)
+      // Only query DB if we have invoiceNumber AND no state data (meaning it's from DB)
+      if (invoiceNumber && !hasStateData) {
         const { data: invoiceData, error } = await supabase
           .from('invoices')
           .select('template_settings')
@@ -64,24 +78,46 @@ export default function ProfessionalInvoicePreviewPage() {
           setTemplateSettings(invoiceData.template_settings)
           return
         }
+        
+        // If invoice not found in DB, fall back to localStorage (might be a new invoice)
+        if (error) {
+          console.log('⚠️ [PREVIEW] Invoice not found in DB, checking localStorage...')
+          const savedCustomizations = localStorage.getItem('professional_template_customizations')
+          if (savedCustomizations) {
+            console.log('✅ [PREVIEW] Loaded template_settings from localStorage (fallback)')
+            const customizations = JSON.parse(savedCustomizations)
+            setTemplateSettings(customizations)
+            return
+          }
+        }
       }
       
-      // PRIORITY 2: Only use localStorage for unsaved/draft invoices (no invoice number in URL)
-      // This is for invoices that haven't been saved to database yet
+      // PRIORITY 3: No invoice number - check localStorage
       if (!invoiceNumber) {
         const savedCustomizations = localStorage.getItem('professional_template_customizations')
         if (savedCustomizations) {
-          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (unsaved invoice)')
+          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (no invoice number)')
           const customizations = JSON.parse(savedCustomizations)
           setTemplateSettings(customizations)
           return
         }
       }
       
-      // PRIORITY 3: No settings found - will use defaults in component
+      // PRIORITY 4: No settings found - will use defaults in component
       console.log('⚠️ [PREVIEW] No template_settings found, using defaults')
     } catch (error) {
       console.error('Error loading template settings:', error)
+      // On error, try localStorage as fallback
+      try {
+        const savedCustomizations = localStorage.getItem('professional_template_customizations')
+        if (savedCustomizations) {
+          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (error fallback)')
+          const customizations = JSON.parse(savedCustomizations)
+          setTemplateSettings(customizations)
+        }
+      } catch (e) {
+        console.error('Error loading from localStorage:', e)
+      }
     }
   }
 
