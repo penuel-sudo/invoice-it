@@ -5,6 +5,7 @@ import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
 import StatusButton from '../components/StatusButton'
 import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
+import { getCurrencySymbol } from '../lib/currencyUtils'
 import { 
   ArrowLeft, 
   Edit, 
@@ -25,6 +26,7 @@ import {
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
 import { useLoading } from '../contexts/LoadingContext'
+import { expenseStorage } from '../lib/storage/expenseStorage'
 // StatusLogic removed - StatusButton handles validation internally
 
 const PAYMENT_METHODS = [
@@ -37,6 +39,7 @@ const PAYMENT_METHODS = [
 
 interface Expense {
   id: string
+  expense_number?: string
   description: string
   category: string
   amount: number
@@ -49,6 +52,7 @@ interface Expense {
   is_tax_deductible: boolean
   tax_rate: number
   tax_amount: number
+  currency_code?: string
   receipt_url?: string
   receipt_filename?: string
   receipt_size?: number
@@ -61,9 +65,10 @@ export default function ExpensePreviewPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { setLoading: setGlobalLoading } = useLoading()
-  const { currencySymbol } = useGlobalCurrency()
+  const { currencySymbol: userDefaultCurrencySymbol } = useGlobalCurrency()
   const [expense, setExpense] = useState<Expense | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [loadingExpense, setLoadingExpense] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -88,56 +93,204 @@ export default function ExpensePreviewPage() {
         return
       }
 
-      // Check if we have form data from create page
-      const expenseData = location.state?.expenseData
-      if (expenseData) {
-        // Transform form data to match Expense interface
-        const transformedExpense: Expense = {
-          id: 'preview',
-          description: expenseData.description,
-          category: expenseData.category,
-          amount: parseFloat(expenseData.amount),
-          status: 'spent',
-          expense_date: expenseData.expense_date,
-          notes: expenseData.notes,
-          client_id: expenseData.client_id,
-          client_name: undefined, // Will be loaded from clients
-          payment_method: expenseData.payment_method,
-          is_tax_deductible: expenseData.is_tax_deductible,
-          tax_rate: parseFloat(expenseData.tax_rate),
-          tax_amount: expenseData.is_tax_deductible ? (parseFloat(expenseData.amount) * parseFloat(expenseData.tax_rate) / 100) : 0,
-          receipt_url: expenseData.receipt_url,
-          receipt_filename: expenseData.receipt_filename,
-          receipt_size: expenseData.receipt_file?.size,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-        setExpense(transformedExpense)
-        setGlobalLoading(false)
-        return
-      }
-
-      // Get expense ID from location state or URL params
-      const expenseId = location.state?.expenseId || new URLSearchParams(location.search).get('id')
-      
-      if (expenseId) {
-        loadExpense(expenseId)
-      } else {
-        navigate('/invoices')
-      }
+      loadExpenseData()
     }, 100)
 
     return () => clearTimeout(timer)
   }, [user, navigate, location, setGlobalLoading])
 
-  const loadExpense = async (expenseId: string) => {
+  const loadExpenseData = async () => {
+    if (!user) return
+
+    // Priority 1: Check location.state for expenseData (from create page)
+    const expenseData = location.state?.expenseData
+    if (expenseData) {
+      console.log('✅ [EXPENSE PREVIEW] Loading from location.state')
+      // Transform form data to match Expense interface
+      const transformedExpense: Expense = {
+        id: 'preview',
+        description: expenseData.description,
+        category: expenseData.category,
+        amount: parseFloat(expenseData.amount),
+        status: 'spent',
+        expense_date: expenseData.expense_date,
+        notes: expenseData.notes,
+        client_id: expenseData.client_id,
+        client_name: undefined, // Will be loaded from clients
+        payment_method: expenseData.payment_method,
+        is_tax_deductible: expenseData.is_tax_deductible,
+        tax_rate: parseFloat(expenseData.tax_rate),
+        tax_amount: expenseData.is_tax_deductible ? (parseFloat(expenseData.amount) * parseFloat(expenseData.tax_rate) / 100) : 0,
+        currency_code: expenseData.currency_code,
+        receipt_url: expenseData.receipt_url,
+        receipt_filename: expenseData.receipt_filename,
+        receipt_size: expenseData.receipt_file?.size,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      setExpense(transformedExpense)
+      setGlobalLoading(false)
+      return
+    }
+
+    // Priority 2: Check localStorage for unsaved expense
+    const savedDraft = expenseStorage.getDraft()
+    if (savedDraft && !savedDraft.expense_number) {
+      console.log('✅ [EXPENSE PREVIEW] Loading unsaved expense from localStorage')
+      const transformedExpense: Expense = {
+        id: 'preview',
+        description: savedDraft.description,
+        category: savedDraft.category,
+        amount: parseFloat(savedDraft.amount),
+        status: 'spent',
+        expense_date: savedDraft.expense_date,
+        notes: savedDraft.notes,
+        client_id: savedDraft.client_id,
+        client_name: undefined,
+        payment_method: savedDraft.payment_method,
+        is_tax_deductible: savedDraft.is_tax_deductible,
+        tax_rate: parseFloat(savedDraft.tax_rate),
+        tax_amount: savedDraft.is_tax_deductible ? (parseFloat(savedDraft.amount) * parseFloat(savedDraft.tax_rate) / 100) : 0,
+        currency_code: savedDraft.currency_code,
+        receipt_url: savedDraft.receipt_url,
+        receipt_filename: savedDraft.receipt_filename,
+        receipt_size: savedDraft.receipt_size,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      setExpense(transformedExpense)
+      setGlobalLoading(false)
+      return
+    }
+
+    // Priority 3: Check URL for expense_number
+    const expenseNumber = new URLSearchParams(location.search).get('expense')
+    if (expenseNumber) {
+      console.log('✅ [EXPENSE PREVIEW] Loading from DB by expense_number:', expenseNumber)
+      await loadExpenseByNumber(expenseNumber)
+      return
+    }
+
+    // Priority 4: Check URL or state for expense ID
+    const expenseId = location.state?.expenseId || new URLSearchParams(location.search).get('id')
+    if (expenseId) {
+      console.log('✅ [EXPENSE PREVIEW] Loading from DB by ID:', expenseId)
+      await loadExpense(expenseId)
+      return
+    }
+
+    // No expense found
+    console.error('❌ [EXPENSE PREVIEW] No expense found in state, localStorage, or URL')
+    toast.error('Expense not found')
+    navigate('/invoices')
+  }
+
+  const loadExpenseByNumber = async (expenseNumber: string) => {
     if (!user) return
 
     try {
+      setLoadingExpense(true)
       setGlobalLoading(true)
       
+<<<<<<< HEAD
       // Load expense with client info
       const { data: expenseData, error } = await supabase
+=======
+      console.log('📥 [EXPENSE PREVIEW] Loading expense from DB by number:', expenseNumber)
+      
+      // Query expenses table by expense_number
+      const { data: expenseData, error: expenseError } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('expense_number', expenseNumber)
+        .eq('user_id', user.id)
+        .single()
+
+      if (expenseError) {
+        console.error('❌ [EXPENSE PREVIEW] Error loading expense:', expenseError)
+        toast.error('Failed to load expense: ' + expenseError.message)
+        navigate('/invoices')
+        return
+      }
+
+      if (!expenseData) {
+        console.error('❌ [EXPENSE PREVIEW] Expense not found in database')
+        toast.error('Expense not found')
+        navigate('/invoices')
+        return
+      }
+
+      console.log('✅ [EXPENSE PREVIEW] Expense loaded successfully:', expenseData.expense_number)
+
+      // Load client name if client_id exists
+      let clientName: string | undefined = undefined
+      if (expenseData.client_id) {
+        try {
+          const { data: clientData } = await supabase
+            .from('clients')
+            .select('name, company_name')
+            .eq('id', expenseData.client_id)
+            .eq('user_id', user.id)
+            .single()
+          
+          if (clientData) {
+            clientName = clientData.name || clientData.company_name || undefined
+          }
+        } catch (clientError) {
+          console.warn('Could not load client name:', clientError)
+        }
+      }
+
+      // Transform the data to match Expense interface
+      const transformedExpense: Expense = {
+        id: expenseData.id,
+        expense_number: expenseData.expense_number,
+        description: expenseData.description,
+        category: expenseData.category,
+        amount: parseFloat(expenseData.amount.toString()),
+        status: expenseData.status as 'spent' | 'expense',
+        expense_date: expenseData.expense_date,
+        notes: expenseData.notes || undefined,
+        client_id: expenseData.client_id || undefined,
+        client_name: clientName,
+        payment_method: expenseData.payment_method,
+        is_tax_deductible: expenseData.is_tax_deductible,
+        tax_rate: parseFloat(expenseData.tax_rate?.toString() || '0'),
+        tax_amount: parseFloat(expenseData.tax_amount?.toString() || '0'),
+        currency_code: expenseData.currency_code || undefined,
+        receipt_url: expenseData.receipt_url || undefined,
+        receipt_filename: expenseData.receipt_filename || undefined,
+        receipt_size: expenseData.receipt_size || undefined,
+        created_at: expenseData.created_at,
+        updated_at: expenseData.updated_at || undefined
+      }
+
+      setExpense(transformedExpense)
+    } catch (error) {
+      console.error('Error loading expense:', error)
+      toast.error('Failed to load expense')
+      navigate('/invoices')
+    } finally {
+      setLoadingExpense(false)
+      setGlobalLoading(false)
+    }
+  }
+
+  const loadExpense = async (expenseId: string) => {
+    if (!user) {
+      console.error('❌ [EXPENSE PREVIEW] No user, cannot load expense')
+      return
+    }
+
+    try {
+      setLoadingExpense(true)
+      setGlobalLoading(true)
+      
+      console.log('📥 [EXPENSE PREVIEW] Loading expense from DB:', expenseId)
+      
+      // Query expenses table directly
+      const { data: expenseData, error: expenseError } = await supabase
+>>>>>>> dev
         .from('expenses')
         .select(`
           *,
@@ -150,13 +303,14 @@ export default function ExpensePreviewPage() {
         .eq('user_id', user.id)
         .single()
 
-      if (error) {
-        console.error('Error loading expense:', error)
-        toast.error('Failed to load expense: ' + error.message)
+      if (expenseError) {
+        console.error('❌ [EXPENSE PREVIEW] Error loading expense:', expenseError)
+        toast.error('Failed to load expense: ' + expenseError.message)
         navigate('/invoices')
         return
       }
 
+<<<<<<< HEAD
       // Transform data to include client_name
       const expense = {
         ...expenseData,
@@ -173,11 +327,68 @@ export default function ExpensePreviewPage() {
       }
 
       setExpense(expense)
+=======
+      if (!expenseData) {
+        console.error('❌ [EXPENSE PREVIEW] Expense not found in database')
+        toast.error('Expense not found')
+        navigate('/invoices')
+        return
+      }
+
+      console.log('✅ [EXPENSE PREVIEW] Expense loaded successfully:', expenseData.id)
+
+      // Load client name if client_id exists
+      let clientName: string | undefined = undefined
+      if (expenseData.client_id) {
+        try {
+          const { data: clientData } = await supabase
+            .from('clients')
+            .select('name, company_name')
+            .eq('id', expenseData.client_id)
+            .eq('user_id', user.id)
+            .single()
+          
+          if (clientData) {
+            clientName = clientData.name || clientData.company_name || undefined
+          }
+        } catch (clientError) {
+          console.warn('Could not load client name:', clientError)
+          // Continue without client name
+        }
+      }
+
+      // Transform the data to match Expense interface
+      const transformedExpense: Expense = {
+        id: expenseData.id,
+        expense_number: expenseData.expense_number,
+        description: expenseData.description,
+        category: expenseData.category,
+        amount: parseFloat(expenseData.amount.toString()),
+        status: expenseData.status as 'spent' | 'expense',
+        expense_date: expenseData.expense_date,
+        notes: expenseData.notes || undefined,
+        client_id: expenseData.client_id || undefined,
+        client_name: clientName,
+        payment_method: expenseData.payment_method,
+        is_tax_deductible: expenseData.is_tax_deductible,
+        tax_rate: parseFloat(expenseData.tax_rate?.toString() || '0'),
+        tax_amount: parseFloat(expenseData.tax_amount?.toString() || '0'),
+        currency_code: expenseData.currency_code || undefined,
+        receipt_url: expenseData.receipt_url || undefined,
+        receipt_filename: expenseData.receipt_filename || undefined,
+        receipt_size: expenseData.receipt_size || undefined,
+        created_at: expenseData.created_at,
+        updated_at: expenseData.updated_at || undefined
+      }
+
+      setExpense(transformedExpense)
+>>>>>>> dev
     } catch (error) {
       console.error('Error loading expense:', error)
       toast.error('Failed to load expense')
       navigate('/invoices')
     } finally {
+      setLoadingExpense(false)
       setGlobalLoading(false)
     }
   }
@@ -216,7 +427,9 @@ export default function ExpensePreviewPage() {
   }
 
   const formatAmount = (amount: number) => {
-    return `${currencySymbol}${amount.toFixed(2)}`
+    const expenseCurrency = expense?.currency_code
+    const symbol = expenseCurrency ? getCurrencySymbol(expenseCurrency) : userDefaultCurrencySymbol
+    return `${symbol}${amount.toFixed(2)}`
   }
 
   const formatDate = (dateString: string) => {
@@ -260,7 +473,8 @@ export default function ExpensePreviewPage() {
 
   if (!user) return null
 
-  if (!expense) {
+  // Don't show "not found" while still loading
+  if (!expense && !authLoading && !loadingExpense) {
     return (
       <Layout>
         <div style={{
@@ -713,7 +927,7 @@ export default function ExpensePreviewPage() {
                     color: brandColors.neutral[500],
                     margin: 0
                   }}>
-                    {expense.receipt_size ? `${(expense.receipt_size / 1024 / 1024).toFixed(2)} MB` : 'Receipt file'}
+                    {expense.receipt_size ? `${(expense.receipt_size / 1024 / 1024).toFixed(2)} MB` : 'Size unknown'}
                   </p>
                 </div>
                 <button
@@ -758,7 +972,7 @@ export default function ExpensePreviewPage() {
               color: brandColors.neutral[500],
               margin: 0
             }}>
-              Created on {formatDate(expense.created_at)} • Expense ID: {expense.id.slice(0, 8).toUpperCase()}
+              Created on {formatDate(expense.created_at)} • {expense.expense_number || `ID: ${expense.id.slice(0, 8).toUpperCase()}`}
             </p>
           </div>
 

@@ -48,17 +48,24 @@ export default function ProfessionalInvoicePreviewPage() {
     if (!user) return
     
     try {
-      // First try to load from localStorage for unsaved invoices
-      const savedCustomizations = localStorage.getItem('professional_template_customizations')
-      if (savedCustomizations) {
-        const customizations = JSON.parse(savedCustomizations)
-        setTemplateSettings(customizations)
-        return
+      const invoiceNumber = getInvoiceFromUrl(searchParams)
+      const hasStateData = !!location.state?.invoiceData
+      
+      // PRIORITY 1: For NEW invoices (from create page via location.state), use localStorage
+      // This means the invoice hasn't been saved to DB yet
+      if (hasStateData) {
+        const savedCustomizations = localStorage.getItem('professional_template_customizations')
+        if (savedCustomizations) {
+          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (new invoice from create page)')
+          const customizations = JSON.parse(savedCustomizations)
+          setTemplateSettings(customizations)
+          return
+        }
       }
       
-      // If no localStorage, try to load from database for saved invoices
-      const invoiceNumber = getInvoiceFromUrl(searchParams)
-      if (invoiceNumber) {
+      // PRIORITY 2: Load from database for saved invoices (invoice-specific)
+      // Only query DB if we have invoiceNumber AND no state data (meaning it's from DB)
+      if (invoiceNumber && !hasStateData) {
         const { data: invoiceData, error } = await supabase
           .from('invoices')
           .select('template_settings')
@@ -67,12 +74,50 @@ export default function ProfessionalInvoicePreviewPage() {
           .single()
           
         if (!error && invoiceData?.template_settings) {
+          console.log('✅ [PREVIEW] Loaded template_settings from database for invoice:', invoiceNumber)
           setTemplateSettings(invoiceData.template_settings)
           return
         }
+        
+        // If invoice not found in DB, fall back to localStorage (might be a new invoice)
+        if (error) {
+          console.log('⚠️ [PREVIEW] Invoice not found in DB, checking localStorage...')
+          const savedCustomizations = localStorage.getItem('professional_template_customizations')
+          if (savedCustomizations) {
+            console.log('✅ [PREVIEW] Loaded template_settings from localStorage (fallback)')
+            const customizations = JSON.parse(savedCustomizations)
+            setTemplateSettings(customizations)
+            return
+          }
+        }
       }
+      
+      // PRIORITY 3: No invoice number - check localStorage
+      if (!invoiceNumber) {
+        const savedCustomizations = localStorage.getItem('professional_template_customizations')
+        if (savedCustomizations) {
+          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (no invoice number)')
+          const customizations = JSON.parse(savedCustomizations)
+          setTemplateSettings(customizations)
+          return
+        }
+      }
+      
+      // PRIORITY 4: No settings found - will use defaults in component
+      console.log('⚠️ [PREVIEW] No template_settings found, using defaults')
     } catch (error) {
       console.error('Error loading template settings:', error)
+      // On error, try localStorage as fallback
+      try {
+        const savedCustomizations = localStorage.getItem('professional_template_customizations')
+        if (savedCustomizations) {
+          console.log('✅ [PREVIEW] Loaded template_settings from localStorage (error fallback)')
+          const customizations = JSON.parse(savedCustomizations)
+          setTemplateSettings(customizations)
+        }
+      } catch (e) {
+        console.error('Error loading from localStorage:', e)
+      }
     }
   }
 
@@ -552,7 +597,16 @@ export default function ProfessionalInvoicePreviewPage() {
               {(templateSettings?.company_name || profileFallback?.company_name || 'INVOICE').toString()}
             </h1>
             {(templateSettings?.tagline || profileFallback?.tagline) && (templateSettings?.template_settings?.show_tagline !== false) && (
+<<<<<<< HEAD
               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: brandColors.neutral[600], fontFamily: fontFamily }}>
+=======
+              <p style={{ 
+                margin: '0.25rem 0 0 0', 
+                fontSize: '0.9rem', 
+                color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600],
+                fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+              }}>
+>>>>>>> dev
                 {(templateSettings?.tagline || profileFallback?.tagline) as string}
               </p>
             )}
@@ -561,17 +615,44 @@ export default function ProfessionalInvoicePreviewPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '1.25rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
               {(templateSettings?.website || profileFallback?.website) && (templateSettings?.template_settings?.show_website !== false) && (
+<<<<<<< HEAD
                 <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0', fontFamily: fontFamily }}>
+=======
+                <p style={{ 
+                  fontSize: '0.875rem', 
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600], 
+                  margin: '0 0 0.25rem 0',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+                }}>
+>>>>>>> dev
                   {(templateSettings?.website || profileFallback?.website) as string}
                 </p>
               )}
               {(templateSettings?.tax_id || profileFallback?.tax_id) && (templateSettings?.template_settings?.show_tax_id !== false) && (
+<<<<<<< HEAD
                 <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: '0 0 0.25rem 0', fontFamily: fontFamily }}>
+=======
+                <p style={{ 
+                  fontSize: '0.875rem', 
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600], 
+                  margin: '0 0 0.25rem 0',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+                }}>
+>>>>>>> dev
                   Tax ID: {(templateSettings?.tax_id || profileFallback?.tax_id) as string}
                 </p>
               )}
               {(templateSettings?.registration_number || profileFallback?.registration_number) && (templateSettings?.template_settings?.show_registration !== false) && (
+<<<<<<< HEAD
                 <p style={{ fontSize: '0.875rem', color: brandColors.neutral[600], margin: 0, fontFamily: fontFamily }}>
+=======
+                <p style={{ 
+                  fontSize: '0.875rem', 
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600], 
+                  margin: 0,
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+                }}>
+>>>>>>> dev
                   Reg: {(templateSettings?.registration_number || profileFallback?.registration_number) as string}
                 </p>
               )}
@@ -605,19 +686,32 @@ export default function ProfessionalInvoicePreviewPage() {
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
+<<<<<<< HEAD
               color: addOpacity(primaryColor, 0.5),
               marginBottom: '0.25rem',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               fontFamily: fontFamily
+=======
+              color: templateSettings?.primary_color || brandColors.neutral[500],
+              marginBottom: '0.25rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               Invoice Number
             </div>
             <div style={{
               fontSize: '1rem',
               fontWeight: '600',
+<<<<<<< HEAD
               color: brandColors.neutral[900],
               fontFamily: fontFamily
+=======
+              color: templateSettings?.primary_color || brandColors.neutral[900],
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               {invoiceData.invoiceNumber}
             </div>
@@ -627,19 +721,32 @@ export default function ProfessionalInvoicePreviewPage() {
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
+<<<<<<< HEAD
               color: addOpacity(primaryColor, 0.5),
               marginBottom: '0.25rem',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               fontFamily: fontFamily
+=======
+              color: templateSettings?.primary_color || brandColors.neutral[500],
+              marginBottom: '0.25rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               Issue Date
             </div>
             <div style={{
               fontSize: '1rem',
               fontWeight: '600',
+<<<<<<< HEAD
               color: brandColors.neutral[900],
               fontFamily: fontFamily
+=======
+              color: templateSettings?.primary_color || brandColors.neutral[900],
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               {new Date(invoiceData.invoiceDate).toLocaleDateString('en-US', {
                 month: 'short',
@@ -653,11 +760,19 @@ export default function ProfessionalInvoicePreviewPage() {
             <div style={{
               fontSize: '0.75rem',
               fontWeight: '600',
+<<<<<<< HEAD
               color: addOpacity(primaryColor, 0.5),
               marginBottom: '0.25rem',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               fontFamily: fontFamily
+=======
+              color: templateSettings?.primary_color || brandColors.neutral[500],
+              marginBottom: '0.25rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               Due Date
             </div>
@@ -665,7 +780,11 @@ export default function ProfessionalInvoicePreviewPage() {
               fontSize: '1rem',
               fontWeight: '600',
               color: brandColors.error[600],
+<<<<<<< HEAD
               fontFamily: fontFamily
+=======
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               {new Date(invoiceData.dueDate).toLocaleDateString('en-US', {
                 month: 'short',
@@ -680,19 +799,32 @@ export default function ProfessionalInvoicePreviewPage() {
               <div style={{
                 fontSize: '0.75rem',
                 fontWeight: '600',
+<<<<<<< HEAD
                 color: addOpacity(primaryColor, 0.5),
                 marginBottom: '0.25rem',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 fontFamily: fontFamily
+=======
+                color: templateSettings?.primary_color || brandColors.neutral[500],
+                marginBottom: '0.25rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
               }}>
                 PO Number
               </div>
               <div style={{
                 fontSize: '1rem',
                 fontWeight: '600',
+<<<<<<< HEAD
                 color: brandColors.neutral[900],
                 fontFamily: fontFamily
+=======
+                color: templateSettings?.primary_color || brandColors.neutral[900],
+                fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
               }}>
                 {invoiceData.poNumber}
               </div>
@@ -704,19 +836,32 @@ export default function ProfessionalInvoicePreviewPage() {
               <div style={{
                 fontSize: '0.75rem',
                 fontWeight: '600',
+<<<<<<< HEAD
                 color: addOpacity(primaryColor, 0.5),
                 marginBottom: '0.25rem',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 fontFamily: fontFamily
+=======
+                color: templateSettings?.primary_color || brandColors.neutral[500],
+                marginBottom: '0.25rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
               }}>
                 Tax ID / VAT
               </div>
               <div style={{
                 fontSize: '1rem',
                 fontWeight: '600',
+<<<<<<< HEAD
                 color: brandColors.neutral[900],
                 fontFamily: fontFamily
+=======
+                color: templateSettings?.primary_color || brandColors.neutral[900],
+                fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
               }}>
                 {invoiceData.taxId}
               </div>
@@ -744,7 +889,11 @@ export default function ProfessionalInvoicePreviewPage() {
               marginBottom: '1rem',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
+<<<<<<< HEAD
               fontFamily: fontFamily
+=======
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               Bill To
             </h3>
@@ -757,20 +906,27 @@ export default function ProfessionalInvoicePreviewPage() {
               <div style={{
                 fontSize: '1.125rem',
                 fontWeight: '700',
+<<<<<<< HEAD
                 color: brandColors.neutral[900],
                 marginBottom: '0.75rem',
                 fontFamily: fontFamily
+=======
+                color: templateSettings?.primary_color || brandColors.neutral[900],
+                marginBottom: '0.75rem',
+                fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
               }}>
                 {invoiceData.clientName}
               </div>
               {invoiceData.clientCompanyName && (
                 <div style={{
                   fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600],
                   marginBottom: '0.5rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                 }}>
                   <Building size={14} />
                   {invoiceData.clientCompanyName}
@@ -779,11 +935,12 @@ export default function ProfessionalInvoicePreviewPage() {
               {invoiceData.clientEmail && (
                 <div style={{
                   fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600],
                   marginBottom: '0.5rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                 }}>
                   <Mail size={14} />
                   {invoiceData.clientEmail}
@@ -792,11 +949,12 @@ export default function ProfessionalInvoicePreviewPage() {
               {invoiceData.clientPhone && (
                 <div style={{
                   fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600],
                   marginBottom: '0.5rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                 }}>
                   <Phone size={14} />
                   {invoiceData.clientPhone}
@@ -805,11 +963,12 @@ export default function ProfessionalInvoicePreviewPage() {
               {invoiceData.clientAddress && (
                 <div style={{
                   fontSize: '0.875rem',
-                  color: brandColors.neutral[600],
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[600],
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '0.5rem',
-                  marginTop: '0.75rem'
+                  marginTop: '0.75rem',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                 }}>
                   <MapPin size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
                   <span>{invoiceData.clientAddress}</span>
@@ -828,7 +987,11 @@ export default function ProfessionalInvoicePreviewPage() {
                 marginBottom: '1rem',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
+<<<<<<< HEAD
                 fontFamily: fontFamily
+=======
+                fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
               }}>
                 Ship To
               </h3>
@@ -841,20 +1004,22 @@ export default function ProfessionalInvoicePreviewPage() {
                 <div style={{
                   fontSize: '1.125rem',
                   fontWeight: '700',
-                  color: brandColors.neutral[900],
+                  color: templateSettings?.primary_color || brandColors.neutral[900],
                   marginBottom: '0.75rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                 }}>
-                  <Truck size={18} color={brandColors.primary[600]} />
+                  <Truck size={18} color={templateSettings?.primary_color || brandColors.primary[600]} />
                   {invoiceData.shipToName}
                 </div>
                 {invoiceData.shipToAddress && (
                   <div style={{
                     fontSize: '0.875rem',
-                    color: brandColors.neutral[700],
-                    marginBottom: '0.25rem'
+                    color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[700],
+                    marginBottom: '0.25rem',
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                   }}>
                     {invoiceData.shipToAddress}
                   </div>
@@ -862,7 +1027,8 @@ export default function ProfessionalInvoicePreviewPage() {
                 {(invoiceData.shipToCity || invoiceData.shipToState || invoiceData.shipToZip) && (
                   <div style={{
                     fontSize: '0.875rem',
-                    color: brandColors.neutral[700]
+                    color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[700],
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                   }}>
                     {[invoiceData.shipToCity, invoiceData.shipToState, invoiceData.shipToZip]
                       .filter(Boolean)
@@ -872,7 +1038,8 @@ export default function ProfessionalInvoicePreviewPage() {
                 {invoiceData.shipToCountry && (
                   <div style={{
                     fontSize: '0.875rem',
-                    color: brandColors.neutral[700]
+                    color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[700],
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
                   }}>
                     {invoiceData.shipToCountry}
                   </div>
@@ -887,11 +1054,19 @@ export default function ProfessionalInvoicePreviewPage() {
           <h3 style={{
             fontSize: '0.875rem',
             fontWeight: '700',
+<<<<<<< HEAD
             color: primaryColor,
             marginBottom: '1rem',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             fontFamily: fontFamily
+=======
+            color: templateSettings?.primary_color || brandColors.neutral[700],
+            marginBottom: '1rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
           }}>
             Items
           </h3>
@@ -909,10 +1084,17 @@ export default function ProfessionalInvoicePreviewPage() {
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
+<<<<<<< HEAD
                   color: primaryColor,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   fontFamily: fontFamily
+=======
+                  color: templateSettings?.primary_color || brandColors.neutral[700],
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                 }}>
                   Description
                 </th>
@@ -921,10 +1103,17 @@ export default function ProfessionalInvoicePreviewPage() {
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
+<<<<<<< HEAD
                   color: primaryColor,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   fontFamily: fontFamily
+=======
+                  color: templateSettings?.primary_color || brandColors.neutral[700],
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                 }}>
                   Qty
                 </th>
@@ -933,10 +1122,17 @@ export default function ProfessionalInvoicePreviewPage() {
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
+<<<<<<< HEAD
                   color: primaryColor,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   fontFamily: fontFamily
+=======
+                  color: templateSettings?.primary_color || brandColors.neutral[700],
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                 }}>
                   Unit Price
                 </th>
@@ -946,10 +1142,17 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.75rem',
                     fontWeight: '700',
+<<<<<<< HEAD
                     color: primaryColor,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     fontFamily: fontFamily
+=======
+                    color: templateSettings?.primary_color || brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                   }}>
                     Disc %
                   </th>
@@ -960,10 +1163,17 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.75rem',
                     fontWeight: '700',
+<<<<<<< HEAD
                     color: primaryColor,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     fontFamily: fontFamily
+=======
+                    color: templateSettings?.primary_color || brandColors.neutral[700],
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                   }}>
                     Tax %
                   </th>
@@ -973,10 +1183,17 @@ export default function ProfessionalInvoicePreviewPage() {
                   padding: '0.75rem 0.5rem',
                   fontSize: '0.75rem',
                   fontWeight: '700',
+<<<<<<< HEAD
                   color: primaryColor,
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
                   fontFamily: fontFamily
+=======
+                  color: templateSettings?.primary_color || brandColors.neutral[700],
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                 }}>
                   Total
                 </th>
@@ -992,27 +1209,45 @@ export default function ProfessionalInvoicePreviewPage() {
                   <td style={{
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
+<<<<<<< HEAD
                     color: brandColors.neutral[900],
                     textAlign: 'left',
                     fontFamily: fontFamily
+=======
+                    color: templateSettings?.primary_color || brandColors.neutral[900],
+                    textAlign: 'left',
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                   }}>
                     {item.description}
                   </td>
                   <td style={{
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
+<<<<<<< HEAD
                     color: brandColors.neutral[700],
                     textAlign: 'center',
                     fontFamily: fontFamily
+=======
+                    color: templateSettings?.primary_color || brandColors.neutral[700],
+                    textAlign: 'center',
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                   }}>
                     {item.quantity.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                   </td>
                   <td style={{
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
+<<<<<<< HEAD
                     color: brandColors.neutral[700],
                     textAlign: 'right',
                     fontFamily: fontFamily
+=======
+                    color: templateSettings?.primary_color || brandColors.neutral[700],
+                    textAlign: 'right',
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                   }}>
                     {invoiceData.currencySymbol}{item.unitPrice.toFixed(2)}
                   </td>
@@ -1020,9 +1255,15 @@ export default function ProfessionalInvoicePreviewPage() {
                     <td style={{
                       padding: '0.75rem 0.5rem',
                       fontSize: '0.875rem',
+<<<<<<< HEAD
                       color: item.discount > 0 ? accentColor : brandColors.neutral[400],
                       textAlign: 'center',
                       fontFamily: fontFamily
+=======
+                      color: item.discount > 0 ? brandColors.error[600] : brandColors.neutral[400],
+                      textAlign: 'center',
+                      fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                     }}>
                       {item.discount > 0 ? `${item.discount}%` : '-'}
                     </td>
@@ -1031,9 +1272,15 @@ export default function ProfessionalInvoicePreviewPage() {
                     <td style={{
                       padding: '0.75rem 0.5rem',
                       fontSize: '0.875rem',
+<<<<<<< HEAD
                       color: brandColors.neutral[700],
                       textAlign: 'center',
                       fontFamily: fontFamily
+=======
+                      color: templateSettings?.primary_color || brandColors.neutral[700],
+                      textAlign: 'center',
+                      fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                     }}>
                       {item.taxRate > 0 ? `${item.taxRate}%` : '-'}
                     </td>
@@ -1042,9 +1289,15 @@ export default function ProfessionalInvoicePreviewPage() {
                     padding: '0.75rem 0.5rem',
                     fontSize: '0.875rem',
                     fontWeight: '600',
+<<<<<<< HEAD
                     color: brandColors.neutral[900],
                     textAlign: 'right',
                     fontFamily: fontFamily
+=======
+                    color: templateSettings?.primary_color || brandColors.neutral[900],
+                    textAlign: 'right',
+                    fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
                   }}>
                     {invoiceData.currencySymbol}{item.lineTotal.toFixed(2)}
                   </td>
@@ -1303,20 +1556,32 @@ export default function ProfessionalInvoicePreviewPage() {
             <h3 style={{
               fontSize: '0.875rem',
               fontWeight: '700',
+<<<<<<< HEAD
               color: primaryColor,
               marginBottom: '0.75rem',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               fontFamily: fontFamily
+=======
+              color: templateSettings?.primary_color || brandColors.neutral[700],
+              marginBottom: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               Notes
             </h3>
             <div style={{
               fontSize: '0.875rem',
-              color: brandColors.neutral[700],
+              color: templateSettings?.accent_color || templateSettings?.primary_color || brandColors.neutral[700],
               whiteSpace: 'pre-line',
               lineHeight: '1.6',
+<<<<<<< HEAD
               fontFamily: fontFamily
+=======
+              fontFamily: templateSettings?.font_family || 'Helvetica, Arial, sans-serif'
+>>>>>>> dev
             }}>
               {invoiceData.notes}
             </div>

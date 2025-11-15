@@ -983,7 +983,7 @@ export default function CustomizationPanel({
                     style={{
                       width: '18px',
                       height: '18px',
-                      accentColor: formData.primary_color
+                      accentColor: brandColors.primary[600]
                     }}
                   />
                 </div>
@@ -997,7 +997,7 @@ export default function CustomizationPanel({
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                backgroundColor: formData.primary_color,
+                backgroundColor: brandColors.primary[600],
                 color: brandColors.white,
                 border: 'none',
                 borderRadius: '8px',

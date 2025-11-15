@@ -2153,10 +2153,81 @@ export default function ProfessionalInvoiceCreatePage() {
         isOpen={isCustomizationOpen}
         onClose={() => setIsCustomizationOpen(false)}
         onSave={async (data) => {
-          // Save to localStorage for unsaved invoices
+          // Save the EXACT data from the panel - don't clean it for localStorage
+          // Only clean when saving to database to remove extra fields
+          // For localStorage, we want to preserve all user selections exactly as they are
+          console.log('💾 [CUSTOMIZATION] Saving to localStorage:', data)
+          
+          // Always save to localStorage for preview purposes - use data directly
           localStorage.setItem('professional_template_customizations', JSON.stringify(data))
           setCustomizationData(data)
           setTemplateSettings(data)
+          
+          // Clean data only for database saves (to remove extra fields)
+          const cleanData = {
+            // Company Details
+            company_name: data.company_name || '',
+            website: data.website || '',
+            tax_id: data.tax_id || '',
+            tagline: data.tagline || '',
+            business_type: data.business_type || '',
+            registration_number: data.registration_number || '',
+            
+            // Branding
+            logo_url: data.logo_url || '',
+            primary_color: data.primary_color || '#16a34a',
+            accent_color: data.accent_color || '#6b7280',
+            font_family: data.font_family || 'Helvetica',
+            
+            // Background Colors
+            background_colors: {
+              main_background: data.background_colors?.main_background || '#f8fafc',
+              card_background: data.background_colors?.card_background || '#ffffff',
+              section_background: data.background_colors?.section_background || '#f1f5f9',
+              header_background: data.background_colors?.header_background || '#ffffff',
+              form_background: data.background_colors?.form_background || '#ffffff'
+            },
+            
+            // Template Settings
+            template_settings: {
+              show_logo: data.template_settings?.show_logo ?? true,
+              show_tagline: data.template_settings?.show_tagline ?? true,
+              show_website: data.template_settings?.show_website ?? true,
+              show_tax_id: data.template_settings?.show_tax_id ?? true,
+              show_registration: data.template_settings?.show_registration ?? true
+            }
+          }
+          
+          // If invoice already exists in database, save customization to database too
+          if (formData.invoiceNumber) {
+            try {
+              const { data: existingInvoice } = await supabase
+                .from('invoices')
+                .select('id')
+                .eq('invoice_number', formData.invoiceNumber)
+                .eq('user_id', user.id)
+                .single()
+              
+              if (existingInvoice) {
+                // Update template_settings in database with cleaned data
+                // This replaces the entire object, removing any old/extra fields
+                const { error: updateError } = await supabase
+                  .from('invoices')
+                  .update({ template_settings: cleanData })
+                  .eq('id', existingInvoice.id)
+                
+                if (updateError) {
+                  console.error('Error saving customization to database:', updateError)
+                  toast.error('Failed to save customization to database')
+                } else {
+                  console.log('✅ [CUSTOMIZATION] Saved clean data to database for invoice:', formData.invoiceNumber)
+                  console.log('📋 [CUSTOMIZATION] Saved structure:', Object.keys(cleanData))
+                }
+              }
+            } catch (error) {
+              console.error('Error checking/saving invoice customization:', error)
+            }
+          }
         }}
         initialData={customizationData}
         template="professional"

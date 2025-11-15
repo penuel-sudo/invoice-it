@@ -23,6 +23,9 @@ import {
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
 import { useLoading } from '../contexts/LoadingContext'
+import { useGlobalCurrency } from '../hooks/useGlobalCurrency'
+import { CURRENCIES, getCurrencySymbol } from '../lib/currencyUtils'
+import { expenseStorage } from '../lib/storage/expenseStorage'
 
 interface ExpenseFormData {
   description: string
@@ -34,6 +37,7 @@ interface ExpenseFormData {
   payment_method: string
   is_tax_deductible: boolean
   tax_rate: string
+  currency_code?: string
   receipt_file?: File
   receipt_url?: string
   receipt_filename?: string
@@ -71,6 +75,7 @@ export default function ExpenseCreatePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { loading, setLoading: setGlobalLoading } = useLoading()
+  const { currency: userDefaultCurrency, currencySymbol: userDefaultCurrencySymbol } = useGlobalCurrency()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
@@ -82,12 +87,15 @@ export default function ExpenseCreatePage() {
     payment_method: 'cash',
     is_tax_deductible: false,
     tax_rate: '0',
+    currency_code: userDefaultCurrency || 'USD',
     receipt_file: undefined,
     receipt_url: '',
     receipt_filename: ''
   })
   const [errors, setErrors] = useState<Partial<ExpenseFormData>>({})
   const [clients, setClients] = useState<Client[]>([])
+  const [currencySymbol, setCurrencySymbol] = useState<string>(userDefaultCurrencySymbol || '$')
+  const hasLoadedInitialData = { current: false }
 
   useEffect(() => {
     // Check if mobile
@@ -101,10 +109,14 @@ export default function ExpenseCreatePage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Load expense data from preview/edit navigation
+  // Load expense data - Priority: location.state > localStorage > default
   useEffect(() => {
+    if (hasLoadedInitialData.current || !user) return
+
+    // Priority 1: Load from location.state (from preview/edit navigation)
     if (location.state?.expenseData) {
       const expenseData = location.state.expenseData
+      const expenseCurrency = expenseData.currency_code || userDefaultCurrency || 'USD'
       setFormData({
         description: expenseData.description || '',
         category: expenseData.category || '',
@@ -115,18 +127,64 @@ export default function ExpenseCreatePage() {
         payment_method: expenseData.payment_method || 'cash',
         is_tax_deductible: expenseData.is_tax_deductible || false,
         tax_rate: expenseData.tax_rate?.toString() || '0',
+        currency_code: expenseCurrency,
         receipt_file: undefined,
         receipt_url: expenseData.receipt_url || '',
         receipt_filename: expenseData.receipt_filename || ''
       })
+      setCurrencySymbol(getCurrencySymbol(expenseCurrency))
+      hasLoadedInitialData.current = true
+      return
     }
-  }, [location.state])
+
+    // Priority 2: Load from localStorage (unsaved draft)
+    const savedDraft = expenseStorage.getDraft()
+    if (savedDraft) {
+      console.log('Loading expense draft from localStorage')
+      const expenseCurrency = savedDraft.currency_code || userDefaultCurrency || 'USD'
+      setFormData({
+        description: savedDraft.description || '',
+        category: savedDraft.category || '',
+        amount: savedDraft.amount || '',
+        expense_date: savedDraft.expense_date || new Date().toISOString().split('T')[0],
+        notes: savedDraft.notes || '',
+        client_id: savedDraft.client_id || '',
+        payment_method: savedDraft.payment_method || 'cash',
+        is_tax_deductible: savedDraft.is_tax_deductible || false,
+        tax_rate: savedDraft.tax_rate || '0',
+        currency_code: expenseCurrency,
+        receipt_file: undefined, // File objects can't be stored in localStorage
+        receipt_url: savedDraft.receipt_url || '',
+        receipt_filename: savedDraft.receipt_filename || ''
+      })
+      setCurrencySymbol(getCurrencySymbol(expenseCurrency))
+      hasLoadedInitialData.current = true
+    }
+  }, [location.state, userDefaultCurrency, user])
+
+  // Auto-save form data to localStorage
+  useEffect(() => {
+    if (!hasLoadedInitialData.current) return
+    
+    expenseStorage.saveDraftDebounced(formData)
+  }, [formData])
 
   useEffect(() => {
     if (user) {
       loadClients()
     }
   }, [user])
+
+  // Update currency when user default currency loads
+  useEffect(() => {
+    if (userDefaultCurrency && !formData.currency_code) {
+      setFormData(prev => ({
+        ...prev,
+        currency_code: userDefaultCurrency
+      }))
+      setCurrencySymbol(userDefaultCurrencySymbol)
+    }
+  }, [userDefaultCurrency, userDefaultCurrencySymbol])
 
   const loadClients = async () => {
     if (!user) return
@@ -199,6 +257,11 @@ export default function ExpenseCreatePage() {
 
   const handleInputChange = (field: keyof ExpenseFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    
+    // Update currency symbol when currency changes
+    if (field === 'currency_code' && typeof value === 'string') {
+      setCurrencySymbol(getCurrencySymbol(value))
+    }
     
     // Clear error when user starts typing
     if (errors[field]) {
@@ -296,6 +359,7 @@ export default function ExpenseCreatePage() {
         is_tax_deductible: formData.is_tax_deductible,
         tax_rate: formData.is_tax_deductible ? parseFloat(formData.tax_rate) : 0,
         tax_amount: formData.is_tax_deductible ? (parseFloat(formData.amount) * parseFloat(formData.tax_rate) / 100) : 0,
+        currency_code: formData.currency_code || userDefaultCurrency || 'USD',
         receipt_url: receiptUrl,
         receipt_filename: receiptFilename,
         receipt_size: formData.receipt_file?.size || null
@@ -303,15 +367,44 @@ export default function ExpenseCreatePage() {
 
       console.log('Saving expense with data:', expenseData)
 
-      const { error } = await supabase
+      const { data: savedExpense, error } = await supabase
         .from('expenses')
         .insert(expenseData)
+        .select('id, expense_number')
+        .single()
 
       if (error) {
         console.error('Error saving expense:', error)
         toast.error('Failed to save expense: ' + error.message)
         return
       }
+
+      if (!savedExpense) {
+        console.error('Error: Expense saved but no data returned')
+        toast.error('Failed to save expense')
+        return
+      }
+
+      console.log('✅ Expense saved successfully:', savedExpense.expense_number)
+
+      // Clear form and localStorage after successful save
+      setFormData({
+        description: '',
+        category: '',
+        amount: '',
+        expense_date: new Date().toISOString().split('T')[0],
+        notes: '',
+        client_id: '',
+        payment_method: 'cash',
+        is_tax_deductible: false,
+        tax_rate: '0',
+        currency_code: userDefaultCurrency || 'USD',
+        receipt_file: undefined,
+        receipt_url: '',
+        receipt_filename: ''
+      })
+      expenseStorage.clearDraft()
+      hasLoadedInitialData.current = false
 
       toast.success('Expense saved successfully!')
       navigate('/invoices')
@@ -511,32 +604,63 @@ export default function ExpenseCreatePage() {
                 }}>
                   Amount *
                 </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.amount}
-                  onChange={(e) => handleInputChange('amount', e.target.value)}
-                  placeholder="0.00"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${errors.amount ? brandColors.error[300] : brandColors.neutral[200]}`,
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[900],
-                    backgroundColor: brandColors.white,
-                    outline: 'none',
-                    transition: 'border-color 0.2s ease',
-                    boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = brandColors.primary[400]
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = errors.amount ? brandColors.error[300] : brandColors.neutral[300]
-                  }}
-                />
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.amount}
+                    onChange={(e) => handleInputChange('amount', e.target.value)}
+                    placeholder="0.00"
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      border: `1px solid ${errors.amount ? brandColors.error[300] : brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[900],
+                      backgroundColor: brandColors.white,
+                      outline: 'none',
+                      transition: 'border-color 0.2s ease',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = brandColors.primary[400]
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.amount ? brandColors.error[300] : brandColors.neutral[300]
+                    }}
+                  />
+                  <select
+                    value={formData.currency_code || userDefaultCurrency || 'USD'}
+                    onChange={(e) => handleInputChange('currency_code', e.target.value)}
+                    style={{
+                      width: '120px',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[900],
+                      backgroundColor: brandColors.white,
+                      outline: 'none',
+                      transition: 'border-color 0.2s ease',
+                      boxSizing: 'border-box',
+                      cursor: 'pointer'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = brandColors.primary[400]
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = brandColors.neutral[300]
+                    }}
+                  >
+                    {CURRENCIES.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 {errors.amount && (
                   <p style={{
                     fontSize: '0.75rem',
@@ -844,7 +968,7 @@ export default function ExpenseCreatePage() {
                       fontSize: '0.875rem',
                       color: brandColors.neutral[600]
                     }}>
-                      Tax Amount: ${formData.is_tax_deductible && formData.amount && formData.tax_rate 
+                      Tax Amount: {currencySymbol}{formData.is_tax_deductible && formData.amount && formData.tax_rate 
                         ? (parseFloat(formData.amount) * parseFloat(formData.tax_rate) / 100).toFixed(2)
                         : '0.00'
                       }
@@ -1002,7 +1126,11 @@ export default function ExpenseCreatePage() {
                     color: brandColors.neutral[500],
                     margin: 0
                   }}>
+<<<<<<< HEAD
                     {formData.receipt_file?.size ? ((formData.receipt_file.size / 1024 / 1024).toFixed(2)) : '0.00'} MB
+=======
+                    {formData.receipt_file?.size ? `${(formData.receipt_file.size / 1024 / 1024).toFixed(2)} MB` : '0.00 MB'}
+>>>>>>> dev
                   </p>
                 </div>
                 <button

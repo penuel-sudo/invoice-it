@@ -973,7 +973,14 @@ export default function TransactionPage() {
                                     navigate(`/invoice/preview/${template}?invoice=${invoiceNumber}`)
                                   }
                                 } else {
-                                  navigate(`/expense/preview`, { state: { expenseId: transaction.id } })
+                                  // Use expense_number if available, otherwise fall back to ID
+                                  const expenseNumber = transaction.expense_number
+                                  if (expenseNumber) {
+                                    navigate(`/expense/preview?expense=${expenseNumber}`)
+                                  } else {
+                                    // Fallback to ID for expenses without expense_number
+                                    navigate(`/expense/preview?id=${transaction.id}`, { state: { expenseId: transaction.id } })
+                                  }
                                 }
                                 setShowTransactionDropdown(null)
                               }}

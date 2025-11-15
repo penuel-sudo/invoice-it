@@ -418,7 +418,15 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
                 {companyName}
               </Text>
               {companyTagline && templateSettings?.template_settings?.show_tagline !== false && (
+<<<<<<< HEAD
                 <Text style={{ ...styles.tagline, fontFamily: pdfFont }}>{companyTagline}</Text>
+=======
+                <Text style={{
+                  ...styles.tagline,
+                  color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                  fontFamily: pdfFont
+                }}>{companyTagline}</Text>
+>>>>>>> dev
               )}
             </View>
             
@@ -427,6 +435,7 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
               {/* Left - Company Info */}
               <View style={styles.headerLeft}>
                 {companyWebsite && templateSettings?.template_settings?.show_website !== false && (
+<<<<<<< HEAD
                   <Text style={{ ...styles.headerInfo, fontFamily: pdfFont }}>{companyWebsite}</Text>
                 )}
                 {companyTaxId && templateSettings?.template_settings?.show_tax_id !== false && (
@@ -434,6 +443,27 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
                 )}
                 {companyRegistration && templateSettings?.template_settings?.show_registration !== false && (
                   <Text style={{ ...styles.headerInfo, fontFamily: pdfFont }}>Reg: {companyRegistration}</Text>
+=======
+                  <Text style={{
+                    ...styles.headerInfo,
+                    color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                    fontFamily: pdfFont
+                  }}>{companyWebsite}</Text>
+                )}
+                {companyTaxId && templateSettings?.template_settings?.show_tax_id !== false && (
+                  <Text style={{
+                    ...styles.headerInfo,
+                    color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                    fontFamily: pdfFont
+                  }}>Tax ID: {companyTaxId}</Text>
+                )}
+                {companyRegistration && templateSettings?.template_settings?.show_registration !== false && (
+                  <Text style={{
+                    ...styles.headerInfo,
+                    color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                    fontFamily: pdfFont
+                  }}>Reg: {companyRegistration}</Text>
+>>>>>>> dev
                 )}
               </View>
               
@@ -447,6 +477,7 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
           </View>
           
           {/* Invoice Details Bar */}
+<<<<<<< HEAD
           <View style={detailsBarStyle}>
             <View style={styles.detailItem}>
               <Text style={{ ...styles.detailLabel, color: primaryColor, fontFamily: pdfFont }}>Invoice Number</Text>
@@ -456,6 +487,36 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
             <View style={styles.detailItem}>
               <Text style={{ ...styles.detailLabel, color: primaryColor, fontFamily: pdfFont }}>Issue Date</Text>
               <Text style={{ ...styles.detailValue, fontFamily: pdfFont }}>
+=======
+          <View style={{
+            ...styles.detailsBar,
+            backgroundColor: templateSettings?.background_colors?.section_background || '#f9fafb'
+          }}>
+            <View style={styles.detailItem}>
+              <Text style={{
+                ...styles.detailLabel,
+                color: templateSettings?.primary_color || '#6b7280',
+                fontFamily: pdfFont
+              }}>Invoice Number</Text>
+              <Text style={{
+                ...styles.detailValue,
+                color: templateSettings?.primary_color || '#111827',
+                fontFamily: pdfFont
+              }}>{invoiceData.invoiceNumber}</Text>
+            </View>
+            
+            <View style={styles.detailItem}>
+              <Text style={{
+                ...styles.detailLabel,
+                color: templateSettings?.primary_color || '#6b7280',
+                fontFamily: pdfFont
+              }}>Issue Date</Text>
+              <Text style={{
+                ...styles.detailValue,
+                color: templateSettings?.primary_color || '#111827',
+                fontFamily: pdfFont
+              }}>
+>>>>>>> dev
                 {new Date(invoiceData.invoiceDate).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -465,8 +526,20 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
             </View>
             
             <View style={styles.detailItem}>
+<<<<<<< HEAD
               <Text style={{ ...styles.detailLabel, color: primaryColor, fontFamily: pdfFont }}>Due Date</Text>
               <Text style={{ ...styles.dueDateValue, fontFamily: pdfFont }}>
+=======
+              <Text style={{
+                ...styles.detailLabel,
+                color: templateSettings?.primary_color || '#6b7280',
+                fontFamily: pdfFont
+              }}>Due Date</Text>
+              <Text style={{
+                ...styles.dueDateValue,
+                fontFamily: pdfFont
+              }}>
+>>>>>>> dev
                 {new Date(invoiceData.dueDate).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -477,15 +550,41 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
             
             {invoiceData.poNumber && (
               <View style={styles.detailItem}>
+<<<<<<< HEAD
                 <Text style={{ ...styles.detailLabel, color: primaryColor, fontFamily: pdfFont }}>PO Number</Text>
                 <Text style={{ ...styles.detailValue, fontFamily: pdfFont }}>{invoiceData.poNumber}</Text>
+=======
+                <Text style={{
+                  ...styles.detailLabel,
+                  color: templateSettings?.primary_color || '#6b7280',
+                  fontFamily: pdfFont
+                }}>PO Number</Text>
+                <Text style={{
+                  ...styles.detailValue,
+                  color: templateSettings?.primary_color || '#111827',
+                  fontFamily: pdfFont
+                }}>{invoiceData.poNumber}</Text>
+>>>>>>> dev
               </View>
             )}
             
             {invoiceData.taxId && (
               <View style={styles.detailItem}>
+<<<<<<< HEAD
                 <Text style={{ ...styles.detailLabel, color: primaryColor, fontFamily: pdfFont }}>Tax ID / VAT</Text>
                 <Text style={{ ...styles.detailValue, fontFamily: pdfFont }}>{invoiceData.taxId}</Text>
+=======
+                <Text style={{
+                  ...styles.detailLabel,
+                  color: templateSettings?.primary_color || '#6b7280',
+                  fontFamily: pdfFont
+                }}>Tax ID / VAT</Text>
+                <Text style={{
+                  ...styles.detailValue,
+                  color: templateSettings?.primary_color || '#111827',
+                  fontFamily: pdfFont
+                }}>{invoiceData.taxId}</Text>
+>>>>>>> dev
               </View>
             )}
           </View>
@@ -494,28 +593,105 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
           <View style={styles.addressSection}>
             {/* Bill To */}
             <View style={styles.addressColumn}>
+<<<<<<< HEAD
               <Text style={{ ...styles.addressTitle, color: primaryColor, fontFamily: pdfFont }}>Bill To</Text>
               <View style={addressCardStyle}>
                 <Text style={{ ...styles.clientName, fontFamily: pdfFont }}>{invoiceData.clientName}</Text>
+=======
+              <Text style={{
+                ...styles.addressTitle,
+                color: templateSettings?.primary_color || '#374151',
+                fontFamily: pdfFont
+              }}>Bill To</Text>
+              <View style={{
+                ...styles.addressCard,
+                backgroundColor: templateSettings?.background_colors?.section_background || '#f9fafb'
+              }}>
+                <Text style={{
+                  ...styles.clientName,
+                  color: templateSettings?.primary_color || '#111827',
+                  fontFamily: pdfFont
+                }}>{invoiceData.clientName}</Text>
+>>>>>>> dev
                 {invoiceData.clientCompanyName && (
-                  <Text style={styles.clientInfo}>
-                    🏢 {invoiceData.clientCompanyName}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginBottom: 4, alignItems: 'flex-start' }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      marginRight: 4
+                    }}>
+                      🏢
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      flex: 1
+                    }}>
+                      {invoiceData.clientCompanyName}
+                    </Text>
+                  </View>
                 )}
                 {invoiceData.clientEmail && (
-                  <Text style={styles.clientInfo}>
-                    ✉️ {invoiceData.clientEmail}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginBottom: 4, alignItems: 'flex-start' }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      marginRight: 4
+                    }}>
+                      ✉️
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      flex: 1
+                    }}>
+                      {invoiceData.clientEmail}
+                    </Text>
+                  </View>
                 )}
                 {invoiceData.clientPhone && (
-                  <Text style={styles.clientInfo}>
-                    📞 {invoiceData.clientPhone}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginBottom: 4, alignItems: 'flex-start' }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      marginRight: 4
+                    }}>
+                      📞
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      flex: 1
+                    }}>
+                      {invoiceData.clientPhone}
+                    </Text>
+                  </View>
                 )}
                 {invoiceData.clientAddress && (
-                  <Text style={styles.clientInfo}>
-                    📍 {invoiceData.clientAddress}
-                  </Text>
+                  <View style={{ flexDirection: 'row', marginTop: 8, alignItems: 'flex-start' }}>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      marginRight: 4
+                    }}>
+                      📍
+                    </Text>
+                    <Text style={{
+                      ...styles.clientInfo,
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#6b7280',
+                      fontFamily: pdfFont,
+                      flex: 1
+                    }}>
+                      {invoiceData.clientAddress}
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -523,25 +699,69 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
             {/* Ship To */}
             {hasShipTo && (
               <View style={styles.addressColumn}>
+<<<<<<< HEAD
                 <Text style={{ ...styles.addressTitle, color: primaryColor, fontFamily: pdfFont }}>Ship To</Text>
                 <View style={addressCardShipStyle}>
                   <Text style={styles.clientName}>
                     🚚 {invoiceData.shipToName}
                   </Text>
+=======
+                <Text style={{
+                  ...styles.addressTitle,
+                  color: templateSettings?.primary_color || '#374151',
+                  fontFamily: pdfFont
+                }}>Ship To</Text>
+                <View style={{
+                  ...styles.addressCardShip,
+                  backgroundColor: templateSettings?.background_colors?.section_background || '#f0fdf4',
+                  borderColor: templateSettings?.primary_color || '#bbf7d0'
+                }}>
+                  <View style={{ flexDirection: 'row', marginBottom: 8, alignItems: 'flex-start' }}>
+                    <Text style={{
+                      ...styles.clientName,
+                      color: templateSettings?.primary_color || '#111827',
+                      fontFamily: pdfFont,
+                      marginRight: 4
+                    }}>
+                      🚚
+                    </Text>
+                    <Text style={{
+                      ...styles.clientName,
+                      color: templateSettings?.primary_color || '#111827',
+                      fontFamily: pdfFont,
+                      flex: 1
+                    }}>
+                      {invoiceData.shipToName}
+                    </Text>
+                  </View>
+>>>>>>> dev
                   {invoiceData.shipToAddress && (
-                    <Text style={{ fontSize: 9, color: '#374151', marginBottom: 2 }}>
+                    <Text style={{ 
+                      fontSize: 9, 
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#374151', 
+                      marginBottom: 2,
+                      fontFamily: pdfFont
+                    }}>
                       {invoiceData.shipToAddress}
                     </Text>
                   )}
                   {(invoiceData.shipToCity || invoiceData.shipToState || invoiceData.shipToZip) && (
-                    <Text style={{ fontSize: 9, color: '#374151' }}>
+                    <Text style={{ 
+                      fontSize: 9, 
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#374151',
+                      fontFamily: pdfFont
+                    }}>
                       {[invoiceData.shipToCity, invoiceData.shipToState, invoiceData.shipToZip]
                         .filter(Boolean)
                         .join(', ')}
                     </Text>
                   )}
                   {invoiceData.shipToCountry && (
-                    <Text style={{ fontSize: 9, color: '#374151' }}>
+                    <Text style={{ 
+                      fontSize: 9, 
+                      color: templateSettings?.accent_color || templateSettings?.primary_color || '#374151',
+                      fontFamily: pdfFont
+                    }}>
                       {invoiceData.shipToCountry}
                     </Text>
                   )}
@@ -552,6 +772,7 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
           
           {/* Line Items Table */}
           <View style={styles.itemsSection}>
+<<<<<<< HEAD
             <Text style={{ ...styles.itemsTitle, color: primaryColor, fontFamily: pdfFont }}>Items</Text>
             <View style={styles.table}>
               {/* Table Header */}
@@ -566,6 +787,65 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
                   <Text style={{ ...styles.tableHeaderCell, flex: 1, textAlign: 'center', color: primaryColor, fontFamily: pdfFont }}>Tax %</Text>
                 )}
                 <Text style={{ ...styles.tableHeaderCell, flex: 1, textAlign: 'right', color: primaryColor, fontFamily: pdfFont }}>Total</Text>
+=======
+            <Text style={{
+              ...styles.itemsTitle,
+              color: templateSettings?.primary_color || '#374151',
+              fontFamily: pdfFont
+            }}>Items</Text>
+            <View style={styles.table}>
+              {/* Table Header */}
+              <View style={{
+                ...styles.tableHeader,
+                backgroundColor: templateSettings?.background_colors?.section_background || '#f1f5f9'
+              }}>
+                <Text style={{ 
+                  ...styles.tableHeaderCell, 
+                  flex: 3, 
+                  textAlign: 'left',
+                  color: templateSettings?.primary_color || '#475569',
+                  fontFamily: pdfFont
+                }}>Description</Text>
+                <Text style={{ 
+                  ...styles.tableHeaderCell, 
+                  flex: 1, 
+                  textAlign: 'center',
+                  color: templateSettings?.primary_color || '#475569',
+                  fontFamily: pdfFont
+                }}>Qty</Text>
+                <Text style={{ 
+                  ...styles.tableHeaderCell, 
+                  flex: 1, 
+                  textAlign: 'right',
+                  color: templateSettings?.primary_color || '#475569',
+                  fontFamily: pdfFont
+                }}>Unit Price</Text>
+                {invoiceData.items.some(item => item.discount > 0) && (
+                  <Text style={{ 
+                    ...styles.tableHeaderCell, 
+                    flex: 1, 
+                    textAlign: 'center',
+                    color: templateSettings?.primary_color || '#475569',
+                    fontFamily: pdfFont
+                  }}>Disc %</Text>
+                )}
+                {invoiceData.items.some(item => item.taxRate > 0) && (
+                  <Text style={{ 
+                    ...styles.tableHeaderCell, 
+                    flex: 1, 
+                    textAlign: 'center',
+                    color: templateSettings?.primary_color || '#475569',
+                    fontFamily: pdfFont
+                  }}>Tax %</Text>
+                )}
+                <Text style={{ 
+                  ...styles.tableHeaderCell, 
+                  flex: 1, 
+                  textAlign: 'right',
+                  color: templateSettings?.primary_color || '#475569',
+                  fontFamily: pdfFont
+                }}>Total</Text>
+>>>>>>> dev
               </View>
               
               {/* Table Rows */}
@@ -573,11 +853,37 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
                 item.description.trim() !== '' || item.quantity > 0 || item.unitPrice > 0
               ).map((item, index) => (
                 <View key={item.id || index} style={styles.tableRow}>
+<<<<<<< HEAD
                   <Text style={{ ...styles.tableCell, flex: 3, textAlign: 'left', fontFamily: pdfFont }}>{item.description}</Text>
                   <Text style={{ ...styles.tableCell, flex: 1, textAlign: 'center', fontFamily: pdfFont }}>
                     {item.quantity.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                   </Text>
                   <Text style={{ ...styles.tableCell, flex: 1, textAlign: 'right', fontFamily: pdfFont }}>
+=======
+                  <Text style={{ 
+                    ...styles.tableCell, 
+                    flex: 3, 
+                    textAlign: 'left',
+                    color: templateSettings?.primary_color || '#111827',
+                    fontFamily: pdfFont
+                  }}>{item.description}</Text>
+                  <Text style={{ 
+                    ...styles.tableCell, 
+                    flex: 1, 
+                    textAlign: 'center',
+                    color: templateSettings?.primary_color || '#111827',
+                    fontFamily: pdfFont
+                  }}>
+                    {item.quantity.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                  </Text>
+                  <Text style={{ 
+                    ...styles.tableCell, 
+                    flex: 1, 
+                    textAlign: 'right',
+                    color: templateSettings?.primary_color || '#111827',
+                    fontFamily: pdfFont
+                  }}>
+>>>>>>> dev
                     {invoiceData.currencySymbol}{item.unitPrice.toFixed(2)}
                   </Text>
                   {invoiceData.items.some(i => i.discount > 0) && (
@@ -592,11 +898,32 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
                     </Text>
                   )}
                   {invoiceData.items.some(i => i.taxRate > 0) && (
+<<<<<<< HEAD
                     <Text style={{ ...styles.tableCell, flex: 1, textAlign: 'center', fontFamily: pdfFont }}>
                       {item.taxRate > 0 ? `${item.taxRate}%` : '-'}
                     </Text>
                   )}
                   <Text style={{ ...styles.tableCell, ...styles.tableCellBold, flex: 1, textAlign: 'right', fontFamily: pdfFont }}>
+=======
+                    <Text style={{ 
+                      ...styles.tableCell, 
+                      flex: 1, 
+                      textAlign: 'center',
+                      color: templateSettings?.primary_color || '#111827',
+                      fontFamily: pdfFont
+                    }}>
+                      {item.taxRate > 0 ? `${item.taxRate}%` : '-'}
+                    </Text>
+                  )}
+                  <Text style={{ 
+                    ...styles.tableCell, 
+                    ...styles.tableCellBold, 
+                    flex: 1, 
+                    textAlign: 'right',
+                    color: templateSettings?.primary_color || '#111827',
+                    fontFamily: pdfFont
+                  }}>
+>>>>>>> dev
                     {invoiceData.currencySymbol}{item.lineTotal.toFixed(2)}
                   </Text>
                 </View>
@@ -718,8 +1045,21 @@ export default function ProfessionalPDF({ invoiceData, user, templateSettings, p
           {/* Notes */}
           {invoiceData.notes && (
             <View style={styles.notesSection}>
+<<<<<<< HEAD
               <Text style={{ ...styles.notesTitle, color: primaryColor, fontFamily: pdfFont }}>Notes</Text>
               <Text style={{ ...styles.notesText, fontFamily: pdfFont }}>{invoiceData.notes}</Text>
+=======
+              <Text style={{
+                ...styles.notesTitle,
+                color: templateSettings?.primary_color || '#374151',
+                fontFamily: pdfFont
+              }}>Notes</Text>
+              <Text style={{
+                ...styles.notesText,
+                color: templateSettings?.accent_color || templateSettings?.primary_color || '#475569',
+                fontFamily: pdfFont
+              }}>{invoiceData.notes}</Text>
+>>>>>>> dev
             </View>
           )}
           

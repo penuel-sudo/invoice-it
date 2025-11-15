@@ -19,6 +19,7 @@ export interface TransactionData {
   selected_payment_method_ids?: string[]
   recurring_invoice_id?: string | null
   // Expense fields
+  expense_number?: string
   category?: string
   expense_date?: string
   description?: string
@@ -95,6 +96,7 @@ export class TransactionService {
         .from('expenses')
         .select(`
           id,
+          expense_number,
           category,
           status,
           expense_date,
@@ -170,11 +172,12 @@ export class TransactionService {
 
       // Transform expenses
       const transformedExpenses: TransactionData[] = (expenses || []).map((expense: any) => {
-        console.log('🔍 DEBUGGING: Processing expense:', expense.id, 'category:', expense.category)
+        console.log('🔍 DEBUGGING: Processing expense:', expense.id, 'category:', expense.category, 'expense_number:', expense.expense_number)
         
         return {
           id: expense.id,
           type: 'expense' as const,
+          expense_number: expense.expense_number,
           category: expense.category,
           status: expense.status,
           expense_date: expense.expense_date,

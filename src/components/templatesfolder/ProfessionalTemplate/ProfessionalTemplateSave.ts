@@ -25,6 +25,48 @@ export interface ProfessionalInvoiceItem {
   lineTotal: number
 }
 
+/**
+ * Clean template settings to ensure only valid CustomizationData fields are saved
+ * This prevents old/extra fields (like 'customization', 'userPreferences') from being saved
+ */
+const cleanTemplateSettings = (data: any): any => {
+  if (!data) return null
+  
+  return {
+    // Company Details
+    company_name: data.company_name || '',
+    website: data.website || '',
+    tax_id: data.tax_id || '',
+    tagline: data.tagline || '',
+    business_type: data.business_type || '',
+    registration_number: data.registration_number || '',
+    
+    // Branding
+    logo_url: data.logo_url || '',
+    primary_color: data.primary_color || '#16a34a',
+    accent_color: data.accent_color || '#6b7280',
+    font_family: data.font_family || 'Helvetica',
+    
+    // Background Colors
+    background_colors: {
+      main_background: data.background_colors?.main_background || '#f8fafc',
+      card_background: data.background_colors?.card_background || '#ffffff',
+      section_background: data.background_colors?.section_background || '#f1f5f9',
+      header_background: data.background_colors?.header_background || '#ffffff',
+      form_background: data.background_colors?.form_background || '#ffffff'
+    },
+    
+    // Template Settings
+    template_settings: {
+      show_logo: data.template_settings?.show_logo ?? true,
+      show_tagline: data.template_settings?.show_tagline ?? true,
+      show_website: data.template_settings?.show_website ?? true,
+      show_tax_id: data.template_settings?.show_tax_id ?? true,
+      show_registration: data.template_settings?.show_registration ?? true
+    }
+  }
+}
+
 export interface ProfessionalInvoiceFormData {
   // Database IDs
   id?: string
@@ -168,16 +210,58 @@ export const saveProfessionalInvoice = async (
     console.log('📋 [PROFESSIONAL TEMPLATE SAVE] Step 2: Saving invoice...')
     let invoiceId: string
     
-    // Check if invoice already exists
+    // Check if invoice already exists (including template_settings to preserve it)
     const { data: existingInvoice } = await supabase
       .from('invoices')
-      .select('id, status')
+      .select('id, status, template_settings')
       .eq('invoice_number', formData.invoiceNumber)
       .eq('user_id', user.id)
       .single()
 
     if (existingInvoice) {
       console.log('🔄 [PROFESSIONAL TEMPLATE SAVE] Updating existing invoice...')
+      
+      // PRESERVE existing template_settings if new templateSettings not provided
+      // Only update template_settings if explicitly provided (from customization panel)
+      let finalTemplateSettings = existingInvoice.template_settings
+      if (templateSettings) {
+        // New customization provided - clean and use it
+        console.log('✅ [PROFESSIONAL TEMPLATE SAVE] Updating with new template_settings')
+        finalTemplateSettings = cleanTemplateSettings(templateSettings)
+      } else {
+        // No new customization - preserve existing database settings
+        console.log('✅ [PROFESSIONAL TEMPLATE SAVE] Preserving existing template_settings from database')
+        if (!finalTemplateSettings) {
+          // Only use defaults if invoice has no settings at all
+          finalTemplateSettings = {
+            company_name: '',
+            website: '',
+            tax_id: '',
+            tagline: '',
+            business_type: '',
+            registration_number: '',
+            logo_url: '',
+            primary_color: '#16a34a',
+            accent_color: '#6b7280',
+            font_family: 'Helvetica',
+            background_colors: {
+              main_background: '#f8fafc',
+              card_background: '#ffffff',
+              section_background: '#f1f5f9',
+              header_background: '#ffffff',
+              form_background: '#ffffff'
+            },
+            template_settings: {
+              show_logo: true,
+              show_tagline: true,
+              show_website: true,
+              show_tax_id: true,
+              show_registration: true
+            }
+          }
+        }
+      }
+      
       // Update existing invoice
       const { data: updatedInvoice, error: updateError } = await supabase
         .from('invoices')
@@ -210,32 +294,7 @@ export const saveProfessionalInvoice = async (
             amountPaid: formData.amountPaid,
             balanceDue: formData.balanceDue
           },
-          template_settings: templateSettings || {
-            company_name: '',
-            website: '',
-            tax_id: '',
-            tagline: '',
-            business_type: '',
-            registration_number: '',
-            logo_url: '',
-            primary_color: '#16a34a',
-            accent_color: '#6b7280',
-            font_family: 'Inter',
-            background_colors: {
-              main_background: '#f8fafc',
-              card_background: '#ffffff',
-              section_background: '#f1f5f9',
-              header_background: '#ffffff',
-              form_background: '#ffffff'
-            },
-            template_settings: {
-              show_logo: true,
-              show_tagline: true,
-              show_website: true,
-              show_tax_id: true,
-              show_registration: true
-            }
-          },
+          template_settings: finalTemplateSettings,
           updated_at: new Date().toISOString()
         })
         .eq('id', existingInvoice.id)
@@ -287,7 +346,7 @@ export const saveProfessionalInvoice = async (
             amountPaid: formData.amountPaid,
             balanceDue: formData.balanceDue
           },
-          template_settings: templateSettings || {
+          template_settings: cleanTemplateSettings(templateSettings) || {
             company_name: '',
             website: '',
             tax_id: '',
@@ -297,7 +356,7 @@ export const saveProfessionalInvoice = async (
             logo_url: '',
             primary_color: '#16a34a',
             accent_color: '#6b7280',
-            font_family: 'Inter',
+            font_family: 'Helvetica',
             background_colors: {
               main_background: '#f8fafc',
               card_background: '#ffffff',

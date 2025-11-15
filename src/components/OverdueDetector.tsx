@@ -26,22 +26,79 @@ export default function OverdueDetector({
       setLoading(true)
       console.log('Checking overdue invoices for user:', userId)
 
+<<<<<<< HEAD
       // Read invoices already marked overdue
       const { data: overdueInvoices, error: fetchError } = await supabase
+=======
+      // Get all pending invoices where due_date <= today (overdue)
+      const today = new Date().toISOString().split('T')[0] // Get today's date in YYYY-MM-DD format
+      
+      // First, get pending invoices that need to be updated to overdue
+      const { data: pendingOverdueInvoices, error: fetchPendingError } = await supabase
+>>>>>>> dev
         .from('invoices')
         .select('id')
         .eq('user_id', userId)
         .eq('status', 'overdue')
 
-      if (fetchError) {
-        console.error('Error fetching overdue invoices:', fetchError)
-        return
+      if (fetchPendingError) {
+        console.error('Error fetching pending overdue invoices:', fetchPendingError)
       }
 
+<<<<<<< HEAD
       const count = overdueInvoices?.length ?? 0
       console.log(`Overdue invoices detected: ${count}`)
       setOverdueCount(count)
       onOverdueUpdate?.(count)
+=======
+      // Also get invoices already marked as overdue
+      const { data: alreadyOverdueInvoices, error: fetchOverdueError } = await supabase
+        .from('invoices')
+        .select(`
+          id,
+          due_date,
+          issue_date,
+          status
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'overdue')
+
+      if (fetchOverdueError) {
+        console.error('Error fetching already overdue invoices:', fetchOverdueError)
+      }
+
+      // Update pending invoices to overdue status
+      if (pendingOverdueInvoices && pendingOverdueInvoices.length > 0) {
+        const invoiceIds = pendingOverdueInvoices.map(inv => inv.id)
+        const { error: updateInvoiceError } = await supabase
+          .from('invoices')
+          .update({ 
+            status: 'overdue',
+            updated_at: new Date().toISOString()
+          })
+          .in('id', invoiceIds)
+
+        if (updateInvoiceError) {
+          console.error('Error updating invoice statuses:', updateInvoiceError)
+        } else {
+          console.log(`Successfully updated ${pendingOverdueInvoices.length} invoices to overdue status`)
+        }
+      }
+
+      // Calculate total overdue count (pending that became overdue + already overdue)
+      const totalOverdueCount = (pendingOverdueInvoices?.length || 0) + (alreadyOverdueInvoices?.length || 0)
+      
+      if (totalOverdueCount === 0) {
+        console.log('No overdue invoices found')
+        setOverdueCount(0)
+        onOverdueUpdate?.(0)
+        return
+      }
+
+      console.log(`Found ${totalOverdueCount} overdue invoices (${pendingOverdueInvoices?.length || 0} newly marked, ${alreadyOverdueInvoices?.length || 0} already overdue)`)
+      setOverdueCount(totalOverdueCount)
+      onOverdueUpdate?.(totalOverdueCount)
+>>>>>>> dev
     } catch (error) {
       console.error('Error in checkOverdueInvoices:', error)
     } finally {

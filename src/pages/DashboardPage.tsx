@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
@@ -11,6 +11,7 @@ import StatusButton from '../components/StatusButton'
 import { supabase } from '../lib/supabaseClient'
 import { format } from 'date-fns'
 import { getCurrencySymbol } from '../lib/currencyUtils'
+import { batchConvert } from '../lib/currencyConversion'
 import { 
   FileText, 
   TrendingUp, 
@@ -46,7 +47,7 @@ export default function DashboardPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
-  const [autoSlideInterval, setAutoSlideInterval] = useState<NodeJS.Timeout | null>(null)
+  const autoSlideIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const [stats, setStats] = useState({
     total: 0,
     paid: 0,
@@ -54,7 +55,9 @@ export default function DashboardPage() {
     overdue: 0,
     draft: 0,
     thisMonthCount: 0,
-    thisMonthRevenue: 0
+    thisMonthRevenue: 0,
+    thisMonthExpenses: 0,
+    thisMonthProfit: 0
   })
 
   // Handle swipe gestures
@@ -68,22 +71,28 @@ export default function DashboardPage() {
 
   // Auto-slide functionality
   const startAutoSlide = () => {
-    if (autoSlideInterval) clearInterval(autoSlideInterval)
+    // Clear any existing interval first
+    stopAutoSlide()
+    
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % 3)
-    }, 4000) // 40 seconds
-    setAutoSlideInterval(interval)
+    }, 5000) // 5 seconds between slides
+    
+    autoSlideIntervalRef.current = interval
   }
 
   const stopAutoSlide = () => {
-    if (autoSlideInterval) {
-      clearInterval(autoSlideInterval)
-      setAutoSlideInterval(null)
+    if (autoSlideIntervalRef.current) {
+      clearInterval(autoSlideIntervalRef.current)
+      autoSlideIntervalRef.current = null
     }
   }
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return
+    
+    // Stop auto-slide on any interaction
+    stopAutoSlide()
     
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
@@ -99,8 +108,7 @@ export default function DashboardPage() {
     setTouchStart(0)
     setTouchEnd(0)
     
-    // Restart auto-slide after user interaction
-    setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
+    // Don't restart automatically - let user control it
   }
 
   // Helper functions from TransactionPage
@@ -133,23 +141,112 @@ export default function DashboardPage() {
   }, [])
 
 
-  // Calculate real stats from invoices
+  // Calculate real stats from invoices and expenses
   const calculateStats = async () => {
     if (!user) return
 
     try {
-      const { data: invoices, error } = await supabase
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const startOfMonthISO = startOfMonth.toISOString()
+
+      // Load invoices with currency
+      const { data: invoices, error: invoicesError } = await supabase
         .from('invoices')
-        .select('status, total_amount, created_at')
+        .select('status, total_amount, created_at, currency_code')
         .eq('user_id', user.id)
 
-      if (error) {
-        console.error('Error loading stats:', error)
+      if (invoicesError) {
+        console.error('Error loading invoices:', invoicesError)
         return
       }
 
-      const now = new Date()
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      // Get user's default currency (ensure we have it)
+      const userCurrency = currency || 'USD'
+      
+      // Load expenses for current month with currency
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      const endOfMonthISO = endOfMonth.toISOString().split('T')[0]
+      
+      const { data: expenses, error: expensesError } = await supabase
+        .from('expenses')
+        .select('amount, expense_date, currency_code')
+        .eq('user_id', user.id)
+        .gte('expense_date', startOfMonthISO.split('T')[0])
+        .lte('expense_date', endOfMonthISO)
+
+      if (expensesError) {
+        console.error('Error loading expenses:', expensesError)
+      }
+
+      // Calculate invoice stats - filter by created_at for current month
+      const thisMonthInvoices = invoices?.filter(inv => {
+        const invDate = new Date(inv.created_at)
+        return invDate >= startOfMonth && invDate <= endOfMonth
+      }) || []
+      const thisMonthPaidInvoices = thisMonthInvoices.filter(inv => inv.status === 'paid')
+      
+      // Prepare income amounts for conversion (only paid invoices from this month)
+      const incomeAmounts = thisMonthPaidInvoices
+        .filter(inv => inv.total_amount > 0) // Only non-zero amounts
+        .map(inv => {
+          const invCurrency = inv.currency_code || userCurrency
+          return {
+            amount: inv.total_amount || 0,
+            currency: invCurrency
+          }
+        })
+      
+      console.log('📊 Dashboard: Converting income amounts:', incomeAmounts, 'to', userCurrency)
+      
+      // Convert income amounts to user's default currency - NO FALLBACK, must convert
+      let thisMonthIncome = 0
+      if (incomeAmounts.length > 0) {
+        try {
+          thisMonthIncome = await batchConvert(incomeAmounts, userCurrency)
+          console.log('✅ Dashboard: Converted income:', thisMonthIncome, userCurrency)
+        } catch (error) {
+          console.error('❌ Error converting income amounts:', error)
+          // Don't use fallback - throw error or return 0
+          thisMonthIncome = 0
+        }
+      }
+      
+      // Prepare expense amounts for conversion (only expenses from this month)
+      const expenseAmounts = (expenses || [])
+        .filter(exp => exp.amount > 0) // Only non-zero amounts
+        .map(exp => {
+          const expCurrency = exp.currency_code || userCurrency
+          return {
+            amount: exp.amount || 0,
+            currency: expCurrency
+          }
+        })
+      
+      console.log('📊 Dashboard: Converting expense amounts:', expenseAmounts, 'to', userCurrency)
+      
+      // Convert expense amounts to user's default currency - NO FALLBACK, must convert
+      let thisMonthExpenses = 0
+      if (expenseAmounts.length > 0) {
+        try {
+          thisMonthExpenses = await batchConvert(expenseAmounts, userCurrency)
+          console.log('✅ Dashboard: Converted expenses:', thisMonthExpenses, userCurrency)
+        } catch (error) {
+          console.error('❌ Error converting expense amounts:', error)
+          // Don't use fallback - throw error or return 0
+          thisMonthExpenses = 0
+        }
+      }
+      
+      // Calculate profit (only after proper conversion)
+      const thisMonthProfit = thisMonthIncome - thisMonthExpenses
+      
+      console.log('📊 Dashboard: Final calculations:', {
+        income: thisMonthIncome,
+        expenses: thisMonthExpenses,
+        profit: thisMonthProfit,
+        currency: userCurrency
+      })
 
       const calculated = {
         total: invoices?.length || 0,
@@ -157,10 +254,10 @@ export default function DashboardPage() {
         pending: invoices?.filter(inv => inv.status === 'pending').length || 0,
         overdue: invoices?.filter(inv => inv.status === 'overdue').length || 0,
         draft: invoices?.filter(inv => inv.status === 'draft').length || 0,
-        thisMonthCount: invoices?.filter(inv => new Date(inv.created_at) >= startOfMonth).length || 0,
-        thisMonthRevenue: invoices
-          ?.filter(inv => new Date(inv.created_at) >= startOfMonth && inv.status === 'paid')
-          .reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0
+        thisMonthCount: thisMonthInvoices.length,
+        thisMonthRevenue: thisMonthIncome,
+        thisMonthExpenses: thisMonthExpenses,
+        thisMonthProfit: thisMonthProfit
       }
 
       setStats(calculated)
@@ -280,14 +377,18 @@ export default function DashboardPage() {
     if (user) {
       calculateStats()
       loadTransactions()
-      startAutoSlide() // Start auto-sliding when component mounts
     }
+  }, [user])
+
+  // Start auto-slide only once on mount
+  useEffect(() => {
+    startAutoSlide()
     
     // Cleanup auto-slide on unmount
     return () => {
       stopAutoSlide()
     }
-  }, [user])
+  }, []) // Empty dependency array - only run once
 
   if (!user) { return null } // AuthWrapper handles redirection
 
@@ -334,7 +435,8 @@ export default function DashboardPage() {
           position: 'relative'
         }}>
           {/* Carousel Container */}
-          <div 
+          <div
+            onMouseEnter={() => stopAutoSlide()} // Stop on hover
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -537,7 +639,7 @@ export default function DashboardPage() {
             {currentSlide === 2 && (
               <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
                 <h3 style={{
-                  fontSize: '0.875rem',
+                  fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
                   fontWeight: '600',
                   color: brandColors.neutral[600],
                   margin: '0 0 1.5rem 0',
@@ -548,58 +650,110 @@ export default function DashboardPage() {
                   justifyContent: 'center',
                   gap: '0.5rem'
                 }}>
-                  <Calendar size={16} color={brandColors.primary[600]} />
+                  <Calendar size={window.innerWidth < 768 ? 14 : 16} color={brandColors.primary[600]} />
                   This Month
                 </h3>
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '1.25rem',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  width: '100%'
                 }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <p style={{
-                      fontSize: '3rem',
+                  {/* Income and Expenses Row */}
+                  <div style={{
+                    width: '100%',
+                    padding: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
+                    backgroundColor: brandColors.neutral[50],
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.75rem'
+                  }}>
+                    {/* Income */}
+                    <div style={{
+                      flex: 1,
+                      textAlign: 'center'
+                    }}>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '1rem' : '1.25rem',
+                        fontWeight: '700',
+                        color: brandColors.success[600],
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
+                      </p>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '0.65rem' : '0.75rem',
+                        color: brandColors.neutral[600],
+                        margin: 0
+                      }}>
+                        Income
+                      </p>
+                    </div>
+
+                    {/* Minus Sign */}
+                    <div style={{
+                      fontSize: window.innerWidth < 768 ? '1.25rem' : '1.5rem',
                       fontWeight: '700',
-                      color: brandColors.primary[600],
+                      color: brandColors.neutral[400],
+                      lineHeight: 1
+                    }}>
+                      −
+                    </div>
+
+                    {/* Expenses */}
+                    <div style={{
+                      flex: 1,
+                      textAlign: 'center'
+                    }}>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '1rem' : '1.25rem',
+                        fontWeight: '700',
+                        color: brandColors.error[600],
+                        margin: '0 0 0.25rem 0'
+                      }}>
+                        {currencySymbol}{(stats.thisMonthExpenses || 0).toLocaleString()}
+                      </p>
+                      <p style={{
+                        fontSize: window.innerWidth < 768 ? '0.65rem' : '0.75rem',
+                        color: brandColors.neutral[600],
+                        margin: 0
+                      }}>
+                        Expenses
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Profit - Prominent */}
+                  <div style={{
+                    width: '100%',
+                    padding: window.innerWidth < 768 ? '1rem' : '1.25rem',
+                    backgroundColor: stats.thisMonthProfit >= 0 ? brandColors.primary[50] : brandColors.warning[50],
+                    borderRadius: '10px',
+                    textAlign: 'center',
+                    border: `2px solid ${stats.thisMonthProfit >= 0 ? brandColors.primary[200] : brandColors.warning[200]}`
+                  }}>
+                    <p style={{
+                      fontSize: window.innerWidth < 768 ? '1.75rem' : '2rem',
+                      fontWeight: '700',
+                      color: stats.thisMonthProfit >= 0 ? brandColors.primary[600] : brandColors.warning[600],
                       margin: '0 0 0.25rem 0',
                       lineHeight: 1
                     }}>
-                      {stats.thisMonthCount}
-              </p>
-              <p style={{
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: brandColors.neutral[600],
-                margin: 0
-              }}>
-                      Invoices Created
-              </p>
-            </div>
-            <div style={{
-                    width: '100%',
-                    padding: '1rem',
-                    backgroundColor: brandColors.success[50],
-                    borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <p style={{
-                      fontSize: '1.5rem',
-                fontWeight: '700',
-                      color: brandColors.success[600],
-                margin: '0 0 0.25rem 0'
-              }}>
-                      {currencySymbol}{(stats.thisMonthRevenue || 0).toLocaleString()}
-              </p>
-              <p style={{
-                      fontSize: '0.75rem',
-                color: brandColors.neutral[600],
-                margin: 0
-              }}>
-                      Revenue Collected
-              </p>
-            </div>
-          </div>
+                      {currencySymbol}{(stats.thisMonthProfit || 0).toLocaleString()}
+                    </p>
+                    <p style={{
+                      fontSize: window.innerWidth < 768 ? '0.7rem' : '0.875rem',
+                      fontWeight: '600',
+                      color: brandColors.neutral[600],
+                      margin: 0
+                    }}>
+                      Profit
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
         </div>
@@ -615,10 +769,10 @@ export default function DashboardPage() {
               <button
                 key={index}
                 onClick={() => {
+                  stopAutoSlide() // Stop on click
                   setCurrentSlide(index)
-                  stopAutoSlide()
-                  setTimeout(() => startAutoSlide(), 10000) // 10 seconds delay before restarting
                 }}
+                onMouseEnter={() => stopAutoSlide()} // Stop on hover
                 style={{
                   width: currentSlide === index ? '24px' : '8px',
                   height: '8px',
