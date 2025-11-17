@@ -77,6 +77,7 @@ export default function ExpenseCreatePage() {
   const { loading, setLoading: setGlobalLoading } = useLoading()
   const { currency: userDefaultCurrency, currencySymbol: userDefaultCurrencySymbol } = useGlobalCurrency()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [expenseNumber, setExpenseNumber] = useState<string>('')
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
     category: '',
@@ -109,6 +110,14 @@ export default function ExpenseCreatePage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Generate expense number on mount
+  useEffect(() => {
+    if (!expenseNumber) {
+      const generatedNumber = `EXP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+      setExpenseNumber(generatedNumber)
+    }
+  }, [])
+
   // Load expense data - Priority: location.state > localStorage > default
   useEffect(() => {
     if (hasLoadedInitialData.current || !user) return
@@ -137,37 +146,39 @@ export default function ExpenseCreatePage() {
       return
     }
 
-    // Priority 2: Load from localStorage (unsaved draft)
-    const savedDraft = expenseStorage.getDraft()
-    if (savedDraft) {
-      console.log('Loading expense draft from localStorage')
-      const expenseCurrency = savedDraft.currency_code || userDefaultCurrency || 'USD'
-      setFormData({
-        description: savedDraft.description || '',
-        category: savedDraft.category || '',
-        amount: savedDraft.amount || '',
-        expense_date: savedDraft.expense_date || new Date().toISOString().split('T')[0],
-        notes: savedDraft.notes || '',
-        client_id: savedDraft.client_id || '',
-        payment_method: savedDraft.payment_method || 'cash',
-        is_tax_deductible: savedDraft.is_tax_deductible || false,
-        tax_rate: savedDraft.tax_rate || '0',
-        currency_code: expenseCurrency,
-        receipt_file: undefined, // File objects can't be stored in localStorage
-        receipt_url: savedDraft.receipt_url || '',
-        receipt_filename: savedDraft.receipt_filename || ''
-      })
-      setCurrencySymbol(getCurrencySymbol(expenseCurrency))
-      hasLoadedInitialData.current = true
+    // Priority 2: Load from localStorage (unsaved draft) - only if expenseNumber exists
+    if (expenseNumber) {
+      const savedDraft = expenseStorage.getDraft(expenseNumber)
+      if (savedDraft) {
+        console.log('Loading expense draft from localStorage')
+        const expenseCurrency = savedDraft.currency_code || userDefaultCurrency || 'USD'
+        setFormData({
+          description: savedDraft.description || '',
+          category: savedDraft.category || '',
+          amount: savedDraft.amount || '',
+          expense_date: savedDraft.expense_date || new Date().toISOString().split('T')[0],
+          notes: savedDraft.notes || '',
+          client_id: savedDraft.client_id || '',
+          payment_method: savedDraft.payment_method || 'cash',
+          is_tax_deductible: savedDraft.is_tax_deductible || false,
+          tax_rate: savedDraft.tax_rate || '0',
+          currency_code: expenseCurrency,
+          receipt_file: undefined, // File objects can't be stored in localStorage
+          receipt_url: savedDraft.receipt_url || '',
+          receipt_filename: savedDraft.receipt_filename || ''
+        })
+        setCurrencySymbol(getCurrencySymbol(expenseCurrency))
+        hasLoadedInitialData.current = true
+      }
     }
   }, [location.state, userDefaultCurrency, user])
 
   // Auto-save form data to localStorage
   useEffect(() => {
-    if (!hasLoadedInitialData.current) return
+    if (!hasLoadedInitialData.current || !expenseNumber) return
     
-    expenseStorage.saveDraftDebounced(formData)
-  }, [formData])
+    expenseStorage.saveDraftDebounced(expenseNumber, formData)
+  }, [formData, expenseNumber])
 
   useEffect(() => {
     if (user) {
@@ -403,7 +414,9 @@ export default function ExpenseCreatePage() {
         receipt_url: '',
         receipt_filename: ''
       })
-      expenseStorage.clearDraft()
+      if (expenseNumber) {
+        expenseStorage.clearDraft(expenseNumber)
+      }
       hasLoadedInitialData.current = false
 
       toast.success('Expense saved successfully!')
@@ -422,10 +435,8 @@ export default function ExpenseCreatePage() {
       return
     }
 
-    // Navigate to preview with form data
-    navigate('/expense/preview', { 
-      state: { expenseData: formData } 
-    })
+    // Navigate to preview with expense_number as URL parameter
+    navigate(`/expense/preview?number=${expenseNumber}`)
   }
 
   if (!user) return null
@@ -670,6 +681,42 @@ export default function ExpenseCreatePage() {
                     {errors.amount}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: brandColors.neutral[700],
+                  marginBottom: '0.5rem'
+                }}>
+                  Expense Number
+                </label>
+                <input
+                  type="text"
+                  value={expenseNumber}
+                  disabled
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: `1px solid ${brandColors.neutral[200]}`,
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    color: brandColors.neutral[500],
+                    backgroundColor: brandColors.neutral[50],
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    cursor: 'not-allowed'
+                  }}
+                />
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: brandColors.neutral[500],
+                  margin: '0.25rem 0 0 0'
+                }}>
+                  Auto-generated
+                </p>
               </div>
 
               <div>

@@ -976,7 +976,7 @@ export default function TransactionPage() {
                                   // Use expense_number if available, otherwise fall back to ID
                                   const expenseNumber = transaction.expense_number
                                   if (expenseNumber) {
-                                    navigate(`/expense/preview?expense=${expenseNumber}`)
+                                    navigate(`/expense/preview?number=${expenseNumber}`)
                                   } else {
                                     // Fallback to ID for expenses without expense_number
                                     navigate(`/expense/preview?id=${transaction.id}`, { state: { expenseId: transaction.id } })

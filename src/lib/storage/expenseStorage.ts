@@ -10,7 +10,8 @@
 
 // Storage keys
 const STORAGE_KEYS = {
-  EXPENSE_DRAFT: 'expense-draft'
+  EXPENSE_DRAFT: 'expense-draft', // Legacy - for backwards compatibility
+  EXPENSE_DRAFT_PREFIX: 'expense_draft_' // New - for expense-number-based drafts
 } as const
 
 export interface ExpenseFormData {
@@ -102,39 +103,73 @@ const debouncedStorage = {
 // Expense-specific storage functions
 export const expenseStorage = {
   /**
-   * Save expense draft to localStorage
+   * Save expense draft to localStorage with expense_number as key
    */
-  saveDraft: (expenseData: ExpenseFormData): boolean => {
-    return storage.setItem(STORAGE_KEYS.EXPENSE_DRAFT, expenseData)
+  saveDraft: (expenseNumber: string, expenseData: ExpenseFormData): boolean => {
+    if (!expenseNumber) {
+      console.error('expenseNumber is required to save draft')
+      return false
+    }
+    const key = `${STORAGE_KEYS.EXPENSE_DRAFT_PREFIX}${expenseNumber}`
+    return storage.setItem(key, expenseData)
   },
 
   /**
    * Save expense draft with debounce for auto-save
    */
-  saveDraftDebounced: (expenseData: ExpenseFormData): void => {
-    debouncedStorage.setItem(STORAGE_KEYS.EXPENSE_DRAFT, expenseData)
+  saveDraftDebounced: (expenseNumber: string, expenseData: ExpenseFormData): void => {
+    if (!expenseNumber) {
+      console.error('expenseNumber is required to save draft')
+      return
+    }
+    const key = `${STORAGE_KEYS.EXPENSE_DRAFT_PREFIX}${expenseNumber}`
+    debouncedStorage.setItem(key, expenseData)
   },
 
   /**
-   * Get expense draft from localStorage
+   * Get expense draft from localStorage using expense_number
    */
-  getDraft: (): ExpenseFormData | null => {
+  getDraft: (expenseNumber: string): ExpenseFormData | null => {
+    if (!expenseNumber) {
+      console.error('expenseNumber is required to get draft')
+      return null
+    }
+    const key = `${STORAGE_KEYS.EXPENSE_DRAFT_PREFIX}${expenseNumber}`
+    return storage.getItem<ExpenseFormData>(key)
+  },
+
+  /**
+   * Clear expense draft from localStorage using expense_number
+   */
+  clearDraft: (expenseNumber: string): boolean => {
+    if (!expenseNumber) {
+      console.error('expenseNumber is required to clear draft')
+      return false
+    }
+    const key = `${STORAGE_KEYS.EXPENSE_DRAFT_PREFIX}${expenseNumber}`
+    debouncedStorage.cancel(key)
+    return storage.removeItem(key)
+  },
+
+  /**
+   * Check if there's a saved draft for this expense_number
+   */
+  hasDraft: (expenseNumber: string): boolean => {
+    if (!expenseNumber) return false
+    const key = `${STORAGE_KEYS.EXPENSE_DRAFT_PREFIX}${expenseNumber}`
+    return storage.getItem(key) !== null
+  },
+
+  /**
+   * Legacy functions - for backwards compatibility
+   */
+  getLegacyDraft: (): ExpenseFormData | null => {
     return storage.getItem<ExpenseFormData>(STORAGE_KEYS.EXPENSE_DRAFT)
   },
 
-  /**
-   * Clear expense draft from localStorage
-   */
-  clearDraft: (): boolean => {
+  clearLegacyDraft: (): boolean => {
     debouncedStorage.cancel(STORAGE_KEYS.EXPENSE_DRAFT)
     return storage.removeItem(STORAGE_KEYS.EXPENSE_DRAFT)
-  },
-
-  /**
-   * Check if there's a saved draft
-   */
-  hasDraft: (): boolean => {
-    return storage.getItem(STORAGE_KEYS.EXPENSE_DRAFT) !== null
   }
 }
 

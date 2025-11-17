@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/useAuth'
 import { brandColors } from '../stylings'
 import { Layout } from '../components/layout'
@@ -21,7 +21,8 @@ import {
   Receipt,
   CheckCircle,
   Download,
-  Share2
+  Share2,
+  Save
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
@@ -64,7 +65,8 @@ export default function ExpensePreviewPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const { setLoading: setGlobalLoading } = useLoading()
+  const [searchParams] = useSearchParams()
+  const { loading: globalLoading, setLoading: setGlobalLoading } = useLoading()
   const { currencySymbol: userDefaultCurrencySymbol } = useGlobalCurrency()
   const [expense, setExpense] = useState<Expense | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -97,48 +99,30 @@ export default function ExpensePreviewPage() {
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [user, navigate, location, setGlobalLoading])
+  }, [user, navigate, searchParams, setGlobalLoading])
 
   const loadExpenseData = async () => {
     if (!user) return
 
-    // Priority 1: Check location.state for expenseData (from create page)
-    const expenseData = location.state?.expenseData
-    if (expenseData) {
-      console.log('✅ [EXPENSE PREVIEW] Loading from location.state')
-      // Transform form data to match Expense interface
-      const transformedExpense: Expense = {
-        id: 'preview',
-        description: expenseData.description,
-        category: expenseData.category,
-        amount: parseFloat(expenseData.amount),
-        status: 'spent',
-        expense_date: expenseData.expense_date,
-        notes: expenseData.notes,
-        client_id: expenseData.client_id,
-        client_name: undefined, // Will be loaded from clients
-        payment_method: expenseData.payment_method,
-        is_tax_deductible: expenseData.is_tax_deductible,
-        tax_rate: parseFloat(expenseData.tax_rate),
-        tax_amount: expenseData.is_tax_deductible ? (parseFloat(expenseData.amount) * parseFloat(expenseData.tax_rate) / 100) : 0,
-        currency_code: expenseData.currency_code,
-        receipt_url: expenseData.receipt_url,
-        receipt_filename: expenseData.receipt_filename,
-        receipt_size: expenseData.receipt_file?.size,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-      setExpense(transformedExpense)
-      setGlobalLoading(false)
+    // Get expense_number from URL params
+    const expenseNumber = searchParams.get('number')
+    
+    if (!expenseNumber) {
+      console.error('❌ [EXPENSE PREVIEW] No expense number in URL params')
+      toast.error('Expense number not found in URL')
+      navigate('/expenses/create')
       return
     }
 
-    // Priority 2: Check localStorage for unsaved expense
-    const savedDraft = expenseStorage.getDraft()
-    if (savedDraft && !savedDraft.expense_number) {
-      console.log('✅ [EXPENSE PREVIEW] Loading unsaved expense from localStorage')
+    console.log('🔍 [EXPENSE PREVIEW] Loading expense:', expenseNumber)
+
+    // Priority 1: Check localStorage for draft with this expense_number
+    const savedDraft = expenseStorage.getDraft(expenseNumber)
+    if (savedDraft) {
+      console.log('✅ [EXPENSE PREVIEW] Found draft in localStorage:', expenseNumber)
       const transformedExpense: Expense = {
-        id: 'preview',
+        id: 'draft-preview',
+        expense_number: expenseNumber,
         description: savedDraft.description,
         category: savedDraft.category,
         amount: parseFloat(savedDraft.amount),
@@ -163,26 +147,9 @@ export default function ExpensePreviewPage() {
       return
     }
 
-    // Priority 3: Check URL for expense_number
-    const expenseNumber = new URLSearchParams(location.search).get('expense')
-    if (expenseNumber) {
-      console.log('✅ [EXPENSE PREVIEW] Loading from DB by expense_number:', expenseNumber)
-      await loadExpenseByNumber(expenseNumber)
-      return
-    }
-
-    // Priority 4: Check URL or state for expense ID
-    const expenseId = location.state?.expenseId || new URLSearchParams(location.search).get('id')
-    if (expenseId) {
-      console.log('✅ [EXPENSE PREVIEW] Loading from DB by ID:', expenseId)
-      await loadExpense(expenseId)
-      return
-    }
-
-    // No expense found
-    console.error('❌ [EXPENSE PREVIEW] No expense found in state, localStorage, or URL')
-    toast.error('Expense not found')
-    navigate('/invoices')
+    // Priority 2: Query database for saved expense by expense_number
+    console.log('📥 [EXPENSE PREVIEW] Draft not found, checking database...')
+    await loadExpenseByNumber(expenseNumber)
   }
 
   const loadExpenseByNumber = async (expenseNumber: string) => {
@@ -202,17 +169,11 @@ export default function ExpensePreviewPage() {
         .eq('user_id', user.id)
         .single()
 
-      if (expenseError) {
-        console.error('❌ [EXPENSE PREVIEW] Error loading expense:', expenseError)
-        toast.error('Failed to load expense: ' + expenseError.message)
-        navigate('/invoices')
-        return
-      }
-
-      if (!expenseData) {
-        console.error('❌ [EXPENSE PREVIEW] Expense not found in database')
-        toast.error('Expense not found')
-        navigate('/invoices')
+      if (expenseError || !expenseData) {
+        console.error('❌ [EXPENSE PREVIEW] Expense not found in database:', expenseNumber)
+        toast.error('Expense not found. Returning to create page.')
+        // Redirect back to create page
+        navigate('/expenses/create')
         return
       }
 
@@ -393,6 +354,64 @@ export default function ExpensePreviewPage() {
       toast.error('Failed to delete expense')
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleSave = async () => {
+    if (!expense || !user) return
+
+    try {
+      setGlobalLoading(true)
+
+      const expenseData = {
+        user_id: user.id,
+        expense_number: expense.expense_number,
+        description: expense.description,
+        category: expense.category,
+        amount: expense.amount,
+        status: expense.status || 'spent',
+        expense_date: expense.expense_date,
+        notes: expense.notes || null,
+        client_id: expense.client_id || null,
+        payment_method: expense.payment_method,
+        is_tax_deductible: expense.is_tax_deductible,
+        tax_rate: expense.tax_rate || 0,
+        tax_amount: expense.tax_amount || 0,
+        currency_code: expense.currency_code || 'USD',
+        receipt_url: expense.receipt_url || null,
+        receipt_filename: expense.receipt_filename || null,
+        receipt_size: expense.receipt_size || null
+      }
+
+      console.log('💾 [EXPENSE PREVIEW] Saving expense:', expenseData)
+
+      const { data: savedExpense, error } = await supabase
+        .from('expenses')
+        .insert(expenseData)
+        .select('id, expense_number')
+        .single()
+
+      if (error) {
+        console.error('❌ [EXPENSE PREVIEW] Error saving expense:', error)
+        toast.error('Failed to save expense: ' + error.message)
+        return
+      }
+
+      console.log('✅ [EXPENSE PREVIEW] Expense saved successfully:', savedExpense.expense_number)
+
+      // Clear localStorage draft after successful save
+      if (expense.expense_number) {
+        expenseStorage.clearDraft(expense.expense_number)
+        console.log('🗑️ [EXPENSE PREVIEW] Cleared draft from localStorage')
+      }
+
+      toast.success('Expense saved successfully!')
+      navigate('/expenses')
+    } catch (error) {
+      console.error('Error saving expense:', error)
+      toast.error('Failed to save expense')
+    } finally {
+      setGlobalLoading(false)
     }
   }
 
@@ -959,6 +978,41 @@ export default function ExpensePreviewPage() {
             margin: isMobile ? '0 -1rem' : '0',
             paddingBottom: isMobile ? '1.5rem' : '0'
           }}>
+            {/* Save Button - Only show if expense is unsaved (draft) */}
+            {expense.id === 'draft-preview' && (
+              <button
+                onClick={handleSave}
+                disabled={globalLoading}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  flex: 1,
+                  padding: isMobile ? '1rem' : '0.875rem 1.5rem',
+                  minHeight: isMobile ? '52px' : 'auto',
+                  backgroundColor: brandColors.success[600],
+                  color: brandColors.white,
+                  border: 'none',
+                  borderRadius: isMobile ? '12px' : '10px',
+                  fontSize: isMobile ? '0.9375rem' : '0.875rem',
+                  fontWeight: '600',
+                  cursor: globalLoading ? 'not-allowed' : 'pointer',
+                  opacity: globalLoading ? 0.6 : 1,
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!globalLoading) e.currentTarget.style.backgroundColor = brandColors.success[700]
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = brandColors.success[600]
+                }}
+              >
+                <Save size={isMobile ? 20 : 16} />
+                {globalLoading ? 'Saving...' : 'Save Expense'}
+              </button>
+            )}
+
             <button
               onClick={() => navigate('/expense/new', { state: { expenseData: expense } })}
               style={{
