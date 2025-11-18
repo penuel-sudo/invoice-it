@@ -52,6 +52,7 @@ const storage = {
     try {
       // Remove receipt_file from data before storing (File objects can't be serialized)
       const { receipt_file, ...dataToStore } = value as any
+      console.log('✅ [STORAGE] Stored to localStorage:', key, dataToStore)
       localStorage.setItem(key, JSON.stringify(dataToStore))
       return true
     } catch (error) {
@@ -118,6 +119,14 @@ export const expenseStorage = {
    * Save expense draft with debounce for auto-save
    */
   saveDraftDebounced: (expenseNumber: string, expenseData: ExpenseFormData): void => {
+    if (!expenseNumber) {
+      console.error('expenseNumber is required to save draft')
+      return
+    }
+    const key = `${STORAGE_KEYS.EXPENSE_DRAFT_PREFIX}${expenseNumber}`
+    console.log('💾 [AUTO-SAVE] Saving expense draft:', expenseNumber, expenseData)
+    debouncedStorage.setItem(key, expenseData)
+  },
     if (!expenseNumber) {
       console.error('expenseNumber is required to save draft')
       return
