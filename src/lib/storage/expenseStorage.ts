@@ -127,13 +127,6 @@ export const expenseStorage = {
     console.log('💾 [AUTO-SAVE] Saving expense draft:', expenseNumber, expenseData)
     debouncedStorage.setItem(key, expenseData)
   },
-    if (!expenseNumber) {
-      console.error('expenseNumber is required to save draft')
-      return
-    }
-    const key = `${STORAGE_KEYS.EXPENSE_DRAFT_PREFIX}${expenseNumber}`
-    debouncedStorage.setItem(key, expenseData)
-  },
 
   /**
    * Get expense draft from localStorage using expense_number
