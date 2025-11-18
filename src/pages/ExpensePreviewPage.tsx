@@ -104,19 +104,52 @@ export default function ExpensePreviewPage() {
   const loadExpenseData = async () => {
     if (!user) return
 
-    // Get expense_number from URL params
+    // Priority 1: Check if data is passed from Create page via state
+    if ((location.state as any)?.expenseData) {
+      console.log('✅ [EXPENSE PREVIEW] Found expense data in state (from create page)')
+      const stateData = (location.state as any).expenseData
+      const expenseNumber = stateData.expense_number || `EXP-${Date.now()}`
+      
+      const transformedExpense: Expense = {
+        id: 'preview-draft',
+        expense_number: expenseNumber,
+        description: stateData.description,
+        category: stateData.category,
+        amount: parseFloat(stateData.amount),
+        status: 'spent',
+        expense_date: stateData.expense_date,
+        notes: stateData.notes,
+        client_id: stateData.client_id,
+        client_name: undefined,
+        payment_method: stateData.payment_method,
+        is_tax_deductible: stateData.is_tax_deductible,
+        tax_rate: parseFloat(stateData.tax_rate),
+        tax_amount: stateData.is_tax_deductible ? (parseFloat(stateData.amount) * parseFloat(stateData.tax_rate) / 100) : 0,
+        currency_code: stateData.currency_code,
+        receipt_url: stateData.receipt_url,
+        receipt_filename: stateData.receipt_filename,
+        receipt_size: stateData.receipt_size,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      setExpense(transformedExpense)
+      setGlobalLoading(false)
+      return
+    }
+
+    // Get expense_number from URL params (for transaction page navigation)
     const expenseNumber = searchParams.get('number')
     
     if (!expenseNumber) {
-      console.error('❌ [EXPENSE PREVIEW] No expense number in URL params')
-      toast.error('Expense number not found in URL')
+      console.error('❌ [EXPENSE PREVIEW] No expense number in URL params or state')
+      toast.error('Expense number not found')
       navigate('/expenses/create')
       return
     }
 
-    console.log('🔍 [EXPENSE PREVIEW] Loading expense:', expenseNumber)
+    console.log('🔍 [EXPENSE PREVIEW] Loading expense from URL params:', expenseNumber)
 
-    // Priority 1: Check localStorage for draft with this expense_number
+    // Priority 2: Check localStorage for draft with this expense_number
     const savedDraft = expenseStorage.getDraft(expenseNumber)
     if (savedDraft) {
       console.log('✅ [EXPENSE PREVIEW] Found draft in localStorage:', expenseNumber)
@@ -147,7 +180,7 @@ export default function ExpensePreviewPage() {
       return
     }
 
-    // Priority 2: Query database for saved expense by expense_number
+    // Priority 3: Query database for saved expense by expense_number
     console.log('📥 [EXPENSE PREVIEW] Draft not found, checking database...')
     await loadExpenseByNumber(expenseNumber)
   }
@@ -173,7 +206,7 @@ export default function ExpensePreviewPage() {
         console.error('❌ [EXPENSE PREVIEW] Expense not found in database:', expenseNumber)
         toast.error('Expense not found. Returning to create page.')
         // Redirect back to create page
-        navigate('/expense/new')
+        navigate('/expenses/create')
         return
       }
 
@@ -224,9 +257,9 @@ export default function ExpensePreviewPage() {
 
       setExpense(transformedExpense)
     } catch (error) {
-      console.error('❌ [EXPENSE PREVIEW] Error loading expense:', error)
-      toast.error('Failed to load expense. Please try again.')
-      // Stay on preview page and let user go back
+      console.error('Error loading expense:', error)
+      toast.error('Failed to load expense')
+      navigate('/invoices')
     } finally {
       setLoadingExpense(false)
       setGlobalLoading(false)
@@ -462,31 +495,8 @@ export default function ExpensePreviewPage() {
 
   if (!user) return null
 
-  // Show loading state while fetching
-  if (authLoading || (loadingExpense && !expense)) {
-    return (
-      <Layout>
-        <div style={{
-          padding: '2rem',
-          backgroundColor: brandColors.white,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{
-            fontSize: '1rem',
-            color: brandColors.neutral[600]
-          }}>
-            Loading expense...
-          </div>
-        </div>
-      </Layout>
-    )
-  }
-
-  // Show "not found" only if we've finished loading and there's no expense
-  if (!expense && !loadingExpense) {
+  // Don't show "not found" while still loading
+  if (!expense && !authLoading && !loadingExpense) {
     return (
       <Layout>
         <div style={{

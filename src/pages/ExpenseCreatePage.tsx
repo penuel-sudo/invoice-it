@@ -77,7 +77,8 @@ export default function ExpenseCreatePage() {
   const { loading, setLoading: setGlobalLoading } = useLoading()
   const { currency: userDefaultCurrency, currencySymbol: userDefaultCurrencySymbol } = useGlobalCurrency()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [expenseNumber, setExpenseNumber] = useState<string>('')
+  const expenseNumberRef = { current: `EXP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}` }
+  const [expenseNumber, setExpenseNumber] = useState<string>(expenseNumberRef.current)
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
     category: '',
@@ -108,14 +109,6 @@ export default function ExpenseCreatePage() {
     window.addEventListener('resize', checkMobile)
     
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  // Generate expense number on mount
-  useEffect(() => {
-    if (!expenseNumber) {
-      const generatedNumber = `EXP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-      setExpenseNumber(generatedNumber)
-    }
   }, [])
 
   // Load expense data - Priority: location.state > localStorage > default
@@ -169,9 +162,13 @@ export default function ExpenseCreatePage() {
         })
         setCurrencySymbol(getCurrencySymbol(expenseCurrency))
         hasLoadedInitialData.current = true
+        return
       }
     }
-  }, [location.state, userDefaultCurrency, user])
+    
+    // Priority 3: New form - set flag to allow auto-save
+    hasLoadedInitialData.current = true
+  }, [location.state, userDefaultCurrency, user, expenseNumber])
 
   // Auto-save form data to localStorage
   useEffect(() => {
@@ -437,8 +434,10 @@ export default function ExpenseCreatePage() {
       return
     }
 
-    // Navigate to preview with expense_number as URL parameter
-    navigate(`/expense/preview?number=${expenseNumber}`)
+    // Navigate to preview with state (like invoices do), not URL params
+    navigate('/expense/preview', { 
+      state: { expenseData: formData }
+    })
   }
 
   if (!user) return null
