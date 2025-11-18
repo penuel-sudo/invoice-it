@@ -173,7 +173,7 @@ export default function ExpensePreviewPage() {
         console.error('❌ [EXPENSE PREVIEW] Expense not found in database:', expenseNumber)
         toast.error('Expense not found. Returning to create page.')
         // Redirect back to create page
-        navigate('/expenses/create')
+        navigate('/expense/new')
         return
       }
 
@@ -224,9 +224,9 @@ export default function ExpensePreviewPage() {
 
       setExpense(transformedExpense)
     } catch (error) {
-      console.error('Error loading expense:', error)
-      toast.error('Failed to load expense')
-      navigate('/invoices')
+      console.error('❌ [EXPENSE PREVIEW] Error loading expense:', error)
+      toast.error('Failed to load expense. Please try again.')
+      // Stay on preview page and let user go back
     } finally {
       setLoadingExpense(false)
       setGlobalLoading(false)
@@ -462,8 +462,31 @@ export default function ExpensePreviewPage() {
 
   if (!user) return null
 
-  // Don't show "not found" while still loading
-  if (!expense && !authLoading && !loadingExpense) {
+  // Show loading state while fetching
+  if (authLoading || (loadingExpense && !expense)) {
+    return (
+      <Layout>
+        <div style={{
+          padding: '2rem',
+          backgroundColor: brandColors.white,
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            fontSize: '1rem',
+            color: brandColors.neutral[600]
+          }}>
+            Loading expense...
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  // Show "not found" only if we've finished loading and there's no expense
+  if (!expense && !loadingExpense) {
     return (
       <Layout>
         <div style={{

@@ -359,6 +359,7 @@ export default function ExpenseCreatePage() {
 
       const expenseData = {
         user_id: user.id,
+        expense_number: expenseNumber,
         description: formData.description.trim(),
         category: formData.category,
         amount: parseFloat(formData.amount),
@@ -420,6 +421,7 @@ export default function ExpenseCreatePage() {
       hasLoadedInitialData.current = false
 
       toast.success('Expense saved successfully!')
+      // Navigate to transactions/invoices page
       navigate('/invoices')
     } catch (error) {
       console.error('Error saving expense:', error)
@@ -642,35 +644,46 @@ export default function ExpenseCreatePage() {
                       e.target.style.borderColor = errors.amount ? brandColors.error[300] : brandColors.neutral[300]
                     }}
                   />
-                  <select
-                    value={formData.currency_code || userDefaultCurrency || 'USD'}
-                    onChange={(e) => handleInputChange('currency_code', e.target.value)}
-                    style={{
-                      width: '120px',
-                      padding: '0.75rem',
-                      border: `1px solid ${brandColors.neutral[200]}`,
-                      borderRadius: '8px',
-                      fontSize: '0.875rem',
-                      color: brandColors.neutral[900],
-                      backgroundColor: brandColors.white,
-                      outline: 'none',
-                      transition: 'border-color 0.2s ease',
-                      boxSizing: 'border-box',
-                      cursor: 'pointer'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = brandColors.primary[400]
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = brandColors.neutral[300]
-                    }}
-                  >
-                    {CURRENCIES.map((currency) => (
-                      <option key={currency.code} value={currency.code}>
-                        {currency.symbol} {currency.code}
-                      </option>
-                    ))}
-                  </select>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      color: brandColors.neutral[600],
+                      marginBottom: '0.25rem'
+                    }}>
+                      Currency
+                    </label>
+                    <select
+                      value={formData.currency_code || userDefaultCurrency || 'USD'}
+                      onChange={(e) => handleInputChange('currency_code', e.target.value)}
+                      style={{
+                        width: '120px',
+                        padding: '0.75rem',
+                        border: `1px solid ${brandColors.neutral[200]}`,
+                        borderRadius: '8px',
+                        fontSize: '0.875rem',
+                        color: brandColors.neutral[900],
+                        backgroundColor: brandColors.white,
+                        outline: 'none',
+                        transition: 'border-color 0.2s ease',
+                        boxSizing: 'border-box',
+                        cursor: 'pointer'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = brandColors.primary[400]
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = brandColors.neutral[300]
+                      }}
+                    >
+                      {CURRENCIES.map((currency) => (
+                        <option key={currency.code} value={currency.code}>
+                          {currency.symbol} {currency.code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 {errors.amount && (
                   <p style={{
@@ -683,84 +696,91 @@ export default function ExpenseCreatePage() {
                 )}
               </div>
 
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: brandColors.neutral[700],
-                  marginBottom: '0.5rem'
-                }}>
-                  Expense Number
-                </label>
-                <input
-                  type="text"
-                  value={expenseNumber}
-                  disabled
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${brandColors.neutral[200]}`,
-                    borderRadius: '8px',
+              {/* Two Column Grid: Expense Number & Expense Date */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: '1rem'
+              }}>
+                <div>
+                  <label style={{
+                    display: 'block',
                     fontSize: '0.875rem',
-                    color: brandColors.neutral[500],
-                    backgroundColor: brandColors.neutral[50],
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    cursor: 'not-allowed'
-                  }}
-                />
-                <p style={{
-                  fontSize: '0.75rem',
-                  color: brandColors.neutral[500],
-                  margin: '0.25rem 0 0 0'
-                }}>
-                  Auto-generated
-                </p>
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: brandColors.neutral[700],
-                  marginBottom: '0.5rem'
-                }}>
-                  Expense Date *
-                </label>
-                <input
-                  type="date"
-                  value={formData.expense_date}
-                  onChange={(e) => handleInputChange('expense_date', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `1px solid ${errors.expense_date ? brandColors.error[300] : brandColors.neutral[200]}`,
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    color: brandColors.neutral[900],
-                    backgroundColor: brandColors.white,
-                    outline: 'none',
-                    transition: 'border-color 0.2s ease',
-                    boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = brandColors.primary[400]
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = errors.expense_date ? brandColors.error[300] : brandColors.neutral[300]
-                  }}
-                />
-                {errors.expense_date && (
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Expense Number
+                  </label>
+                  <input
+                    type="text"
+                    value={expenseNumber}
+                    disabled
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[500],
+                      backgroundColor: brandColors.neutral[50],
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      cursor: 'not-allowed'
+                    }}
+                  />
                   <p style={{
                     fontSize: '0.75rem',
-                    color: brandColors.error[600],
+                    color: brandColors.neutral[500],
                     margin: '0.25rem 0 0 0'
                   }}>
-                    {errors.expense_date}
+                    Auto-generated
                   </p>
-                )}
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: brandColors.neutral[700],
+                    marginBottom: '0.5rem'
+                  }}>
+                    Expense Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.expense_date}
+                    onChange={(e) => handleInputChange('expense_date', e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: `1px solid ${errors.expense_date ? brandColors.error[300] : brandColors.neutral[200]}`,
+                      borderRadius: '8px',
+                      fontSize: '0.875rem',
+                      color: brandColors.neutral[900],
+                      backgroundColor: brandColors.white,
+                      outline: 'none',
+                      transition: 'border-color 0.2s ease',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = brandColors.primary[400]
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.expense_date ? brandColors.error[300] : brandColors.neutral[300]
+                    }}
+                  />
+                  {errors.expense_date && (
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: brandColors.error[600],
+                      margin: '0.25rem 0 0 0'
+                    }}>
+                      {errors.expense_date}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
